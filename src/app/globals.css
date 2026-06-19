@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FAF4EC;
+  --foreground: #1a1a1a;
+}
+
+@theme inline {
+  --color-brand-blue: #1A36AF;
+  --color-brand-orange: #F18B23;
+  --color-brand-red: #EC2229;
+  --color-brand-pink: #ED397D;
+  --color-brand-cream: #FAF4EC;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-serif: var(--font-cormorant), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+}
+
+html {
+  background: var(--background);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Hide scrollbar during preloader */
+html.preloading {
+  overflow: hidden;
+}
