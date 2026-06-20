@@ -1,50 +1,65 @@
+import Image from "next/image";
 import { ScrollReveal } from "./ScrollReveal";
 
 interface Dish {
   name: string;
+  korean: string;
   description: string;
   price: string;
+  image: string;
   tag?: string;
 }
 
 const FEATURED_DISHES: Dish[] = [
   {
-    name: "Wagyu Galbi",
+    name: "Galbi",
+    korean: "갈비",
     description:
       "Short ribs marinated in a soy-pear blend, grilled over live charcoal until caramelized.",
     price: "$00",
+    image: "/images/galbi.png",
     tag: "Signature",
   },
   {
     name: "Samgyeopsal",
+    korean: "삼겹살",
     description:
       "Thick-cut pork belly, crisp-edged and paired with fresh perilla, garlic, and doenjang.",
     price: "$00",
+    image: "/images/samgyeopsal.png",
   },
   {
     name: "Chadolbaegi",
+    korean: "차돌박이",
     description:
       "Paper-thin brisket slices that cook in seconds — dipped in sesame oil and salt.",
     price: "$00",
+    image: "/images/chadolbaegi.png",
     tag: "Chef's Pick",
   },
   {
-    name: "LA Galbi",
+    name: "Japchae",
+    korean: "잡채",
     description:
-      "Cross-cut flanken ribs in our house marinade, charred on the edges and sweet through.",
+      "Glass noodles stir-fried with vegetables and beef in a sweet soy sesame sauce.",
     price: "$00",
+    image: "/images/japchae.png",
   },
   {
     name: "Bulgogi",
+    korean: "불고기",
     description:
       "Tender ribeye in a sesame-ginger marinade — the classic that never disappoints.",
     price: "$00",
+    image: "/images/bulgogi.png",
   },
   {
-    name: "Spicy Pork (Jeyuk)",
+    name: "Kimchi",
+    korean: "김치",
     description:
-      "Gochujang-marinated pork with onions and green onion — bold, smoky, addictive.",
+      "House-fermented napa cabbage with gochugaru, garlic, and ginger — bold, smoky, addictive.",
     price: "$00",
+    image: "/images/kimchi.png",
     tag: "Spicy",
   },
 ];
@@ -58,15 +73,21 @@ function DishCard({ dish, index }: { dish: Dish; index: number }) {
             {dish.tag}
           </span>
         )}
-        {/* TODO: Replace with <Image> dish photo above content */}
-        <div className="mb-4 aspect-[3/2] w-full bg-neutral-100 flex items-center justify-center">
-          <span className="font-sans text-xs text-neutral-400">
-            TODO: dish photo
-          </span>
+        <div className="relative mb-4 aspect-[3/2] w-full overflow-hidden bg-neutral-100">
+          <Image
+            src={dish.image}
+            alt={dish.name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
         </div>
         <h3 className="font-serif text-xl font-light text-foreground">
           {dish.name}
         </h3>
+        <p className="font-sans text-sm font-light text-foreground/40">
+          {dish.korean}
+        </p>
         <p className="mt-2 font-sans text-sm font-light leading-relaxed text-foreground/60">
           {dish.description}
         </p>
