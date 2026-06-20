@@ -66,8 +66,8 @@ const FEATURED_DISHES: Dish[] = [
 
 function DishCard({ dish, index }: { dish: Dish; index: number }) {
   return (
-    <ScrollReveal delay={index * 0.07} className="group">
-      <div className="relative flex flex-col border border-neutral-200 bg-white p-6 transition-shadow hover:shadow-md">
+    <ScrollReveal delay={index * 0.07} className="group h-full">
+      <div className="relative flex h-full flex-col border border-neutral-200 bg-white p-6 transition-shadow hover:shadow-md">
         {dish.tag && (
           <span className="mb-3 inline-block font-sans text-xs font-medium tracking-widest uppercase text-brand-orange">
             {dish.tag}
@@ -91,7 +91,7 @@ function DishCard({ dish, index }: { dish: Dish; index: number }) {
         <p className="mt-2 font-sans text-sm font-light leading-relaxed text-foreground/60">
           {dish.description}
         </p>
-        <div className="mt-4 flex items-center justify-between">
+        <div className="mt-auto pt-4 flex items-center justify-between">
           <span className="font-sans text-sm font-medium text-brand-blue">
             {dish.price}
           </span>
@@ -136,7 +136,7 @@ export function MenuPreview() {
           </ScrollReveal>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURED_DISHES.map((dish, i) => (
             <DishCard key={dish.name} dish={dish} index={i} />
           ))}
