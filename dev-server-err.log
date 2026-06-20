@@ -1,0 +1,9 @@
+⚠ Port 3000 is in use by process 18020, using available port 3002 instead.
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3001
+- PID:          15200
+- Dir:          C:\Users\brand\kmbbq
+- Log:          .next\dev\logs\next-development.log
+
+Run taskkill /PID 15200 /F to stop it.
