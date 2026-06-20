@@ -32,15 +32,18 @@ export function Preloader() {
           aria-label="Loading KM.BBQ"
           role="status"
         >
-          <div className="flex flex-col items-center gap-5">
+          <div className="flex flex-col items-center gap-8">
             {/* Badge with animated ring */}
-            <div className="relative flex items-center justify-center">
+            <div
+              className="relative flex items-center justify-center"
+              style={{ width: "min(192px, 80vw)", height: "min(192px, 80vw)" }}
+            >
               {/* Animated ring */}
               <motion.svg
-                width="110"
-                height="110"
+                width="100%"
+                height="100%"
                 viewBox="0 0 110 110"
-                className="absolute"
+                className="absolute inset-0"
                 aria-hidden="true"
               >
                 <motion.circle
@@ -61,8 +64,8 @@ export function Preloader() {
               {/* Badge SVG — just the circular badge portion */}
               <motion.svg
                 viewBox="64 177 52 46"
-                width="82"
-                height="72"
+                width="75%"
+                height="66%"
                 aria-hidden="true"
                 initial={{ opacity: 0, scale: 0.85 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -117,7 +120,7 @@ export function Preloader() {
 
             {/* Wordmark */}
             <motion.p
-              className="font-serif text-2xl tracking-[0.25em] text-brand-blue/80 font-light"
+              className="font-serif text-4xl tracking-[0.25em] text-brand-blue/80 font-light"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
