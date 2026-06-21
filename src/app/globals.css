@@ -19,6 +19,12 @@
 
 html {
   background: var(--background);
+  /* Reserve the scrollbar's space at all times so the layout width never
+     changes when the scrollbar toggles (e.g. when the full-bleed About
+     mural pins at progress 0, or when the preloader's overflow:hidden is
+     removed). Without this the full-width mural reflows by the scrollbar
+     width and visibly jumps to the right at pin start. */
+  scrollbar-gutter: stable;
 }
 
 body {
