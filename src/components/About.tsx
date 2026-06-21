@@ -96,15 +96,15 @@ export function About() {
       className="relative overflow-hidden bg-white"
       style={{ ["--nav-h" as string]: "68px" } as React.CSSProperties}
     >
-      {/* Mural stage. On desktop it goes full-bleed: edge-to-edge across the
-          viewport, its top flush with the bottom of the fixed navbar and its
-          bottom at the bottom of the screen — so the mural fills the whole
-          visible area (cover, halves meeting flush at center). On mobile /
-          reduced motion it falls back to the mural's natural 1779:884 ratio
-          inside the content column so it isn't heavily cropped on a narrow,
-          portrait screen. */}
+      {/* Mural stage. The halves are `object-contain` everywhere so the whole
+          illustration is always shown — nothing is cropped. The art sits on a
+          white field that blends into this section's white background, so the
+          contain letterboxing is invisible and the two halves meet flush at the
+          center seam. On desktop the stage is full height (vertically centered
+          art); on mobile / reduced motion it keeps the mural's natural ~2535:1240
+          combined ratio inside the content column. */}
       <div className="relative z-20 px-6 md:px-0 motion-safe:md:min-h-screen">
-        <div className="relative mx-auto aspect-[1779/884] w-full max-w-7xl overflow-hidden md:mx-0 md:mt-[var(--nav-h)] md:aspect-auto md:h-[calc(100vh-var(--nav-h))] md:max-w-none">
+        <div className="relative mx-auto aspect-[2535/1240] w-full max-w-7xl overflow-hidden md:mx-0 md:aspect-auto md:h-screen md:max-w-none">
           {/* Left half */}
           <div className="mural-half-left absolute left-0 top-0 h-full w-1/2 will-change-transform">
             <img
@@ -113,7 +113,7 @@ export function About() {
               aria-hidden="true"
               draggable={false}
               onLoad={refresh}
-              className="block h-full w-full select-none object-contain object-right md:object-cover"
+              className="block h-full w-full select-none object-contain object-right"
             />
             {/* line glued to this half's inner (right) edge, straddling the seam */}
             <div className="mural-line" style={{ ...lineStyle, right: -1.5 }} />
@@ -127,7 +127,7 @@ export function About() {
               aria-hidden="true"
               draggable={false}
               onLoad={refresh}
-              className="block h-full w-full select-none object-contain object-left md:object-cover"
+              className="block h-full w-full select-none object-contain object-left"
             />
             {/* line glued to this half's inner (left) edge, straddling the seam */}
             <div className="mural-line" style={{ ...lineStyle, left: -1.5 }} />
