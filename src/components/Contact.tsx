@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import { ScrollReveal } from "./ScrollReveal";
 
 const HOURS = [
@@ -9,20 +6,6 @@ const HOURS = [
 ];
 
 export function Contact() {
-  const [formState, setFormState] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    message: "",
-  });
-  const [submitted, setSubmitted] = useState(false);
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    // TODO: Wire up to a real form endpoint (Resend, Formspree, etc.)
-    setSubmitted(true);
-  }
-
   return (
     <section
       id="contact"
@@ -47,8 +30,8 @@ export function Contact() {
           </ScrollReveal>
         </div>
 
-        <div className="grid gap-16 lg:grid-cols-2">
-          {/* Left — info */}
+        <div className="mx-auto max-w-2xl">
+          {/* Info */}
           <div className="space-y-12">
             {/* Hours */}
             <ScrollReveal>
@@ -151,103 +134,6 @@ export function Contact() {
               </div>
             </ScrollReveal>
           </div>
-
-          {/* Right — contact form */}
-          <ScrollReveal direction="left" delay={0.1}>
-            <div>
-              <h3 className="font-serif text-2xl font-light text-foreground mb-7">
-                Send a Message
-              </h3>
-
-              {submitted ? (
-                <div className="rounded border border-brand-orange/30 bg-brand-orange/5 p-6 font-sans text-sm text-foreground/70">
-                  {/* TODO: Customise confirmation copy */}
-                  Thank you! We&apos;ll be in touch shortly.
-                </div>
-              ) : (
-                <form
-                  onSubmit={handleSubmit}
-                  className="space-y-5"
-                  noValidate
-                  aria-label="Contact form"
-                >
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <label className="flex flex-col gap-1.5">
-                      <span className="font-sans text-xs font-medium tracking-wide text-foreground/60">
-                        Name
-                      </span>
-                      <input
-                        type="text"
-                        required
-                        autoComplete="name"
-                        value={formState.name}
-                        onChange={(e) =>
-                          setFormState((s) => ({ ...s, name: e.target.value }))
-                        }
-                        className="border border-neutral-200 bg-transparent px-4 py-3 font-sans text-sm text-foreground outline-none transition-colors focus:border-brand-blue"
-                        placeholder="Your name"
-                      />
-                    </label>
-                    <label className="flex flex-col gap-1.5">
-                      <span className="font-sans text-xs font-medium tracking-wide text-foreground/60">
-                        Phone (optional)
-                      </span>
-                      <input
-                        type="tel"
-                        autoComplete="tel"
-                        value={formState.phone}
-                        onChange={(e) =>
-                          setFormState((s) => ({ ...s, phone: e.target.value }))
-                        }
-                        className="border border-neutral-200 bg-transparent px-4 py-3 font-sans text-sm text-foreground outline-none transition-colors focus:border-brand-blue"
-                        placeholder="(000) 000-0000"
-                      />
-                    </label>
-                  </div>
-                  <label className="flex flex-col gap-1.5">
-                    <span className="font-sans text-xs font-medium tracking-wide text-foreground/60">
-                      Email
-                    </span>
-                    <input
-                      type="email"
-                      required
-                      autoComplete="email"
-                      value={formState.email}
-                      onChange={(e) =>
-                        setFormState((s) => ({ ...s, email: e.target.value }))
-                      }
-                      className="border border-neutral-200 bg-transparent px-4 py-3 font-sans text-sm text-foreground outline-none transition-colors focus:border-brand-blue"
-                      placeholder="you@example.com"
-                    />
-                  </label>
-                  <label className="flex flex-col gap-1.5">
-                    <span className="font-sans text-xs font-medium tracking-wide text-foreground/60">
-                      Message
-                    </span>
-                    <textarea
-                      required
-                      rows={5}
-                      value={formState.message}
-                      onChange={(e) =>
-                        setFormState((s) => ({
-                          ...s,
-                          message: e.target.value,
-                        }))
-                      }
-                      className="border border-neutral-200 bg-transparent px-4 py-3 font-sans text-sm text-foreground outline-none transition-colors focus:border-brand-blue resize-none"
-                      placeholder="Reservations, catering inquiries, anything…"
-                    />
-                  </label>
-                  <button
-                    type="submit"
-                    className="w-full rounded-full bg-brand-blue py-3 font-sans text-sm font-medium text-white transition-opacity hover:opacity-85"
-                  >
-                    Send Message
-                  </button>
-                </form>
-              )}
-            </div>
-          </ScrollReveal>
         </div>
       </div>
     </section>

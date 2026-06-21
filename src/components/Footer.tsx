@@ -3,7 +3,6 @@ const NAV_LINKS = [
   { label: "Menu", href: "#menu" },
   { label: "About", href: "#about" },
   { label: "Gallery", href: "#gallery" },
-  { label: "Catering", href: "#catering" },
   { label: "Contact", href: "#contact" },
 ];
 
