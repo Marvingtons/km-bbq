@@ -45,7 +45,7 @@ export function Hero() {
         </motion.p>
 
         <motion.h1
-          className="font-serif text-6xl font-light leading-tight tracking-tight sm:text-7xl md:text-8xl"
+          className="font-serif text-5xl font-light leading-tight tracking-tight sm:text-6xl md:text-7xl"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.4 }}

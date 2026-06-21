@@ -137,13 +137,13 @@ function DishCard({ dish, index }: { dish: Dish; index: number }) {
 
   return (
     <div ref={cardRef} className="group h-full will-change-transform">
-      <div className="relative flex h-full flex-col border border-neutral-200 bg-white p-6 transition-shadow hover:shadow-md">
+      <div className="relative flex h-full flex-col border border-neutral-200 bg-white p-5 transition-shadow hover:shadow-md">
         {dish.tag && (
           <span className="mb-3 inline-block font-sans text-xs font-medium tracking-widest uppercase text-brand-orange">
             {dish.tag}
           </span>
         )}
-        <div className="relative mb-4 aspect-[3/2] w-full overflow-hidden bg-neutral-100">
+        <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden bg-neutral-100">
           <div ref={imageRef} className="absolute inset-0 will-change-transform">
             <Image
               src={dish.image}
@@ -173,7 +173,63 @@ function DishCard({ dish, index }: { dish: Dish; index: number }) {
   );
 }
 
+// Fire seam that descends from the mural above into this section, echoing the
+// ignited center line of the mural so the two sections read as one continuous
+// reveal rather than a hard cut.
+const seamStyle: React.CSSProperties = {
+  width: 4,
+  height: 72,
+  borderRadius: 2,
+  transformOrigin: "top center",
+  background:
+    "linear-gradient(180deg, #fff7cc 0%, #ffd24a 16%, #ff9c1f 42%, #ff5a1f 68%, #d11e0c 100%)",
+  boxShadow:
+    "0 0 6px rgba(255,170,50,.95), 0 0 16px rgba(255,90,20,.7), 0 0 30px rgba(255,60,10,.45)",
+  // Hint the compositor: animated via scaleY on scroll.
+  willChange: "transform",
+  pointerEvents: "none",
+};
+
 export function MenuPreview() {
+  const headerRef = useRef<HTMLDivElement>(null);
+  const seamRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    const seam = seamRef.current;
+    const glow = glowRef.current;
+    if (!header || !seam || !glow) return;
+
+    const mm = gsap.matchMedia();
+
+    // Motion allowed: the seam draws down (top -> bottom) as the section rises
+    // from the mural, while a warm glow blooms behind the heading. Scrubbed so
+    // it tracks the smoothed Lenis scroll. prefers-reduced-motion falls through
+    // to the static CSS state (seam shown whole, glow hidden) — no movement.
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      gsap.set(seam, { scaleY: 0, transformOrigin: "top center" });
+      gsap.set(glow, { opacity: 0 });
+
+      const tl = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: {
+          trigger: header,
+          start: "top 92%",
+          end: "top 52%",
+          scrub: 0.6,
+        },
+      });
+
+      // Seam draws down across the first ~70% of the handoff…
+      tl.to(seam, { scaleY: 1, duration: 0.7 }, 0);
+      // …then the glow blooms as the spark reaches the heading.
+      tl.to(glow, { opacity: 1, duration: 0.4 }, 0.45);
+    });
+
+    return () => mm.revert();
+  }, []);
+
   return (
     <section
       id="menu"
@@ -181,7 +237,21 @@ export function MenuPreview() {
       aria-labelledby="menu-heading"
     >
       <div className="mx-auto max-w-7xl">
-        <div className="mb-16 text-center">
+        <div ref={headerRef} className="relative mb-16 text-center">
+          {/* Warm bloom behind the heading — the seam's spark landing here. */}
+          <div
+            ref={glowRef}
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-64 w-[36rem] max-w-full -translate-x-1/2 -translate-y-1/2"
+            style={{
+              background:
+                "radial-gradient(ellipse at center, rgba(255,140,40,0.18) 0%, rgba(255,90,20,0.08) 38%, transparent 70%)",
+            }}
+          />
+          {/* Fire seam descending from the mural above. */}
+          <div className="mb-10 flex justify-center">
+            <div ref={seamRef} aria-hidden="true" style={seamStyle} />
+          </div>
           <ScrollReveal>
             <p className="mb-4 font-sans text-xs font-medium tracking-[0.3em] uppercase text-brand-orange">
               {/* TODO: section label */}
@@ -191,7 +261,7 @@ export function MenuPreview() {
           <ScrollReveal delay={0.1}>
             <h2
               id="menu-heading"
-              className="font-serif text-5xl font-light text-foreground md:text-6xl"
+              className="font-serif text-4xl font-light text-foreground md:text-5xl"
             >
               {/* TODO: heading */}
               The Grill Awaits

@@ -81,7 +81,7 @@ export function Navbar() {
           className="flex items-center transition-opacity duration-300 hover:opacity-80"
         >
           <Logo
-            size={scrolled ? 124 : 138}
+            size={scrolled ? 108 : 120}
             className="transition-all duration-500 ease-out"
           />
         </a>
@@ -95,7 +95,7 @@ export function Navbar() {
                 <a
                   href={href}
                   aria-current={isActive ? "page" : undefined}
-                  className="group relative inline-block py-1 text-[13px] font-medium uppercase tracking-[0.16em] transition-colors duration-300"
+                  className="group relative inline-block py-1 text-[11.5px] font-medium uppercase tracking-[0.16em] transition-colors duration-300"
                   style={{
                     color: onLight
                       ? isActive

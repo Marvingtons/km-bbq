@@ -204,12 +204,12 @@ export function About() {
           </p>
           <h2
             id="about-heading"
-            className="font-serif text-5xl font-light leading-snug text-foreground md:text-6xl"
+            className="font-serif text-4xl font-light leading-snug text-foreground md:text-5xl"
           >
             A Tradition{" "}
             <em className="italic text-brand-blue">Born in Fire</em>
           </h2>
-          <div className="mt-8 space-y-5 font-sans text-base font-light leading-relaxed text-foreground/80">
+          <div className="mt-8 space-y-5 font-sans text-sm font-light leading-relaxed text-foreground/80">
             <p>
               KM.BBQ was born from a simple obsession: the perfect bite. Founded
               in [Year] by [Founder Name], our restaurant brings the warmth of
