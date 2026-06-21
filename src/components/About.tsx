@@ -68,12 +68,12 @@ export function About() {
         // PHASE 1 (progress 0 -> 0.42): draw the line top -> bottom, mural closed.
         tl.fromTo(lines, { scaleY: 0 }, { scaleY: 1, duration: 0.42 }, 0);
 
-        // PHASE 2 (0.42 -> 1.0): halves slide to 46% open; each carries its
+        // PHASE 2 (0.42 -> 1.0): halves slide to 40% open; each carries its
         // line segment along its inner edge. xPercent is relative to the half's
-        // own width (50% of the stage), so -46% / +46% opens a centered gap of
-        // ~46% of the stage while leaving ~27% mural bands framing each side.
-        tl.to(leftHalf, { xPercent: -46, duration: 0.58 }, 0.42);
-        tl.to(rightHalf, { xPercent: 46, duration: 0.58 }, 0.42);
+        // own width (50% of the stage), so -40% / +40% opens a centered gap of
+        // ~40% of the stage while leaving ~30% mural bands framing each side.
+        tl.to(leftHalf, { xPercent: -40, duration: 0.58 }, 0.42);
+        tl.to(rightHalf, { xPercent: 40, duration: 0.58 }, 0.42);
 
         // Text: start ~10% into phase 2, fully visible by ~70% of it.
         tl.to(textCol, { opacity: 1, scale: 1, duration: 0.35 }, 0.48);
@@ -143,8 +143,7 @@ export function About() {
           className="about-text mx-auto w-full text-center"
           style={{
             maxWidth: "min(90%, 34rem)",
-            background:
-              "radial-gradient(ellipse at center, rgba(250,244,236,0.85) 45%, rgba(250,244,236,0.5) 70%, transparent 100%)",
+            background: "transparent",
             padding: "2.5rem 1.5rem",
           }}
         >

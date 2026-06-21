@@ -80,9 +80,10 @@ export function Gallery() {
 
         <ScrollReveal delay={0.1}>
           <div className="mt-10 text-center">
-            {/* TODO: link to Instagram or a /gallery page */}
             <a
-              href="#"
+              href="https://www.instagram.com/kmkoreanbbq/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-sans text-sm font-medium text-brand-pink hover:underline underline-offset-4"
             >
               Follow us on Instagram →

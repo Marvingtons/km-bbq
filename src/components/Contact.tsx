@@ -4,9 +4,8 @@ import { useState } from "react";
 import { ScrollReveal } from "./ScrollReveal";
 
 const HOURS = [
-  { day: "Monday – Thursday", time: "5:00 PM – 10:00 PM" },
-  { day: "Friday – Saturday", time: "4:00 PM – 11:30 PM" },
-  { day: "Sunday", time: "4:00 PM – 9:30 PM" },
+  { day: "Sunday – Thursday", time: "12:00 PM – 9:30 PM" },
+  { day: "Friday – Saturday", time: "12:00 PM – 10:00 PM" },
 ];
 
 export function Contact() {
@@ -78,37 +77,77 @@ export function Contact() {
                   Location
                 </h3>
                 <address className="not-italic font-sans text-sm font-light leading-relaxed text-foreground/70">
-                  {/* TODO: Replace with real address */}
-                  123 Main Street, Suite 100
+                  2216 S El Camino Real #108 #109
                   <br />
-                  [City, State ZIP]
+                  Oceanside, CA 92054
                   <br />
                   <a
-                    href="tel:+10000000000"
+                    href="tel:+17604331888"
                     className="mt-2 inline-block text-brand-orange hover:underline underline-offset-4"
                   >
-                    {/* TODO: Replace with real phone */}
-                    (000) 000-0000
-                  </a>
-                  <br />
-                  <a
-                    href="mailto:hello@kmbbq.com"
-                    className="text-brand-orange hover:underline underline-offset-4"
-                  >
-                    {/* TODO: Replace with real email */}
-                    hello@kmbbq.com
+                    (760) 433-1888
                   </a>
                 </address>
+
+                {/* Socials */}
+                <div className="mt-6 flex items-center gap-4">
+                  <a
+                    href="https://www.instagram.com/kmkoreanbbq/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="KM BBQ on Instagram"
+                    className="text-foreground/60 transition-colors hover:text-brand-orange"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <rect x="2" y="2" width="20" height="20" rx="5" />
+                      <circle cx="12" cy="12" r="4" />
+                      <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" />
+                    </svg>
+                  </a>
+                  <a
+                    href="https://www.tiktok.com/@kmkoreanbbq"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="KM BBQ on TikTok"
+                    className="text-foreground/60 transition-colors hover:text-brand-orange"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.19 8.19 0 0 0 4.79 1.54V6.78a4.85 4.85 0 0 1-1.02-.09z" />
+                    </svg>
+                  </a>
+                </div>
               </div>
             </ScrollReveal>
 
             {/* Map placeholder */}
             <ScrollReveal delay={0.15}>
-              <div className="aspect-video w-full bg-neutral-100 flex items-center justify-center border border-neutral-200">
-                {/* TODO: Replace with Google Maps embed or Mapbox */}
-                <p className="font-sans text-sm text-neutral-400">
-                  TODO: Map embed
-                </p>
+              <div className="aspect-video w-full overflow-hidden border border-neutral-200">
+                <iframe
+                  title="Map to KM BBQ Oceanside"
+                  src="https://www.google.com/maps?q=2216+S+El+Camino+Real+%23108,+Oceanside,+CA+92054&output=embed"
+                  className="h-full w-full border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  allowFullScreen
+                />
               </div>
             </ScrollReveal>
           </div>

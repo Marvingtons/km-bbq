@@ -12,7 +12,6 @@ interface Dish {
   name: string;
   korean: string;
   description: string;
-  price: string;
   image: string;
   tag?: string;
 }
@@ -23,7 +22,6 @@ const FEATURED_DISHES: Dish[] = [
     korean: "갈비",
     description:
       "Short ribs marinated in a soy-pear blend, grilled over live charcoal until caramelized.",
-    price: "$00",
     image: "/images/galbi.png",
     tag: "Signature",
   },
@@ -32,7 +30,6 @@ const FEATURED_DISHES: Dish[] = [
     korean: "삼겹살",
     description:
       "Thick-cut pork belly, crisp-edged and paired with fresh perilla, garlic, and doenjang.",
-    price: "$00",
     image: "/images/samgyeopsal.png",
   },
   {
@@ -40,7 +37,6 @@ const FEATURED_DISHES: Dish[] = [
     korean: "차돌박이",
     description:
       "Paper-thin brisket slices that cook in seconds — dipped in sesame oil and salt.",
-    price: "$00",
     image: "/images/chadolbaegi.png",
     tag: "Chef's Pick",
   },
@@ -49,7 +45,6 @@ const FEATURED_DISHES: Dish[] = [
     korean: "잡채",
     description:
       "Glass noodles stir-fried with vegetables and beef in a sweet soy sesame sauce.",
-    price: "$00",
     image: "/images/japchae.png",
   },
   {
@@ -57,7 +52,6 @@ const FEATURED_DISHES: Dish[] = [
     korean: "불고기",
     description:
       "Tender ribeye in a sesame-ginger marinade — the classic that never disappoints.",
-    price: "$00",
     image: "/images/bulgogi.png",
   },
   {
@@ -65,7 +59,6 @@ const FEATURED_DISHES: Dish[] = [
     korean: "김치",
     description:
       "House-fermented napa cabbage with gochugaru, garlic, and ginger — bold, smoky, addictive.",
-    price: "$00",
     image: "/images/kimchi.png",
     tag: "Spicy",
   },
@@ -168,10 +161,7 @@ function DishCard({ dish, index }: { dish: Dish; index: number }) {
         <p className="mt-2 font-sans text-sm font-light leading-relaxed text-foreground/60">
           {dish.description}
         </p>
-        <div className="mt-auto pt-4 flex items-center justify-between">
-          <span className="font-sans text-sm font-medium text-brand-blue">
-            {dish.price}
-          </span>
+        <div className="mt-auto pt-4 flex items-center justify-end">
           <span className="font-sans text-xs text-foreground/40 transition-colors group-hover:text-brand-orange">
             {/* TODO: wire up to menu page */}+
           </span>

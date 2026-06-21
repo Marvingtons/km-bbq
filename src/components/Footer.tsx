@@ -1,5 +1,3 @@
-import { Logo } from "./Logo";
-
 const NAV_LINKS = [
   { label: "Home", href: "#home" },
   { label: "Menu", href: "#menu" },
@@ -12,8 +10,7 @@ const NAV_LINKS = [
 const SOCIAL_LINKS = [
   {
     label: "Instagram",
-    href: "#",
-    // TODO: Replace with real Instagram URL
+    href: "https://www.instagram.com/kmkoreanbbq/",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -35,8 +32,7 @@ const SOCIAL_LINKS = [
   },
   {
     label: "TikTok",
-    href: "#",
-    // TODO: Replace with real TikTok URL
+    href: "https://www.tiktok.com/@kmkoreanbbq",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -78,12 +74,17 @@ export function Footer() {
         <div className="grid gap-12 md:grid-cols-3 md:gap-8">
           {/* Brand */}
           <div>
-            <Logo size={140} className="brightness-0 invert opacity-90" />
+            <img
+              src="/logos/km-bbq-logo.svg"
+              alt="KM.BBQ logo"
+              width={140}
+              height={34}
+              className="opacity-90"
+            />
             <p className="mt-5 font-sans text-sm font-light leading-relaxed text-white/50">
-              {/* TODO: Replace with real tagline / address snippet */}
               Premium Korean BBQ.
               <br />
-              [City, State]
+              Oceanside, CA
             </p>
           </div>
 
@@ -127,18 +128,10 @@ export function Footer() {
             </div>
             <div className="mt-6 space-y-1 font-sans text-sm">
               <a
-                href="tel:+10000000000"
+                href="tel:+17604331888"
                 className="block hover:text-white transition-colors"
               >
-                {/* TODO: real phone */}
-                (000) 000-0000
-              </a>
-              <a
-                href="mailto:hello@kmbbq.com"
-                className="block hover:text-white transition-colors"
-              >
-                {/* TODO: real email */}
-                hello@kmbbq.com
+                (760) 433-1888
               </a>
             </div>
           </div>
