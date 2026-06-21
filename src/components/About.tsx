@@ -6,22 +6,40 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Thin brushed-steel vertical line. Two identical segments overlap at the
+// Shared geometry for the seam lines. Two identical segments overlap at the
 // seam at rest (looking like one line); each rides its half's inner edge
 // outward during the split because it is a child of that half.
-const lineStyle: React.CSSProperties = {
+const lineBase: React.CSSProperties = {
   position: "absolute",
   top: 0,
   bottom: 0,
-  width: 3,
   borderRadius: 2,
+  transformOrigin: "top center",
+  pointerEvents: "none",
+};
+
+// Brushed-steel line — always present in the mural (the pre-existing seam).
+const steelLineStyle: React.CSSProperties = {
+  ...lineBase,
+  width: 3,
   background:
     "linear-gradient(180deg, #4a4a4e 0%, #6f6f74 30%, #9a9aa0 50%, #6f6f74 70%, #4a4a4e 100%)",
   boxShadow: "0 0 5px rgba(140,140,150,.55), 0 0 10px rgba(140,140,150,.3)",
-  transformOrigin: "top center",
-  transform: "scaleY(0)", // hidden by default (fallback shows a clean mural)
   zIndex: 10,
-  pointerEvents: "none",
+};
+
+// Fire overlay — sits exactly on top of the steel line and "ignites" it from
+// top to bottom on scroll. Hidden by default (scaleY 0); the fallback / reduced
+// motion state simply shows the cool steel line beneath.
+const fireLineStyle: React.CSSProperties = {
+  ...lineBase,
+  width: 4,
+  background:
+    "linear-gradient(180deg, #fff7cc 0%, #ffd24a 16%, #ff9c1f 42%, #ff5a1f 68%, #d11e0c 100%)",
+  boxShadow:
+    "0 0 6px rgba(255,170,50,.95), 0 0 16px rgba(255,90,20,.7), 0 0 30px rgba(255,60,10,.45)",
+  transform: "scaleY(0)",
+  zIndex: 11,
 };
 
 export function About() {
@@ -37,13 +55,14 @@ export function About() {
     mm.add(
       "(min-width: 768px) and (prefers-reduced-motion: no-preference)",
       () => {
-        const lines = q(".mural-line");
+        const fireLines = q(".mural-line-fire");
         const leftHalf = q(".mural-half-left");
         const rightHalf = q(".mural-half-right");
         const textCol = q(".about-text");
 
-        // Animated start state: line undrawn, mural closed, text hidden.
-        gsap.set(lines, { scaleY: 0 });
+        // Animated start state: steel line already showing (its default), fire
+        // not yet ignited, mural closed, text hidden.
+        gsap.set(fireLines, { scaleY: 0 });
         gsap.set(leftHalf, { xPercent: 0 });
         gsap.set(rightHalf, { xPercent: 0 });
         gsap.set(textCol, { opacity: 0, scale: 0.92 });
@@ -65,15 +84,16 @@ export function About() {
           },
         });
 
-        // PHASE 1 (progress 0 -> 0.42): draw the line top -> bottom, mural closed.
-        tl.fromTo(lines, { scaleY: 0 }, { scaleY: 1, duration: 0.42 }, 0);
+        // PHASE 1 (progress 0 -> 0.42): fire ignites down the existing steel
+        // line, top -> bottom, mural still closed.
+        tl.fromTo(fireLines, { scaleY: 0 }, { scaleY: 1, duration: 0.42 }, 0);
 
-        // PHASE 2 (0.42 -> 1.0): halves slide to 40% open; each carries its
+        // PHASE 2 (0.42 -> 1.0): halves slide to 36% open; each carries its
         // line segment along its inner edge. xPercent is relative to the half's
-        // own width (50% of the stage), so -40% / +40% opens a centered gap of
-        // ~40% of the stage while leaving ~30% mural bands framing each side.
-        tl.to(leftHalf, { xPercent: -40, duration: 0.58 }, 0.42);
-        tl.to(rightHalf, { xPercent: 40, duration: 0.58 }, 0.42);
+        // own width (50% of the stage), so -36% / +36% opens a centered gap of
+        // ~36% of the stage while leaving mural bands framing each side.
+        tl.to(leftHalf, { xPercent: -36, duration: 0.58 }, 0.42);
+        tl.to(rightHalf, { xPercent: 36, duration: 0.58 }, 0.42);
 
         // Text: start ~10% into phase 2, fully visible by ~70% of it.
         tl.to(textCol, { opacity: 1, scale: 1, duration: 0.35 }, 0.48);
@@ -115,8 +135,10 @@ export function About() {
               onLoad={refresh}
               className="block h-full w-full select-none object-contain object-right"
             />
-            {/* line glued to this half's inner (right) edge, straddling the seam */}
-            <div className="mural-line" style={{ ...lineStyle, right: -1.5 }} />
+            {/* seam line glued to this half's inner (right) edge: steel always
+                visible, fire overlay ignites on scroll */}
+            <div className="mural-line-steel" style={{ ...steelLineStyle, right: -1.5 }} />
+            <div className="mural-line-fire" style={{ ...fireLineStyle, right: -2 }} />
           </div>
 
           {/* Right half */}
@@ -129,9 +151,19 @@ export function About() {
               onLoad={refresh}
               className="block h-full w-full select-none object-contain object-left"
             />
-            {/* line glued to this half's inner (left) edge, straddling the seam */}
-            <div className="mural-line" style={{ ...lineStyle, left: -1.5 }} />
+            {/* seam line glued to this half's inner (left) edge: steel always
+                visible, fire overlay ignites on scroll */}
+            <div className="mural-line-steel" style={{ ...steelLineStyle, left: -1.5 }} />
+            <div className="mural-line-fire" style={{ ...fireLineStyle, left: -2 }} />
           </div>
+
+          {/* Top edge fades the mural up out of the page — this carries the bulk
+              of the hero→mural dissolve so it reads as fading INTO the mural
+              rather than out of the video above. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 z-30 h-40 bg-gradient-to-b from-white to-transparent"
+          />
         </div>
       </div>
 

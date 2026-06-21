@@ -1,23 +1,25 @@
 "use client";
 
+import Image from "next/image";
+
 import { ScrollReveal } from "./ScrollReveal";
 
 interface GalleryItem {
   id: number;
+  src: string;
   alt: string;
   span?: "wide" | "tall" | "normal";
 }
 
-// TODO: Replace placeholder items with real images
 const GALLERY_ITEMS: GalleryItem[] = [
-  { id: 1, alt: "TODO: Live grill close-up", span: "wide" },
-  { id: 2, alt: "TODO: Banchan spread" },
-  { id: 3, alt: "TODO: Marbled wagyu on grill", span: "tall" },
-  { id: 4, alt: "TODO: Restaurant interior" },
-  { id: 5, alt: "TODO: Samgyeopsal sizzling" },
-  { id: 6, alt: "TODO: Table setting", span: "wide" },
-  { id: 7, alt: "TODO: Drink / cocktail" },
-  { id: 8, alt: "TODO: Team / kitchen" },
+  { id: 1, src: "/images/live-grill.png", alt: "Live charcoal grill at KM BBQ", span: "wide" },
+  { id: 2, src: "/images/banchan-spread.png", alt: "Banchan side dishes" },
+  { id: 3, src: "/images/marbled-wagyu.png", alt: "Marbled wagyu on the grill", span: "tall" },
+  { id: 4, src: "/images/interior.png", alt: "KM BBQ interior" },
+  { id: 5, src: "/images/samgyeopsal-grilling.png", alt: "Samgyeopsal sizzling on the grill" },
+  { id: 6, src: "/images/table.png", alt: "Table setting", span: "wide" },
+  { id: 7, src: "/images/drinks.png", alt: "Drinks" },
+  { id: 8, src: "/images/outside.png", alt: "Outside of KM BBQ" },
 ];
 
 function GalleryCell({ item, index }: { item: GalleryItem; index: number }) {
@@ -35,12 +37,13 @@ function GalleryCell({ item, index }: { item: GalleryItem; index: number }) {
         item.span === "tall" ? "min-h-[400px]" : "aspect-square"
       }`}
     >
-      {/* TODO: Replace with Next.js <Image fill> */}
-      <div className="flex h-full w-full items-center justify-center">
-        <p className="font-sans text-xs text-neutral-400 text-center px-4">
-          {item.alt}
-        </p>
-      </div>
+      <Image
+        src={item.src}
+        alt={item.alt}
+        fill
+        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+        className="object-cover"
+      />
       <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/20" />
     </ScrollReveal>
   );
@@ -72,7 +75,7 @@ export function Gallery() {
         </div>
 
         {/* Masonry-style grid */}
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
           {GALLERY_ITEMS.map((item, i) => (
             <GalleryCell key={item.id} item={item} index={i} />
           ))}
