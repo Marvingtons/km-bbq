@@ -124,7 +124,9 @@ function DishCard({ dish, index }: { dish: Dish; index: number }) {
             trigger: card,
             start: "top bottom",
             end: "bottom top",
-            scrub: true,
+            // Numeric scrub eases the parallax toward the scroll position
+            // (matching the smoothed Lenis scroll) instead of snapping 1:1.
+            scrub: 1,
           },
         }
       );

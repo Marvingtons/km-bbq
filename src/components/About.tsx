@@ -33,12 +33,17 @@ const steelLineStyle: React.CSSProperties = {
 // motion state simply shows the cool steel line beneath.
 const fireLineStyle: React.CSSProperties = {
   ...lineBase,
+  // Ignite from the top of the bar downward when this screen comes into view.
+  transformOrigin: "top center",
   width: 4,
   background:
     "linear-gradient(180deg, #fff7cc 0%, #ffd24a 16%, #ff9c1f 42%, #ff5a1f 68%, #d11e0c 100%)",
   boxShadow:
     "0 0 6px rgba(255,170,50,.95), 0 0 16px rgba(255,90,20,.7), 0 0 30px rgba(255,60,10,.45)",
   transform: "scaleY(0)",
+  // Hint the compositor: this line is animated (scaleY) on scrub, so keep it
+  // on its own GPU layer to avoid layout-driven jank during the ignite.
+  willChange: "transform",
   zIndex: 11,
 };
 
@@ -62,7 +67,7 @@ export function About() {
 
         // Animated start state: steel line already showing (its default), fire
         // not yet ignited, mural closed, text hidden.
-        gsap.set(fireLines, { scaleY: 0 });
+        gsap.set(fireLines, { scaleY: 0, transformOrigin: "top center" });
         gsap.set(leftHalf, { xPercent: 0 });
         gsap.set(rightHalf, { xPercent: 0 });
         gsap.set(textCol, { opacity: 0, scale: 0.92 });
@@ -79,7 +84,11 @@ export function About() {
             // show a one-frame compositing jump (the mural appearing to nudge
             // sideways) at the instant the pin engages.
             anticipatePin: 1,
-            scrub: true,
+            // Numeric scrub adds a ~0.8s catch-up so the timeline eases toward
+            // the scroll position instead of snapping to it frame-for-frame.
+            // This is what makes the mural open/ignite feel smooth rather than
+            // stepping in hard chunks with each wheel/trackpad notch.
+            scrub: 0.8,
             invalidateOnRefresh: true,
           },
         });
@@ -103,7 +112,18 @@ export function About() {
       }
     );
 
-    return () => mm.revert();
+    // Re-measure pin start/end once async content settles. The mural <img>s
+    // already call refresh on load, but fonts and the final window load can
+    // also shift layout; measuring against stale sizes is what makes the pin
+    // jump on the first scroll instead of scrubbing from the right spot.
+    const refreshST = () => ScrollTrigger.refresh();
+    window.addEventListener("load", refreshST);
+    document.fonts?.ready.then(refreshST);
+
+    return () => {
+      window.removeEventListener("load", refreshST);
+      mm.revert();
+    };
   }, []);
 
   const refresh = () => ScrollTrigger.refresh();

@@ -38,3 +38,26 @@ body {
 html.preloading {
   overflow: hidden;
 }
+
+/* Lenis smooth-scroll integration. Lenis adds these classes to <html>; the
+   rules let it own the scroll position cleanly. height:auto overrides the
+   `h-full` on <html> so Lenis measures the full document height (correct
+   scroll limit = correct ScrollTrigger pin measurements), and disabling
+   native smooth scroll-behavior stops the browser from fighting Lenis's
+   per-frame scrollTop writes (the cause of stutter/snapping). */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
