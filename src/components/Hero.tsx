@@ -41,8 +41,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
         >
-          {/* TODO: Replace with tagline or location */}
-          Live Fire · Premium Cuts · Elevated Experience
+          All-You-Can-Eat Korean BBQ
         </motion.p>
 
         <motion.h1
@@ -62,10 +61,8 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.65 }}
         >
-          {/* TODO: Replace subline copy */}
-          Experience Korean barbecue the way it was meant to be — premium
-          hand-cut meats, live charcoal grills, and flavors rooted in decades of
-          craft.
+          All-you-can-eat, self-serve Korean BBQ grilled over live charcoal —
+          pick what you want, grill it your way, and eat all you like.
         </motion.p>
 
         <motion.div
