@@ -66,23 +66,45 @@ export function Hero() {
         </motion.p>
 
         <motion.div
-          className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
+          className="mt-10 flex justify-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.85 }}
         >
-          <a
+          <motion.a
             href="#menu"
-            className="rounded-full border border-white/40 px-8 py-3 text-sm font-medium tracking-wide text-white backdrop-blur-sm transition-all hover:bg-white hover:text-foreground"
+            className="group relative inline-flex flex-col items-center gap-3 font-sans text-[0.7rem] font-light tracking-[0.45em] uppercase text-white/90 transition-colors duration-700 hover:text-brand-orange"
+            whileTap={{ scale: 0.99 }}
           >
-            View Menu
-          </a>
-          <a
-            href="#contact"
-            className="rounded-full bg-brand-orange px-8 py-3 text-sm font-medium tracking-wide text-white transition-opacity hover:opacity-85"
-          >
-            Order Now
-          </a>
+            {/* Hairline above — a quiet frame, the way fine menus are set */}
+            <span
+              aria-hidden="true"
+              className="block h-px w-10 bg-white/40 transition-all duration-700 ease-out group-hover:w-16 group-hover:bg-brand-orange"
+            />
+
+            <span className="relative inline-flex items-center gap-3 pl-[0.45em]">
+              View Menu
+              {/* A slender arrow that drifts forward on hover */}
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="h-3 w-3 translate-x-0 transition-transform duration-700 ease-out group-hover:translate-x-1.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M4 12h16M14 6l6 6-6 6" />
+              </svg>
+            </span>
+
+            {/* Hairline below — extends outward on hover */}
+            <span
+              aria-hidden="true"
+              className="block h-px w-10 bg-white/40 transition-all duration-700 ease-out group-hover:w-16 group-hover:bg-brand-orange"
+            />
+          </motion.a>
         </motion.div>
       </div>
     </section>

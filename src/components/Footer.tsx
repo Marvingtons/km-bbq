@@ -68,37 +68,66 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-foreground px-6 py-16 text-white/60" role="contentinfo">
-      <div className="mx-auto max-w-7xl">
-        <div className="grid gap-12 md:grid-cols-3 md:gap-8">
+    <footer
+      className="relative overflow-hidden bg-foreground px-6 py-20 text-white/60"
+      role="contentinfo"
+    >
+      {/* Top accent line */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-orange/60 to-transparent"
+      />
+
+      {/* Ambient warm glow for depth */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-brand-orange/10 blur-[120px]"
+      />
+
+      <div className="relative mx-auto max-w-7xl">
+        <div className="grid gap-12 md:grid-cols-12 md:gap-8">
           {/* Brand */}
-          <div>
+          <div className="md:col-span-5">
             <img
               src="/logos/km-bbq-logo.svg"
               alt="KM.BBQ logo"
-              width={140}
-              height={34}
+              width={150}
+              height={36}
               className="opacity-90"
             />
-            <p className="mt-5 font-sans text-sm font-light leading-relaxed text-white/50">
-              Premium Korean BBQ.
-              <br />
-              Oceanside, CA
+            <p className="mt-5 max-w-xs font-sans text-sm font-light leading-relaxed text-white/50">
+              Premium Korean BBQ · Oceanside, CA
             </p>
+            <a
+              href="tel:+17604331888"
+              className="group mt-5 inline-flex items-center gap-2 font-serif text-2xl text-white/90 transition-colors hover:text-brand-orange"
+            >
+              <span
+                aria-hidden="true"
+                className="text-brand-orange transition-transform duration-300 group-hover:scale-110"
+              >
+                ☎
+              </span>
+              (760) 433-1888
+            </a>
           </div>
 
           {/* Navigation */}
-          <nav aria-label="Footer navigation">
-            <p className="mb-5 font-sans text-xs font-medium tracking-widest uppercase text-white/30">
-              Navigate
-            </p>
-            <ul className="space-y-3" role="list">
+          <nav aria-label="Footer navigation" className="md:col-span-4">
+            <h2 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+              Explore
+            </h2>
+            <ul className="mt-5 grid grid-cols-2 gap-x-8 gap-y-3" role="list">
               {NAV_LINKS.map(({ label, href }) => (
                 <li key={label}>
                   <a
                     href={href}
-                    className="font-sans text-sm transition-colors hover:text-white"
+                    className="group inline-flex items-center font-sans text-sm text-white/70 transition-colors hover:text-white"
                   >
+                    <span
+                      aria-hidden="true"
+                      className="mr-0 h-px w-0 bg-brand-orange transition-all duration-300 group-hover:mr-2 group-hover:w-4"
+                    />
                     {label}
                   </a>
                 </li>
@@ -106,18 +135,18 @@ export function Footer() {
             </ul>
           </nav>
 
-          {/* Socials + contact */}
-          <div>
-            <p className="mb-5 font-sans text-xs font-medium tracking-widest uppercase text-white/30">
-              Connect
-            </p>
-            <div className="flex gap-5">
+          {/* Socials */}
+          <div className="md:col-span-3">
+            <h2 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+              Follow Us
+            </h2>
+            <div className="mt-5 flex gap-3">
               {SOCIAL_LINKS.map(({ label, href, icon }) => (
                 <a
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="text-white/50 transition-colors hover:text-brand-orange"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/60 transition-all duration-300 hover:-translate-y-1 hover:border-brand-orange/60 hover:bg-brand-orange/10 hover:text-brand-orange hover:shadow-[0_8px_24px_-8px] hover:shadow-brand-orange/40"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -125,28 +154,29 @@ export function Footer() {
                 </a>
               ))}
             </div>
-            <div className="mt-6 space-y-1 font-sans text-sm">
-              <a
-                href="tel:+17604331888"
-                className="block hover:text-white transition-colors"
-              >
-                (760) 433-1888
-              </a>
-            </div>
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 sm:flex-row">
+        <div className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-7 sm:flex-row">
           <p className="font-sans text-xs text-white/30">
             &copy; {year} KM.BBQ. All rights reserved.
           </p>
-          <div className="flex gap-6 font-sans text-xs text-white/30">
+          <div className="flex items-center gap-6 font-sans text-xs text-white/30">
             {/* TODO: add real policy pages */}
             <a href="#" className="hover:text-white/60 transition-colors">
               Privacy Policy
             </a>
             <a href="#" className="hover:text-white/60 transition-colors">
               Terms of Service
+            </a>
+            <span aria-hidden="true" className="text-white/15">|</span>
+            <a
+              href="https://norvix.ai/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-brand-orange"
+            >
+              Crafted by Norvix
             </a>
           </div>
         </div>
