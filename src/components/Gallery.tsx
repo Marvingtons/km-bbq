@@ -124,10 +124,28 @@ export function Gallery() {
       id="gallery"
       aria-labelledby="gallery-heading"
       // overflow-hidden keeps the horizontal motion inside the section — the
-      // page itself never scrolls sideways at any width.
-      className="relative overflow-hidden bg-background py-20 motion-safe:md:py-0"
+      // page itself never scrolls sideways at any width. The warm cream base
+      // (#FAF4EC) sits under the faded ink-wash background so it reads on a
+      // consistent tone.
+      className="relative overflow-hidden py-20 motion-safe:md:py-0"
+      style={{ backgroundColor: "#FAF4EC" }}
     >
-      <div className="flex flex-col gap-10 motion-safe:md:h-screen motion-safe:md:flex-row motion-safe:md:items-center motion-safe:md:gap-0">
+      {/* Ink-wash atmosphere — lowest layer (z-0), behind the photos and
+          heading. Faded to 60% so it reads as backdrop while the food photos
+          (which sit at z-10) stay the clear focus. The art is a wide panoramic,
+          so on desktop (md+) we use `cover` to fill the full-screen pinned
+          section edge-to-edge with no letterboxing; on narrow/mobile screens
+          `contain` keeps the whole wide composition visible. Either way any
+          space the art doesn't reach is the section's matching cream base
+          (#FAF4EC), so there's no visible seam. The section's overflow-hidden
+          means it never adds a sideways scrollbar. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-0 bg-contain bg-center bg-no-repeat opacity-60 md:bg-cover"
+        style={{ backgroundImage: "url(/images/gallery-bg.png)" }}
+      />
+
+      <div className="relative z-10 flex flex-col gap-10 motion-safe:md:h-screen motion-safe:md:flex-row motion-safe:md:items-center motion-safe:md:gap-0">
         {/* Heading — the fixed anchor. Sits centered on the left while the
             photos stream past on desktop; flows on top on mobile. */}
         <div className="shrink-0 px-6 text-center motion-safe:md:w-[32%] motion-safe:md:px-12 motion-safe:md:text-left">
@@ -157,7 +175,7 @@ export function Gallery() {
             {GALLERY_ITEMS.map((item) => (
               <figure
                 key={item.id}
-                className="gallery-tile group relative h-[52vh] shrink-0 snap-start overflow-hidden rounded-xl bg-neutral-200 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] motion-safe:md:h-[60vh]"
+                className="gallery-tile group relative h-[52vh] shrink-0 snap-start overflow-hidden rounded-xl bg-neutral-200 shadow-[0_18px_56px_-12px_rgba(0,0,0,0.62)] motion-safe:md:h-[60vh]"
                 style={{ aspectRatio: String(item.ratio) }}
               >
                 <Image

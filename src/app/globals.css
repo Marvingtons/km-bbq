@@ -34,6 +34,38 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Custom global scrollbar — ultra-slim with a defined dark track so it reads
+   as an intentional thin rail over BOTH dark and light sections (a transparent
+   track exposed the light page background as a pale sliver on the right edge).
+   The thumb is a soft charcoal that stays legible on any section color.
+   Purely visual; works alongside Lenis smooth scrolling. */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px; /* covers horizontal scroll areas */
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-track-piece,
+::-webkit-scrollbar-corner {
+  background: #2a2a2e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #6f6a64;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5c574f;
+}
+
+/* Firefox fallback (no webkit pseudo-elements). */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #6f6a64 #2a2a2e;
+}
+
 /* Hide scrollbar during preloader */
 html.preloading {
   overflow: hidden;
