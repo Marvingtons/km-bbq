@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollReveal } from "./ScrollReveal";
@@ -283,13 +284,12 @@ export function MenuPreview() {
 
         <ScrollReveal delay={0.2}>
           <div className="mt-14 text-center">
-            <a
-              href="#"
+            <Link
+              href="/menu"
               className="inline-flex rounded-full border border-brand-blue px-8 py-3 font-sans text-sm font-medium text-brand-blue transition-colors hover:bg-brand-blue hover:text-white"
             >
-              {/* TODO: link to /menu page */}
               View Full Menu
-            </a>
+            </Link>
           </div>
         </ScrollReveal>
       </div>

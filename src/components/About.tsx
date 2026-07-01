@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
+import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -112,6 +113,27 @@ export function About() {
       }
     );
 
+    // Mobile (no pin/split): the full mural renders as a static banner above
+    // the copy. Give the stacked text a gentle, non-pinned fade/slide-up as it
+    // scrolls into view. prefers-reduced-motion phones get the plain static
+    // layout (this block never runs for them).
+    mm.add(
+      "(max-width: 767px) and (prefers-reduced-motion: no-preference)",
+      () => {
+        const textCol = q(".about-text");
+        gsap.from(textCol, {
+          opacity: 0,
+          y: 24,
+          duration: 0.7,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: textCol[0],
+            start: "top 88%",
+          },
+        });
+      }
+    );
+
     // Re-measure pin start/end once async content settles. The mural <img>s
     // already call refresh on load, but fonts and the final window load can
     // also shift layout; measuring against stale sizes is what makes the pin
@@ -136,14 +158,15 @@ export function About() {
       className="relative overflow-hidden bg-white"
       style={{ ["--nav-h" as string]: "68px" } as React.CSSProperties}
     >
-      {/* Mural stage. The halves are `object-contain` everywhere so the whole
+      {/* Mural stage (>= md only — hidden on mobile, where it's omitted
+          entirely). The halves are `object-contain` everywhere so the whole
           illustration is always shown — nothing is cropped. The art sits on a
           white field that blends into this section's white background, so the
           contain letterboxing is invisible and the two halves meet flush at the
           center seam. On desktop the stage is full height (vertically centered
-          art); on mobile / reduced motion it keeps the mural's natural ~2535:1240
+          art); on reduced motion it keeps the mural's natural ~2535:1240
           combined ratio inside the content column. */}
-      <div className="relative z-20 px-6 md:px-0 motion-safe:md:min-h-screen">
+      <div className="hidden md:block relative z-20 px-6 md:px-0 motion-safe:md:min-h-screen">
         <div className="relative mx-auto aspect-[2535/1240] w-full max-w-7xl overflow-hidden md:mx-0 md:aspect-auto md:h-screen md:max-w-none">
           {/* Left half */}
           <div className="mural-half-left absolute left-0 top-0 h-full w-1/2 will-change-transform">
@@ -190,7 +213,7 @@ export function About() {
       {/* Text — revealed in the gap on desktop with motion; flows below the
           mural on mobile and for prefers-reduced-motion (where the mural stays
           whole), so the copy is always visible. */}
-      <div className="relative z-10 px-6 pb-20 motion-safe:md:absolute motion-safe:md:inset-0 motion-safe:md:flex motion-safe:md:items-center motion-safe:md:justify-center motion-safe:md:px-6 motion-safe:md:pb-0">
+      <div className="relative z-10 px-6 pb-20 pt-8 md:pt-0 motion-safe:md:absolute motion-safe:md:inset-0 motion-safe:md:flex motion-safe:md:items-center motion-safe:md:justify-center motion-safe:md:px-6 motion-safe:md:pb-0">
         <div
           className="about-text mx-auto w-full text-center"
           style={{
@@ -211,29 +234,27 @@ export function About() {
           </h2>
           <div className="mt-8 space-y-5 font-sans text-sm font-light leading-relaxed text-foreground/80">
             <p>
-              KM.BBQ was born from a simple obsession: the perfect bite. Founded
-              in [Year] by [Founder Name], our restaurant brings the warmth of
-              Korean family grilling to every table — live charcoal, hand-trimmed
-              cuts, and banchan made fresh daily.
+              KM.BBQ was born from a simple obsession: the perfect bite. We bring
+              the warmth of Korean family grilling to every table — live charcoal,
+              hand-trimmed cuts, and banchan made fresh daily.
             </p>
             <p>
-              We source our meats from [local farms / partners], choosing quality
-              over convenience. Every cut is marinated in-house using recipes
-              passed down through generations, balanced with our own modern
-              touches.
+              We source our meats from trusted partners, choosing quality over
+              convenience. Every cut is marinated in-house using recipes passed
+              down through generations, balanced with our own modern touches.
             </p>
             <p>
               This is not fast food. This is slow fire, shared plates, and the
               kind of meal you remember.
             </p>
           </div>
-          <a
-            href="#menu"
+          <Link
+            href="/menu"
             className="mt-10 inline-flex items-center gap-2 font-sans text-sm font-medium text-brand-orange transition-all hover:gap-3"
           >
             Explore our menu
             <span aria-hidden="true">→</span>
-          </a>
+          </Link>
         </div>
       </div>
     </section>

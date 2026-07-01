@@ -1,21 +1,32 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "./Logo";
 
+// `hash` links point at sections on the home page; `route` links point at a
+// dedicated route. From the home page a section link is a same-page hash; from
+// any other route it is prefixed with "/" so it returns home and then scrolls.
 const NAV_LINKS = [
-  { label: "Home", href: "#home", id: "home" },
-  { label: "Menu", href: "#menu", id: "menu" },
-  { label: "About", href: "#about", id: "about" },
-  { label: "Gallery", href: "#gallery", id: "gallery" },
-  { label: "Contact", href: "#contact", id: "contact" },
+  { label: "Home", id: "home", hash: "#home" },
+  { label: "Menu", id: "menu", route: "/menu" },
+  { label: "About", id: "about", hash: "#about" },
+  { label: "Gallery", id: "gallery", hash: "#gallery" },
+  { label: "Contact", id: "contact", hash: "#contact" },
 ];
 
 export function Navbar() {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [active, setActive] = useState("home");
+  const [active, setActive] = useState(isHome ? "home" : "menu");
+
+  const hrefFor = (link: (typeof NAV_LINKS)[number]) =>
+    link.route ?? (isHome ? link.hash! : `/${link.hash}`);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -25,7 +36,10 @@ export function Navbar() {
   }, []);
 
   // Track which section is in view so the matching link stays underlined.
+  // Only relevant on the home page, where the sections actually live.
   useEffect(() => {
+    if (!isHome) return;
+
     const sections = NAV_LINKS.map(({ id }) => document.getElementById(id)).filter(
       (el): el is HTMLElement => el !== null
     );
@@ -45,7 +59,7 @@ export function Navbar() {
 
     sections.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [isHome]);
 
   // Lock body scroll while the mobile menu is open, and close on Escape.
   useEffect(() => {
@@ -60,12 +74,17 @@ export function Navbar() {
     };
   }, [menuOpen]);
 
-  const onLight = scrolled || menuOpen;
+  // On routes other than the home page there is no dark hero behind the bar,
+  // so it always reads as the solid light treatment (legible over the cream
+  // page) rather than the transparent-over-video state.
+  const solid = scrolled || !isHome;
+  const onLight = solid || menuOpen;
 
   return (
+    <>
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
+        solid
           ? "bg-brand-cream/90 backdrop-blur-md border-b border-black/[0.06] shadow-[0_1px_24px_-12px_rgba(26,26,26,0.35)]"
           : "bg-transparent"
       }`}
@@ -75,25 +94,25 @@ export function Navbar() {
         aria-label="Main navigation"
       >
         {/* Logo */}
-        <a
-          href="#home"
+        <Link
+          href="/"
           aria-label="KM.BBQ — go to top"
           className="flex items-center transition-opacity duration-300 hover:opacity-80"
         >
           <Logo
-            size={scrolled ? 108 : 120}
+            size={solid ? 108 : 120}
             className="transition-all duration-500 ease-out"
           />
-        </a>
+        </Link>
 
         {/* Desktop links */}
         <ul className="hidden items-center gap-10 lg:flex" role="list">
-          {NAV_LINKS.map(({ label, href, id }) => {
-            const isActive = active === id;
+          {NAV_LINKS.map((link) => {
+            const isActive = active === link.id;
             return (
-              <li key={label}>
-                <a
-                  href={href}
+              <li key={link.label}>
+                <Link
+                  href={hrefFor(link)}
                   aria-current={isActive ? "page" : undefined}
                   className="group relative inline-block py-1 text-[11.5px] font-medium uppercase tracking-[0.16em] transition-colors duration-300"
                   style={{
@@ -106,7 +125,7 @@ export function Navbar() {
                         : "rgba(255,255,255,0.82)",
                   }}
                 >
-                  {label}
+                  {link.label}
                   {/* Underline grows in from the left on hover / when active. */}
                   <span
                     className={`pointer-events-none absolute -bottom-0.5 left-0 h-px origin-left transition-transform duration-[250ms] ease-out group-hover:scale-x-100 ${
@@ -117,7 +136,7 @@ export function Navbar() {
                       backgroundColor: onLight ? "#1A36AF" : "#F18B23",
                     }}
                   />
-                </a>
+                </Link>
               </li>
             );
           })}
@@ -148,8 +167,15 @@ export function Navbar() {
           />
         </button>
       </nav>
+    </header>
 
-      {/* Mobile menu */}
+    {/* Mobile menu — rendered as a sibling of <header>, NOT a child. The header
+        carries `backdrop-blur-md` when solid, and an ancestor's backdrop-filter
+        makes `position: fixed` descendants resolve against that ancestor instead
+        of the viewport — which collapsed this overlay to the header's height and
+        let the page (e.g. gallery photos) show through below it. As a sibling it
+        fills the viewport. It sits at z-40, just under the header (z-50), so the
+        close button stays visible and tappable on top. */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
@@ -164,30 +190,30 @@ export function Navbar() {
             aria-label="Site menu"
           >
             <ul className="flex flex-col gap-9" role="list">
-              {NAV_LINKS.map(({ label, href, id }, i) => {
-                const isActive = active === id;
+              {NAV_LINKS.map((link, i) => {
+                const isActive = active === link.id;
                 return (
                   <motion.li
-                    key={label}
+                    key={link.label}
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ delay: 0.08 + i * 0.06, duration: 0.4, ease: "easeOut" }}
                   >
-                    <a
-                      href={href}
+                    <Link
+                      href={hrefFor(link)}
                       onClick={() => setMenuOpen(false)}
                       aria-current={isActive ? "page" : undefined}
                       className="group relative inline-block text-sm font-medium uppercase tracking-[0.18em] transition-colors duration-300"
                       style={{ color: isActive ? "#1A36AF" : "#2a2a2a" }}
                     >
-                      {label}
+                      {link.label}
                       <span
                         className={`pointer-events-none absolute -bottom-1 left-0 h-px w-full origin-left bg-brand-blue transition-transform duration-[250ms] ease-out group-hover:scale-x-100 ${
                           isActive ? "scale-x-100" : "scale-x-0"
                         }`}
                       />
-                    </a>
+                    </Link>
                   </motion.li>
                 );
               })}
@@ -195,6 +221,6 @@ export function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </>
   );
 }

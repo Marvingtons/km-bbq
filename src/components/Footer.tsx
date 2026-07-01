@@ -1,9 +1,12 @@
+// Absolute hrefs so the footer works from any route — section links return to
+// the home page (and scroll to the section), and "Menu" goes to the full menu
+// page. From the home page the section hrefs simply update the hash and scroll.
 const NAV_LINKS = [
-  { label: "Home", href: "#home" },
-  { label: "Menu", href: "#menu" },
-  { label: "About", href: "#about" },
-  { label: "Gallery", href: "#gallery" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/#home" },
+  { label: "Menu", href: "/menu" },
+  { label: "About", href: "/#about" },
+  { label: "Gallery", href: "/#gallery" },
+  { label: "Contact", href: "/#contact" },
 ];
 
 const SOCIAL_LINKS = [

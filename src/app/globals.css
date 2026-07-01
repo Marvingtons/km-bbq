@@ -71,6 +71,30 @@ html.preloading {
   overflow: hidden;
 }
 
+/* Gallery mobile swipe hint — a small horizontal nudge that loops to signal
+   the photo row scrolls sideways. Respect reduced-motion by holding still. */
+@keyframes swipe-nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateX(8px);
+    opacity: 1;
+  }
+}
+
+.gallery-swipe-hint {
+  animation: swipe-nudge 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-swipe-hint {
+    animation: none;
+  }
+}
+
 /* Lenis smooth-scroll integration. Lenis adds these classes to <html>; the
    rules let it own the scroll position cleanly. height:auto overrides the
    `h-full` on <html> so Lenis measures the full document height (correct

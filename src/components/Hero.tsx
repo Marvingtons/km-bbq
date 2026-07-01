@@ -1,8 +1,21 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useRef } from "react";
 
 export function Hero() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // The clip is allowed to play only its first 5 seconds, then loops back to
+  // the start. `loop` alone would play the whole file, so we drive it manually.
+  const handleTimeUpdate = () => {
+    const video = videoRef.current;
+    if (video && video.currentTime >= 5) {
+      video.currentTime = 0;
+      void video.play();
+    }
+  };
+
   return (
     <section
       id="home"
@@ -11,6 +24,7 @@ export function Hero() {
     >
       {/* Background video */}
       <video
+        ref={videoRef}
         className="absolute inset-0 h-full w-full object-cover"
         src="/videos/hero-grill.mp4"
         autoPlay
@@ -18,6 +32,7 @@ export function Hero() {
         loop
         playsInline
         aria-hidden="true"
+        onTimeUpdate={handleTimeUpdate}
       />
 
       {/* Dark gradient overlay */}
@@ -72,7 +87,7 @@ export function Hero() {
           transition={{ duration: 0.7, delay: 0.85 }}
         >
           <motion.a
-            href="#menu"
+            href="/menu"
             className="group relative inline-flex flex-col items-center gap-3 font-sans text-[0.7rem] font-light tracking-[0.45em] uppercase text-white/90 transition-colors duration-700 hover:text-brand-orange"
             whileTap={{ scale: 0.99 }}
           >
