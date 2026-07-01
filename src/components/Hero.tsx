@@ -1,38 +1,26 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useRef } from "react";
 
 export function Hero() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  // The clip is allowed to play only its first 5 seconds, then loops back to
-  // the start. `loop` alone would play the whole file, so we drive it manually.
-  const handleTimeUpdate = () => {
-    const video = videoRef.current;
-    if (video && video.currentTime >= 5) {
-      video.currentTime = 0;
-      void video.play();
-    }
-  };
-
   return (
     <section
       id="home"
       className="relative flex min-h-screen items-center justify-center overflow-hidden"
       aria-label="Hero"
     >
-      {/* Background video */}
+      {/* Background video — the file itself is trimmed to the 5s loop, so the
+          native `loop` attribute handles playback. The poster paints the first
+          frame immediately while the clip streams in. */}
       <video
-        ref={videoRef}
         className="absolute inset-0 h-full w-full object-cover"
         src="/videos/hero-grill.mp4"
+        poster="/images/hero-poster.jpg"
         autoPlay
         muted
         loop
         playsInline
         aria-hidden="true"
-        onTimeUpdate={handleTimeUpdate}
       />
 
       {/* Dark gradient overlay */}

@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 // Absolute hrefs so the footer works from any route — section links return to
 // the home page (and scroll to the section), and "Menu" goes to the full menu
 // page. From the home page the section hrefs simply update the hash and scroll.
@@ -90,7 +92,7 @@ export function Footer() {
         <div className="grid gap-12 md:grid-cols-12 md:gap-8">
           {/* Brand */}
           <div className="md:col-span-5">
-            <img
+            <Image
               src="/logos/km-bbq-logo.svg"
               alt="KM.BBQ logo"
               width={150}

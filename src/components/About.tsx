@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -170,13 +171,15 @@ export function About() {
         <div className="relative mx-auto aspect-[2535/1240] w-full max-w-7xl overflow-hidden md:mx-0 md:aspect-auto md:h-screen md:max-w-none">
           {/* Left half */}
           <div className="mural-half-left absolute left-0 top-0 h-full w-1/2 will-change-transform">
-            <img
+            <Image
               src="/images/mural-left.png"
               alt=""
               aria-hidden="true"
+              fill
+              sizes="50vw"
               draggable={false}
               onLoad={refresh}
-              className="block h-full w-full select-none object-contain object-right"
+              className="select-none object-contain object-right"
             />
             {/* seam line glued to this half's inner (right) edge: steel always
                 visible, fire overlay ignites on scroll */}
@@ -186,13 +189,15 @@ export function About() {
 
           {/* Right half */}
           <div className="mural-half-right absolute right-0 top-0 h-full w-1/2 will-change-transform">
-            <img
+            <Image
               src="/images/mural-right.png"
               alt=""
               aria-hidden="true"
+              fill
+              sizes="50vw"
               draggable={false}
               onLoad={refresh}
-              className="block h-full w-full select-none object-contain object-left"
+              className="select-none object-contain object-left"
             />
             {/* seam line glued to this half's inner (left) edge: steel always
                 visible, fire overlay ignites on scroll */}
