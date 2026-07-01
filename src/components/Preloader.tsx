@@ -1,25 +1,36 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+// The intro plays once per tab session. sessionStorage is client-only, so it
+// is read through useSyncExternalStore: the server snapshot says "already
+// shown" (no overlay in the SSR HTML) and the client re-renders with the real
+// value right after hydration — no setState-in-effect, no hydration mismatch.
+const subscribe = () => () => {};
+const wasShown = () => sessionStorage.getItem("km-preloader-shown") === "1";
+const serverSnapshot = () => true;
+
 export function Preloader() {
-  const [visible, setVisible] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const alreadyShown = useSyncExternalStore(subscribe, wasShown, serverSnapshot);
+  const visible = !alreadyShown && !dismissed;
 
   useEffect(() => {
-    if (!sessionStorage.getItem("km-preloader-shown")) {
-      document.documentElement.classList.add("preloading");
-      setVisible(true);
+    if (!visible) return;
+    document.documentElement.classList.add("preloading");
 
-      const timer = setTimeout(() => {
-        setVisible(false);
-        sessionStorage.setItem("km-preloader-shown", "1");
-        document.documentElement.classList.remove("preloading");
-      }, 3000);
+    const timer = setTimeout(() => {
+      sessionStorage.setItem("km-preloader-shown", "1");
+      document.documentElement.classList.remove("preloading");
+      setDismissed(true);
+    }, 3000);
 
-      return () => clearTimeout(timer);
-    }
-  }, []);
+    return () => {
+      clearTimeout(timer);
+      document.documentElement.classList.remove("preloading");
+    };
+  }, [visible]);
 
   return (
     <AnimatePresence>
