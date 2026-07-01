@@ -233,7 +233,10 @@ export function MenuPreview() {
 
   return (
     <section
-      id="menu"
+      // Not "menu": that id would collide with the navbar's MENU entry, whose
+      // scroll-spy id refers to the /menu route — scrolling past this section
+      // used to light up MENU even though clicking it leaves the page.
+      id="featured"
       className="bg-white py-28 px-6"
       aria-labelledby="menu-heading"
     >

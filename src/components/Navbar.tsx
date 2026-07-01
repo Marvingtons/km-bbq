@@ -36,13 +36,15 @@ export function Navbar() {
   }, []);
 
   // Track which section is in view so the matching link stays underlined.
-  // Only relevant on the home page, where the sections actually live.
+  // Only relevant on the home page, where the sections actually live — and
+  // only for hash links: route links (MENU) point at other pages, so no
+  // homepage section may activate them.
   useEffect(() => {
     if (!isHome) return;
 
-    const sections = NAV_LINKS.map(({ id }) => document.getElementById(id)).filter(
-      (el): el is HTMLElement => el !== null
-    );
+    const sections = NAV_LINKS.filter((link) => link.hash)
+      .map(({ id }) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
     if (sections.length === 0) return;
 
     const observer = new IntersectionObserver(
