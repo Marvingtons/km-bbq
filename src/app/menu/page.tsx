@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { MenuJumpNav, type JumpTarget } from "@/components/MenuJumpNav";
 
 export const metadata: Metadata = {
   title: "Full Menu — KM.BBQ",
@@ -28,7 +29,15 @@ interface Category {
   korean?: string;
   tag?: string;
   items: Item[];
+  /** Short label for the jump nav; defaults to `name`. */
+  navLabel?: string;
 }
+
+const slugify = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 
 const CATEGORIES: Category[] = [
   {
@@ -133,6 +142,7 @@ const CATEGORIES: Category[] = [
   },
   {
     name: "Rice, Noodles & More",
+    navLabel: "Rice & More",
     items: [
       {
         name: "Hot Dog",
@@ -203,6 +213,7 @@ const CATEGORIES: Category[] = [
     name: "Banchan & Sides",
     korean: "반찬",
     tag: "Included",
+    navLabel: "Banchan",
     items: [
       {
         name: "Lettuce Salad",
@@ -483,7 +494,7 @@ function ItemCard({
 
 function CategorySection({ category }: { category: Category }) {
   return (
-    <section className="mt-16 first:mt-0">
+    <section id={slugify(category.name)} className="mt-16 scroll-mt-32 first:mt-0">
       <div className="mb-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-[#e4d9c4] pb-4">
         <h2 className="font-serif text-3xl font-light text-foreground md:text-4xl">
           {category.name}
@@ -531,7 +542,10 @@ function TierSection({
     variant === "premium" ? "text-brand-orange" : "text-brand-blue";
 
   return (
-    <section className={`mt-12 rounded-2xl border ${shell} p-6 sm:p-10`}>
+    <section
+      id={variant}
+      className={`mt-12 scroll-mt-32 rounded-2xl border ${shell} p-6 sm:p-10`}
+    >
       <div className="mb-8 text-center">
         <p
           className={`mb-3 font-sans text-xs font-semibold uppercase tracking-[0.3em] ${labelColor}`}
@@ -562,6 +576,15 @@ function TierSection({
 // ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
+
+const JUMP_TARGETS: JumpTarget[] = [
+  ...CATEGORIES.map((c) => ({
+    label: c.navLabel ?? c.name,
+    id: slugify(c.name),
+  })),
+  { label: "Premium", id: "premium" },
+  { label: "Signature", id: "signature" },
+];
 
 export default function MenuPage() {
   return (
@@ -640,6 +663,9 @@ export default function MenuPage() {
             </ul>
           </div>
         </section>
+
+        {/* Category jump nav — sticks just below the fixed site header */}
+        <MenuJumpNav targets={JUMP_TARGETS} />
 
         {/* Categories */}
         <div className="mx-auto max-w-7xl px-6 pt-12 pb-20">

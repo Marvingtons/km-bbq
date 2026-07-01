@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Lenis from "@studio-freight/lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { setLenis } from "@/lib/lenis";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,6 +14,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     });
+    setLenis(lenis);
 
     // Keep ScrollTrigger in sync with Lenis so scrub-driven timelines
     // track the smoothed scroll position instead of native scroll.
@@ -27,6 +29,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
 
     return () => {
       gsap.ticker.remove(onTick);
+      setLenis(null);
       lenis.destroy();
     };
   }, []);
