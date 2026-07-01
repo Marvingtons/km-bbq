@@ -23,9 +23,10 @@ export function Hero() {
         aria-hidden="true"
       />
 
-      {/* Dark gradient overlay */}
+      {/* Dark gradient overlay — the mid-band is the scrim under the subtext,
+          so keep it strong enough for AA contrast over bright grill footage. */}
       <div
-        className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-black/70"
+        className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/55 to-black/70"
         aria-hidden="true"
       />
 
@@ -59,7 +60,7 @@ export function Hero() {
         </motion.h1>
 
         <motion.p
-          className="mx-auto mt-6 max-w-xl font-sans text-base font-light leading-relaxed text-white/80"
+          className="mx-auto mt-6 max-w-xl font-sans text-base font-light leading-relaxed text-white/90"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.65 }}

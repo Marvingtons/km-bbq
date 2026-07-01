@@ -34,6 +34,15 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Visible keyboard focus everywhere. Brand orange reads on both the cream
+   pages and the charcoal footer; the offset keeps it clear of tight pills
+   and underlined nav links. */
+:focus-visible {
+  outline: 2px solid var(--color-brand-orange);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
 /* Custom global scrollbar — ultra-slim with a defined dark track so it reads
    as an intentional thin rail over BOTH dark and light sections (a transparent
    track exposed the light page background as a pale sliver on the right edge).
