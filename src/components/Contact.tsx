@@ -5,6 +5,11 @@ const HOURS = [
   { day: "Friday – Saturday", time: "12:00 PM – 10:00 PM" },
 ];
 
+// Reveal as soon as an element's top clears the bottom fifth of the viewport,
+// and keep the animation short — fast scrollers were reaching this section
+// before the default (later, 0.7s) reveal made the content legible.
+const REVEAL = { margin: "0px 0px -20% 0px", duration: 0.45 } as const;
+
 export function Contact() {
   return (
     <section
@@ -14,12 +19,12 @@ export function Contact() {
     >
       <div className="mx-auto max-w-7xl">
         <div className="mb-16 text-center">
-          <ScrollReveal>
+          <ScrollReveal {...REVEAL}>
             <p className="mb-4 font-sans text-xs font-medium tracking-[0.3em] uppercase text-brand-orange">
               Find Us
             </p>
           </ScrollReveal>
-          <ScrollReveal delay={0.1}>
+          <ScrollReveal {...REVEAL} delay={0.05}>
             <h2
               id="contact-heading"
               className="font-serif text-5xl font-light text-foreground md:text-6xl"
@@ -34,7 +39,7 @@ export function Contact() {
           {/* Info */}
           <div className="space-y-12">
             {/* Hours */}
-            <ScrollReveal>
+            <ScrollReveal {...REVEAL}>
               <div>
                 <h3 className="font-serif text-2xl font-light text-foreground mb-5">
                   Hours
@@ -54,7 +59,7 @@ export function Contact() {
             </ScrollReveal>
 
             {/* Address */}
-            <ScrollReveal delay={0.1}>
+            <ScrollReveal {...REVEAL} delay={0.05}>
               <div>
                 <h3 className="font-serif text-2xl font-light text-foreground mb-4">
                   Location
@@ -121,7 +126,7 @@ export function Contact() {
             </ScrollReveal>
 
             {/* Map placeholder */}
-            <ScrollReveal delay={0.15}>
+            <ScrollReveal {...REVEAL} delay={0.08}>
               <div className="aspect-video w-full overflow-hidden border border-neutral-200">
                 <iframe
                   title="Map to KM BBQ Oceanside"
