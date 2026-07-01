@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
@@ -89,6 +91,7 @@ const CATEGORIES: Category[] = [
         name: "Teriyaki Chicken",
         korean: "데리야키 치킨",
         desc: "Sweet-savory teriyaki chicken that grills up golden and tender.",
+        image: "/images/teriyaki-chicken.png",
       },
     ],
   },
@@ -112,11 +115,13 @@ const CATEGORIES: Category[] = [
         name: "Fresh Fish Fillet",
         korean: "생선",
         desc: "Mild white fish fillet — light and flaky straight off the grill.",
+        image: "/images/fresh-fish-fillet.png",
       },
       {
         name: "Spicy Squid",
         korean: "오징어",
         desc: "Tender squid tossed in a spicy chili marinade with a smoky char.",
+        image: "/images/spicy-squid.png",
       },
       {
         name: "Spicy Octopus",
@@ -233,6 +238,7 @@ const CATEGORIES: Category[] = [
         name: "Fishcake",
         korean: "어묵",
         desc: "Savory stir-fried fish cake in a light sauce.",
+        image: "/images/fishcake.png",
       },
       {
         name: "Steamed Egg",
@@ -290,7 +296,11 @@ const PREMIUM: Item[] = [
     desc: "House-cut steak, fresh and grill-ready.",
     image: "/images/freshly-cut-steak.png",
   },
-  { name: "Lamb", desc: "Tender lamb with a savory, aromatic char." },
+  {
+    name: "Lamb",
+    desc: "Tender lamb with a savory, aromatic char.",
+    image: "/images/lamb.png",
+  },
   {
     name: "Marinated Chef Beef",
     desc: "The chef's signature beef in a house marinade.",
@@ -299,17 +309,23 @@ const PREMIUM: Item[] = [
   {
     name: "Marinated Pork Belly",
     desc: "Pork belly soaked in a savory house marinade.",
+    image: "/images/marinated-pork-belly.png",
   },
   {
     name: "Beef Skirt Steak",
     desc: "Richly marbled skirt steak that chars beautifully.",
+    image: "/images/beef-skirt-steak.png",
   },
   {
     name: "Mussels",
     desc: "Plump mussels grilled in the shell.",
     image: "/images/mussels.png",
   },
-  { name: "Popcorn Chicken", desc: "Crispy, bite-size fried chicken." },
+  {
+    name: "Popcorn Chicken",
+    desc: "Crispy, bite-size fried chicken.",
+    image: "/images/popcorn-chicken.png",
+  },
   {
     name: "Corn Cheese",
     desc: "Sweet corn baked with melty, bubbling cheese.",
@@ -323,8 +339,16 @@ const SIGNATURE: Item[] = [
     desc: "Prime-grade New York strip — full-flavored and tender.",
     image: "/images/prime-new-york-steak.png",
   },
-  { name: "Prime Cut Steak", desc: "A premium prime cut, marbled and juicy." },
-  { name: "Beef Roll", desc: "Thin beef rolled around a savory filling." },
+  {
+    name: "Prime Cut Steak",
+    desc: "A premium prime cut, marbled and juicy.",
+    image: "/images/prime-cut-steak.png",
+  },
+  {
+    name: "Beef Roll",
+    desc: "Thin beef rolled around a savory filling.",
+    image: "/images/beef-roll.png",
+  },
   {
     name: "Beef Tongue",
     korean: "우설",
@@ -334,11 +358,13 @@ const SIGNATURE: Item[] = [
   {
     name: "Sliced Beef Short Plate",
     desc: "Thinly sliced short plate, quick-searing and rich.",
+    image: "/images/sliced-beef-short-plate.png",
   },
   {
     name: "Lamb Chop",
     desc: "Bone-in lamb chop, juicy and aromatic off the charcoal.",
     note: "Limit 2 per person",
+    image: "/images/lamb-chop.png",
   },
   {
     name: "Butter Garlic Jumbo Shrimp",
@@ -348,6 +374,7 @@ const SIGNATURE: Item[] = [
   {
     name: "Miso Garlic Jumbo Shrimp",
     desc: "Jumbo shrimp glazed with savory miso and garlic.",
+    image: "/images/miso-garlic-jumbo-shrimp.png",
   },
 ];
 
@@ -361,12 +388,18 @@ const INCLUDED = [
 
 const IMAGE_SIZES = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw";
 
+// Every item carries its expected image path (see MISSING_IMAGES.md), but a
+// photo may not have been shot yet. Resolve against public/ at render time so
+// an absent file gets the lettered placeholder instead of a broken <img>.
+const imageExists = (image: string) =>
+  fs.existsSync(path.join(process.cwd(), "public", image));
+
 // ---------------------------------------------------------------------------
 // Presentational pieces
 // ---------------------------------------------------------------------------
 
 function ItemMedia({ item }: { item: Item }) {
-  if (item.image) {
+  if (item.image && imageExists(item.image)) {
     return (
       <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden bg-neutral-100">
         <Image
