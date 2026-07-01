@@ -60,7 +60,7 @@ export function Contact() {
                   Location
                 </h3>
                 <address className="not-italic font-sans text-sm font-light leading-relaxed text-foreground/70">
-                  2216 S El Camino Real #108 #109
+                  2216 S El Camino Real #108–109
                   <br />
                   Oceanside, CA 92054
                   <br />
@@ -125,7 +125,7 @@ export function Contact() {
               <div className="aspect-video w-full overflow-hidden border border-neutral-200">
                 <iframe
                   title="Map to KM BBQ Oceanside"
-                  src="https://www.google.com/maps?q=2216+S+El+Camino+Real+%23108,+Oceanside,+CA+92054&output=embed"
+                  src="https://www.google.com/maps?q=2216+S+El+Camino+Real+%23108-109,+Oceanside,+CA+92054&output=embed"
                   className="h-full w-full border-0"
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
