@@ -28,9 +28,11 @@ const GALLERY_ITEMS: GalleryItem[] = [
   { id: 8, src: "/images/outside.png", alt: "Outside of KM BBQ", caption: "Outside", ratio: 1.05 },
 ];
 
-// How much vertical scroll maps to the horizontal travel. >1 stretches the pin
-// so the photos drift sideways slowly — the weighty / premium feel asked for.
-const PACE = 1.15;
+// How much vertical scroll maps to the horizontal travel. <1 compresses the
+// pin so the full row passes in roughly half the wheel effort of a 1:1 map —
+// the 1.15 pace read as premium but took ~4 viewport-heights of scrolling to
+// traverse, which testers found sluggish.
+const PACE = 0.55;
 
 export function Gallery() {
   const sectionRef = useRef<HTMLElement>(null);
