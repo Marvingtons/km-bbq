@@ -49,6 +49,58 @@ const fireLineStyle: React.CSSProperties = {
   zIndex: 11,
 };
 
+interface Dish {
+  name: string;
+  korean: string;
+  description: string;
+  image: string;
+  tag?: string;
+  spicy?: boolean;
+}
+
+const FEATURED_DISHES: Dish[] = [
+  {
+    name: "Galbi",
+    korean: "갈비",
+    description:
+      "Short ribs marinated in a soy-pear blend, grilled over live charcoal until caramelized.",
+    image: "/images/galbi.png",
+    tag: "Signature",
+  },
+  {
+    name: "Samgyeopsal",
+    korean: "삼겹살",
+    description:
+      "Thick-cut pork belly, crisp-edged and paired with fresh perilla, garlic, and doenjang.",
+    image: "/images/samgyeopsal.png",
+  },
+  {
+    name: "Chadolbaegi",
+    korean: "차돌박이",
+    description:
+      "Paper-thin brisket slices that cook in seconds — dipped in sesame oil and salt.",
+    image: "/images/chadolbaegi.png",
+    tag: "Chef's Pick",
+  },
+  {
+    name: "Bulgogi",
+    korean: "불고기",
+    description:
+      "Tender ribeye in a sesame-ginger marinade — the classic that never disappoints.",
+    image: "/images/bulgogi.png",
+  },
+  {
+    name: "Kimchi",
+    korean: "김치",
+    description:
+      "House-fermented napa cabbage with gochugaru, garlic, and ginger — bold, smoky, addictive.",
+    image: "/images/kimchi.png",
+    // Heat is dietary info, not curation — it renders as an inline spice
+    // indicator next to the name rather than a badge on the photo.
+    spicy: true,
+  },
+];
+
 export function About() {
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -56,82 +108,166 @@ export function About() {
     const mm = gsap.matchMedia();
     const q = gsap.utils.selector(sectionRef);
 
-    // Desktop / tablet with motion allowed: pin + draw-line + split.
-    // prefers-reduced-motion and small screens fall through to the default
-    // CSS state (full seamless mural, text visible, no pin).
+    // One conditions-based block because the breakpoints differ per concern:
+    // the mural pin + story reveal runs from md up, but the grill grid only
+    // joins the pinned overlay at lg — its feature-card layout is too tall
+    // for a single pinned tablet viewport, so tablets flow it statically
+    // below the stage instead. prefers-reduced-motion falls through to the
+    // default CSS state (full seamless mural, all copy visible, no pin).
     mm.add(
-      "(min-width: 768px) and (prefers-reduced-motion: no-preference)",
-      () => {
-        const fireLines = q(".mural-line-fire");
-        const leftHalf = q(".mural-half-left");
-        const rightHalf = q(".mural-half-right");
-        const textCol = q(".about-text");
+      {
+        md: "(min-width: 768px)",
+        lg: "(min-width: 1024px)",
+        motion: "(prefers-reduced-motion: no-preference)",
+      },
+      (context) => {
+        const { md, lg, motion } = context.conditions as {
+          md: boolean;
+          lg: boolean;
+          motion: boolean;
+        };
+        if (!motion) return;
 
-        // Animated start state: steel line already showing (its default), fire
-        // not yet ignited, mural closed, text hidden.
-        gsap.set(fireLines, { scaleY: 0, transformOrigin: "top center" });
-        gsap.set(leftHalf, { xPercent: 0 });
-        gsap.set(rightHalf, { xPercent: 0 });
-        gsap.set(textCol, { opacity: 0, scale: 0.92 });
+        const grillHead = q(".grill-head");
+        const grillDishes = q(".grill-dish");
 
-        const tl = gsap.timeline({
-          defaults: { ease: "none" },
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top top",
-            end: "+=150%",
-            pin: true,
-            pinSpacing: true,
-            // Switch to position:fixed one tick early so the browser doesn't
-            // show a one-frame compositing jump (the mural appearing to nudge
-            // sideways) at the instant the pin engages.
-            anticipatePin: 1,
-            // Numeric scrub adds a ~0.8s catch-up so the timeline eases toward
-            // the scroll position instead of snapping to it frame-for-frame.
-            // This is what makes the mural open/ignite feel smooth rather than
-            // stepping in hard chunks with each wheel/trackpad notch.
-            scrub: 0.8,
-            invalidateOnRefresh: true,
-          },
-        });
+        if (md) {
+          const fireLines = q(".mural-line-fire");
+          const leftHalf = q(".mural-half-left");
+          const rightHalf = q(".mural-half-right");
+          const textCol = q(".about-text");
+          const grillLayer = q(".grill-layer");
+          const grillCta = q(".grill-cta");
 
-        // PHASE 1 (progress 0 -> 0.22): fire ignites down the existing steel
-        // line, top -> bottom, mural still closed.
-        tl.fromTo(fireLines, { scaleY: 0 }, { scaleY: 1, duration: 0.22 }, 0);
+          // Animated start state: steel line already showing (its default),
+          // fire not yet ignited, mural closed, story hidden. autoAlpha
+          // (opacity + visibility) so a hidden layer never intercepts clicks
+          // meant for the visible one — on lg the two layers overlap
+          // absolutely in the stage.
+          gsap.set(fireLines, { scaleY: 0, transformOrigin: "top center" });
+          gsap.set(leftHalf, { xPercent: 0 });
+          gsap.set(rightHalf, { xPercent: 0 });
+          gsap.set(textCol, { autoAlpha: 0, scale: 0.92 });
+          if (lg) gsap.set(grillLayer, { autoAlpha: 0 });
 
-        // PHASE 2 (0.22 -> 1.0): halves slide to 36% open; each carries its
-        // line segment along its inner edge. xPercent is relative to the half's
-        // own width (50% of the stage), so -36% / +36% opens a centered gap of
-        // ~36% of the stage while leaving mural bands framing each side.
-        tl.to(leftHalf, { xPercent: -36, duration: 0.78 }, 0.22);
-        tl.to(rightHalf, { xPercent: 36, duration: 0.78 }, 0.22);
+          const tl = gsap.timeline({
+            defaults: { ease: "none" },
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top top",
+              // Longer pin than the single-open version: the timeline now
+              // plays ignite -> open to the story -> open fully while the
+              // featured cuts build in, so each phase keeps roughly the same
+              // scroll distance per move as before.
+              end: "+=260%",
+              pin: true,
+              pinSpacing: true,
+              // Switch to position:fixed one tick early so the browser
+              // doesn't show a one-frame compositing jump (the mural
+              // appearing to nudge sideways) at the instant the pin engages.
+              anticipatePin: 1,
+              // Numeric scrub adds a ~0.8s catch-up so the timeline eases
+              // toward the scroll position instead of snapping to it
+              // frame-for-frame. This is what makes the mural open/ignite
+              // feel smooth rather than stepping in hard chunks with each
+              // wheel/trackpad notch.
+              scrub: 0.8,
+              invalidateOnRefresh: true,
+            },
+          });
 
-        // Text: start ~10% into phase 2, fully visible by ~60% of it.
-        tl.to(textCol, { opacity: 1, scale: 1, duration: 0.4 }, 0.3);
+          // PHASE 1 (progress 0 -> 0.13): fire ignites down the existing
+          // steel line, top -> bottom, mural still closed.
+          tl.fromTo(fireLines, { scaleY: 0 }, { scaleY: 1, duration: 0.13 }, 0);
 
-        // Recompute pin spacing once the half images have laid out.
-        ScrollTrigger.refresh();
-      }
-    );
+          // PHASE 2 (0.13 -> 0.40): halves slide to 36% open; each carries
+          // its line segment along its inner edge. xPercent is relative to
+          // the half's own width (50% of the stage), so -36% / +36% opens a
+          // centered gap of ~36% of the stage while leaving mural bands
+          // framing each side. The story fades in and gets a beat of
+          // stillness (0.40 -> 0.52) to read.
+          tl.to(leftHalf, { xPercent: -36, duration: 0.27 }, 0.13);
+          tl.to(rightHalf, { xPercent: 36, duration: 0.27 }, 0.13);
+          tl.to(textCol, { autoAlpha: 1, scale: 1, duration: 0.16 }, 0.18);
 
-    // Mobile (no pin/split): the full mural renders as a static banner above
-    // the copy. Give the stacked text a gentle, non-pinned fade/slide-up as it
-    // scrolls into view. prefers-reduced-motion phones get the plain static
-    // layout (this block never runs for them).
-    mm.add(
-      "(max-width: 767px) and (prefers-reduced-motion: no-preference)",
-      () => {
-        const textCol = q(".about-text");
-        gsap.from(textCol, {
-          opacity: 0,
-          y: 24,
-          duration: 0.7,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: textCol[0],
-            start: "top 88%",
-          },
-        });
+          // PHASE 3 (0.52 -> 1.0): the mural keeps opening out — each half
+          // moves its full width (50% of the stage) so the art has fully
+          // left the viewport by the end of the pin. No close, one
+          // continuous motion.
+          tl.to(leftHalf, { xPercent: -100, duration: 0.48 }, 0.52);
+          tl.to(rightHalf, { xPercent: 100, duration: 0.48 }, 0.52);
+          tl.to(textCol, { autoAlpha: 0, scale: 0.95, duration: 0.1 }, 0.52);
+
+          if (lg) {
+            // The story hands the stage to the featured cuts: the Grill
+            // Awaits layer builds in the widening gap — heading first, then
+            // the feature card leads the photo stagger, CTA last.
+            tl.to(grillLayer, { autoAlpha: 1, duration: 0.04 }, 0.6);
+            tl.fromTo(
+              grillHead,
+              { y: 40, autoAlpha: 0 },
+              { y: 0, autoAlpha: 1, duration: 0.16 },
+              0.6
+            );
+            tl.fromTo(
+              grillDishes,
+              { y: 70, autoAlpha: 0, scale: 0.92 },
+              { y: 0, autoAlpha: 1, scale: 1, duration: 0.16, stagger: 0.035 },
+              0.66
+            );
+            tl.fromTo(
+              grillCta,
+              { autoAlpha: 0 },
+              { autoAlpha: 1, duration: 0.12 },
+              0.86
+            );
+          }
+
+          // Recompute pin spacing once the half images have laid out.
+          ScrollTrigger.refresh();
+        } else {
+          // Mobile (no pin/split): the full mural is omitted and the story
+          // gets a gentle, non-pinned fade/slide-up as it scrolls into view.
+          const textCol = q(".about-text");
+          gsap.from(textCol, {
+            opacity: 0,
+            y: 24,
+            duration: 0.7,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: textCol[0],
+              start: "top 88%",
+            },
+          });
+        }
+
+        if (!lg) {
+          // Below lg the grill grid flows statically (below the pinned stage
+          // on tablets, below the story on phones) — give it the same gentle
+          // entrance the story gets, feature card first.
+          gsap.from(grillHead, {
+            opacity: 0,
+            y: 24,
+            duration: 0.7,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: grillHead[0],
+              start: "top 88%",
+            },
+          });
+
+          gsap.from(grillDishes, {
+            opacity: 0,
+            y: 24,
+            duration: 0.6,
+            stagger: 0.08,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: grillDishes[0],
+              start: "top 90%",
+            },
+          });
+        }
       }
     );
 
@@ -211,7 +347,7 @@ export function About() {
       {/* Text — revealed in the gap on desktop with motion; flows below the
           mural on mobile and for prefers-reduced-motion (where the mural stays
           whole), so the copy is always visible. */}
-      <div className="relative z-10 px-6 pb-20 pt-8 md:pt-0 motion-safe:md:absolute motion-safe:md:inset-0 motion-safe:md:flex motion-safe:md:items-center motion-safe:md:justify-center motion-safe:md:px-6 motion-safe:md:pb-0">
+      <div className="relative z-10 px-6 pb-20 pt-8 md:pt-0 motion-safe:md:absolute motion-safe:md:inset-x-0 motion-safe:md:top-0 motion-safe:md:h-screen motion-safe:md:flex motion-safe:md:items-center motion-safe:md:justify-center motion-safe:md:px-6 motion-safe:md:pb-0">
         <div
           className="about-text mx-auto w-full text-center"
           style={{
@@ -253,6 +389,126 @@ export function About() {
             Explore our menu
             <span aria-hidden="true">→</span>
           </Link>
+        </div>
+      </div>
+
+      {/* The Grill Awaits — house favorites. At lg with motion this layer
+          shares the pinned stage with the story text: the story fades out and
+          this builds in while the mural halves keep opening until they leave
+          the viewport. Below lg (and for reduced motion) it flows statically
+          after the stage — the feature-card grid is too tall to share a
+          single pinned tablet viewport. */}
+      <div className="grill-layer relative z-10 px-6 pb-24 motion-safe:lg:absolute motion-safe:lg:inset-x-0 motion-safe:lg:top-0 motion-safe:lg:h-screen motion-safe:lg:flex motion-safe:lg:items-center motion-safe:lg:justify-center motion-safe:lg:pb-0 motion-safe:lg:pt-[var(--nav-h)]">
+        <div className="mx-auto w-full max-w-4xl text-center lg:max-w-7xl">
+          <div className="grill-head">
+            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-brand-orange">
+              House Favorites
+            </p>
+            <h2
+              id="menu-heading"
+              className="font-serif text-4xl font-light text-foreground md:text-5xl"
+            >
+              The Grill Awaits
+            </h2>
+            {/* transform-gpu: this light gray text picks up blue subpixel-AA
+                fringing on some words when rasterized in the main layer —
+                looks like link styling. Its own compositing layer rasterizes
+                with uniform grayscale AA. */}
+            <p className="mx-auto mt-3 max-w-xl transform-gpu font-sans text-base font-light text-foreground/60">
+              A taste of what&rsquo;s waiting at your table &mdash; signature
+              cuts, classics, and the banchan that brings it all together.
+            </p>
+          </div>
+          {/* Feature grid: Galbi anchors the left half at full height; the
+              other four form an equal 2x2 on the right — auto-placement fills
+              them left-to-right, top-to-bottom, and the row-span keeps the
+              feature flush with the second row's bottom edge. Tablets collapse
+              to two columns with Galbi full-width on top; phones stack
+              single-file, Galbi first. */}
+          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7">
+            {FEATURED_DISHES.map((dish, i) => {
+              const isFeature = i === 0;
+              const span = isFeature ? "sm:col-span-2 lg:row-span-2" : "";
+              return (
+                <div
+                  key={dish.name}
+                  className={`grill-dish group h-full will-change-transform ${span}`}
+                >
+                  <div className="flex h-full flex-col bg-white p-5 text-left shadow-[0_2px_16px_rgba(120,60,20,0.08)] transition-shadow duration-300 hover:shadow-[0_6px_24px_rgba(120,60,20,0.14)]">
+                    {/* Feature photo stretches to fill the two-row card; the
+                        others crop slightly wider at lg so both grid rows plus
+                        the header and CTA share one pinned viewport. */}
+                    <div
+                      className={`relative w-full overflow-hidden bg-neutral-100 ${
+                        isFeature
+                          ? "aspect-[16/9] lg:aspect-auto lg:min-h-0 lg:flex-1"
+                          : "aspect-[16/9] lg:aspect-[2/1]"
+                      }`}
+                    >
+                      <Image
+                        src={dish.image}
+                        alt={dish.name}
+                        fill
+                        className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                        sizes={
+                          isFeature
+                            ? "(max-width: 1023px) 100vw, 50vw"
+                            : "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 25vw"
+                        }
+                      />
+                      {dish.tag && (
+                        <span className="absolute left-2 top-2 z-10 bg-brand-orange px-2 py-1 font-sans text-[10px] font-medium uppercase tracking-widest text-white">
+                          {dish.tag}
+                        </span>
+                      )}
+                    </div>
+                    <h3
+                      className={`mt-3 font-serif font-light text-foreground ${
+                        isFeature ? "text-lg lg:text-2xl" : "text-lg"
+                      }`}
+                    >
+                      {dish.name}{" "}
+                      {dish.spicy && (
+                        <span
+                          role="img"
+                          aria-label="Spicy"
+                          title="Spicy"
+                          className="mr-1 align-middle text-sm"
+                        >
+                          🌶️
+                        </span>
+                      )}
+                      <span className="font-sans text-sm font-light text-foreground/40">
+                        {dish.korean}
+                      </span>
+                    </h3>
+                    {/* The pinned stage is exactly one viewport tall, so on
+                        short desktop screens the description is the line that
+                        gets cut — drop it there rather than clipping the CTA
+                        below the fold. The feature card keeps its description:
+                        its flexible photo absorbs the height instead. */}
+                    <p
+                      className={`mt-1 font-sans text-sm font-light leading-snug text-foreground/60 ${
+                        isFeature
+                          ? ""
+                          : "motion-safe:lg:[@media(max-height:840px)]:hidden"
+                      }`}
+                    >
+                      {dish.description}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="grill-cta mt-6">
+            <Link
+              href="/menu"
+              className="relative isolate inline-flex overflow-hidden rounded-full border border-brand-orange px-8 py-3 font-sans text-sm font-medium text-brand-orange transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-brand-orange before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
+            >
+              View Full Menu
+            </Link>
+          </div>
         </div>
       </div>
     </section>
