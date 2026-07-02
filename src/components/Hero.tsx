@@ -30,13 +30,6 @@ export function Hero() {
         aria-hidden="true"
       />
 
-      {/* A slim bottom edge softens the video into the page; the bulk of the
-          dissolve now lives on the mural below (see About). */}
-      <div
-        className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent to-white"
-        aria-hidden="true"
-      />
-
       {/* Content */}
       <div className="relative z-10 mx-auto max-w-5xl px-6 text-center text-white">
         <motion.p

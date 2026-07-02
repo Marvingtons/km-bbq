@@ -95,19 +95,19 @@ export function About() {
           },
         });
 
-        // PHASE 1 (progress 0 -> 0.42): fire ignites down the existing steel
+        // PHASE 1 (progress 0 -> 0.22): fire ignites down the existing steel
         // line, top -> bottom, mural still closed.
-        tl.fromTo(fireLines, { scaleY: 0 }, { scaleY: 1, duration: 0.42 }, 0);
+        tl.fromTo(fireLines, { scaleY: 0 }, { scaleY: 1, duration: 0.22 }, 0);
 
-        // PHASE 2 (0.42 -> 1.0): halves slide to 36% open; each carries its
+        // PHASE 2 (0.22 -> 1.0): halves slide to 36% open; each carries its
         // line segment along its inner edge. xPercent is relative to the half's
         // own width (50% of the stage), so -36% / +36% opens a centered gap of
         // ~36% of the stage while leaving mural bands framing each side.
-        tl.to(leftHalf, { xPercent: -36, duration: 0.58 }, 0.42);
-        tl.to(rightHalf, { xPercent: 36, duration: 0.58 }, 0.42);
+        tl.to(leftHalf, { xPercent: -36, duration: 0.78 }, 0.22);
+        tl.to(rightHalf, { xPercent: 36, duration: 0.78 }, 0.22);
 
-        // Text: start ~10% into phase 2, fully visible by ~70% of it.
-        tl.to(textCol, { opacity: 1, scale: 1, duration: 0.35 }, 0.48);
+        // Text: start ~10% into phase 2, fully visible by ~60% of it.
+        tl.to(textCol, { opacity: 1, scale: 1, duration: 0.4 }, 0.3);
 
         // Recompute pin spacing once the half images have laid out.
         ScrollTrigger.refresh();
@@ -205,13 +205,6 @@ export function About() {
             <div className="mural-line-fire" style={{ ...fireLineStyle, left: -2 }} />
           </div>
 
-          {/* Top edge fades the mural up out of the page — this carries the bulk
-              of the hero→mural dissolve so it reads as fading INTO the mural
-              rather than out of the video above. */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 z-30 h-40 bg-gradient-to-b from-white to-transparent"
-          />
         </div>
       </div>
 
