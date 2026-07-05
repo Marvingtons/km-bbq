@@ -230,9 +230,9 @@ export function Challenge() {
             </div>
 
             {/* The red button — the only start/stop control, built like the
-                arcade dome by the door: a red dome mounted on a black plate
-                whose finish matches the clock bezel, so the two read as parts
-                of the same prop. The <button> is the whole plate (generous
+                arcade dome by the door: a red dome mounted on a circular
+                black plate whose finish matches the clock bezel, so the two
+                read as parts of the same prop. The <button> is the whole plate (generous
                 hit target), but on press only the dome sinks into it and
                 springs back with a little overshoot — the plate stays put.
                 Space/Enter work natively (real <button>), and :active gives
@@ -248,7 +248,7 @@ export function Challenge() {
                     ? "Try again"
                     : "Start the clock"
               }
-              className="group relative mt-10 flex h-32 w-32 cursor-pointer items-center justify-center rounded-[20px] border border-[#242424] sm:h-[172px] sm:w-[172px] sm:rounded-[26px]"
+              className="group relative mt-10 flex h-[104px] w-[104px] cursor-pointer items-center justify-center rounded-full border border-[#242424] sm:h-[136px] sm:w-[136px]"
               style={{
                 background: "#0c0c0c",
                 boxShadow:
