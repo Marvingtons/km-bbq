@@ -104,6 +104,22 @@ html.preloading {
   }
 }
 
+/* House Game LED clock — the colon blinks at 1Hz while the clock idles at
+   10:00, like the physical prop by the door. The unlit state drops to
+   opacity 0 so the ghost segment layer beneath shows through (a real LED
+   separator never disappears, it just goes dark). Reduced motion is handled
+   where the class is applied (motion-safe: variant), not here. */
+@keyframes led-blink {
+  0%,
+  49.9% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
 /* Lenis smooth-scroll integration. Lenis adds these classes to <html>; the
    rules let it own the scroll position cleanly. height:auto overrides the
    `h-full` on <html> so Lenis measures the full document height (correct
