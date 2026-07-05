@@ -248,7 +248,7 @@ export function Challenge() {
                     ? "Try again"
                     : "Start the clock"
               }
-              className="group relative mt-10 flex h-[104px] w-[104px] cursor-pointer items-center justify-center rounded-full border border-[#242424] sm:h-[136px] sm:w-[136px]"
+              className="group relative mt-10 flex h-[84px] w-[84px] cursor-pointer items-center justify-center rounded-full border border-[#242424] sm:h-[108px] sm:w-[108px]"
               style={{
                 background: "#0c0c0c",
                 boxShadow:
@@ -258,7 +258,7 @@ export function Challenge() {
               {/* dome assembly, centered on the plate */}
               <span
                 aria-hidden="true"
-                className="relative block h-20 w-20 sm:h-[108px] sm:w-[108px]"
+                className="relative block h-16 w-16 sm:h-[84px] sm:w-[84px]"
               >
                 {/* base rim where the dome meets the plate; carries the
                     dome's shadow cast onto the plate, which tightens on
