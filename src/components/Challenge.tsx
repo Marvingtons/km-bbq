@@ -230,8 +230,11 @@ export function Challenge() {
             </div>
 
             {/* The red button — the only start/stop control, built like the
-                arcade dome by the door: a raised dome that sinks into its
-                darker base on press and springs back with a little overshoot.
+                arcade dome by the door: a red dome mounted on a black plate
+                whose finish matches the clock bezel, so the two read as parts
+                of the same prop. The <button> is the whole plate (generous
+                hit target), but on press only the dome sinks into it and
+                springs back with a little overshoot — the plate stays put.
                 Space/Enter work natively (real <button>), and :active gives
                 keyboard presses the same smack. */}
             <button
@@ -245,24 +248,35 @@ export function Challenge() {
                     ? "Try again"
                     : "Start the clock"
               }
-              className="group relative mt-10 h-20 w-20 cursor-pointer rounded-full sm:h-[108px] sm:w-[108px]"
+              className="group relative mt-10 flex h-32 w-32 cursor-pointer items-center justify-center rounded-[20px] border border-[#242424] sm:h-[172px] sm:w-[172px] sm:rounded-[26px]"
+              style={{
+                background: "#0c0c0c",
+                boxShadow:
+                  "inset 0 1px 0 rgba(255,255,255,0.07), inset 0 0 16px rgba(0,0,0,0.65), 0 20px 40px -20px rgba(120,60,20,0.5), 0 6px 16px -10px rgba(26,26,26,0.35)",
+              }}
             >
-              {/* base rim the dome sinks into */}
+              {/* dome assembly, centered on the plate */}
               <span
                 aria-hidden="true"
-                className="absolute inset-x-[3%] top-[12%] bottom-0 rounded-full bg-gradient-to-b from-[#8a1216] to-[#54080c] shadow-[0_16px_28px_-10px_rgba(140,25,18,0.55)] transition-shadow duration-150 group-active:shadow-[0_8px_14px_-8px_rgba(140,25,18,0.65)] motion-reduce:transition-none"
-              />
-              {/* dome */}
-              <span
-                aria-hidden="true"
-                className="absolute inset-x-0 top-0 bottom-[10%] rounded-full transition-transform duration-[180ms] ease-[cubic-bezier(0.34,1.8,0.64,1)] group-active:translate-y-1 group-active:duration-[120ms] group-active:ease-out motion-reduce:transition-none"
-                style={{
-                  background:
-                    "radial-gradient(circle at 32% 26%, #ff7a6b 0%, #f24a43 22%, #e02128 55%, #b0141b 82%, #921016 100%)",
-                  boxShadow:
-                    "inset 0 -8px 14px rgba(80,5,8,0.45), inset 0 4px 8px rgba(255,255,255,0.28)",
-                }}
-              />
+                className="relative block h-20 w-20 sm:h-[108px] sm:w-[108px]"
+              >
+                {/* base rim where the dome meets the plate; carries the
+                    dome's shadow cast onto the plate, which tightens on
+                    press while the plate holds still */}
+                <span
+                  className="absolute inset-x-[3%] top-[12%] bottom-0 block rounded-full bg-gradient-to-b from-[#8a1216] to-[#54080c] shadow-[0_14px_24px_-8px_rgba(0,0,0,0.75)] transition-shadow duration-150 group-active:shadow-[0_6px_12px_-6px_rgba(0,0,0,0.8)] motion-reduce:transition-none"
+                />
+                {/* dome */}
+                <span
+                  className="absolute inset-x-0 top-0 bottom-[10%] block rounded-full transition-transform duration-[180ms] ease-[cubic-bezier(0.34,1.8,0.64,1)] group-active:translate-y-1 group-active:duration-[120ms] group-active:ease-out motion-reduce:transition-none"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 32% 26%, #ff7a6b 0%, #f24a43 22%, #e02128 55%, #b0141b 82%, #921016 100%)",
+                    boxShadow:
+                      "inset 0 -8px 14px rgba(80,5,8,0.45), inset 0 4px 8px rgba(255,255,255,0.28)",
+                  }}
+                />
+              </span>
             </button>
 
             <span className="mt-5 block font-sans text-xs font-light text-foreground/40">
