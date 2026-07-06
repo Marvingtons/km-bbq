@@ -607,33 +607,50 @@ export default function MenuPage() {
 
             {/* Price band */}
             <div className="mx-auto mt-9 inline-flex items-stretch rounded-2xl border border-[#e4d9c4] bg-white shadow-[0_8px_30px_-18px_rgba(26,26,26,0.45)]">
-              <div className="px-8 py-5 text-center sm:px-12">
+              <div className="px-6 py-5 text-center sm:px-10">
                 <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground/45">
                   Lunch
                 </p>
                 <p className="mt-1 font-serif text-3xl font-light text-brand-red sm:text-4xl">
-                  $22.99
+                  $21.99
                 </p>
                 <p className="mt-1 font-sans text-xs font-light text-foreground/40">
                   per person
                 </p>
               </div>
               <div aria-hidden="true" className="w-px bg-[#e4d9c4]" />
-              <div className="px-8 py-5 text-center sm:px-12">
+              <div className="px-6 py-5 text-center sm:px-10">
                 <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground/45">
                   Dinner
                 </p>
                 <p className="mt-1 font-serif text-3xl font-light text-brand-red sm:text-4xl">
-                  $29.99
+                  $30.99
                 </p>
                 <p className="mt-1 font-sans text-xs font-light text-foreground/40">
                   per person
+                </p>
+              </div>
+              <div aria-hidden="true" className="w-px bg-[#e4d9c4]" />
+              <div className="px-6 py-5 text-center sm:px-10">
+                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground/45">
+                  Seating
+                </p>
+                <p className="mt-1 font-serif text-3xl font-light text-brand-blue sm:text-4xl">
+                  90 min
+                </p>
+                <p className="mt-1 font-sans text-xs font-light text-foreground/40">
+                  per table
                 </p>
               </div>
             </div>
 
             <p className="mt-6 font-sans text-sm font-light text-foreground/50">
               Walk-in only · No reservations needed
+            </p>
+            <p className="mt-2 font-sans text-sm font-light text-foreground/50">
+              Feeling lucky? Stop our clock at exactly{" "}
+              <span className="font-medium text-brand-red">10.00 seconds</span>{" "}
+              and your next barbecue is free.
             </p>
           </div>
         </section>

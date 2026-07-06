@@ -55,7 +55,6 @@ interface Dish {
   description: string;
   image: string;
   tag?: string;
-  spicy?: boolean;
 }
 
 const FEATURED_DISHES: Dish[] = [
@@ -95,9 +94,6 @@ const FEATURED_DISHES: Dish[] = [
     description:
       "House-fermented napa cabbage with gochugaru, garlic, and ginger — bold, smoky, addictive.",
     image: "/images/kimchi.png",
-    // Heat is dietary info, not curation — it renders as an inline spice
-    // indicator next to the name rather than a badge on the photo.
-    spicy: true,
   },
 ];
 
@@ -191,11 +187,16 @@ export function About() {
           tl.to(textCol, { autoAlpha: 1, scale: 1, duration: 0.16 }, 0.18);
 
           // PHASE 3 (0.52 -> 1.0): the mural keeps opening out — each half
-          // moves its full width (50% of the stage) so the art has fully
-          // left the viewport by the end of the pin. No close, one
-          // continuous motion.
-          tl.to(leftHalf, { xPercent: -100, duration: 0.48 }, 0.52);
-          tl.to(rightHalf, { xPercent: 100, duration: 0.48 }, 0.52);
+          // moves slightly past its full width so the art and its glowing
+          // seam line have fully left the viewport by the end of the pin.
+          // No close, one continuous motion.
+          // ±110 rather than ±100: the seam lines overhang each half's inner
+          // edge by ~2px and glow up to ~30px, so at exactly ±100 an orange
+          // sliver would stay pinned to the viewport edges. The extra 10% of
+          // travel (≥ ~38px at md and up) carries the line and its glow fully
+          // off-screen, and only right at the end of the pin.
+          tl.to(leftHalf, { xPercent: -110, duration: 0.48 }, 0.52);
+          tl.to(rightHalf, { xPercent: 110, duration: 0.48 }, 0.52);
           tl.to(textCol, { autoAlpha: 0, scale: 0.95, duration: 0.1 }, 0.52);
 
           if (lg) {
@@ -303,7 +304,10 @@ export function About() {
           center seam. On desktop the stage is full height (vertically centered
           art); on reduced motion it keeps the mural's natural ~2535:1240
           combined ratio inside the content column. */}
-      <div className="hidden md:block relative z-20 px-6 md:px-0 motion-safe:md:min-h-screen">
+      {/* pointer-events-none: this stage overlays the story/grill layers
+          (z-20 over z-10) and is purely decorative — without it, it swallows
+          every click meant for the buttons revealed in the gap beneath. */}
+      <div className="pointer-events-none hidden md:block relative z-20 px-6 md:px-0 motion-safe:md:min-h-screen">
         <div className="relative mx-auto aspect-[2535/1240] w-full max-w-7xl overflow-hidden md:mx-0 md:aspect-auto md:h-screen md:max-w-none">
           {/* Left half */}
           <div className="mural-half-left absolute left-0 top-0 h-full w-1/2 will-change-transform">
@@ -384,7 +388,7 @@ export function About() {
           </div>
           <Link
             href="/menu"
-            className="mt-10 inline-flex items-center gap-2 font-sans text-sm font-medium text-brand-orange transition-all hover:gap-3"
+            className="relative isolate mt-10 inline-flex items-center gap-2 overflow-hidden rounded-full border border-brand-orange px-8 py-3 font-sans text-sm font-medium text-brand-orange transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-brand-orange before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
           >
             Explore our menu
             <span aria-hidden="true">→</span>
@@ -468,16 +472,6 @@ export function About() {
                       }`}
                     >
                       {dish.name}{" "}
-                      {dish.spicy && (
-                        <span
-                          role="img"
-                          aria-label="Spicy"
-                          title="Spicy"
-                          className="mr-1 align-middle text-sm"
-                        >
-                          🌶️
-                        </span>
-                      )}
                       <span className="font-sans text-sm font-light text-foreground/40">
                         {dish.korean}
                       </span>

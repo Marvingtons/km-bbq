@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { HeroVideo } from "./HeroVideo";
 
 export function Hero() {
   return (
@@ -9,19 +10,10 @@ export function Hero() {
       className="relative flex min-h-screen items-center justify-center overflow-hidden"
       aria-label="Hero"
     >
-      {/* Background video — the file itself is trimmed to the 5s loop, so the
-          native `loop` attribute handles playback. The poster paints the first
-          frame immediately while the clip streams in. */}
-      <video
-        className="absolute inset-0 h-full w-full object-cover"
-        src="/videos/hero-grill.mp4"
-        poster="/images/hero-poster.jpg"
-        autoPlay
-        muted
-        loop
-        playsInline
-        aria-hidden="true"
-      />
+      {/* Background video — holds its first frame while the preloader is up
+          and starts the loop from the top as the overlay fades. The poster
+          paints the first frame immediately while the clip streams in. */}
+      <HeroVideo className="absolute inset-0 h-full w-full object-cover" />
 
       {/* Dark gradient overlay — the mid-band is the scrim under the subtext,
           so keep it strong enough for AA contrast over bright grill footage. */}

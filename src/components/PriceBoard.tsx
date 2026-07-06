@@ -47,7 +47,7 @@ export function PriceBoard() {
                   Lunch
                 </p>
                 <p className="mt-1 font-display text-5xl font-extrabold tracking-tight">
-                  $22.99
+                  $21.99
                 </p>
                 <p className="mt-2 text-sm font-medium text-brand-ink/70">
                   per person
@@ -58,7 +58,7 @@ export function PriceBoard() {
                   Dinner
                 </p>
                 <p className="mt-1 font-display text-5xl font-extrabold tracking-tight">
-                  $29.99
+                  $30.99
                 </p>
                 <p className="mt-2 text-sm font-medium text-brand-ink/70">
                   per person

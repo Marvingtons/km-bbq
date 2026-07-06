@@ -14,7 +14,7 @@ export function Contact() {
   return (
     <section
       id="contact"
-      className="bg-white py-28 px-6"
+      className="bg-[#F7F5F1] py-28 px-6"
       aria-labelledby="contact-heading"
     >
       <div className="mx-auto max-w-7xl">
@@ -48,7 +48,7 @@ export function Contact() {
                   {HOURS.map(({ day, time }) => (
                     <div
                       key={day}
-                      className="flex items-start justify-between border-b border-neutral-100 pb-3 font-sans text-sm"
+                      className="flex items-start justify-between border-b border-[#e3dfd6] pb-3 font-sans text-sm"
                     >
                       <dt className="text-foreground/70">{day}</dt>
                       <dd className="font-medium text-foreground">{time}</dd>
@@ -127,7 +127,7 @@ export function Contact() {
 
             {/* Map placeholder */}
             <ScrollReveal {...REVEAL} delay={0.08}>
-              <div className="aspect-video w-full overflow-hidden border border-neutral-200">
+              <div className="aspect-video w-full overflow-hidden border border-[#e3dfd6]">
                 <iframe
                   title="Map to KM BBQ Oceanside"
                   src="https://www.google.com/maps?q=2216+S+El+Camino+Real+%23108-109,+Oceanside,+CA+92054&output=embed"
