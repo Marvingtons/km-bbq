@@ -132,12 +132,6 @@ const CATEGORIES: Category[] = [
         desc: "Tender squid tossed in a spicy chili marinade with a smoky char.",
         image: "/images/spicy-squid.png",
       },
-      {
-        name: "Spicy Octopus",
-        korean: "문어",
-        desc: "Octopus in a bold chili marinade — tender with a smoky, spicy kick.",
-        image: "/images/spicy-octopus.png",
-      },
     ],
   },
   {
@@ -344,51 +338,6 @@ const PREMIUM: Item[] = [
   },
 ];
 
-const SIGNATURE: Item[] = [
-  {
-    name: "Prime New York Steak",
-    desc: "Prime-grade New York strip — full-flavored and tender.",
-    image: "/images/prime-new-york-steak.png",
-  },
-  {
-    name: "Prime Cut Steak",
-    desc: "A premium prime cut, marbled and juicy.",
-    image: "/images/prime-cut-steak.png",
-  },
-  {
-    name: "Beef Roll",
-    desc: "Thin beef rolled around a savory filling.",
-    image: "/images/beef-roll.png",
-  },
-  {
-    name: "Beef Tongue",
-    korean: "우설",
-    desc: "Delicately sliced beef tongue — a grilling delicacy.",
-    image: "/images/beef-tongue.png",
-  },
-  {
-    name: "Sliced Beef Short Plate",
-    desc: "Thinly sliced short plate, quick-searing and rich.",
-    image: "/images/sliced-beef-short-plate.png",
-  },
-  {
-    name: "Lamb Chop",
-    desc: "Bone-in lamb chop, juicy and aromatic off the charcoal.",
-    note: "Limit 2 per person",
-    image: "/images/lamb-chop.png",
-  },
-  {
-    name: "Butter Garlic Jumbo Shrimp",
-    desc: "Jumbo shrimp in rich butter and roasted garlic.",
-    image: "/images/butter-garlic-jumbo-shrimp.png",
-  },
-  {
-    name: "Miso Garlic Jumbo Shrimp",
-    desc: "Jumbo shrimp glazed with savory miso and garlic.",
-    image: "/images/miso-garlic-jumbo-shrimp.png",
-  },
-];
-
 const INCLUDED = [
   "Fresh veggies & wraps",
   "Banchan included",
@@ -583,7 +532,6 @@ const JUMP_TARGETS: JumpTarget[] = [
     id: slugify(c.name),
   })),
   { label: "Premium", id: "premium" },
-  { label: "Signature", id: "signature" },
 ];
 
 export default function MenuPage() {
@@ -702,13 +650,6 @@ export default function MenuPage() {
             blurb="A step up in cut and indulgence — included for everyone at the table."
             items={PREMIUM}
             variant="premium"
-          />
-          <TierSection
-            label="Signature"
-            title="Signature Selection"
-            blurb="Our finest cuts and specialties — the very best of the spread."
-            items={SIGNATURE}
-            variant="signature"
           />
         </div>
 

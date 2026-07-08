@@ -10,7 +10,6 @@ image slot until the file exists.
 | Menu item                | Section         | Expected file                                    |
 | ------------------------ | --------------- | ------------------------------------------------ |
 | Teriyaki Chicken         | Chicken         | `public/images/teriyaki-chicken.png`             |
-| Fresh Fish Fillet        | Seafood         | `public/images/fresh-fish-fillet.png`            |
 | Spicy Squid              | Seafood         | `public/images/spicy-squid.png`                  |
 | Fishcake                 | Banchan & Sides | `public/images/fishcake.png`                     |
 | Lamb                     | Premium         | `public/images/lamb.png`                         |

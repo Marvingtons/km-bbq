@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useSyncExternalStore } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 // The intro plays once per tab session. sessionStorage is client-only, so it
 // is read through useSyncExternalStore: the server snapshot says "already
@@ -13,6 +13,7 @@ const serverSnapshot = () => true;
 
 export function Preloader() {
   const [dismissed, setDismissed] = useState(false);
+  const reduceMotion = useReducedMotion();
   const alreadyShown = useSyncExternalStore(subscribe, wasShown, serverSnapshot);
   const visible = !alreadyShown && !dismissed;
 
@@ -61,7 +62,7 @@ export function Preloader() {
             aria-hidden="true"
           />
 
-          <div className="relative flex flex-col items-center gap-8">
+          <div className="relative flex flex-col items-center gap-6">
             {/* Badge with ember ring */}
             <div
               className="relative flex items-center justify-center"
@@ -156,21 +157,26 @@ export function Preloader() {
               </motion.svg>
             </div>
 
-            {/* Wordmark — fire climbs up and ignites the letters */}
-            <div className="relative">
-              {/* Charred base text */}
-              <p className="font-serif text-4xl font-light tracking-[0.25em] text-[#3a2415]">
-                M.BBQ
-              </p>
-              {/* Fire-filled overlay, revealed bottom-up like flame climbing */}
+            {/* Wordmark + subtitle — staggered fade-up on the badge's center
+                axis. Reduced motion skips straight to the final state. */}
+            <div className="flex flex-col items-center gap-2">
               <motion.p
-                className="absolute inset-0 bg-gradient-to-t from-[#EC2229] via-[#F18B23] to-[#EBA039] bg-clip-text font-serif text-4xl font-light tracking-[0.25em] text-transparent"
-                style={{ WebkitTextFillColor: "transparent" }}
-                initial={{ clipPath: "inset(0 0 100% 0)" }}
-                animate={{ clipPath: "inset(0 0 0% 0)" }}
+                className="font-serif text-5xl font-medium tracking-[0.06em] text-foreground"
+                initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.9, ease: "easeOut", delay: 1.0 }}
               >
-                M.BBQ
+                KM.BBQ
+              </motion.p>
+              {/* Negative margin cancels the last letter's tracking so the
+                  line optically centers under the wordmark */}
+              <motion.p
+                className="mr-[-0.35em] font-sans text-xs font-medium uppercase tracking-[0.35em] text-brand-orange-deep"
+                initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, ease: "easeOut", delay: 1.25 }}
+              >
+                Korean Barbecue
               </motion.p>
             </div>
           </div>

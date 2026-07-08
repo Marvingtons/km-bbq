@@ -8,6 +8,8 @@
 @theme inline {
   --color-brand-blue: #1A36AF;
   --color-brand-orange: #F18B23;
+  /* Dark gold for small text on cream — brand-orange itself fails AA there. */
+  --color-brand-orange-deep: #9A5A1A;
   --color-brand-red: #EC2229;
   --color-brand-pink: #ED397D;
   --color-brand-cream: #FAF4EC;
