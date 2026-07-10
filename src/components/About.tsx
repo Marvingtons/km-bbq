@@ -331,8 +331,8 @@ function MuralStory() {
                 touches.
               </p>
               <p>
-                This is not fast food. This is slow fire, shared plates, and the
-                kind of meal you remember.
+                Pull up a chair, fire up the grill, and take your time. Shared
+                plates, second helpings, and the kind of meal you linger over.
               </p>
             </div>
 

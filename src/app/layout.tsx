@@ -22,7 +22,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "KM.BBQ — Korean BBQ",
   description:
-    "KM.BBQ — an elevated Korean BBQ dining experience. Premium meats, live-fire grills, and warm hospitality.",
+    "All-you-can-eat, self-serve Korean BBQ in Oceanside, CA. Grill it yourself over live charcoal — beef, pork, seafood, banchan and free ice cream, all one price.",
   keywords: ["Korean BBQ", "KM BBQ", "KBBQ", "restaurant"],
 };
 
