@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 // Absolute hrefs so the footer works from any route — section links return to
 // the home page (and scroll to the section), and "Menu" goes to the full menu
 // page. From the home page the section hrefs simply update the hash and scroll.
@@ -73,42 +71,47 @@ export function Footer() {
 
   return (
     <footer
-      className="relative overflow-hidden bg-foreground px-6 py-20 text-white/60"
+      className="relative overflow-hidden bg-charcoal px-6 py-20 text-white/60"
       role="contentinfo"
     >
       {/* Top accent line */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-orange/60 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ember/60 to-transparent"
       />
 
       {/* Ambient warm glow for depth */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-brand-orange/10 blur-[120px]"
+        className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-ember/10 blur-[120px]"
+      />
+
+      {/* Faint warm wash — keeps the dark footer cozy, lit at top & base, never a cold slab */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ember/8 via-transparent to-ember/5"
       />
 
       <div className="relative mx-auto max-w-7xl">
         <div className="grid gap-12 md:grid-cols-12 md:gap-8">
           {/* Brand */}
           <div className="md:col-span-5">
-            <Image
-              src="/logos/km-bbq-logo.svg"
-              alt="KM.BBQ logo"
-              width={150}
-              height={36}
-              className="opacity-90"
-            />
+            {/* Serif wordmark variant — the ember period is the single accent,
+                on-brand with the token palette (the old blue/pink badge SVG
+                predates the rebrand). */}
+            <p className="font-serif text-3xl font-medium tracking-[0.04em] text-white">
+              KM<span className="text-ember">.</span>BBQ
+            </p>
             <p className="mt-5 max-w-xs font-sans text-sm font-light leading-relaxed text-white/50">
               Premium Korean BBQ · Oceanside, CA
             </p>
             <a
               href="tel:+17604331888"
-              className="group mt-5 inline-flex items-center gap-2 font-serif text-2xl text-white/90 transition-colors hover:text-brand-orange"
+              className="group mt-5 inline-flex items-center gap-2 font-serif text-2xl text-white/90 transition-colors hover:text-ember"
             >
               <span
                 aria-hidden="true"
-                className="text-brand-orange transition-transform duration-300 group-hover:scale-110"
+                className="text-ember transition-transform duration-300 group-hover:scale-110"
               >
                 ☎
               </span>
@@ -126,11 +129,11 @@ export function Footer() {
                 <li key={label}>
                   <a
                     href={href}
-                    className="group inline-flex items-center font-sans text-sm text-white/70 transition-colors hover:text-white"
+                    className="group inline-flex items-center font-sans text-sm text-white/70 transition-colors hover:text-ember"
                   >
                     <span
                       aria-hidden="true"
-                      className="mr-0 h-px w-0 bg-brand-orange transition-all duration-300 group-hover:mr-2 group-hover:w-4"
+                      className="mr-0 h-px w-0 bg-ember transition-all duration-300 group-hover:mr-2 group-hover:w-4"
                     />
                     {label}
                   </a>
@@ -150,7 +153,7 @@ export function Footer() {
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/60 transition-all duration-300 hover:-translate-y-1 hover:border-brand-orange/60 hover:bg-brand-orange/10 hover:text-brand-orange hover:shadow-[0_8px_24px_-8px] hover:shadow-brand-orange/40"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/60 transition-all duration-300 hover:-translate-y-1 hover:border-ember/60 hover:bg-ember/10 hover:text-ember hover:shadow-[0_8px_24px_-8px] hover:shadow-ember/40"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -166,10 +169,10 @@ export function Footer() {
             &copy; {year} KM.BBQ. All rights reserved.
           </p>
           <div className="flex items-center gap-6 font-sans text-xs text-white/30">
-            <a href="/privacy" className="hover:text-white/60 transition-colors">
+            <a href="/privacy" className="transition-colors hover:text-ember">
               Privacy Policy
             </a>
-            <a href="/terms" className="hover:text-white/60 transition-colors">
+            <a href="/terms" className="transition-colors hover:text-ember">
               Terms of Service
             </a>
             <span aria-hidden="true" className="text-white/15">|</span>
@@ -177,7 +180,7 @@ export function Footer() {
               href="https://norvix.ai/"
               target="_blank"
               rel="noopener noreferrer"
-              className="transition-colors hover:text-brand-orange"
+              className="transition-colors hover:text-ember"
             >
               Crafted by Norvix
             </a>

@@ -87,7 +87,7 @@ export function Navbar() {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         solid
-          ? "bg-brand-cream/90 backdrop-blur-md border-b border-black/[0.06] shadow-[0_1px_24px_-12px_rgba(26,26,26,0.35)]"
+          ? "bg-cream/90 backdrop-blur-md border-b border-black/[0.06] shadow-[0_1px_24px_-12px_rgba(26,26,26,0.35)]"
           : "bg-transparent"
       }`}
     >
@@ -120,8 +120,8 @@ export function Navbar() {
                   style={{
                     color: onLight
                       ? isActive
-                        ? "#1A36AF"
-                        : "#2a2a2a"
+                        ? "var(--color-ember-deep)"
+                        : "var(--color-ink)"
                       : isActive
                         ? "#ffffff"
                         : "rgba(255,255,255,0.82)",
@@ -135,7 +135,7 @@ export function Navbar() {
                     }`}
                     style={{
                       width: "100%",
-                      backgroundColor: onLight ? "#1A36AF" : "#F18B23",
+                      backgroundColor: "var(--color-ember)",
                     }}
                   />
                 </Link>
@@ -155,17 +155,17 @@ export function Navbar() {
           <motion.span
             className="block h-0.5 w-6 rounded-full"
             animate={menuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
-            style={{ backgroundColor: onLight ? "#1a1a1a" : "#ffffff" }}
+            style={{ backgroundColor: onLight ? "var(--color-ink)" : "#ffffff" }}
           />
           <motion.span
             className="block h-0.5 w-4 rounded-full"
             animate={menuOpen ? { opacity: 0 } : { opacity: 1 }}
-            style={{ backgroundColor: onLight ? "#1a1a1a" : "#ffffff" }}
+            style={{ backgroundColor: onLight ? "var(--color-ink)" : "#ffffff" }}
           />
           <motion.span
             className="block h-0.5 w-6 rounded-full"
             animate={menuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
-            style={{ backgroundColor: onLight ? "#1a1a1a" : "#ffffff" }}
+            style={{ backgroundColor: onLight ? "var(--color-ink)" : "#ffffff" }}
           />
         </button>
       </nav>
@@ -182,7 +182,7 @@ export function Navbar() {
         {menuOpen && (
           <motion.div
             id="mobile-menu"
-            className="fixed inset-0 z-40 flex flex-col bg-brand-cream px-9 pt-28 lg:hidden"
+            className="fixed inset-0 z-40 flex flex-col bg-cream px-9 pt-28 lg:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -207,11 +207,11 @@ export function Navbar() {
                       onClick={() => setMenuOpen(false)}
                       aria-current={isActive ? "page" : undefined}
                       className="group relative inline-block text-sm font-medium uppercase tracking-[0.18em] transition-colors duration-300"
-                      style={{ color: isActive ? "#1A36AF" : "#2a2a2a" }}
+                      style={{ color: isActive ? "var(--color-ember-deep)" : "var(--color-ink)" }}
                     >
                       {link.label}
                       <span
-                        className={`pointer-events-none absolute -bottom-1 left-0 h-px w-full origin-left bg-brand-blue transition-transform duration-[250ms] ease-out group-hover:scale-x-100 ${
+                        className={`pointer-events-none absolute -bottom-1 left-0 h-px w-full origin-left bg-ember transition-transform duration-[250ms] ease-out group-hover:scale-x-100 ${
                           isActive ? "scale-x-100" : "scale-x-0"
                         }`}
                       />

@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollReveal } from "./ScrollReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -101,6 +102,26 @@ export function Gallery() {
           },
         });
 
+        // One-time staggered fade-up of the tiles as the section first
+        // scrolls into view. It animates each tile's autoAlpha + y —
+        // DIFFERENT properties and targets than the pin (which animates `x`
+        // on the parent track) — so the two timelines compose without
+        // fighting. `once` means it never re-hides tiles on scroll-back, and
+        // living inside this matchMedia means the mobile / reduced-motion
+        // branch never runs it (tiles render fully visible there).
+        gsap.from(tiles, {
+          autoAlpha: 0,
+          y: 24,
+          stagger: 0.08,
+          duration: 0.5,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 80%",
+            once: true,
+          },
+        });
+
         // Row width depends on the (async) image layout — measure once it lands.
         ScrollTrigger.refresh();
       }
@@ -126,32 +147,35 @@ export function Gallery() {
       id="gallery"
       aria-labelledby="gallery-heading"
       // overflow-hidden keeps the horizontal motion inside the section — the
-      // page itself never scrolls sideways at any width. The warm cream base
-      // (#FAF4EC) sits under the faded ink-wash background so it reads on a
-      // consistent tone.
-      className="relative overflow-hidden py-20 motion-safe:md:py-0"
-      style={{ backgroundColor: "#FAF4EC" }}
+      // page itself never scrolls sideways at any width. The unified cream base
+      // sits under the faded ink-wash so it reads on a consistent tone.
+      className="relative overflow-hidden bg-cream py-20 motion-safe:md:py-0"
     >
-      {/* Ink-wash atmosphere — lowest layer (z-0), behind the photos and
-          heading. Faded to 60% so it reads as backdrop while the food photos
-          (which sit at z-10) stay the clear focus. The art is a wide panoramic,
-          so on desktop (md+) we use `cover` to fill the full-screen pinned
-          section edge-to-edge with no letterboxing; on narrow/mobile screens
-          `contain` keeps the whole wide composition visible. Either way any
-          space the art doesn't reach is the section's matching cream base
-          (#FAF4EC), so there's no visible seam. The section's overflow-hidden
-          means it never adds a sideways scrollbar. */}
+      {/* Ink-wash atmosphere — a SUPPORTING TEXTURE, not a wall. `multiply`
+          drops the art's white field so only the ink mountains, the grey
+          cloud/smoke, the ember sun and the gold line remain, and opacity is
+          dialed right down so it reads as a faint atmosphere behind the photos
+          rather than competing with them. A warm `sepia`+`hue-rotate` filter
+          pulls the cool grey ink toward the mural's warm brown so it belongs to
+          the same hand-drawn world instead of reading as a third art style.
+          The art is a wide panoramic: `cover` fills the full-screen pinned
+          section on desktop, `contain` keeps the whole composition on mobile.
+          The section's overflow-hidden means it never adds a sideways
+          scrollbar. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0 bg-contain bg-center bg-no-repeat opacity-60 md:bg-cover"
-        style={{ backgroundImage: "url(/images/gallery-bg.png)" }}
+        className="pointer-events-none absolute inset-0 z-0 bg-contain bg-center bg-no-repeat opacity-[0.16] mix-blend-multiply md:bg-cover"
+        style={{
+          backgroundImage: "url(/images/gallery-bg.png)",
+          filter: "sepia(0.4) saturate(1.15) hue-rotate(-12deg)",
+        }}
       />
 
       <div className="relative z-10 flex flex-col gap-10 motion-safe:md:h-screen motion-safe:md:flex-row motion-safe:md:items-center motion-safe:md:gap-0">
         {/* Heading — the fixed anchor. Sits centered on the left while the
             photos stream past on desktop; flows on top on mobile. */}
-        <div className="shrink-0 px-6 text-center motion-safe:md:w-[32%] motion-safe:md:px-12 motion-safe:md:text-left">
-          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-brand-orange">
+        <ScrollReveal className="shrink-0 px-6 text-center motion-safe:md:w-[32%] motion-safe:md:px-12 motion-safe:md:text-left">
+          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember">
             Gallery
           </p>
           <h2
@@ -164,11 +188,11 @@ export function Gallery() {
             href="https://www.instagram.com/kmkoreanbbq/"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-8 inline-block font-sans text-sm font-medium text-brand-pink underline-offset-4 hover:underline"
+            className="mt-8 inline-block font-sans text-sm font-medium text-ember-deep underline-offset-4 hover:underline"
           >
             Follow us on Instagram →
           </a>
-        </div>
+        </ScrollReveal>
 
         {/* Photo row. On desktop the GSAP timeline translates this track; on
             mobile / reduced motion the wrapper is a native snap carousel. */}
@@ -177,7 +201,7 @@ export function Gallery() {
             {GALLERY_ITEMS.map((item) => (
               <figure
                 key={item.id}
-                className="gallery-tile group relative h-[52vh] shrink-0 snap-start overflow-hidden rounded-xl bg-neutral-200 shadow-[0_18px_56px_-12px_rgba(0,0,0,0.62)] motion-safe:md:h-[60vh]"
+                className="gallery-tile group relative h-[52vh] shrink-0 snap-start overflow-hidden rounded-card bg-cream-deep shadow-card motion-safe:md:h-[60vh]"
                 style={{ aspectRatio: String(item.ratio) }}
               >
                 <Image
@@ -185,8 +209,15 @@ export function Gallery() {
                   alt={item.alt}
                   fill
                   sizes="(max-width: 768px) 70vw, 40vw"
-                  className="object-cover"
+                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
                   onLoad={refresh}
+                />
+                {/* Warm ember wash on hover — a subtle glow via `multiply`
+                    (not a heavy tint). Sits above the image but below the
+                    caption so the label stays legible. */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 bg-ember opacity-0 mix-blend-multiply transition-opacity duration-500 group-hover:opacity-15"
                 />
                 {/* Caption: dark bottom gradient + small letter-spaced label.
                     Visible per-tile on mobile; on desktop it starts hidden and
@@ -216,7 +247,7 @@ export function Gallery() {
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="gallery-swipe-hint h-4 w-4 text-brand-orange"
+            className="gallery-swipe-hint h-4 w-4 text-ember"
           >
             <path d="M5 12h14M13 6l6 6-6 6" />
           </svg>

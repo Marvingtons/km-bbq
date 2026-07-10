@@ -36,7 +36,7 @@ export default function RootLayout({
       lang="en"
       className={`${cormorant.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-brand-cream text-foreground">
+      <body className="min-h-full bg-cream text-foreground">
         <Preloader />
         <SmoothScroll>{children}</SmoothScroll>
       </body>

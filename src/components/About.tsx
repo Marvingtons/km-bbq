@@ -8,46 +8,47 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Shared geometry for the seam lines. Two identical segments overlap at the
-// seam at rest (looking like one line); each rides its half's inner edge
-// outward during the split because it is a child of that half.
-const lineBase: React.CSSProperties = {
-  position: "absolute",
-  top: 0,
-  bottom: 0,
-  borderRadius: 2,
-  transformOrigin: "top center",
-  pointerEvents: "none",
-};
+/* ===========================================================================
+   ABOUT — the hand-drawn brand MURAL, brought to life
+   ---------------------------------------------------------------------------
+   The full-color mural is KM.BBQ's signature. Two illustrated clusters
+   (mural-left / mural-right) frame the story copy; a faint doodle-scatter
+   sits behind. Three depth planes drift at DIFFERENT scroll speeds so the
+   flat art reads as a living scene:
 
-// Brushed-steel line — always present in the mural (the pre-existing seam).
-const steelLineStyle: React.CSSProperties = {
-  ...lineBase,
-  width: 3,
-  background:
-    "linear-gradient(180deg, #4a4a4e 0%, #6f6f74 30%, #9a9aa0 50%, #6f6f74 70%, #4a4a4e 100%)",
-  boxShadow: "0 0 5px rgba(140,140,150,.55), 0 0 10px rgba(140,140,150,.3)",
-  zIndex: 10,
-};
+     • scatter  (deepest)  → drifts SLOW      (.mural-scatter, parallax y ±30)
+     • copy     (middle)   → drifts a touch   (.mural-copy-parallax, y ±14)
+     • clusters (front)    → drift FAST        (.mural-cluster-*, y ±80/100, +x)
 
-// Fire overlay — sits exactly on top of the steel line and "ignites" it from
-// top to bottom on scroll. Hidden by default (scaleY 0); the fallback / reduced
-// motion state simply shows the cool steel line beneath.
-const fireLineStyle: React.CSSProperties = {
-  ...lineBase,
-  // Ignite from the top of the bar downward when this screen comes into view.
-  transformOrigin: "top center",
-  width: 4,
-  background:
-    "linear-gradient(180deg, #fff7cc 0%, #ffd24a 16%, #ff9c1f 42%, #ff5a1f 68%, #d11e0c 100%)",
-  boxShadow:
-    "0 0 6px rgba(255,170,50,.95), 0 0 16px rgba(255,90,20,.7), 0 0 30px rgba(255,60,10,.45)",
-  transform: "scaleY(0)",
-  // Hint the compositor: this line is animated (scaleY) on scrub, so keep it
-  // on its own GPU layer to avoid layout-driven jank during the ignite.
-  willChange: "transform",
-  zIndex: 11,
-};
+   The illustration PNGs have WHITE backgrounds; `mix-blend-multiply` drops the
+   white onto the cream page so only the art remains. Each cluster settles +
+   fades in on scroll (staggered), then breathes with a gentle idle bob.
+
+   Motion contract (holds 60fps): scrubbed parallax and idle motion only ever
+   touch `transform`/`opacity`, on SEPARATE nested layers (outer = parallax y,
+   inner = entrance, img = idle bob) so nothing fights for the same property.
+   Reduced motion / no-JS render the finished, static mural with the copy fully
+   legible — the whole GSAP block lives inside a `no-preference` matchMedia.
+   =========================================================================== */
+
+// Faint background doodle-scatter — the mural's own folk-doodle vocabulary
+// (dots + brush ticks) as the deepest, slowest parallax plane. Fixed values so
+// the SSR and client renders match; each mark wanders on its own idle drift.
+const SCATTER = [
+  { l: 20, t: 24, s: 9, c: "ember", o: 0.5, dx: 14, dy: -10, dur: 12, dl: 0 },
+  { l: 72, t: 20, s: 6, c: "warm", o: 0.4, dx: -12, dy: 9, dur: 13, dl: 1.4 },
+  { l: 15, t: 62, s: 7, c: "ember", o: 0.42, dx: 9, dy: 12, dur: 14, dl: 0.7 },
+  { l: 80, t: 66, s: 5, c: "warm", o: 0.4, dx: -10, dy: -8, dur: 12.5, dl: 2.1 },
+  { l: 34, t: 82, s: 6, c: "ember", o: 0.38, dx: 11, dy: 9, dur: 15, dl: 1.1 },
+  { l: 63, t: 80, s: 5, c: "ember", o: 0.4, dx: -8, dy: 11, dur: 13.5, dl: 0.4 },
+] as const;
+
+// A couple of thin brush ticks, same deep plane — a nod to the mural's ink
+// strokes without competing with the copy.
+const TICKS = [
+  { l: 26, t: 40, w: 34, rot: -22, o: 0.28 },
+  { l: 70, t: 52, w: 28, rot: 16, o: 0.26 },
+] as const;
 
 interface Dish {
   name: string;
@@ -98,184 +99,86 @@ const FEATURED_DISHES: Dish[] = [
 ];
 
 export function About() {
+  return (
+    <>
+      <MuralStory />
+      <HouseFavorites />
+    </>
+  );
+}
+
+/* ---------------------------------------------------------------------------
+   MURAL STORY — the warm, full-color brand band
+   --------------------------------------------------------------------------- */
+function MuralStory() {
   const sectionRef = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
     const mm = gsap.matchMedia();
-    const q = gsap.utils.selector(sectionRef);
+    const q = gsap.utils.selector(el);
 
-    // One conditions-based block because the breakpoints differ per concern:
-    // the mural pin + story reveal runs from md up, but the grill grid only
-    // joins the pinned overlay at lg — its feature-card layout is too tall
-    // for a single pinned tablet viewport, so tablets flow it statically
-    // below the stage instead. prefers-reduced-motion falls through to the
-    // default CSS state (full seamless mural, all copy visible, no pin).
-    mm.add(
-      {
-        md: "(min-width: 768px)",
-        lg: "(min-width: 1024px)",
-        motion: "(prefers-reduced-motion: no-preference)",
-      },
-      (context) => {
-        const { md, lg, motion } = context.conditions as {
-          md: boolean;
-          lg: boolean;
-          motion: boolean;
-        };
-        if (!motion) return;
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      const enter = q(".mural-enter");
+      const marks = q(".mural-mark");
+      const copyIn = q(".mural-copy-in");
 
-        const grillHead = q(".grill-head");
-        const grillDishes = q(".grill-dish");
+      // Animated start state — clusters pushed down + shrunk, marks + copy
+      // hidden. Applied in useLayoutEffect (pre-paint) so there's no flash.
+      gsap.set(enter, { autoAlpha: 0, yPercent: 6, scale: 0.965 });
+      gsap.set(marks, { autoAlpha: 0 });
+      gsap.set(copyIn, { autoAlpha: 0, y: 22 });
 
-        if (md) {
-          const fireLines = q(".mural-line-fire");
-          const leftHalf = q(".mural-half-left");
-          const rightHalf = q(".mural-half-right");
-          const textCol = q(".about-text");
-          const grillLayer = q(".grill-layer");
-          const grillCta = q(".grill-cta");
+      // Staggered settle-in on scroll-into-view: copy first, the faint scatter
+      // blooms in, then the two clusters arrive one after the other.
+      const tlIn = gsap.timeline({
+        scrollTrigger: { trigger: el, start: "top 72%", once: true },
+      });
+      tlIn
+        .to(copyIn, { autoAlpha: 1, y: 0, duration: 0.7, ease: "power2.out" })
+        .to(marks, { autoAlpha: 1, duration: 0.6, stagger: 0.05 }, 0.1)
+        .to(
+          enter,
+          {
+            autoAlpha: 1,
+            yPercent: 0,
+            scale: 1,
+            duration: 0.85,
+            ease: "power3.out",
+            stagger: 0.16,
+          },
+          0.08
+        );
 
-          // Animated start state: steel line already showing (its default),
-          // fire not yet ignited, mural closed, story hidden. autoAlpha
-          // (opacity + visibility) so a hidden layer never intercepts clicks
-          // meant for the visible one — on lg the two layers overlap
-          // absolutely in the stage.
-          gsap.set(fireLines, { scaleY: 0, transformOrigin: "top center" });
-          gsap.set(leftHalf, { xPercent: 0 });
-          gsap.set(rightHalf, { xPercent: 0 });
-          gsap.set(textCol, { autoAlpha: 0, scale: 0.92 });
-          if (lg) gsap.set(grillLayer, { autoAlpha: 0 });
+      // Scrubbed parallax — one plane per depth, different travel = different
+      // speed. `ease: none` + scrub ties travel to scroll position. These write
+      // transform on the OUTER wrappers only; entrance/idle live on inner layers.
+      const scrub = (
+        targets: Element[],
+        from: gsap.TweenVars,
+        to: gsap.TweenVars
+      ) =>
+        gsap.fromTo(targets, from, {
+          ...to,
+          ease: "none",
+          scrollTrigger: {
+            trigger: el,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        });
 
-          const tl = gsap.timeline({
-            defaults: { ease: "none" },
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top top",
-              // Longer pin than the single-open version: the timeline now
-              // plays ignite -> open to the story -> open fully while the
-              // featured cuts build in, so each phase keeps roughly the same
-              // scroll distance per move as before.
-              end: "+=260%",
-              pin: true,
-              pinSpacing: true,
-              // Switch to position:fixed one tick early so the browser
-              // doesn't show a one-frame compositing jump (the mural
-              // appearing to nudge sideways) at the instant the pin engages.
-              anticipatePin: 1,
-              // Numeric scrub adds a ~0.8s catch-up so the timeline eases
-              // toward the scroll position instead of snapping to it
-              // frame-for-frame. This is what makes the mural open/ignite
-              // feel smooth rather than stepping in hard chunks with each
-              // wheel/trackpad notch.
-              scrub: 0.8,
-              invalidateOnRefresh: true,
-            },
-          });
+      scrub(q(".mural-scatter"), { y: -30 }, { y: 30 });
+      scrub(q(".mural-copy-parallax"), { y: -14 }, { y: 14 });
+      scrub(q(".mural-cluster-left"), { y: -74, x: -8 }, { y: 74, x: 8 });
+      scrub(q(".mural-cluster-right"), { y: -98, x: 8 }, { y: 98, x: -8 });
+    });
 
-          // PHASE 1 (progress 0 -> 0.13): fire ignites down the existing
-          // steel line, top -> bottom, mural still closed.
-          tl.fromTo(fireLines, { scaleY: 0 }, { scaleY: 1, duration: 0.13 }, 0);
-
-          // PHASE 2 (0.13 -> 0.40): halves slide to 36% open; each carries
-          // its line segment along its inner edge. xPercent is relative to
-          // the half's own width (50% of the stage), so -36% / +36% opens a
-          // centered gap of ~36% of the stage while leaving mural bands
-          // framing each side. The story fades in and gets a beat of
-          // stillness (0.40 -> 0.52) to read.
-          tl.to(leftHalf, { xPercent: -36, duration: 0.27 }, 0.13);
-          tl.to(rightHalf, { xPercent: 36, duration: 0.27 }, 0.13);
-          tl.to(textCol, { autoAlpha: 1, scale: 1, duration: 0.16 }, 0.18);
-
-          // PHASE 3 (0.52 -> 1.0): the mural keeps opening out — each half
-          // moves slightly past its full width so the art and its glowing
-          // seam line have fully left the viewport by the end of the pin.
-          // No close, one continuous motion.
-          // ±110 rather than ±100: the seam lines overhang each half's inner
-          // edge by ~2px and glow up to ~30px, so at exactly ±100 an orange
-          // sliver would stay pinned to the viewport edges. The extra 10% of
-          // travel (≥ ~38px at md and up) carries the line and its glow fully
-          // off-screen, and only right at the end of the pin.
-          tl.to(leftHalf, { xPercent: -110, duration: 0.48 }, 0.52);
-          tl.to(rightHalf, { xPercent: 110, duration: 0.48 }, 0.52);
-          tl.to(textCol, { autoAlpha: 0, scale: 0.95, duration: 0.1 }, 0.52);
-
-          if (lg) {
-            // The story hands the stage to the featured cuts: the Grill
-            // Awaits layer builds in the widening gap — heading first, then
-            // the feature card leads the photo stagger, CTA last.
-            tl.to(grillLayer, { autoAlpha: 1, duration: 0.04 }, 0.6);
-            tl.fromTo(
-              grillHead,
-              { y: 40, autoAlpha: 0 },
-              { y: 0, autoAlpha: 1, duration: 0.16 },
-              0.6
-            );
-            tl.fromTo(
-              grillDishes,
-              { y: 70, autoAlpha: 0, scale: 0.92 },
-              { y: 0, autoAlpha: 1, scale: 1, duration: 0.16, stagger: 0.035 },
-              0.66
-            );
-            tl.fromTo(
-              grillCta,
-              { autoAlpha: 0 },
-              { autoAlpha: 1, duration: 0.12 },
-              0.86
-            );
-          }
-
-          // Recompute pin spacing once the half images have laid out.
-          ScrollTrigger.refresh();
-        } else {
-          // Mobile (no pin/split): the full mural is omitted and the story
-          // gets a gentle, non-pinned fade/slide-up as it scrolls into view.
-          const textCol = q(".about-text");
-          gsap.from(textCol, {
-            opacity: 0,
-            y: 24,
-            duration: 0.7,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: textCol[0],
-              start: "top 88%",
-            },
-          });
-        }
-
-        if (!lg) {
-          // Below lg the grill grid flows statically (below the pinned stage
-          // on tablets, below the story on phones) — give it the same gentle
-          // entrance the story gets, feature card first.
-          gsap.from(grillHead, {
-            opacity: 0,
-            y: 24,
-            duration: 0.7,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: grillHead[0],
-              start: "top 88%",
-            },
-          });
-
-          gsap.from(grillDishes, {
-            opacity: 0,
-            y: 24,
-            duration: 0.6,
-            stagger: 0.08,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: grillDishes[0],
-              start: "top 90%",
-            },
-          });
-        }
-      }
-    );
-
-    // Re-measure pin start/end once async content settles. The mural <img>s
-    // already call refresh on load, but fonts and the final window load can
-    // also shift layout; measuring against stale sizes is what makes the pin
-    // jump on the first scroll instead of scrubbing from the right spot.
+    // Re-measure once fonts/images settle so parallax ranges line up.
     const refreshST = () => ScrollTrigger.refresh();
     window.addEventListener("load", refreshST);
     document.fonts?.ready.then(refreshST);
@@ -286,223 +189,290 @@ export function About() {
     };
   }, []);
 
-  const refresh = () => ScrollTrigger.refresh();
-
   return (
     <section
       ref={sectionRef}
       id="about"
       aria-labelledby="about-heading"
-      className="relative overflow-hidden bg-white"
-      style={{ ["--nav-h" as string]: "68px" } as React.CSSProperties}
+      className="relative isolate overflow-hidden bg-cream scroll-mt-20"
     >
-      {/* Mural stage (>= md only — hidden on mobile, where it's omitted
-          entirely). The halves are `object-contain` everywhere so the whole
-          illustration is always shown — nothing is cropped. The art sits on a
-          white field that blends into this section's white background, so the
-          contain letterboxing is invisible and the two halves meet flush at the
-          center seam. On desktop the stage is full height (vertically centered
-          art); on reduced motion it keeps the mural's natural ~2535:1240
-          combined ratio inside the content column. */}
-      {/* pointer-events-none: this stage overlays the story/grill layers
-          (z-20 over z-10) and is purely decorative — without it, it swallows
-          every click meant for the buttons revealed in the gap beneath. */}
-      <div className="pointer-events-none hidden md:block relative z-20 px-6 md:px-0 motion-safe:md:min-h-screen">
-        <div className="relative mx-auto aspect-[2535/1240] w-full max-w-7xl overflow-hidden md:mx-0 md:aspect-auto md:h-screen md:max-w-none">
-          {/* Left half */}
-          <div className="mural-half-left absolute left-0 top-0 h-full w-1/2 will-change-transform">
+      <div className="relative flex min-h-[42rem] items-center justify-center px-6 py-section md:min-h-[46rem]">
+        {/* ---- SCATTER (z-0, deepest / slowest) ------------------------- */}
+        <div
+          className="mural-scatter pointer-events-none absolute inset-0 z-0"
+          aria-hidden="true"
+        >
+          {SCATTER.map((m, i) => (
+            <span
+              key={`d${i}`}
+              className="mural-mark mural-drift absolute block rounded-full"
+              style={
+                {
+                  left: `${m.l}%`,
+                  top: `${m.t}%`,
+                  width: m.s,
+                  height: m.s,
+                  opacity: m.o,
+                  background:
+                    m.c === "ember"
+                      ? "var(--color-ember)"
+                      : "var(--color-warm-muted)",
+                  "--dx": `${m.dx}px`,
+                  "--dy": `${m.dy}px`,
+                  "--drift-dur": `${m.dur}s`,
+                  "--drift-delay": `${m.dl}s`,
+                } as React.CSSProperties
+              }
+            />
+          ))}
+          {TICKS.map((t, i) => (
+            <span
+              key={`t${i}`}
+              className="mural-mark mural-drift absolute block h-[3px] rounded-full"
+              style={
+                {
+                  left: `${t.l}%`,
+                  top: `${t.t}%`,
+                  width: t.w,
+                  opacity: t.o,
+                  background: "var(--color-ember)",
+                  transform: `rotate(${t.rot}deg)`,
+                  "--dx": "8px",
+                  "--dy": "-6px",
+                  "--drift-dur": "16s",
+                  "--drift-delay": `${i * 1.3}s`,
+                } as React.CSSProperties
+              }
+            />
+          ))}
+        </div>
+
+        {/* ---- CLUSTERS (z-10, front / fastest) ------------------------- */}
+        {/* Left cluster — tiger, drummer, hanok, stews. mix-blend-multiply
+            drops the PNG's white field onto the cream page. Outer wrapper =
+            parallax; inner = entrance; img = idle bob. */}
+        <div className="mural-cluster-left pointer-events-none absolute inset-y-0 -left-[5%] z-10 w-[56%] max-w-[540px] mix-blend-multiply sm:w-[46%] md:w-[39%]">
+          <div className="mural-enter absolute inset-0 flex items-center">
             <Image
               src="/images/mural-left.png"
               alt=""
               aria-hidden="true"
-              fill
-              sizes="50vw"
-              draggable={false}
-              onLoad={refresh}
-              className="select-none object-contain object-right"
+              width={886}
+              height={886}
+              className="mural-bob h-auto w-full object-contain"
+              style={{ "--bob": "-10px", "--bob-dur": "7s" } as React.CSSProperties}
+              sizes="(max-width: 768px) 56vw, 39vw"
             />
-            {/* seam line glued to this half's inner (right) edge: steel always
-                visible, fire overlay ignites on scroll */}
-            <div className="mural-line-steel" style={{ ...steelLineStyle, right: -1.5 }} />
-            <div className="mural-line-fire" style={{ ...fireLineStyle, right: -2 }} />
           </div>
+        </div>
 
-          {/* Right half */}
-          <div className="mural-half-right absolute right-0 top-0 h-full w-1/2 will-change-transform">
+        {/* Right cluster — grill, mask, the fire mascot, soju, pine. */}
+        <div className="mural-cluster-right pointer-events-none absolute inset-y-0 -right-[5%] z-10 w-[56%] max-w-[540px] mix-blend-multiply sm:w-[46%] md:w-[39%]">
+          <div className="mural-enter absolute inset-0 flex items-center">
             <Image
               src="/images/mural-right.png"
               alt=""
               aria-hidden="true"
-              fill
-              sizes="50vw"
-              draggable={false}
-              onLoad={refresh}
-              className="select-none object-contain object-left"
+              width={886}
+              height={886}
+              className="mural-bob h-auto w-full object-contain"
+              style={
+                { "--bob": "-13px", "--bob-dur": "8.5s", "--bob-delay": "0.6s" } as React.CSSProperties
+              }
+              sizes="(max-width: 768px) 56vw, 39vw"
             />
-            {/* seam line glued to this half's inner (left) edge: steel always
-                visible, fire overlay ignites on scroll */}
-            <div className="mural-line-steel" style={{ ...steelLineStyle, left: -1.5 }} />
-            <div className="mural-line-fire" style={{ ...fireLineStyle, left: -2 }} />
           </div>
-
         </div>
-      </div>
 
-      {/* Text — revealed in the gap on desktop with motion; flows below the
-          mural on mobile and for prefers-reduced-motion (where the mural stays
-          whole), so the copy is always visible. */}
-      <div className="relative z-10 px-6 pb-20 pt-8 md:pt-0 motion-safe:md:absolute motion-safe:md:inset-x-0 motion-safe:md:top-0 motion-safe:md:h-screen motion-safe:md:flex motion-safe:md:items-center motion-safe:md:justify-center motion-safe:md:px-6 motion-safe:md:pb-0">
+        {/* ---- EDGE FADES — melt the mural band's top & bottom into the page
+            cream so it reads as art emerging from the page, not a rectangle. */}
         <div
-          className="about-text mx-auto w-full text-center"
-          style={{
-            maxWidth: "min(90%, 34rem)",
-            background: "transparent",
-            padding: "2.5rem 1.5rem",
-          }}
-        >
-          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-brand-orange">
-            Our Story
-          </p>
-          <h2
-            id="about-heading"
-            className="font-serif text-4xl font-light leading-snug text-foreground md:text-5xl"
-          >
-            A Tradition{" "}
-            <em className="italic text-brand-blue">Born in Fire</em>
-          </h2>
-          <div className="mt-8 space-y-5 font-sans text-sm font-light leading-relaxed text-foreground/80">
-            <p>
-              KM.BBQ was born from a simple obsession: the perfect bite. We bring
-              the warmth of Korean family grilling to every table — live charcoal,
-              hand-trimmed cuts, and banchan made fresh daily.
-            </p>
-            <p>
-              We source our meats from trusted partners, choosing quality over
-              convenience. Every cut is marinated in-house using recipes passed
-              down through generations, balanced with our own modern touches.
-            </p>
-            <p>
-              This is not fast food. This is slow fire, shared plates, and the
-              kind of meal you remember.
-            </p>
-          </div>
-          <Link
-            href="/menu"
-            className="relative isolate mt-10 inline-flex items-center gap-2 overflow-hidden rounded-full border border-brand-orange px-8 py-3 font-sans text-sm font-medium text-brand-orange transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-brand-orange before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
-          >
-            Explore our menu
-            <span aria-hidden="true">→</span>
-          </Link>
-        </div>
-      </div>
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 z-[12] h-20 bg-gradient-to-b from-cream to-transparent"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[12] h-20 bg-gradient-to-t from-cream to-transparent"
+        />
 
-      {/* The Grill Awaits — house favorites. At lg with motion this layer
-          shares the pinned stage with the story text: the story fades out and
-          this builds in while the mural halves keep opening until they leave
-          the viewport. Below lg (and for reduced motion) it flows statically
-          after the stage — the feature-card grid is too tall to share a
-          single pinned tablet viewport. */}
-      <div className="grill-layer relative z-10 px-6 pb-24 motion-safe:lg:absolute motion-safe:lg:inset-x-0 motion-safe:lg:top-0 motion-safe:lg:h-screen motion-safe:lg:flex motion-safe:lg:items-center motion-safe:lg:justify-center motion-safe:lg:pb-0 motion-safe:lg:pt-[var(--nav-h)]">
-        <div className="mx-auto w-full max-w-4xl text-center lg:max-w-7xl">
-          <div className="grill-head">
-            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-brand-orange">
-              House Favorites
+        {/* ---- COPY (z-20, middle) — a soft cream field carves a clean, empty
+            reading column out of the busy mural (the composition wants an empty
+            centre); the art stays rich at the edges and frames the story. --- */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 top-1/2 z-[15] h-[32rem] w-[48rem] max-w-[94vw] -translate-x-1/2 -translate-y-1/2"
+          style={{
+            background:
+              "radial-gradient(58% 52% at 50% 50%, var(--color-cream) 0%, var(--color-cream) 54%, color-mix(in srgb, var(--color-cream) 80%, transparent) 72%, transparent 100%)",
+          }}
+        />
+        <div className="mural-copy-parallax relative z-20 mx-auto w-full max-w-[34rem] px-2 text-center">
+          <div className="mural-copy-in">
+            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.32em] text-ember">
+              Our Story
             </p>
             <h2
-              id="menu-heading"
-              className="font-serif text-4xl font-light text-foreground md:text-5xl"
+              id="about-heading"
+              className="font-serif text-4xl font-light leading-[1.12] text-ink sm:text-5xl md:text-[3.4rem]"
             >
-              The Grill Awaits
+              A Tradition{" "}
+              <em className="italic text-ember">Born in Fire</em>
             </h2>
-            {/* transform-gpu: this light gray text picks up blue subpixel-AA
-                fringing on some words when rasterized in the main layer —
-                looks like link styling. Its own compositing layer rasterizes
-                with uniform grayscale AA. */}
-            <p className="mx-auto mt-3 max-w-xl transform-gpu font-sans text-base font-light text-foreground/60">
-              A taste of what&rsquo;s waiting at your table &mdash; signature
-              cuts, classics, and the banchan that brings it all together.
-            </p>
-          </div>
-          {/* Feature grid: Galbi anchors the left half at full height; the
-              other four form an equal 2x2 on the right — auto-placement fills
-              them left-to-right, top-to-bottom, and the row-span keeps the
-              feature flush with the second row's bottom edge. Tablets collapse
-              to two columns with Galbi full-width on top; phones stack
-              single-file, Galbi first. */}
-          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7">
-            {FEATURED_DISHES.map((dish, i) => {
-              const isFeature = i === 0;
-              const span = isFeature ? "sm:col-span-2 lg:row-span-2" : "";
-              return (
-                <div
-                  key={dish.name}
-                  className={`grill-dish group h-full will-change-transform ${span}`}
-                >
-                  <div className="flex h-full flex-col bg-white p-5 text-left shadow-[0_2px_16px_rgba(120,60,20,0.08)] transition-shadow duration-300 hover:shadow-[0_6px_24px_rgba(120,60,20,0.14)]">
-                    {/* Feature photo stretches to fill the two-row card; the
-                        others crop slightly wider at lg so both grid rows plus
-                        the header and CTA share one pinned viewport. */}
-                    <div
-                      className={`relative w-full overflow-hidden bg-neutral-100 ${
-                        isFeature
-                          ? "aspect-[16/9] lg:aspect-auto lg:min-h-0 lg:flex-1"
-                          : "aspect-[16/9] lg:aspect-[2/1]"
-                      }`}
-                    >
-                      <Image
-                        src={dish.image}
-                        alt={dish.name}
-                        fill
-                        className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-                        sizes={
-                          isFeature
-                            ? "(max-width: 1023px) 100vw, 50vw"
-                            : "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 25vw"
-                        }
-                      />
-                      {dish.tag && (
-                        <span className="absolute left-2 top-2 z-10 bg-brand-orange px-2 py-1 font-sans text-[10px] font-medium uppercase tracking-widest text-white">
-                          {dish.tag}
-                        </span>
-                      )}
-                    </div>
-                    <h3
-                      className={`mt-3 font-serif font-light text-foreground ${
-                        isFeature ? "text-lg lg:text-2xl" : "text-lg"
-                      }`}
-                    >
-                      {dish.name}{" "}
-                      <span className="font-sans text-sm font-light text-foreground/40">
-                        {dish.korean}
-                      </span>
-                    </h3>
-                    {/* The pinned stage is exactly one viewport tall, so on
-                        short desktop screens the description is the line that
-                        gets cut — drop it there rather than clipping the CTA
-                        below the fold. The feature card keeps its description:
-                        its flexible photo absorbs the height instead. */}
-                    <p
-                      className={`mt-1 font-sans text-sm font-light leading-snug text-foreground/60 ${
-                        isFeature
-                          ? ""
-                          : "motion-safe:lg:[@media(max-height:840px)]:hidden"
-                      }`}
-                    >
-                      {dish.description}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <div className="grill-cta mt-6">
+            <div className="mt-7 space-y-5 font-sans text-sm font-light leading-relaxed text-warm sm:text-base">
+              <p>
+                KM.BBQ was born from a simple obsession: the perfect bite. We
+                bring the warmth of Korean family grilling to every table — live
+                charcoal, hand-trimmed cuts, and banchan made fresh daily.
+              </p>
+              <p>
+                We source our meats from trusted partners, choosing quality over
+                convenience. Every cut is marinated in-house using recipes
+                passed down through generations, balanced with our own modern
+                touches.
+              </p>
+              <p>
+                This is not fast food. This is slow fire, shared plates, and the
+                kind of meal you remember.
+              </p>
+            </div>
+
             <Link
               href="/menu"
-              className="relative isolate inline-flex overflow-hidden rounded-full border border-brand-orange px-8 py-3 font-sans text-sm font-medium text-brand-orange transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-brand-orange before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
+              className="relative isolate mt-9 inline-flex items-center gap-2 overflow-hidden rounded-full border border-ember px-8 py-3 font-sans text-sm font-medium text-ember transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
             >
-              View Full Menu
+              Explore our menu
+              <span aria-hidden="true">→</span>
             </Link>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------------------------------------------------------------------
+   HOUSE FAVORITES — warm cream cards, staggered reveal
+   --------------------------------------------------------------------------- */
+function HouseFavorites() {
+  const ref = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const mm = gsap.matchMedia();
+    const q = gsap.utils.selector(el);
+
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      const head = q(".grill-head");
+      const dishes = q(".grill-dish");
+
+      gsap.from(head, {
+        opacity: 0,
+        y: 24,
+        duration: 0.7,
+        ease: "power2.out",
+        scrollTrigger: { trigger: head[0], start: "top 88%" },
+      });
+      gsap.from(dishes, {
+        opacity: 0,
+        y: 24,
+        duration: 0.6,
+        stagger: 0.08,
+        ease: "power2.out",
+        scrollTrigger: { trigger: dishes[0], start: "top 90%" },
+      });
+    });
+
+    return () => mm.revert();
+  }, []);
+
+  return (
+    <section
+      ref={ref}
+      aria-labelledby="favorites-heading"
+      className="relative bg-cream-deep px-6 py-section"
+    >
+      <div className="mx-auto w-full max-w-4xl text-center lg:max-w-7xl">
+        <div className="grill-head">
+          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember">
+            House Favorites
+          </p>
+          <h2
+            id="favorites-heading"
+            className="font-serif text-4xl font-light text-ink md:text-5xl"
+          >
+            The Grill Awaits
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl transform-gpu font-sans text-base font-light text-warm">
+            A taste of what&rsquo;s waiting at your table &mdash; signature
+            cuts, classics, and the banchan that brings it all together.
+          </p>
+        </div>
+
+        {/* Galbi anchors the left column at full height; the other four form an
+            equal 2x2 on the right. Tablets: two columns, Galbi full-width on
+            top. Phones: single file, Galbi first. */}
+        <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7">
+          {FEATURED_DISHES.map((dish, i) => {
+            const isFeature = i === 0;
+            const span = isFeature ? "sm:col-span-2 lg:row-span-2" : "";
+            return (
+              <div
+                key={dish.name}
+                className={`grill-dish group h-full will-change-transform ${span}`}
+              >
+                <div className="flex h-full flex-col rounded-card bg-cream p-5 text-left shadow-card transition-[transform,box-shadow] duration-300 transform-gpu hover:-translate-y-1">
+                  <div
+                    className={`relative w-full overflow-hidden rounded-card bg-cream-deep ${
+                      isFeature
+                        ? "aspect-[16/9] lg:aspect-auto lg:min-h-0 lg:flex-1"
+                        : "aspect-[16/9] lg:aspect-[2/1]"
+                    }`}
+                  >
+                    <Image
+                      src={dish.image}
+                      alt={dish.name}
+                      fill
+                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
+                      sizes={
+                        isFeature
+                          ? "(max-width: 1023px) 100vw, 50vw"
+                          : "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 25vw"
+                      }
+                    />
+                    {dish.tag && (
+                      <span className="absolute left-2.5 top-2.5 z-10 inline-flex items-center rounded-full bg-ember px-2.5 py-1 font-sans text-[10px] font-semibold uppercase tracking-[0.12em] text-white">
+                        {dish.tag}
+                      </span>
+                    )}
+                  </div>
+                  <h3
+                    className={`mt-3 font-serif font-light text-ink ${
+                      isFeature ? "text-lg lg:text-2xl" : "text-lg"
+                    }`}
+                  >
+                    {dish.name}{" "}
+                    <span className="font-sans text-sm font-light text-warm-muted">
+                      {dish.korean}
+                    </span>
+                  </h3>
+                  <p className="mt-1 font-sans text-sm font-light leading-snug text-warm">
+                    {dish.description}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-8">
+          <Link
+            href="/menu"
+            className="relative isolate inline-flex overflow-hidden rounded-full border border-ember px-8 py-3 font-sans text-sm font-medium text-ember transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
+          >
+            View Full Menu
+          </Link>
         </div>
       </div>
     </section>

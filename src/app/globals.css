@@ -1,22 +1,67 @@
 @import "tailwindcss";
 
+/* ===========================================================================
+   DESIGN TOKENS — single source of truth
+   ---------------------------------------------------------------------------
+   Direction: cinematic premium. Charcoal/near-black surfaces + warm cream,
+   ONE ember accent, warm-gray text, one radius, one shadow, one section
+   rhythm. Every section pulls from these; nothing hard-codes a hex.
+   =========================================================================== */
+
 :root {
-  --background: #FAF4EC;
-  --foreground: #1a1a1a;
+  /* Page defaults: warm cream base, warm near-black ink (not neutral #1a1a1a,
+     so the /70 /60 /40 text opacities used across the site read as warm
+     grays automatically). */
+  --background: #faf6ef; /* cream */
+  --foreground: #241c16; /* warm near-black ink */
 }
 
 @theme inline {
-  --color-brand-blue: #1A36AF;
-  --color-brand-orange: #F18B23;
-  /* Dark gold for small text on cream — brand-orange itself fails AA there. */
-  --color-brand-orange-deep: #9A5A1A;
-  --color-brand-red: #EC2229;
-  --color-brand-pink: #ED397D;
-  --color-brand-cream: #FAF4EC;
+  /* ---- Surfaces --------------------------------------------------------- */
+  --color-charcoal: #1a1512;          /* primary dark surface: hero scrim, footer, feature moments */
+  --color-charcoal-elevated: #241d18; /* raised dark surface: cards/props on charcoal */
+  --color-cream: #faf6ef;             /* primary light surface / page base */
+  --color-cream-deep: #f2ebdd;        /* alternating light section / recessed field */
+
+  /* ---- Accent — the ONE accent ----------------------------------------- */
+  --color-ember: #e0662b;             /* ember-orange: the single accent, everywhere */
+  --color-ember-deep: #a8481c;        /* darker ember — AA-safe for small text / links on cream */
+
+  /* ---- Text (warm grays) ------------------------------------------------ */
+  --color-ink: #241c16;               /* strong text / headings on cream (the "charcoal" ink) */
+  --color-warm: #5c5148;              /* body text on cream (warm gray) */
+  --color-warm-muted: #8a7d6f;        /* muted / secondary text on cream (warm gray) */
+  --color-body: #5c5148;              /* canonical body-copy token — alias of --color-warm, named
+                                         per the brand spec. Use `text-body` for paragraph copy so
+                                         it never rides on an alpha of --foreground (which fringes
+                                         under Windows ClearType and reads as a multi-color tint). */
+
+  /* ---- One-of primitives ------------------------------------------------ */
+  --radius-card: 0.875rem;            /* the single card/container radius — friendly & rounded to
+                                         suit the warm, playful direction (pills stay pills) */
+  --shadow-card: 0 16px 40px -20px rgba(74, 44, 22, 0.42); /* the single elevation shadow — warm,
+                                         soft, tinted toward ember-brown, never neutral black */
+  --spacing-section: 7rem;            /* the single section vertical rhythm (py-section) */
+
+  /* ---- Type ------------------------------------------------------------- */
+  --font-serif: var(--font-cormorant), Georgia, serif; /* editorial display */
+  --font-sans: var(--font-inter), system-ui, sans-serif; /* body */
+
+  /* ---- Semantic bg/fg --------------------------------------------------- */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-serif: var(--font-cormorant), Georgia, serif;
-  --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  /* ---- Legacy aliases --------------------------------------------------- */
+  /* Older, un-imported components (Highlights, HowItWorks, Visit, …) still
+     reference brand-* class names. Repoint them onto the new palette so any
+     straggler resolves on-brand instead of reintroducing a competing hue.
+     Live components are migrated to the semantic tokens above. */
+  --color-brand-cream: var(--color-cream);
+  --color-brand-orange: var(--color-ember);
+  --color-brand-orange-deep: var(--color-ember-deep);
+  --color-brand-blue: var(--color-ink);
+  --color-brand-red: var(--color-ember);
+  --color-brand-pink: var(--color-ember);
 }
 
 html {
@@ -40,7 +85,7 @@ body {
    pages and the charcoal footer; the offset keeps it clear of tight pills
    and underlined nav links. */
 :focus-visible {
-  outline: 2px solid var(--color-brand-orange);
+  outline: 2px solid var(--color-ember);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -58,23 +103,25 @@ body {
 ::-webkit-scrollbar-track,
 ::-webkit-scrollbar-track-piece,
 ::-webkit-scrollbar-corner {
-  background: #2a2a2e;
+  background: var(--color-charcoal-elevated);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #6f6a64;
+  /* Mid warm-gray between --color-warm and --color-warm-muted; no exact token
+     for a 5px thumb, kept literal on purpose. */
+  background: #6f665c;
   border-radius: 10px;
   transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #5c574f;
+  background: var(--color-warm);
 }
 
 /* Firefox fallback (no webkit pseudo-elements). */
 html {
   scrollbar-width: thin;
-  scrollbar-color: #6f6a64 #2a2a2e;
+  scrollbar-color: #6f665c var(--color-charcoal-elevated);
 }
 
 /* Hide scrollbar during preloader */
@@ -102,6 +149,87 @@ html.preloading {
 
 @media (prefers-reduced-motion: reduce) {
   .gallery-swipe-hint {
+    animation: none;
+  }
+}
+
+/* Hero scroll cue — an ember tick travels down the hairline rail (h-10 = 40px)
+   and fades at each end, a quiet "there's more below" that loops. The track
+   clips it (overflow-hidden), so reduced-motion just parks it at the top. */
+@keyframes hero-scroll-cue {
+  0% {
+    transform: translateX(-50%) translateY(-10px);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) translateY(40px);
+    opacity: 0;
+  }
+}
+
+.hero-scroll-cue {
+  animation: hero-scroll-cue 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-scroll-cue {
+    animation: none;
+    transform: translateX(-50%);
+  }
+}
+
+/* About MURAL idle motion — the hand-drawn brand mural breathes at rest so it
+   never feels like a flat sticker. These run on INNER layers only; the OUTER
+   cluster wrappers carry the scroll-driven parallax (GSAP writes their
+   transform), so idle + parallax never fight over the same property.
+
+   mural-bob: a gentle vertical float with an optional micro-tilt — used on the
+   playful foreground characters (the fire mascot, the tiger). Each instance
+   sets its own --bob / --tilt / duration / delay inline so nothing marches in
+   lockstep. Transform-only, compositor-friendly. */
+@keyframes mural-bob {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, var(--bob, -8px), 0) rotate(var(--tilt, 0deg));
+  }
+}
+
+.mural-bob {
+  animation: mural-bob var(--bob-dur, 6s) ease-in-out infinite;
+  animation-delay: var(--bob-delay, 0s);
+  will-change: transform;
+}
+
+/* mural-drift: a slow 2-axis wander for the faint BACKGROUND scatter marks, so
+   the deepest parallax plane shimmers almost imperceptibly. */
+@keyframes mural-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(var(--dx, 10px), var(--dy, -6px), 0);
+  }
+}
+
+.mural-drift {
+  animation: mural-drift var(--drift-dur, 12s) ease-in-out infinite;
+  animation-delay: var(--drift-delay, 0s);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mural-bob,
+  .mural-drift {
     animation: none;
   }
 }

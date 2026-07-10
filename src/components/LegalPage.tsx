@@ -15,7 +15,7 @@ export function LegalPage({
   return (
     <>
       <Navbar />
-      <main className="bg-brand-cream px-6 pt-32 pb-24 sm:pt-36">
+      <main className="bg-cream px-6 pt-32 pb-24 sm:pt-36">
         <article className="mx-auto max-w-2xl">
           <h1 className="font-serif text-4xl font-light leading-tight text-foreground sm:text-5xl">
             {title}

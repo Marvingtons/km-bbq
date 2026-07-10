@@ -1,4 +1,5 @@
 import { ScrollReveal } from "./ScrollReveal";
+import { ContactMap } from "./ContactMap";
 
 const HOURS = [
   { day: "Sunday – Thursday", time: "12:00 PM – 9:30 PM" },
@@ -14,13 +15,13 @@ export function Contact() {
   return (
     <section
       id="contact"
-      className="bg-[#F7F5F1] py-28 px-6"
+      className="bg-cream-deep py-section px-6"
       aria-labelledby="contact-heading"
     >
       <div className="mx-auto max-w-7xl">
         <div className="mb-16 text-center">
           <ScrollReveal {...REVEAL}>
-            <p className="mb-4 font-sans text-xs font-medium tracking-[0.3em] uppercase text-brand-orange">
+            <p className="mb-4 font-sans text-xs font-medium tracking-[0.3em] uppercase text-ember">
               Find Us
             </p>
           </ScrollReveal>
@@ -35,22 +36,23 @@ export function Contact() {
           </ScrollReveal>
         </div>
 
-        <div className="mx-auto max-w-2xl">
-          {/* Info */}
-          <div className="space-y-12">
+        <div className="mx-auto max-w-5xl">
+          {/* Hours + Location share one card grid: matched padding, the locked
+              radius and elevation shadow. Stacks on mobile, two-up on desktop. */}
+          <div className="grid gap-6 md:grid-cols-2">
             {/* Hours */}
             <ScrollReveal {...REVEAL}>
-              <div>
-                <h3 className="font-serif text-2xl font-light text-foreground mb-5">
+              <div className="flex h-full flex-col rounded-card bg-cream p-6 shadow-card transform-gpu">
+                <h3 className="mb-5 font-serif text-2xl font-light text-foreground">
                   Hours
                 </h3>
                 <dl className="space-y-3">
                   {HOURS.map(({ day, time }) => (
                     <div
                       key={day}
-                      className="flex items-start justify-between border-b border-[#e3dfd6] pb-3 font-sans text-sm"
+                      className="flex items-start justify-between border-b border-ink/10 pb-3 font-sans text-sm"
                     >
-                      <dt className="text-foreground/70">{day}</dt>
+                      <dt className="text-warm">{day}</dt>
                       <dd className="font-medium text-foreground">{time}</dd>
                     </div>
                   ))}
@@ -58,33 +60,33 @@ export function Contact() {
               </div>
             </ScrollReveal>
 
-            {/* Address */}
+            {/* Location */}
             <ScrollReveal {...REVEAL} delay={0.05}>
-              <div>
-                <h3 className="font-serif text-2xl font-light text-foreground mb-4">
+              <div className="flex h-full flex-col rounded-card bg-cream p-6 shadow-card transform-gpu">
+                <h3 className="mb-4 font-serif text-2xl font-light text-foreground">
                   Location
                 </h3>
-                <address className="not-italic font-sans text-sm font-light leading-relaxed text-foreground/70">
+                <address className="not-italic font-sans text-sm leading-relaxed text-warm">
                   2216 S El Camino Real #108–109
                   <br />
                   Oceanside, CA 92054
                   <br />
                   <a
                     href="tel:+17604331888"
-                    className="mt-2 inline-block text-brand-orange hover:underline underline-offset-4"
+                    className="mt-2 inline-block text-ember-deep underline-offset-4 transition-colors hover:text-ember hover:underline"
                   >
                     (760) 433-1888
                   </a>
                 </address>
 
                 {/* Socials */}
-                <div className="mt-6 flex items-center gap-4">
+                <div className="mt-auto flex items-center gap-4 pt-6">
                   <a
                     href="https://www.instagram.com/kmkoreanbbq/"
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="KM BBQ on Instagram"
-                    className="text-foreground/60 transition-colors hover:text-brand-orange"
+                    className="text-warm-muted transition-colors hover:text-ember"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -108,7 +110,7 @@ export function Contact() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="KM BBQ on TikTok"
-                    className="text-foreground/60 transition-colors hover:text-brand-orange"
+                    className="text-warm-muted transition-colors hover:text-ember"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -124,21 +126,15 @@ export function Contact() {
                 </div>
               </div>
             </ScrollReveal>
-
-            {/* Map placeholder */}
-            <ScrollReveal {...REVEAL} delay={0.08}>
-              <div className="aspect-video w-full overflow-hidden border border-[#e3dfd6]">
-                <iframe
-                  title="Map to KM BBQ Oceanside"
-                  src="https://www.google.com/maps?q=2216+S+El+Camino+Real+%23108-109,+Oceanside,+CA+92054&output=embed"
-                  className="h-full w-full border-0"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  allowFullScreen
-                />
-              </div>
-            </ScrollReveal>
           </div>
+
+          {/* Map — brand-styled (warm cream/charcoal, ember pin) in its own
+              card, sharing the locked radius and shadow. */}
+          <ScrollReveal {...REVEAL} delay={0.08}>
+            <div className="mt-6 aspect-video w-full overflow-hidden rounded-card border border-ink/10 shadow-card">
+              <ContactMap />
+            </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>
