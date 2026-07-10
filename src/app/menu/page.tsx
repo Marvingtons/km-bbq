@@ -430,7 +430,7 @@ function ItemCard({
           {item.name}
         </h3>
         {item.korean && (
-          <p className="font-sans text-sm font-light text-foreground/40">
+          <p className="font-sans text-sm font-light text-warm-muted">
             {item.korean}
           </p>
         )}
@@ -456,12 +456,12 @@ function CategorySection({ category }: { category: Category }) {
             {category.name}
           </h2>
           {category.korean && (
-            <span className="font-sans text-base font-light text-foreground/40">
+            <span className="font-sans text-base font-light text-warm-muted">
               {category.korean}
             </span>
           )}
           {category.tag && (
-            <span className="ml-auto font-sans text-xs font-medium uppercase tracking-[0.2em] text-ember">
+            <span className="ml-auto font-sans text-xs font-medium uppercase tracking-[0.2em] text-ember-deep">
               {category.tag}
             </span>
           )}
@@ -497,8 +497,9 @@ function TierSection({
     variant === "premium"
       ? "border-ember/25 bg-cream"
       : "border-ember/20 bg-cream";
-  const labelColor =
-    variant === "premium" ? "text-ember" : "text-ember";
+  // ember-deep, not ember: this is small uppercase label text on cream, where
+  // plain ember only reaches 3.19:1 (below AA for normal text).
+  const labelColor = "text-ember-deep";
 
   return (
     <section
@@ -515,7 +516,7 @@ function TierSection({
           <h2 className="font-serif text-3xl font-light text-foreground md:text-4xl">
             {title}
             {korean && (
-              <span className="ml-3 align-middle font-sans text-base font-light text-foreground/40">
+              <span className="ml-3 align-middle font-sans text-base font-light text-warm-muted">
                 {korean}
               </span>
             )}
@@ -556,7 +557,7 @@ export default function MenuPage() {
         {/* Header */}
         <section className="px-6 pt-32 pb-12 sm:pt-36 lg:pt-40">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="mb-5 font-sans text-xs font-semibold uppercase tracking-[0.3em] text-ember">
+            <p className="mb-5 font-sans text-xs font-semibold uppercase tracking-[0.3em] text-ember-deep">
               All-You-Can-Eat · Self-Serve · Charcoal
             </p>
             <h1 className="font-serif text-5xl font-light leading-tight text-foreground sm:text-6xl">
@@ -570,37 +571,37 @@ export default function MenuPage() {
             {/* Price band */}
             <div className="mx-auto mt-9 inline-flex items-stretch rounded-card border border-ink/10 bg-cream shadow-card">
               <div className="px-6 py-5 text-center sm:px-10">
-                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground/45">
+                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-warm-muted">
                   Lunch
                 </p>
                 <p className="mt-1 font-serif text-3xl font-light text-ember sm:text-4xl">
                   $21.99
                 </p>
-                <p className="mt-1 font-sans text-xs font-light text-foreground/40">
+                <p className="mt-1 font-sans text-xs font-light text-warm-muted">
                   per person
                 </p>
               </div>
               <div aria-hidden="true" className="w-px bg-ink/10" />
               <div className="px-6 py-5 text-center sm:px-10">
-                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground/45">
+                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-warm-muted">
                   Dinner
                 </p>
                 <p className="mt-1 font-serif text-3xl font-light text-ember sm:text-4xl">
                   $30.99
                 </p>
-                <p className="mt-1 font-sans text-xs font-light text-foreground/40">
+                <p className="mt-1 font-sans text-xs font-light text-warm-muted">
                   per person
                 </p>
               </div>
               <div aria-hidden="true" className="w-px bg-ink/10" />
               <div className="px-6 py-5 text-center sm:px-10">
-                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground/45">
+                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-warm-muted">
                   Seating
                 </p>
                 <p className="mt-1 font-serif text-3xl font-light text-ember sm:text-4xl">
                   90 min
                 </p>
-                <p className="mt-1 font-sans text-xs font-light text-foreground/40">
+                <p className="mt-1 font-sans text-xs font-light text-warm-muted">
                   per table
                 </p>
               </div>
@@ -620,7 +621,7 @@ export default function MenuPage() {
         {/* Included strip — hairline dividers, no box */}
         <section className="px-6 pb-4">
           <div className="mx-auto max-w-4xl text-center">
-            <p className="mb-4 font-sans text-[11px] font-medium uppercase tracking-[0.25em] text-foreground/40">
+            <p className="mb-4 font-sans text-[11px] font-medium uppercase tracking-[0.25em] text-warm-muted">
               Included with every meal
             </p>
             <ul
@@ -675,7 +676,7 @@ export default function MenuPage() {
             </h2>
             <div className="mt-12 grid gap-10 sm:grid-cols-3">
               <div>
-                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ember">
+                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ember-deep">
                   Hours
                 </h3>
                 <p className="mt-4 font-sans text-sm font-light leading-relaxed text-warm">
@@ -685,7 +686,7 @@ export default function MenuPage() {
                 </p>
               </div>
               <div>
-                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ember">
+                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ember-deep">
                   Location
                 </h3>
                 <p className="mt-4 font-sans text-sm font-light leading-relaxed text-warm">
@@ -695,7 +696,7 @@ export default function MenuPage() {
                 </p>
               </div>
               <div>
-                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ember">
+                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ember-deep">
                   Walk-In
                 </h3>
                 <p className="mt-4 font-sans text-sm font-light leading-relaxed text-warm">
@@ -703,7 +704,7 @@ export default function MenuPage() {
                   <br />
                   <a
                     href="tel:+17604331888"
-                    className="font-medium text-ember-deep transition-colors hover:text-ember"
+                    className="font-medium text-ember-deep underline-offset-4 hover:underline"
                   >
                     (760) 433-1888
                   </a>

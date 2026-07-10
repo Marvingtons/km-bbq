@@ -121,7 +121,7 @@ export function Footer() {
 
           {/* Navigation */}
           <nav aria-label="Footer navigation" className="md:col-span-4">
-            <h2 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+            <h2 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-white/55">
               Explore
             </h2>
             <ul className="mt-5 grid grid-cols-2 gap-x-8 gap-y-3" role="list">
@@ -144,7 +144,7 @@ export function Footer() {
 
           {/* Socials */}
           <div className="md:col-span-3">
-            <h2 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+            <h2 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-white/55">
               Follow Us
             </h2>
             <div className="mt-5 flex gap-3">
@@ -165,10 +165,10 @@ export function Footer() {
         </div>
 
         <div className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-7 sm:flex-row">
-          <p className="font-sans text-xs text-white/30">
+          <p className="font-sans text-xs text-white/55">
             &copy; {year} KM.BBQ. All rights reserved.
           </p>
-          <div className="flex items-center gap-6 font-sans text-xs text-white/30">
+          <div className="flex items-center gap-6 font-sans text-xs text-white/60">
             <a href="/privacy" className="transition-colors hover:text-ember">
               Privacy Policy
             </a>

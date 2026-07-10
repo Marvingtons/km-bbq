@@ -81,8 +81,8 @@ export function MenuJumpNav({ targets }: { targets: JumpTarget[] }) {
                 aria-current={isActive ? "true" : undefined}
                 className={`inline-block whitespace-nowrap rounded-full border px-4 py-1.5 font-sans text-xs font-medium uppercase tracking-[0.12em] transition-colors ${
                   isActive
-                    ? "border-ember bg-ember text-white"
-                    : "border-ink/15 bg-cream/60 text-foreground/60 hover:border-ember/50 hover:text-ember-deep"
+                    ? "border-ember-deep bg-ember-deep text-white"
+                    : "border-ink/15 bg-cream/60 text-warm hover:border-ember-deep/50 hover:text-ember-deep"
                 }`}
               >
                 {label}

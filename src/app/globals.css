@@ -29,8 +29,12 @@
 
   /* ---- Text (warm grays) ------------------------------------------------ */
   --color-ink: #241c16;               /* strong text / headings on cream (the "charcoal" ink) */
-  --color-warm: #5c5148;              /* body text on cream (warm gray) */
-  --color-warm-muted: #8a7d6f;        /* muted / secondary text on cream (warm gray) */
+  --color-warm: #5c5148;              /* body text on cream (warm gray) — 7.15:1 on cream */
+  --color-warm-muted: #73675c;        /* muted / secondary text on cream. Darkened from #8a7d6f,
+                                         which only reached 3.72:1 on cream / 3.38:1 on cream-deep
+                                         and failed AA as normal text. Now 5.10:1 / 4.63:1 — passes
+                                         on BOTH light surfaces while staying clearly lighter than
+                                         --color-warm, so the type hierarchy survives. */
   --color-body: #5c5148;              /* canonical body-copy token — alias of --color-warm, named
                                          per the brand spec. Use `text-body` for paragraph copy so
                                          it never rides on an alpha of --foreground (which fringes
@@ -81,11 +85,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Visible keyboard focus everywhere. Brand orange reads on both the cream
-   pages and the charcoal footer; the offset keeps it clear of tight pills
-   and underlined nav links. */
+/* Visible keyboard focus everywhere. Uses ember-deep, not ember: WCAG requires
+   3:1 for non-text indicators, and plain ember only reached 2.90:1 against
+   cream-deep. ember-deep clears the bar on every surface the ring can land on
+   — cream 5.40:1, cream-deep 4.91:1, charcoal 3.11:1. The offset keeps it
+   clear of tight pills and underlined nav links. */
 :focus-visible {
-  outline: 2px solid var(--color-ember);
+  outline: 2px solid var(--color-ember-deep);
   outline-offset: 3px;
   border-radius: 2px;
 }

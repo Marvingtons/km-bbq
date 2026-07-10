@@ -140,7 +140,7 @@ export function Challenge() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-14 text-center">
           <ScrollReveal {...REVEAL}>
-            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember">
+            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
               The House Game
             </p>
           </ScrollReveal>
@@ -149,7 +149,9 @@ export function Challenge() {
               id="challenge-heading"
               className="font-serif text-5xl font-light text-ink md:text-6xl"
             >
-              Feeling <em className="italic text-ember">Lucky?</em>
+              {/* ember-deep, not ember: this section sits on cream-deep, where
+                  plain ember is only 2.90:1 — under the 3:1 large-text floor. */}
+              Feeling <em className="italic text-ember-deep">Lucky?</em>
             </h2>
           </ScrollReveal>
           <ScrollReveal {...REVEAL} delay={0.1}>
@@ -302,7 +304,7 @@ export function Challenge() {
                   <>
                     You stopped at{" "}
                     <span
-                      className={`font-medium ${won ? "text-ember" : "text-ink"}`}
+                      className={`font-medium ${won ? "text-ember-deep" : "text-ink"}`}
                       style={{ fontVariantNumeric: "tabular-nums" }}
                     >
                       {formatClock(cs)}

@@ -21,7 +21,7 @@ export function Contact() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-16 text-center">
           <ScrollReveal {...REVEAL}>
-            <p className="mb-4 font-sans text-xs font-medium tracking-[0.3em] uppercase text-ember">
+            <p className="mb-4 font-sans text-xs font-medium tracking-[0.3em] uppercase text-ember-deep">
               Find Us
             </p>
           </ScrollReveal>
@@ -73,7 +73,7 @@ export function Contact() {
                   <br />
                   <a
                     href="tel:+17604331888"
-                    className="mt-2 inline-block text-ember-deep underline-offset-4 transition-colors hover:text-ember hover:underline"
+                    className="mt-2 inline-block text-ember-deep underline-offset-4 hover:underline"
                   >
                     (760) 433-1888
                   </a>

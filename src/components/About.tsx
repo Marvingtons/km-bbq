@@ -308,7 +308,7 @@ function MuralStory() {
         />
         <div className="mural-copy-parallax relative z-20 mx-auto w-full max-w-[34rem] px-2 text-center">
           <div className="mural-copy-in">
-            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.32em] text-ember">
+            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.32em] text-ember-deep">
               Our Story
             </p>
             <h2
@@ -338,7 +338,7 @@ function MuralStory() {
 
             <Link
               href="/menu"
-              className="relative isolate mt-9 inline-flex items-center gap-2 overflow-hidden rounded-full border border-ember px-8 py-3 font-sans text-sm font-medium text-ember transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
+              className="relative isolate mt-9 inline-flex items-center gap-2 overflow-hidden rounded-full border border-ember-deep px-8 py-3 font-sans text-sm font-medium text-ember-deep transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember-deep before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
             >
               Explore our menu
               <span aria-hidden="true">→</span>
@@ -395,7 +395,7 @@ function HouseFavorites() {
     >
       <div className="mx-auto w-full max-w-4xl text-center lg:max-w-7xl">
         <div className="grill-head">
-          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember">
+          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
             House Favorites
           </p>
           <h2
@@ -442,7 +442,7 @@ function HouseFavorites() {
                       }
                     />
                     {dish.tag && (
-                      <span className="absolute left-2.5 top-2.5 z-10 inline-flex items-center rounded-full bg-ember px-2.5 py-1 font-sans text-[10px] font-semibold uppercase tracking-[0.12em] text-white">
+                      <span className="absolute left-2.5 top-2.5 z-10 inline-flex items-center rounded-full bg-ember-deep px-2.5 py-1 font-sans text-[10px] font-semibold uppercase tracking-[0.12em] text-white">
                         {dish.tag}
                       </span>
                     )}
@@ -469,7 +469,7 @@ function HouseFavorites() {
         <div className="mt-8">
           <Link
             href="/menu"
-            className="relative isolate inline-flex overflow-hidden rounded-full border border-ember px-8 py-3 font-sans text-sm font-medium text-ember transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
+            className="relative isolate inline-flex overflow-hidden rounded-full border border-ember-deep px-8 py-3 font-sans text-sm font-medium text-ember-deep transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember-deep before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
           >
             View Full Menu
           </Link>
