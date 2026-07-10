@@ -23,7 +23,11 @@ export function LegalPage({
           <p className="mt-3 font-sans text-xs font-medium uppercase tracking-[0.2em] text-warm-muted">
             Last updated {updated}
           </p>
-          <div className="mt-10 space-y-8 font-sans text-sm font-light leading-relaxed text-foreground/75 [&_h2]:font-serif [&_h2]:text-2xl [&_h2]:font-light [&_h2]:text-foreground [&_p]:mt-3">
+          {/* Solid --color-body, not an alpha of --foreground: alpha-composited
+              light text picks up red/blue subpixel fringing under Windows
+              ClearType. transform-gpu forces uniform grayscale AA, matching the
+              cards elsewhere on the site. */}
+          <div className="mt-10 space-y-8 transform-gpu font-sans text-sm font-light leading-relaxed text-body [&_h2]:font-serif [&_h2]:text-2xl [&_h2]:font-light [&_h2]:text-foreground [&_p]:mt-3">
             {children}
           </div>
         </article>

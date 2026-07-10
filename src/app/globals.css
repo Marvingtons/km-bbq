@@ -3,9 +3,21 @@
 /* ===========================================================================
    DESIGN TOKENS — single source of truth
    ---------------------------------------------------------------------------
-   Direction: cinematic premium. Charcoal/near-black surfaces + warm cream,
-   ONE ember accent, warm-gray text, one radius, one shadow, one section
-   rhythm. Every section pulls from these; nothing hard-codes a hex.
+   Direction: WARM, PLAYFUL, INVITING — a casual all-you-can-eat charcoal
+   Korean BBQ spot, not a dark/cinematic/premium restaurant. Bright cream
+   surfaces carry the site; warm charcoal is for TEXT and the single cozy
+   footer, never for content-section backgrounds. ONE ember accent, warm-gray
+   body text, one radius, one shadow, one section rhythm. The full-color
+   hand-drawn mural is the brand signature everything else warms up to match.
+
+   Accent rule: use --color-ember for LARGE display type on cream, solid fills
+   and non-text marks; use --color-ember-deep for anything small — labels,
+   links, fills behind white text, and the focus ring. Plain ember only reaches
+   3.19:1 on cream and 2.90:1 on cream-deep, which fails AA as normal text.
+
+   Every section pulls from these; nothing hard-codes a hex. (The LED clock in
+   Challenge.tsx is the one sanctioned exception — it's a physical prop, not a
+   surface, so it keeps its literal device colors.)
    =========================================================================== */
 
 :root {
@@ -35,10 +47,11 @@
                                          and failed AA as normal text. Now 5.10:1 / 4.63:1 — passes
                                          on BOTH light surfaces while staying clearly lighter than
                                          --color-warm, so the type hierarchy survives. */
-  --color-body: #5c5148;              /* canonical body-copy token — alias of --color-warm, named
-                                         per the brand spec. Use `text-body` for paragraph copy so
-                                         it never rides on an alpha of --foreground (which fringes
-                                         under Windows ClearType and reads as a multi-color tint). */
+  --color-body: #5c5148;              /* canonical body-copy token — same value as --color-warm,
+                                         named per the brand spec. Use `text-body` for long-form
+                                         prose (see LegalPage) so it never rides on an alpha of
+                                         --foreground, which fringes red/blue under Windows
+                                         ClearType and reads as a multi-color tint. */
 
   /* ---- One-of primitives ------------------------------------------------ */
   --radius-card: 0.875rem;            /* the single card/container radius — friendly & rounded to
@@ -56,16 +69,15 @@
   --color-foreground: var(--foreground);
 
   /* ---- Legacy aliases --------------------------------------------------- */
-  /* Older, un-imported components (Highlights, HowItWorks, Visit, …) still
-     reference brand-* class names. Repoint them onto the new palette so any
-     straggler resolves on-brand instead of reintroducing a competing hue.
-     Live components are migrated to the semantic tokens above. */
+  /* Only Preloader.tsx (being replaced separately) still reaches for brand-*
+     class names. They are repointed onto the warm palette so it resolves
+     on-brand rather than reintroducing a competing hue. Everything else uses
+     the semantic tokens above. The brand-blue / -red / -pink aliases were
+     dropped: nothing referenced them, and keeping a blue and a magenta on
+     standby invites the old direction back in. */
   --color-brand-cream: var(--color-cream);
   --color-brand-orange: var(--color-ember);
   --color-brand-orange-deep: var(--color-ember-deep);
-  --color-brand-blue: var(--color-ink);
-  --color-brand-red: var(--color-ember);
-  --color-brand-pink: var(--color-ember);
 }
 
 html {
