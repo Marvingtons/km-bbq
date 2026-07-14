@@ -131,7 +131,9 @@ const CATEGORIES: Category[] = [
         name: "Spicy Squid",
         korean: "오징어",
         desc: "Tender squid tossed in a spicy chili marinade with a smoky char.",
-        image: "/images/spicy-squid.png",
+        // Stand-in until a squid shot exists: the spicy-octopus photo is the
+        // same gochujang-coated cephalopod presentation. Swap when shot.
+        image: "/images/spicy-octopus.png",
       },
     ],
   },
@@ -320,7 +322,9 @@ const PREMIUM: Item[] = [
   {
     name: "Beef Skirt Steak",
     desc: "Richly marbled skirt steak that chars beautifully.",
-    image: "/images/beef-skirt-steak.png",
+    // Stand-in until a skirt-steak shot exists: prime-new-york-steak is the
+    // same raw, marbled-beef presentation. Swap when shot.
+    image: "/images/prime-new-york-steak.png",
   },
   {
     name: "Mussels",
@@ -374,15 +378,29 @@ function ItemMedia({ item }: { item: Item }) {
     );
   }
 
-  // Tasteful placeholder: a soft cream gradient with the dish's serif initial,
-  // so cards without a photo still read as intentional rather than broken.
+  // Branded fallback: a warm cream tile with a faint ember wash, the KM.BBQ
+  // flame glyph, and the wordmark — so a dish still awaiting a photo reads as an
+  // intentional, on-brand card rather than an empty/missing slot.
   return (
     <div
       aria-hidden="true"
-      className="mb-4 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-card bg-gradient-to-br from-cream-deep to-cream"
+      className="mb-4 flex aspect-[16/9] w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-card bg-cream-deep"
+      style={{
+        backgroundImage:
+          "radial-gradient(80% 90% at 50% 20%, color-mix(in srgb, var(--color-ember) 12%, transparent) 0%, transparent 70%)",
+      }}
     >
-      <span className="font-serif text-5xl font-light text-warm-muted select-none">
-        {item.name.charAt(0)}
+      <svg
+        width="30"
+        height="30"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className="text-ember/70"
+      >
+        <path d="M12 2c.4 3.1-1.6 4.6-3 6.2C7.4 9.9 6 11.6 6 14a6 6 0 0 0 12 0c0-1.8-.8-3.3-1.8-4.6-.3 1-.9 1.7-1.8 2C15 9 14.4 6.3 12 2Zm0 17.5A2.6 2.6 0 0 1 9.4 17c0-1.2.8-2 1.5-2.8.3.6.8 1 1.5 1.2.7-.3 1-.8 1.1-1.5.8.8 1.2 1.6 1.2 2.6a2.6 2.6 0 0 1-2.7 3Z" />
+      </svg>
+      <span className="font-sans text-[10px] font-semibold uppercase tracking-[0.25em] text-warm-muted select-none">
+        KM<span className="text-ember/70">·</span>BBQ
       </span>
     </div>
   );
@@ -451,7 +469,7 @@ function CategorySection({ category }: { category: Category }) {
   return (
     <section id={slugify(category.name)} className="mt-16 scroll-mt-32 first:mt-0">
       <ScrollReveal>
-        <div className="mb-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-ink/10 pb-4">
+        <div className="mb-7 flex transform-gpu flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-ink/10 pb-4">
           <h2 className="font-serif text-3xl font-light text-foreground md:text-4xl">
             {category.name}
           </h2>
@@ -507,7 +525,7 @@ function TierSection({
       className={`mt-12 scroll-mt-32 rounded-card border ${shell} p-6 sm:p-10`}
     >
       <ScrollReveal>
-        <div className="mb-8 text-center">
+        <div className="mb-8 transform-gpu text-center">
           <p
             className={`mb-3 font-sans text-xs font-semibold uppercase tracking-[0.3em] ${labelColor}`}
           >
@@ -556,7 +574,11 @@ export default function MenuPage() {
       <main className="bg-cream">
         {/* Header */}
         <section className="px-6 pt-32 pb-12 sm:pt-36 lg:pt-40">
-          <div className="mx-auto max-w-3xl text-center">
+          {/* transform-gpu: promote the header copy to its own compositing
+              layer so it rasterizes with uniform grayscale AA. Without it the
+              light warm-gray text picks up red/blue subpixel (ClearType)
+              fringing on Windows that reads as a multi-color tint. */}
+          <div className="mx-auto max-w-3xl text-center transform-gpu">
             <p className="mb-5 font-sans text-xs font-semibold uppercase tracking-[0.3em] text-ember-deep">
               All-You-Can-Eat · Self-Serve · Charcoal
             </p>
@@ -568,13 +590,15 @@ export default function MenuPage() {
               eat all you want. One price, everything included.
             </p>
 
-            {/* Price band */}
-            <div className="mx-auto mt-9 inline-flex items-stretch rounded-card border border-ink/10 bg-cream shadow-card">
-              <div className="px-6 py-5 text-center sm:px-10">
+            {/* Price band — full-width and evenly split on phones so the third
+                cell never runs past the viewport edge; the compact inline pill
+                returns from sm up. */}
+            <div className="mx-auto mt-9 flex w-full max-w-md items-stretch rounded-card border border-ink/10 bg-cream shadow-card sm:inline-flex sm:w-auto sm:max-w-none">
+              <div className="flex-1 px-3 py-5 text-center sm:flex-none sm:px-10">
                 <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-warm-muted">
                   Lunch
                 </p>
-                <p className="mt-1 font-serif text-3xl font-light text-ember sm:text-4xl">
+                <p className="mt-1 font-serif text-2xl font-light text-ember sm:text-4xl">
                   $21.99
                 </p>
                 <p className="mt-1 font-sans text-xs font-light text-warm-muted">
@@ -582,11 +606,11 @@ export default function MenuPage() {
                 </p>
               </div>
               <div aria-hidden="true" className="w-px bg-ink/10" />
-              <div className="px-6 py-5 text-center sm:px-10">
+              <div className="flex-1 px-3 py-5 text-center sm:flex-none sm:px-10">
                 <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-warm-muted">
                   Dinner
                 </p>
-                <p className="mt-1 font-serif text-3xl font-light text-ember sm:text-4xl">
+                <p className="mt-1 font-serif text-2xl font-light text-ember sm:text-4xl">
                   $30.99
                 </p>
                 <p className="mt-1 font-sans text-xs font-light text-warm-muted">
@@ -594,11 +618,11 @@ export default function MenuPage() {
                 </p>
               </div>
               <div aria-hidden="true" className="w-px bg-ink/10" />
-              <div className="px-6 py-5 text-center sm:px-10">
+              <div className="flex-1 px-3 py-5 text-center sm:flex-none sm:px-10">
                 <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-warm-muted">
                   Seating
                 </p>
-                <p className="mt-1 font-serif text-3xl font-light text-ember sm:text-4xl">
+                <p className="mt-1 font-serif text-2xl font-light text-ember sm:text-4xl">
                   90 min
                 </p>
                 <p className="mt-1 font-sans text-xs font-light text-warm-muted">
@@ -620,7 +644,7 @@ export default function MenuPage() {
 
         {/* Included strip — hairline dividers, no box */}
         <section className="px-6 pb-4">
-          <div className="mx-auto max-w-4xl text-center">
+          <div className="mx-auto max-w-4xl text-center transform-gpu">
             <p className="mb-4 font-sans text-[11px] font-medium uppercase tracking-[0.25em] text-warm-muted">
               Included with every meal
             </p>
@@ -649,7 +673,7 @@ export default function MenuPage() {
 
         {/* Categories */}
         <div className="mx-auto max-w-7xl px-6 pt-12 pb-20">
-          <p className="mb-10 text-center font-serif text-lg font-light italic text-warm">
+          <p className="mb-10 transform-gpu text-center font-serif text-lg font-light italic text-warm">
             Everything is included in the all-you-can-eat price — no per-item
             charges.
           </p>
@@ -670,7 +694,7 @@ export default function MenuPage() {
 
         {/* Info band */}
         <section className="bg-cream-deep px-6 py-20">
-          <div className="mx-auto max-w-5xl text-center">
+          <div className="mx-auto max-w-5xl text-center transform-gpu">
             <h2 className="font-serif text-4xl font-light text-foreground md:text-5xl">
               Come Hungry
             </h2>

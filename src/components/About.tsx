@@ -297,13 +297,18 @@ function MuralStory() {
 
         {/* ---- COPY (z-20, middle) — a soft cream field carves a clean, empty
             reading column out of the busy mural (the composition wants an empty
-            centre); the art stays rich at the edges and frames the story. --- */}
+            centre); the art stays rich, full-colour, and untouched at the edges
+            and frames the story. Sized generously with a firm cream plateau so
+            the copy always lands on clean cream — even at 375px, where the
+            clusters otherwise crowded the text — rather than dimming the mural.
+            The top/bottom edge fades above keep the field from reading as a
+            hard rectangle. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-1/2 z-[15] h-[32rem] w-[48rem] max-w-[94vw] -translate-x-1/2 -translate-y-1/2"
+          className="pointer-events-none absolute left-1/2 top-1/2 z-[15] h-[38rem] w-[46rem] max-w-[97vw] -translate-x-1/2 -translate-y-1/2"
           style={{
             background:
-              "radial-gradient(58% 52% at 50% 50%, var(--color-cream) 0%, var(--color-cream) 54%, color-mix(in srgb, var(--color-cream) 80%, transparent) 72%, transparent 100%)",
+              "radial-gradient(68% 60% at 50% 50%, var(--color-cream) 0%, var(--color-cream) 66%, color-mix(in srgb, var(--color-cream) 82%, transparent) 82%, transparent 100%)",
           }}
         />
         <div className="mural-copy-parallax relative z-20 mx-auto w-full max-w-[34rem] px-2 text-center">
@@ -395,12 +400,12 @@ function HouseFavorites() {
     >
       <div className="mx-auto w-full max-w-4xl text-center lg:max-w-7xl">
         <div className="grill-head">
-          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
+          <p className="mb-4 transform-gpu font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
             House Favorites
           </p>
           <h2
             id="favorites-heading"
-            className="font-serif text-4xl font-light text-ink md:text-5xl"
+            className="transform-gpu font-serif text-4xl font-light text-ink md:text-5xl"
           >
             The Grill Awaits
           </h2>

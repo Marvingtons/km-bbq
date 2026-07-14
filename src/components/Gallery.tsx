@@ -175,12 +175,12 @@ export function Gallery() {
         {/* Heading — the fixed anchor. Sits centered on the left while the
             photos stream past on desktop; flows on top on mobile. */}
         <ScrollReveal className="shrink-0 px-6 text-center motion-safe:md:w-[32%] motion-safe:md:px-12 motion-safe:md:text-left">
-          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
+          <p className="mb-4 transform-gpu font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
             Gallery
           </p>
           <h2
             id="gallery-heading"
-            className="font-serif text-5xl font-light text-foreground md:text-6xl"
+            className="transform-gpu font-serif text-5xl font-light text-foreground md:text-6xl"
           >
             Seen Through Fire
           </h2>
@@ -188,7 +188,7 @@ export function Gallery() {
             href="https://www.instagram.com/kmkoreanbbq/"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-8 inline-block font-sans text-sm font-medium text-ember-deep underline-offset-4 hover:underline"
+            className="mt-8 inline-block transform-gpu font-sans text-sm font-medium text-ember-deep underline-offset-4 hover:underline"
           >
             Follow us on Instagram →
           </a>
@@ -236,7 +236,7 @@ export function Gallery() {
             scroll-driven track that needs no hint; on phones the photo row is a
             native horizontal swipe carousel, so cue the sideways gesture. */}
         <div className="flex items-center justify-center gap-2 px-6 md:hidden">
-          <span className="font-sans text-[11px] font-medium uppercase tracking-[0.25em] text-warm">
+          <span className="transform-gpu font-sans text-[11px] font-medium uppercase tracking-[0.25em] text-warm">
             Swipe to explore
           </span>
           <svg

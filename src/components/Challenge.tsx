@@ -140,14 +140,14 @@ export function Challenge() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-14 text-center">
           <ScrollReveal {...REVEAL}>
-            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
+            <p className="mb-4 transform-gpu font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
               The House Game
             </p>
           </ScrollReveal>
           <ScrollReveal {...REVEAL} delay={0.05}>
             <h2
               id="challenge-heading"
-              className="font-serif text-5xl font-light text-ink md:text-6xl"
+              className="transform-gpu font-serif text-5xl font-light text-ink md:text-6xl"
             >
               {/* ember-deep, not ember: this section sits on cream-deep, where
                   plain ember is only 2.90:1 — under the 3:1 large-text floor. */}
@@ -155,7 +155,7 @@ export function Challenge() {
             </h2>
           </ScrollReveal>
           <ScrollReveal {...REVEAL} delay={0.1}>
-            <p className="mx-auto mt-6 max-w-xl font-sans text-base font-light leading-relaxed text-warm">
+            <p className="mx-auto mt-6 max-w-xl transform-gpu font-sans text-base font-light leading-relaxed text-warm">
               By the door hangs a clock and a single red button. Every table
               gets one press per visit — stop the clock at exactly 10.00
               seconds and your next barbecue is on us.
@@ -169,7 +169,7 @@ export function Challenge() {
                 cream surface with the one card radius and the one elevation
                 shadow — so the clock and button read as a designed KM.BBQ
                 panel rather than a prop dropped onto the section. */}
-            <div className="flex flex-col items-center rounded-card border border-ink/10 bg-cream px-8 py-12 shadow-card sm:px-12 sm:py-14">
+            <div className="flex transform-gpu flex-col items-center rounded-card border border-ink/10 bg-cream px-8 py-12 shadow-card sm:px-12 sm:py-14">
               <span className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-warm-muted">
                 The Clock
               </span>
@@ -318,7 +318,7 @@ export function Challenge() {
 
             {/* Fine print sits outside the card as a caption, keeping the panel
                 itself focused on the machine. */}
-            <p className="mt-8 text-center font-sans text-xs font-light leading-relaxed text-warm">
+            <p className="mt-8 transform-gpu text-center font-sans text-xs font-light leading-relaxed text-warm">
               Practice here all you like — only the clock at the restaurant
               counts, one shot per table, per visit.
             </p>

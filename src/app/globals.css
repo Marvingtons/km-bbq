@@ -171,37 +171,6 @@ html.preloading {
   }
 }
 
-/* Hero scroll cue — an ember tick travels down the hairline rail (h-10 = 40px)
-   and fades at each end, a quiet "there's more below" that loops. The track
-   clips it (overflow-hidden), so reduced-motion just parks it at the top. */
-@keyframes hero-scroll-cue {
-  0% {
-    transform: translateX(-50%) translateY(-10px);
-    opacity: 0;
-  }
-  18% {
-    opacity: 1;
-  }
-  82% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(-50%) translateY(40px);
-    opacity: 0;
-  }
-}
-
-.hero-scroll-cue {
-  animation: hero-scroll-cue 2.4s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-scroll-cue {
-    animation: none;
-    transform: translateX(-50%);
-  }
-}
-
 /* About MURAL idle motion — the hand-drawn brand mural breathes at rest so it
    never feels like a flat sticker. These run on INNER layers only; the OUTER
    cluster wrappers carry the scroll-driven parallax (GSAP writes their

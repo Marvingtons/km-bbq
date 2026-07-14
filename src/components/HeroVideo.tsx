@@ -3,12 +3,9 @@
 import { useEffect, useRef } from "react";
 
 /**
- * The hero's charcoal-ember clip. Autoplays muted like the old full-bleed hero,
- * but honors prefers-reduced-motion by pausing on the poster frame instead of
- * looping. The source is a re-cut of the grill footage down to the one clean,
- * cinematic shot — glowing coals with a slow shower of sparks — crossfaded end
- * to start so the 2s loop wraps with no visible seam (no clipped meat, no
- * blurred foreground; the earlier montage read as stock).
+ * The hero's grill clip. Autoplays muted, but honors prefers-reduced-motion by
+ * pausing on the poster frame instead of looping. The poster is the clip's
+ * first frame so the reveal from the preloader is seamless.
  *
  * While the intro preloader is up (html.preloading), the video holds on its
  * first frame and starts from the top as the overlay begins to fade, so the
@@ -60,8 +57,8 @@ export function HeroVideo({ className = "" }: { className?: string }) {
     <video
       ref={ref}
       className={className}
-      src="/videos/hero-ember.mp4"
-      poster="/images/hero-ember.jpg"
+      src="/videos/kmbbq-hero.mp4"
+      poster="/images/kmbbq-hero-poster.jpg"
       autoPlay
       muted
       loop

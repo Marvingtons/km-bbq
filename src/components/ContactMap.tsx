@@ -11,14 +11,14 @@ const ADDRESS = "2216 S El Camino Real #108-109, Oceanside, CA 92054";
 const FALLBACK_CENTER = { lat: 33.1809, lng: -117.3376 };
 
 // A key unlocks the branded JavaScript map (custom style + ember pin). Without
-// one we degrade to the standard embed, warmed with a filter so it still reads
-// on-brand rather than stark Google-blue.
+// one we degrade to a warm, on-brand static location panel (below) rather than
+// the stock Google embed, which brought a cool palette and POI clutter.
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-const EMBED_SRC =
-  "https://www.google.com/maps?q=" +
-  encodeURIComponent(ADDRESS) +
-  "&output=embed";
+// Opens turn-by-turn directions in Google Maps — no API key required.
+const DIRECTIONS_URL =
+  "https://www.google.com/maps/dir/?api=1&destination=" +
+  encodeURIComponent(ADDRESS);
 
 // Warm cream/charcoal map palette — the single ember accent lives on the pin,
 // never in the map itself. Land is cream, water/parks muted taupe, labels warm
@@ -142,22 +142,71 @@ export function ContactMap() {
     };
   }, []);
 
-  // No key (or the script failed): warm-filtered embed so the map still reads
-  // cream/charcoal rather than default blue.
+  // No key (or the script failed): a warm, self-contained location panel —
+  // abstract cream/taupe street lines, the ember pin, and a directions button.
+  // Fully on-brand and free of the stock embed's cool palette and POI clutter.
   if (!API_KEY || failed) {
     return (
-      <iframe
-        title="Map to KM BBQ Oceanside"
-        src={EMBED_SRC}
-        className="h-full w-full border-0"
-        style={{
-          filter:
-            "sepia(0.32) saturate(0.7) hue-rotate(-8deg) contrast(0.94) brightness(1.03)",
-        }}
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-        allowFullScreen
-      />
+      <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-cream-deep px-6 text-center">
+        {/* Abstract street grid — decorative; evokes a map without real
+            geography, drawn from warm tokens so nothing reads cool. */}
+        <svg
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          preserveAspectRatio="xMidYMid slice"
+          viewBox="0 0 400 225"
+          fill="none"
+        >
+          <g stroke="var(--color-warm-muted)" strokeOpacity="0.16" strokeWidth="6">
+            <path d="M-20 72 H420" />
+            <path d="M-20 158 H420" />
+            <path d="M92 -20 V245" />
+            <path d="M298 -20 V245" />
+          </g>
+          <g stroke="var(--color-warm-muted)" strokeOpacity="0.09" strokeWidth="2">
+            <path d="M-20 116 H420" />
+            <path d="M46 -20 V245" />
+            <path d="M200 -20 V245" />
+            <path d="M-20 30 L200 245" />
+            <path d="M260 -20 L440 130" />
+          </g>
+        </svg>
+
+        <div className="relative z-10 flex transform-gpu flex-col items-center">
+          <svg
+            width="34"
+            height="46"
+            viewBox="0 0 36 48"
+            className="drop-shadow-[0_6px_10px_rgba(74,44,22,0.28)]"
+            aria-hidden="true"
+          >
+            <path
+              d="M18 0C8.06 0 0 8.06 0 18c0 12.5 18 30 18 30s18-17.5 18-30C36 8.06 27.94 0 18 0z"
+              fill="var(--color-ember)"
+              stroke="var(--color-ember-deep)"
+              strokeWidth="1.5"
+            />
+            <circle cx="18" cy="18" r="6.5" fill="var(--color-cream)" />
+          </svg>
+          <p className="mt-3 font-sans text-base font-bold tracking-tight text-ink">
+            KM<span className="text-ember">.</span>BBQ
+          </p>
+          <address className="mt-1 font-sans text-sm font-light not-italic leading-relaxed text-warm">
+            2216 S El Camino Real #108–109
+            <br />
+            Oceanside, CA 92054
+          </address>
+          <a
+            href={DIRECTIONS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-ember-deep px-5 py-2 font-sans text-xs font-medium text-ember-deep transition-colors duration-300 hover:bg-ember-deep hover:text-white focus-visible:bg-ember-deep focus-visible:text-white"
+          >
+            Get Directions
+            <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
     );
   }
 

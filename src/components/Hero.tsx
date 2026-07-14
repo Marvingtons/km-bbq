@@ -126,26 +126,6 @@ export function Hero() {
           </motion.a>
         </motion.div>
       </div>
-
-      {/* Scroll cue — a hairline rail with an ember tick that drifts down and
-          loops, echoing the CTA's hairline language. Fades in last; the
-          animation is held on the poster for reduced-motion (globals.css). */}
-      <motion.div
-        className="pointer-events-none absolute inset-x-0 bottom-8 z-10 flex justify-center"
-        aria-hidden="true"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.9, delay: 1.15 }}
-      >
-        <div className="flex flex-col items-center gap-3">
-          <span className="font-sans text-[0.6rem] font-light tracking-[0.4em] uppercase text-white/55">
-            Scroll
-          </span>
-          <span className="relative block h-10 w-px overflow-hidden bg-white/20">
-            <span className="hero-scroll-cue absolute left-1/2 top-0 block h-2.5 w-px bg-ember" />
-          </span>
-        </div>
-      </motion.div>
     </section>
   );
 }
