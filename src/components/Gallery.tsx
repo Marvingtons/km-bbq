@@ -5,7 +5,7 @@ import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollReveal } from "./ScrollReveal";
-import { EASE, DUR, STAGGER, RISE } from "@/lib/motion";
+import { EASE, DUR, STAGGER, RISE, MOTION_OK } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -52,7 +52,7 @@ export function Gallery() {
     // motion-safe:md classes that build the pinned layout are inactive there,
     // and the GSAP timeline below never runs, so touch scroll stays untouched.
     mm.add(
-      "(min-width: 768px) and (prefers-reduced-motion: no-preference)",
+      `(min-width: 768px) and ${MOTION_OK}`,
       () => {
         const track = q(".gallery-track")[0] as HTMLElement;
         const wrapper = track.parentElement as HTMLElement;

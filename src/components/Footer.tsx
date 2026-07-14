@@ -38,12 +38,14 @@ export function Footer() {
       role="contentinfo"
     >
       {/* Deliberate seam: a single crisp ember hairline marks the cream→charcoal
-          transition (the old full-height ember wash that bled at this edge is
-          gone). */}
+          transition, with a slow ember glint that shimmers along it. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ember/60 to-transparent"
-      />
+        className="pointer-events-none absolute inset-x-0 top-0 h-px overflow-hidden"
+      >
+        <div className="h-full w-full bg-gradient-to-r from-transparent via-ember/55 to-transparent" />
+        <div className="footer-shimmer absolute inset-y-0 left-0 w-[32%] bg-gradient-to-r from-transparent via-ember to-transparent" />
+      </div>
 
       {/* Ambient warm glow — centered behind the content as intentional cozy
           depth, well clear of the top edge so it never reads as a seam bleed. */}

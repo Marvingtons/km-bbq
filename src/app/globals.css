@@ -193,7 +193,6 @@ html.preloading {
 .mural-bob {
   animation: mural-bob var(--bob-dur, 6s) ease-in-out infinite;
   animation-delay: var(--bob-delay, 0s);
-  will-change: transform;
 }
 
 /* mural-drift: a slow 2-axis wander for the faint BACKGROUND scatter marks, so
@@ -211,13 +210,42 @@ html.preloading {
 .mural-drift {
   animation: mural-drift var(--drift-dur, 12s) ease-in-out infinite;
   animation-delay: var(--drift-delay, 0s);
-  will-change: transform;
+}
+
+/* Idle motion halts while the mural is off-screen (JS toggles .mural-paused via
+   an IntersectionObserver) — no wasted animation frames or layers off-screen. */
+.mural-paused .mural-bob,
+.mural-paused .mural-drift {
+  animation-play-state: paused;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .mural-bob,
   .mural-drift {
     animation: none;
+  }
+}
+
+/* Footer hairline shimmer — a brighter ember glint travels along the ember
+   divider above the footer, a slow ambient touch. Transform-only; the parent
+   line clips it (overflow-hidden). Held still for reduced motion. */
+@keyframes footer-shimmer {
+  0% {
+    transform: translateX(-140%);
+  }
+  100% {
+    transform: translateX(380%);
+  }
+}
+
+.footer-shimmer {
+  animation: footer-shimmer 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer-shimmer {
+    animation: none;
+    opacity: 0;
   }
 }
 

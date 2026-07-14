@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { EASE, DUR, STAGGER, RISE, MOTION_OK } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -20,15 +21,18 @@ gsap.registerPlugin(ScrollTrigger);
      • copy     (middle)   → drifts a touch   (.mural-copy-parallax, y ±14)
      • clusters (front)    → drift FAST        (.mural-cluster-*, y ±80/100, +x)
 
-   The illustration PNGs have WHITE backgrounds; `mix-blend-multiply` drops the
-   white onto the cream page so only the art remains. Each cluster settles +
-   fades in on scroll (staggered), then breathes with a gentle idle bob.
+   The illustration PNGs are pre-multiplied against the page cream (baked at
+   build, *-cream.png) so their field already matches the page and they composite
+   normally — NO mix-blend on these moving layers (blend + transform per frame
+   was the mural's perf cost). Each cluster settles + fades in on scroll
+   (staggered), then breathes with a gentle idle bob that pauses off-screen.
 
    Motion contract (holds 60fps): scrubbed parallax and idle motion only ever
    touch `transform`/`opacity`, on SEPARATE nested layers (outer = parallax y,
-   inner = entrance, img = idle bob) so nothing fights for the same property.
-   Reduced motion / no-JS render the finished, static mural with the copy fully
-   legible — the whole GSAP block lives inside a `no-preference` matchMedia.
+   inner = entrance, img = idle bob) so nothing fights for the same property, and
+   no layer carries a permanent will-change. Reduced motion / no-JS render the
+   finished, static mural with the copy fully legible — the whole GSAP block
+   lives inside a `no-preference` matchMedia.
    =========================================================================== */
 
 // Faint background doodle-scatter — the mural's own folk-doodle vocabulary
@@ -120,7 +124,7 @@ function MuralStory() {
     const mm = gsap.matchMedia();
     const q = gsap.utils.selector(el);
 
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
+    mm.add(MOTION_OK, () => {
       const enter = q(".mural-enter");
       const marks = q(".mural-mark");
       const copyIn = q(".mural-copy-in");
@@ -137,17 +141,17 @@ function MuralStory() {
         scrollTrigger: { trigger: el, start: "top 72%", once: true },
       });
       tlIn
-        .to(copyIn, { autoAlpha: 1, y: 0, duration: 0.7, ease: "power2.out" })
-        .to(marks, { autoAlpha: 1, duration: 0.6, stagger: 0.05 }, 0.1)
+        .to(copyIn, { autoAlpha: 1, y: 0, duration: DUR.base, ease: EASE.out })
+        .to(marks, { autoAlpha: 1, duration: DUR.base, stagger: STAGGER.tight }, 0.1)
         .to(
           enter,
           {
             autoAlpha: 1,
             yPercent: 0,
             scale: 1,
-            duration: 0.85,
-            ease: "power3.out",
-            stagger: 0.16,
+            duration: DUR.slow,
+            ease: EASE.out,
+            stagger: STAGGER.loose,
           },
           0.08
         );
@@ -178,6 +182,14 @@ function MuralStory() {
       scrub(q(".mural-cluster-right"), { y: -98, x: 8 }, { y: 98, x: -8 });
     });
 
+    // Pause the idle bob/drift whenever the mural leaves the viewport, so it
+    // never animates (or holds a layer) off-screen. CSS reads .mural-paused.
+    const io = new IntersectionObserver(
+      ([entry]) => el.classList.toggle("mural-paused", !entry.isIntersecting),
+      { rootMargin: "0px" }
+    );
+    io.observe(el);
+
     // Re-measure once fonts/images settle so parallax ranges line up.
     const refreshST = () => ScrollTrigger.refresh();
     window.addEventListener("load", refreshST);
@@ -185,6 +197,7 @@ function MuralStory() {
 
     return () => {
       window.removeEventListener("load", refreshST);
+      io.disconnect();
       mm.revert();
     };
   }, []);
@@ -248,13 +261,13 @@ function MuralStory() {
         </div>
 
         {/* ---- CLUSTERS (z-10, front / fastest) ------------------------- */}
-        {/* Left cluster — tiger, drummer, hanok, stews. mix-blend-multiply
-            drops the PNG's white field onto the cream page. Outer wrapper =
-            parallax; inner = entrance; img = idle bob. */}
-        <div className="mural-cluster-left pointer-events-none absolute inset-y-0 -left-[5%] z-10 w-[56%] max-w-[540px] mix-blend-multiply sm:w-[46%] md:w-[39%]">
+        {/* Left cluster — tiger, drummer, hanok, stews. The PNG is pre-baked
+            against page cream, so it composites normally (no blend on this
+            moving layer). Outer wrapper = parallax; inner = entrance; img = bob. */}
+        <div className="mural-cluster-left pointer-events-none absolute inset-y-0 -left-[5%] z-10 w-[56%] max-w-[540px] sm:w-[46%] md:w-[39%]">
           <div className="mural-enter absolute inset-0 flex items-center">
             <Image
-              src="/images/mural-left.png"
+              src="/images/mural-left-cream.png"
               alt=""
               aria-hidden="true"
               width={886}
@@ -267,10 +280,10 @@ function MuralStory() {
         </div>
 
         {/* Right cluster — grill, mask, the fire mascot, soju, pine. */}
-        <div className="mural-cluster-right pointer-events-none absolute inset-y-0 -right-[5%] z-10 w-[56%] max-w-[540px] mix-blend-multiply sm:w-[46%] md:w-[39%]">
+        <div className="mural-cluster-right pointer-events-none absolute inset-y-0 -right-[5%] z-10 w-[56%] max-w-[540px] sm:w-[46%] md:w-[39%]">
           <div className="mural-enter absolute inset-0 flex items-center">
             <Image
-              src="/images/mural-right.png"
+              src="/images/mural-right-cream.png"
               alt=""
               aria-hidden="true"
               width={886}
@@ -368,23 +381,23 @@ function HouseFavorites() {
     const mm = gsap.matchMedia();
     const q = gsap.utils.selector(el);
 
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
+    mm.add(MOTION_OK, () => {
       const head = q(".grill-head");
       const dishes = q(".grill-dish");
 
       gsap.from(head, {
         opacity: 0,
-        y: 24,
-        duration: 0.7,
-        ease: "power2.out",
+        y: RISE,
+        duration: DUR.base,
+        ease: EASE.out,
         scrollTrigger: { trigger: head[0], start: "top 88%" },
       });
       gsap.from(dishes, {
         opacity: 0,
-        y: 24,
-        duration: 0.6,
-        stagger: 0.08,
-        ease: "power2.out",
+        y: RISE,
+        duration: DUR.base,
+        stagger: STAGGER.base,
+        ease: EASE.out,
         scrollTrigger: { trigger: dishes[0], start: "top 90%" },
       });
     });
@@ -425,7 +438,7 @@ function HouseFavorites() {
             return (
               <div
                 key={dish.name}
-                className={`grill-dish group h-full will-change-transform ${span}`}
+                className={`grill-dish group h-full ${span}`}
               >
                 <div className="flex h-full flex-col rounded-card bg-cream p-5 text-left shadow-card transition-[transform,box-shadow] duration-300 transform-gpu hover:-translate-y-1">
                   <div
