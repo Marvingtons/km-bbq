@@ -82,7 +82,7 @@ const FEATURED_DISHES: Dish[] = [
     name: "Chadolbaegi",
     korean: "차돌박이",
     description:
-      "Paper-thin brisket slices that cook in seconds — dipped in sesame oil and salt.",
+      "Paper-thin brisket that cooks in seconds. Dip it in sesame oil and salt.",
     image: "/images/chadolbaegi.png",
     tag: "Chef's Pick",
   },
@@ -90,14 +90,14 @@ const FEATURED_DISHES: Dish[] = [
     name: "Bulgogi",
     korean: "불고기",
     description:
-      "Tender ribeye in a sesame-ginger marinade — the classic that never disappoints.",
+      "Tender ribeye in a sesame-ginger marinade. A classic for a reason.",
     image: "/images/bulgogi.png",
   },
   {
     name: "Kimchi",
     korean: "김치",
     description:
-      "House-fermented napa cabbage with gochugaru, garlic, and ginger — bold, smoky, addictive.",
+      "House-fermented napa cabbage. Tangy, a little spicy, and hard to put down.",
     image: "/images/kimchi.png",
   },
 ];
@@ -327,30 +327,28 @@ function MuralStory() {
         <div className="mural-copy-parallax relative z-20 mx-auto w-full max-w-[34rem] px-2 text-center">
           <div className="mural-copy-in">
             <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.32em] text-ember-deep">
-              Our Story
+              Our story
             </p>
             <h2
               id="about-heading"
               className="font-serif text-4xl font-light leading-[1.12] text-ink sm:text-5xl md:text-[3.4rem]"
             >
-              A Tradition{" "}
-              <em className="italic text-ember">Born in Fire</em>
+              It started with a{" "}
+              <em className="italic text-ember">grill</em>
             </h2>
             <div className="mt-7 space-y-5 font-sans text-sm font-light leading-relaxed text-warm sm:text-base">
               <p>
-                KM.BBQ was born from a simple obsession: the perfect bite. We
-                bring the warmth of Korean family grilling to every table — live
-                charcoal, hand-trimmed cuts, and banchan made fresh daily.
+                KM.BBQ started with one idea: really good Korean BBQ that you
+                cook yourself. Every table gets its own live charcoal grill.
               </p>
               <p>
-                We source our meats from trusted partners, choosing quality over
-                convenience. Every cut is marinated in-house using recipes
-                passed down through generations, balanced with our own modern
-                touches.
+                We pick our meat carefully and marinate it in house, using
+                recipes we have leaned on for years. You grill it fresh, right
+                where you sit, cooked exactly how you like it.
               </p>
               <p>
-                Pull up a chair, fire up the grill, and take your time. Shared
-                plates, second helpings, and the kind of meal you linger over.
+                Pull up a chair and take your time. Order more whenever you
+                want. Good food, a hot grill, and no reason to rush.
               </p>
             </div>
 
@@ -358,7 +356,7 @@ function MuralStory() {
               href="/menu"
               className="relative isolate mt-9 inline-flex items-center gap-2 overflow-hidden rounded-full border border-ember-deep px-8 py-3 font-sans text-sm font-medium text-ember-deep transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember-deep before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
             >
-              Explore our menu
+              See the menu
               <span aria-hidden="true">→</span>
             </Link>
           </div>
@@ -414,17 +412,17 @@ function HouseFavorites() {
       <div className="mx-auto w-full max-w-4xl text-center lg:max-w-7xl">
         <div className="grill-head">
           <p className="mb-4 transform-gpu font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-            House Favorites
+            House favorites
           </p>
           <h2
             id="favorites-heading"
             className="transform-gpu font-serif text-4xl font-light text-ink md:text-5xl"
           >
-            The Grill Awaits
+            What to grill first
           </h2>
           <p className="mx-auto mt-3 max-w-xl transform-gpu font-sans text-base font-light text-warm">
-            A taste of what&rsquo;s waiting at your table &mdash; signature
-            cuts, classics, and the banchan that brings it all together.
+            A few of the ones people order again and again. The full lineup is
+            on the menu.
           </p>
         </div>
 
@@ -489,7 +487,7 @@ function HouseFavorites() {
             href="/menu"
             className="relative isolate inline-flex overflow-hidden rounded-full border border-ember-deep px-8 py-3 font-sans text-sm font-medium text-ember-deep transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember-deep before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
           >
-            View Full Menu
+            See the full menu
           </Link>
         </div>
       </div>

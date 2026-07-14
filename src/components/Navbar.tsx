@@ -98,7 +98,7 @@ export function Navbar() {
         {/* Logo */}
         <Link
           href="/"
-          aria-label="KM.BBQ — go to top"
+          aria-label="KM.BBQ, back to top"
           className="flex items-center transition-opacity duration-300 hover:opacity-80"
         >
           <Logo

@@ -64,7 +64,7 @@ export function Footer() {
               KM<span className="text-ember">.</span>BBQ
             </p>
             <p className="mt-4 max-w-xs font-sans text-sm font-light leading-relaxed text-white/55">
-              All-You-Can-Eat Charcoal BBQ · Oceanside, CA
+              All-you-can-eat charcoal BBQ in Oceanside, CA
             </p>
             <a
               href="tel:+17604331888"
@@ -131,7 +131,7 @@ export function Footer() {
               rel="noopener noreferrer"
               className="transition-colors hover:text-ember"
             >
-              Crafted by Norvix
+              Site by Norvix
             </a>
           </div>
         </div>

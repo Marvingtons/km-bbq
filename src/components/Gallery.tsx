@@ -207,7 +207,7 @@ export function Gallery() {
             id="gallery-heading"
             className="transform-gpu font-serif text-5xl font-light text-foreground md:text-6xl"
           >
-            Seen Through Fire
+            A look inside
           </h2>
           <a
             href="https://www.instagram.com/kmkoreanbbq/"

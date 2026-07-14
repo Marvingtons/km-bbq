@@ -20,9 +20,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "KM.BBQ — Korean BBQ",
+  title: "KM.BBQ | All-You-Can-Eat Korean BBQ in Oceanside",
   description:
-    "All-you-can-eat, self-serve Korean BBQ in Oceanside, CA. Grill it yourself over live charcoal — beef, pork, seafood, banchan and free ice cream, all one price.",
+    "All-you-can-eat, self-serve Korean BBQ in Oceanside, CA. Grill your own cuts over live charcoal with unlimited banchan. Lunch $21.99, dinner $30.99.",
   keywords: ["Korean BBQ", "KM BBQ", "KBBQ", "restaurant"],
 };
 

@@ -8,9 +8,9 @@ import { MenuJumpNav, type JumpTarget } from "@/components/MenuJumpNav";
 import { ScrollReveal } from "@/components/ScrollReveal";
 
 export const metadata: Metadata = {
-  title: "Full Menu — KM.BBQ",
+  title: "Menu | KM.BBQ",
   description:
-    "The full KM.BBQ spread — all-you-can-eat, self-serve charcoal Korean BBQ. Beef, pork, chicken, seafood, banchan, and premium cuts, all included in one per-person price.",
+    "The full KM.BBQ menu. All-you-can-eat, self-serve Korean BBQ over live charcoal, with beef, pork, chicken, seafood, banchan, and premium cuts all included in one per-person price.",
 };
 
 // ---------------------------------------------------------------------------
@@ -48,7 +48,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Beef Bulgogi",
         korean: "불고기",
-        desc: "Thin ribeye in a soy, sesame, and pear marinade — sweet, savory, and quick on the grill.",
+        desc: "Thin ribeye in a soy, sesame, and pear marinade. Sweet, savory, and fast on the grill.",
         image: "/images/bulgogi.png",
       },
       {
@@ -59,7 +59,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Beef Brisket",
         korean: "차돌박이",
-        desc: "Paper-thin brisket that sears in seconds — dip in sesame oil and a pinch of salt.",
+        desc: "Paper-thin brisket that sears in seconds. Dip it in sesame oil and a pinch of salt.",
         image: "/images/chadolbaegi.png",
       },
     ],
@@ -71,7 +71,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Sliced Pork Belly",
         korean: "삼겹살",
-        desc: "Thick-cut pork belly grilled crisp-edged and juicy — wrap it up your way.",
+        desc: "Thick-cut pork belly, grilled crisp and juicy. Wrap it up your way.",
         image: "/images/samgyeopsal.png",
       },
       {
@@ -82,7 +82,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Spicy Pork Belly",
         korean: "제육볶음",
-        desc: "Pork belly in a gochujang chili marinade — sweet heat with a smoky finish.",
+        desc: "Pork belly in a gochujang chili marinade. Sweet heat with a smoky finish.",
         image: "/images/spicy-pork-belly.png",
       },
     ],
@@ -124,7 +124,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Fresh Fish Fillet",
         korean: "생선",
-        desc: "Mild white fish fillet — light and flaky straight off the grill.",
+        desc: "Mild white fish fillet, light and flaky straight off the grill.",
         image: "/images/fresh-fish-fillet.png",
       },
       {
@@ -201,7 +201,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Salt Beansprout",
         korean: "콩나물",
-        desc: "Crisp seasoned bean sprouts — a cool, clean side.",
+        desc: "Crisp seasoned bean sprouts. A cool, clean side.",
         image: "/images/salt-beansprout.png",
       },
     ],
@@ -221,7 +221,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Kimchi",
         korean: "김치",
-        desc: "House-fermented napa cabbage — bold, tangy, and a little spicy.",
+        desc: "House-fermented napa cabbage. Tangy and a little spicy.",
         image: "/images/kimchi.png",
       },
       {
@@ -257,7 +257,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Plain Rice",
         korean: "밥",
-        desc: "Warm steamed white rice — the perfect base.",
+        desc: "Warm steamed white rice. The perfect base.",
         image: "/images/plain-rice.png",
       },
     ],
@@ -280,7 +280,7 @@ const CATEGORIES: Category[] = [
       },
       {
         name: "Ice Cream",
-        desc: "A cold, sweet finish — self-serve and unlimited.",
+        desc: "A cold, sweet finish. Self-serve and unlimited.",
         image: "/images/ice-cream.png",
       },
     ],
@@ -296,7 +296,7 @@ const PREMIUM: Item[] = [
   },
   {
     name: "Beef Finger Meat",
-    desc: "Prized meat from between the ribs — deeply beefy and tender.",
+    desc: "Prized meat from between the ribs. Deeply beefy and tender.",
     image: "/images/beef-finger-meat.png",
   },
   {
@@ -635,9 +635,9 @@ export default function MenuPage() {
               Walk-in only · No reservations needed
             </p>
             <p className="mt-2 font-sans text-sm font-light text-warm">
-              Feeling lucky? Stop our clock at exactly{" "}
+              Stop our clock at exactly{" "}
               <span className="font-medium text-ember-deep">10.00 seconds</span>{" "}
-              and your next barbecue is free.
+              and your next visit is free.
             </p>
           </div>
         </section>
@@ -674,7 +674,7 @@ export default function MenuPage() {
         {/* Categories */}
         <div className="mx-auto max-w-7xl px-6 pt-12 pb-20">
           <p className="mb-10 transform-gpu text-center font-serif text-lg font-light italic text-warm">
-            Everything is included in the all-you-can-eat price — no per-item
+            Everything is included in the all-you-can-eat price. No per-item
             charges.
           </p>
 
@@ -686,7 +686,7 @@ export default function MenuPage() {
           <TierSection
             label="Premium"
             title="Premium Selection"
-            blurb="A step up in cut and indulgence — included for everyone at the table."
+            blurb="The good stuff. Included for everyone at the table, same as the rest of the menu."
             items={PREMIUM}
             variant="premium"
           />

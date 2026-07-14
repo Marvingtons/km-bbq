@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — KM.BBQ",
+  title: "Privacy Policy | KM.BBQ",
   description:
     "How KM.BBQ in Oceanside, CA handles information collected through our website.",
 };
@@ -15,7 +15,7 @@ export default function PrivacyPage() {
         <p>
           KM.BBQ (&ldquo;we,&rdquo; &ldquo;us&rdquo;) operates the website
           kmbbq.vercel.app. This policy describes what information is handled
-          when you visit our site. We are a restaurant, not a data business —
+          when you visit our site. We are a restaurant, not a data business, so
           we collect as little as possible.
         </p>
       </section>
@@ -55,8 +55,8 @@ export default function PrivacyPage() {
       <section>
         <h2>Contact</h2>
         <p>
-          Questions about this policy? Call us at (760) 433-1888 or visit us at
-          2216 S El Camino Real #108–109, Oceanside, CA 92054.
+          For questions about this policy, call us at (760) 433-1888 or visit
+          us at 2216 S El Camino Real #108–109, Oceanside, CA 92054.
         </p>
       </section>
     </LegalPage>

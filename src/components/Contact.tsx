@@ -23,7 +23,7 @@ export function Contact() {
         <div className="mb-16 text-center">
           <ScrollReveal {...REVEAL}>
             <p className="mb-4 transform-gpu font-sans text-xs font-medium tracking-[0.3em] uppercase text-ember-deep">
-              Find Us
+              Find us
             </p>
           </ScrollReveal>
           <ScrollReveal {...REVEAL} delay={0.05}>
@@ -31,7 +31,7 @@ export function Contact() {
               id="contact-heading"
               className="transform-gpu font-serif text-5xl font-light text-foreground md:text-6xl"
             >
-              Come to the Table
+              Stop by
             </h2>
           </ScrollReveal>
         </div>

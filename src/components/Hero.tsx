@@ -69,9 +69,8 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.4 }}
         >
-          {/* TODO: Replace headline */}
-          Fire, Flavor,{" "}
-          <em className="italic text-ember">Tradition.</em>
+          All you can{" "}
+          <em className="italic text-ember">grill.</em>
         </motion.h1>
 
         <motion.p
@@ -80,8 +79,8 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.65 }}
         >
-          All-you-can-eat, self-serve Korean BBQ grilled over live charcoal —
-          pick what you want, grill it your way, and eat all you like.
+          Self-serve Korean BBQ over live charcoal. Pick your cuts, cook them
+          right at your table, and eat all you want.
         </motion.p>
 
         <motion.div
