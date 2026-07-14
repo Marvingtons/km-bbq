@@ -5,6 +5,7 @@ import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollReveal } from "./ScrollReveal";
+import { EASE, DUR, STAGGER, RISE } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -37,6 +38,9 @@ const PACE = 0.55;
 
 export function Gallery() {
   const sectionRef = useRef<HTMLElement>(null);
+  // One refresh after ALL tile images settle, instead of one per <img> load
+  // (8 rapid ScrollTrigger.refresh() calls used to thrash layout on load).
+  const loadedRef = useRef(0);
 
   useLayoutEffect(() => {
     const mm = gsap.matchMedia();
@@ -53,6 +57,9 @@ export function Gallery() {
         const track = q(".gallery-track")[0] as HTMLElement;
         const wrapper = track.parentElement as HTMLElement;
         const tiles = q(".gallery-tile") as HTMLElement[];
+        const caps = tiles.map(
+          (t) => t.querySelector(".gallery-caption") as HTMLElement | null
+        );
 
         // Total sideways distance: full row width minus the visible window to
         // its right of the heading. Read live (invalidateOnRefresh) so it stays
@@ -60,25 +67,42 @@ export function Gallery() {
         const getTravel = () =>
           Math.max(0, track.scrollWidth - wrapper.clientWidth);
 
-        // Fade the caption of whichever tile is nearest screen-center in, the
-        // rest out — animating opacity only. Driven from the scrub onUpdate so
-        // it tracks the smoothed scroll position.
+        // --- Caption crossfade WITHOUT per-frame layout reads -----------------
+        // Previously updateCaptions() called getBoundingClientRect() on all 8
+        // tiles every scrub frame — a forced synchronous layout that spiked
+        // frame times on slower machines. Instead we measure each tile's
+        // screen-center ONCE (on refresh/resize), remember the track's x at
+        // that moment, then per frame derive the live center from the track's
+        // transform delta — read cheaply from GSAP's cache, no layout.
+        let metrics: { center: number; half: number }[] = [];
+        let baseX = 0;
+        let viewCenter = window.innerWidth / 2;
+
+        const measure = () => {
+          baseX = (gsap.getProperty(track, "x") as number) || 0;
+          viewCenter = window.innerWidth / 2;
+          metrics = tiles.map((t) => {
+            const r = t.getBoundingClientRect();
+            return { center: r.left + r.width / 2, half: r.width / 2 };
+          });
+          updateCaptions();
+        };
+
         const updateCaptions = () => {
-          const center = window.innerWidth / 2;
-          tiles.forEach((tile) => {
-            const rect = tile.getBoundingClientRect();
-            const tileCenter = rect.left + rect.width / 2;
-            const dist = Math.abs(tileCenter - center);
-            // Full opacity within ~15% of the tile's half-width of center,
-            // faded out by ~75% — a smooth crossfade as tiles pass through.
+          const dx = ((gsap.getProperty(track, "x") as number) || 0) - baseX;
+          for (let i = 0; i < tiles.length; i++) {
+            const m = metrics[i];
+            const cap = caps[i];
+            if (!m || !cap) continue;
+            const dist = Math.abs(m.center + dx - viewCenter);
+            // Full opacity within ~15% of half-width of center, faded by ~75%.
             const o = gsap.utils.clamp(
               0,
               1,
-              1 - (dist - rect.width * 0.15) / (rect.width * 0.6)
+              1 - (dist - m.half * 0.3) / (m.half * 1.2)
             );
-            const cap = tile.querySelector(".gallery-caption") as HTMLElement;
-            if (cap) gsap.set(cap, { opacity: o });
-          });
+            gsap.set(cap, { opacity: o });
+          }
         };
 
         gsap.set(track, { x: 0 });
@@ -97,24 +121,21 @@ export function Gallery() {
             // position so the travel never snaps notch-to-notch.
             scrub: 1,
             invalidateOnRefresh: true,
-            onRefresh: updateCaptions,
+            onRefresh: measure,
             onUpdate: updateCaptions,
           },
         });
 
-        // One-time staggered fade-up of the tiles as the section first
-        // scrolls into view. It animates each tile's autoAlpha + y —
-        // DIFFERENT properties and targets than the pin (which animates `x`
-        // on the parent track) — so the two timelines compose without
-        // fighting. `once` means it never re-hides tiles on scroll-back, and
-        // living inside this matchMedia means the mobile / reduced-motion
-        // branch never runs it (tiles render fully visible there).
+        // One-time staggered fade-up of the tiles as the section first scrolls
+        // into view — autoAlpha + y only, on the shared motion vocabulary. This
+        // targets the tiles while the pin animates `x` on the parent track, so
+        // the two never fight over a property.
         gsap.from(tiles, {
           autoAlpha: 0,
-          y: 24,
-          stagger: 0.08,
-          duration: 0.5,
-          ease: "power2.out",
+          y: RISE,
+          stagger: STAGGER.base,
+          duration: DUR.fast,
+          ease: EASE.out,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 80%",
@@ -127,8 +148,8 @@ export function Gallery() {
       }
     );
 
-    // Re-measure pin distance once async content settles (images already call
-    // refresh on load, but fonts / final window load can shift layout too).
+    // Re-measure pin distance once async content settles (fonts / final window
+    // load can shift layout; the tile images are handled by the load counter).
     const refreshST = () => ScrollTrigger.refresh();
     window.addEventListener("load", refreshST);
     document.fonts?.ready.then(refreshST);
@@ -139,7 +160,11 @@ export function Gallery() {
     };
   }, []);
 
-  const refresh = () => ScrollTrigger.refresh();
+  // Count image loads; refresh exactly once when the last tile lands.
+  const onTileLoad = () => {
+    loadedRef.current += 1;
+    if (loadedRef.current >= GALLERY_ITEMS.length) ScrollTrigger.refresh();
+  };
 
   return (
     <section
@@ -197,7 +222,7 @@ export function Gallery() {
         {/* Photo row. On desktop the GSAP timeline translates this track; on
             mobile / reduced motion the wrapper is a native snap carousel. */}
         <div className="overflow-x-auto px-6 [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory motion-safe:md:flex-1 motion-safe:md:overflow-hidden motion-safe:md:px-0 [&::-webkit-scrollbar]:hidden">
-          <div className="gallery-track flex items-center gap-5 pr-6 will-change-transform motion-safe:md:gap-8 motion-safe:md:pr-[12vw]">
+          <div className="gallery-track flex items-center gap-5 pr-6 motion-safe:md:gap-8 motion-safe:md:pr-[12vw]">
             {GALLERY_ITEMS.map((item) => (
               <figure
                 key={item.id}
@@ -210,14 +235,14 @@ export function Gallery() {
                   fill
                   sizes="(max-width: 768px) 70vw, 40vw"
                   className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
-                  onLoad={refresh}
+                  onLoad={onTileLoad}
                 />
-                {/* Warm ember wash on hover — a subtle glow via `multiply`
-                    (not a heavy tint). Sits above the image but below the
-                    caption so the label stays legible. */}
+                {/* Warm ember wash on hover — a soft glow from the bottom. Plain
+                    (non-blend) compositing so it never turns the moving tile
+                    into a blend layer; opacity-only transition. */}
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 bg-ember opacity-0 mix-blend-multiply transition-opacity duration-500 group-hover:opacity-15"
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ember/25 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                 />
                 {/* Caption: dark bottom gradient + small letter-spaced label.
                     Visible per-tile on mobile; on desktop it starts hidden and
