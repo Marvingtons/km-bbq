@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 const ADDRESS = "2216 S El Camino Real #108-109, Oceanside, CA 92054";
 
@@ -10,9 +11,10 @@ const ADDRESS = "2216 S El Camino Real #108-109, Oceanside, CA 92054";
 // the geocoder answers (and as the fallback if geocoding is unavailable).
 const FALLBACK_CENTER = { lat: 33.1809, lng: -117.3376 };
 
-// A key unlocks the branded JavaScript map (custom style + ember pin). Without
-// one we degrade to a warm, on-brand static location panel (below) rather than
-// the stock Google embed, which brought a cool palette and POI clutter.
+// A key unlocks the branded, interactive JavaScript map (warm style, POI off,
+// ember pin). Without one we show a real warm-toned static map image (baked
+// from OpenStreetMap, see /public/images/contact-map.jpg) — never an empty
+// grid. Production currently has NO key set, so the static path is what ships.
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 // Opens turn-by-turn directions in Google Maps — no API key required.
@@ -20,9 +22,8 @@ const DIRECTIONS_URL =
   "https://www.google.com/maps/dir/?api=1&destination=" +
   encodeURIComponent(ADDRESS);
 
-// Warm cream/charcoal map palette — the single ember accent lives on the pin,
-// never in the map itself. Land is cream, water/parks muted taupe, labels warm
-// charcoal with a cream halo. No default Google blue anywhere.
+// Warm cream/charcoal map palette for the interactive path — the single ember
+// accent lives on the pin, never in the map itself. No default Google blue.
 const MAP_STYLE: any[] = [
   { elementType: "geometry", stylers: [{ color: "#f2ebdd" }] },
   { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
@@ -46,8 +47,7 @@ const MAP_STYLE: any[] = [
   { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#8a7d6f" }] },
 ];
 
-// Ember teardrop pin with a cream eye — drawn from tokens (#e0662b / #a8481c /
-// #faf6ef) so it stays on-brand at any zoom.
+// Ember teardrop pin with a cream eye — drawn from tokens so it stays on-brand.
 const EMBER_PIN =
   "data:image/svg+xml;charset=UTF-8," +
   encodeURIComponent(
@@ -62,9 +62,7 @@ let mapsPromise: Promise<void> | null = null;
 function loadMaps(key: string) {
   if (mapsPromise) return mapsPromise;
   mapsPromise = new Promise<void>((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>(
-      "script[data-gmaps]",
-    );
+    const existing = document.querySelector<HTMLScriptElement>("script[data-gmaps]");
     if (existing) {
       existing.addEventListener("load", () => resolve());
       existing.addEventListener("error", () => reject(new Error("maps")));
@@ -79,6 +77,41 @@ function loadMaps(key: string) {
     document.head.appendChild(script);
   });
   return mapsPromise;
+}
+
+// Inline ember pin for the static map, sized for the overlay.
+function EmberPin() {
+  return (
+    <svg
+      width="34"
+      height="46"
+      viewBox="0 0 36 48"
+      className="drop-shadow-[0_6px_10px_rgba(74,44,22,0.4)]"
+      aria-hidden="true"
+    >
+      <path
+        d="M18 0C8.06 0 0 8.06 0 18c0 12.5 18 30 18 30s18-17.5 18-30C36 8.06 27.94 0 18 0z"
+        fill="var(--color-ember)"
+        stroke="var(--color-ember-deep)"
+        strokeWidth="1.5"
+      />
+      <circle cx="18" cy="18" r="6.5" fill="var(--color-cream)" />
+    </svg>
+  );
+}
+
+function DirectionsButton() {
+  return (
+    <a
+      href={DIRECTIONS_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-cream/95 px-4 py-2 font-sans text-xs font-semibold text-ember-deep shadow-card ring-1 ring-ink/10 transition-colors duration-300 hover:bg-ember-deep hover:text-white focus-visible:bg-ember-deep focus-visible:text-white"
+    >
+      Get Directions
+      <span aria-hidden="true">→</span>
+    </a>
+  );
 }
 
 export function ContactMap() {
@@ -119,7 +152,6 @@ export function ContactMap() {
           });
         };
 
-        // Geocode for pin accuracy; fall back to the known coordinates.
         new google.maps.Geocoder().geocode(
           { address: ADDRESS },
           (results: any, status: string) => {
@@ -142,73 +174,41 @@ export function ContactMap() {
     };
   }, []);
 
-  // No key (or the script failed): a warm, self-contained location panel —
-  // abstract cream/taupe street lines, the ember pin, and a directions button.
-  // Fully on-brand and free of the stock embed's cool palette and POI clutter.
-  if (!API_KEY || failed) {
-    return (
-      <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-cream-deep px-6 text-center">
-        {/* Abstract street grid — decorative; evokes a map without real
-            geography, drawn from warm tokens so nothing reads cool. */}
-        <svg
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 h-full w-full"
-          preserveAspectRatio="xMidYMid slice"
-          viewBox="0 0 400 225"
-          fill="none"
-        >
-          <g stroke="var(--color-warm-muted)" strokeOpacity="0.16" strokeWidth="6">
-            <path d="M-20 72 H420" />
-            <path d="M-20 158 H420" />
-            <path d="M92 -20 V245" />
-            <path d="M298 -20 V245" />
-          </g>
-          <g stroke="var(--color-warm-muted)" strokeOpacity="0.09" strokeWidth="2">
-            <path d="M-20 116 H420" />
-            <path d="M46 -20 V245" />
-            <path d="M200 -20 V245" />
-            <path d="M-20 30 L200 245" />
-            <path d="M260 -20 L440 130" />
-          </g>
-        </svg>
+  const showStatic = !API_KEY || failed;
 
-        <div className="relative z-10 flex transform-gpu flex-col items-center">
-          <svg
-            width="34"
-            height="46"
-            viewBox="0 0 36 48"
-            className="drop-shadow-[0_6px_10px_rgba(74,44,22,0.28)]"
+  return (
+    <div className="relative h-full w-full bg-cream-deep">
+      {showStatic ? (
+        <>
+          {/* Real, warm-toned static map (OpenStreetMap, baked at build). */}
+          <Image
+            src="/images/contact-map.jpg"
+            alt="Map showing KM.BBQ on South El Camino Real in Oceanside"
+            fill
+            sizes="(max-width: 1024px) 100vw, 60vw"
+            className="object-cover"
+          />
+          {/* Soft warm scrim: unifies the tone and hides the map's cropped edge. */}
+          <div
             aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-charcoal/15 via-transparent to-cream/20"
+          />
+          {/* Ember pin — its tip sits on the storefront at map centre. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-full"
           >
-            <path
-              d="M18 0C8.06 0 0 8.06 0 18c0 12.5 18 30 18 30s18-17.5 18-30C36 8.06 27.94 0 18 0z"
-              fill="var(--color-ember)"
-              stroke="var(--color-ember-deep)"
-              strokeWidth="1.5"
-            />
-            <circle cx="18" cy="18" r="6.5" fill="var(--color-cream)" />
-          </svg>
-          <p className="mt-3 font-sans text-base font-bold tracking-tight text-ink">
-            KM<span className="text-ember">.</span>BBQ
-          </p>
-          <address className="mt-1 font-sans text-sm font-light not-italic leading-relaxed text-warm">
-            2216 S El Camino Real #108–109
-            <br />
-            Oceanside, CA 92054
-          </address>
-          <a
-            href={DIRECTIONS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-ember-deep px-5 py-2 font-sans text-xs font-medium text-ember-deep transition-colors duration-300 hover:bg-ember-deep hover:text-white focus-visible:bg-ember-deep focus-visible:text-white"
-          >
-            Get Directions
-            <span aria-hidden="true">→</span>
-          </a>
-        </div>
-      </div>
-    );
-  }
-
-  return <div ref={ref} className="h-full w-full" aria-label="Map to KM BBQ Oceanside" />;
+            <EmberPin />
+          </div>
+          {/* Required OpenStreetMap attribution. */}
+          <span className="pointer-events-none absolute bottom-1.5 left-2.5 font-sans text-[10px] text-ink/55">
+            © OpenStreetMap
+          </span>
+        </>
+      ) : (
+        <div ref={ref} className="h-full w-full" aria-label="Map to KM BBQ Oceanside" />
+      )}
+      <DirectionsButton />
+    </div>
+  );
 }
