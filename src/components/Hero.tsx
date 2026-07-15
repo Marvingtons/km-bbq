@@ -125,6 +125,30 @@ export function Hero() {
           </motion.a>
         </motion.div>
       </div>
+
+      {/* Seam: Hero -> About. The mural's first scattered marks drift up into
+          the last of the hero as you scroll, so the illustrated world arrives
+          before the section does. Driven by SeamMotion; static (hidden) at
+          rest and for reduced motion. */}
+      <div
+        className="hero-arrival pointer-events-none absolute inset-x-0 bottom-[7%] z-10 mx-auto flex max-w-sm items-center justify-center gap-7 motion-reduce:hidden"
+        aria-hidden="true"
+      >
+        {[
+          { s: 7, c: "var(--color-ember)", o: 0.9 },
+          { s: 4, c: "rgba(255,255,255,0.7)", o: 0.7 },
+          { s: 9, c: "var(--color-ember)", o: 0.8 },
+          { s: 5, c: "rgba(255,255,255,0.6)", o: 0.6 },
+          { s: 6, c: "var(--color-ember)", o: 0.85 },
+          { s: 4, c: "rgba(255,255,255,0.7)", o: 0.7 },
+        ].map((d, i) => (
+          <span
+            key={i}
+            className="block rounded-full"
+            style={{ width: d.s, height: d.s, background: d.c, opacity: d.o }}
+          />
+        ))}
+      </div>
     </section>
   );
 }

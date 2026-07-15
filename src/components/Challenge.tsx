@@ -6,6 +6,7 @@ import { gsap } from "gsap";
 import { ScrollReveal } from "./ScrollReveal";
 import { EASE } from "@/lib/motion";
 import { prefersReducedMotion } from "@/lib/motion";
+import { SeamThread } from "./SeamThread";
 
 // Seven-segment face for the LED clock — bundled locally (SIL OFL) so the
 // digits never depend on a CDN, and share one advance width so the clock stays
@@ -165,8 +166,12 @@ export function Challenge() {
     <section
       id="challenge"
       aria-labelledby="challenge-heading"
-      className="bg-cream-deep px-6 py-section"
+      className="relative bg-cream-deep px-6 py-section"
+      data-seam-morph
+      data-from="#faf6ef"
+      data-to="#f2ebdd"
     >
+      <SeamThread />
       <div className="mx-auto max-w-xl">
         {/* Compact header, tight to the machine below. */}
         <div className="mb-8 text-center">

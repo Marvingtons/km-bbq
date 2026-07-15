@@ -6,6 +6,7 @@ import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { EASE, DUR, STAGGER, RISE, MOTION_OK } from "@/lib/motion";
+import { SeamThread } from "./SeamThread";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -209,6 +210,7 @@ function MuralStory() {
       aria-labelledby="about-heading"
       className="relative isolate overflow-hidden bg-cream scroll-mt-20"
     >
+      <SeamThread />
       <div className="relative flex min-h-[42rem] items-center justify-center px-6 py-section md:min-h-[46rem]">
         {/* ---- SCATTER (z-0, deepest / slowest) ------------------------- */}
         <div
@@ -362,6 +364,32 @@ function MuralStory() {
           </div>
         </div>
       </div>
+
+      {/* Seam: mural -> House Favorites. A couple of mural accents drift down
+          past the boundary and fade, so the illustrated world trails off into
+          the photography instead of stopping at a border (driven by SeamMotion). */}
+      <div
+        className="mural-trail pointer-events-none absolute inset-x-0 bottom-6 z-[13] flex items-center justify-center gap-16 motion-reduce:hidden"
+        aria-hidden="true"
+      >
+        <span
+          className="block h-2.5 w-2.5 rounded-full"
+          style={{ background: "var(--color-ember)", opacity: 0.7 }}
+        />
+        <svg width="34" height="14" viewBox="0 0 34 14" fill="none">
+          <path
+            d="M1 9c5-6 10 4 16-1s10-6 16 2"
+            stroke="var(--color-warm-muted)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeOpacity="0.6"
+          />
+        </svg>
+        <span
+          className="block h-2 w-2 rounded-full"
+          style={{ background: "var(--color-ember)", opacity: 0.6 }}
+        />
+      </div>
     </section>
   );
 }
@@ -408,7 +436,11 @@ function HouseFavorites() {
       ref={ref}
       aria-labelledby="favorites-heading"
       className="relative bg-cream-deep px-6 py-section"
+      data-seam-morph
+      data-from="#faf6ef"
+      data-to="#f2ebdd"
     >
+      <SeamThread />
       <div className="mx-auto w-full max-w-4xl text-center lg:max-w-7xl">
         <div className="grill-head">
           <p className="mb-4 transform-gpu font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">

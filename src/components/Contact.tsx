@@ -1,6 +1,7 @@
 import { ScrollReveal } from "./ScrollReveal";
 import { ContactMap } from "./ContactMap";
 import { SocialChips } from "./SocialLinks";
+import { SeamThread } from "./SeamThread";
 
 const HOURS = [
   { day: "Sunday – Thursday", time: "12:00 PM – 9:30 PM" },
@@ -16,9 +17,10 @@ export function Contact() {
   return (
     <section
       id="contact"
-      className="bg-cream-deep py-section px-6"
+      className="relative bg-cream-deep py-section px-6"
       aria-labelledby="contact-heading"
     >
+      <SeamThread />
       <div className="mx-auto max-w-7xl">
         <div className="mb-16 text-center">
           <ScrollReveal {...REVEAL}>

@@ -34,7 +34,7 @@ export function Footer() {
 
   return (
     <footer
-      className="relative overflow-hidden bg-charcoal px-6 pt-16 pb-10 text-white/60"
+      className="relative -mt-6 overflow-hidden bg-charcoal px-6 pt-16 pb-10 text-white/60"
       role="contentinfo"
     >
       {/* Deliberate seam: a single crisp ember hairline marks the cream→charcoal

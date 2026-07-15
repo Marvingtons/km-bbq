@@ -5,6 +5,7 @@ import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollReveal } from "./ScrollReveal";
+import { SeamThread } from "./SeamThread";
 import { EASE, DUR, STAGGER, RISE, MOTION_OK } from "@/lib/motion";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -175,25 +176,22 @@ export function Gallery() {
       // page itself never scrolls sideways at any width. The unified cream base
       // sits under the faded ink-wash so it reads on a consistent tone.
       className="relative overflow-hidden bg-cream py-20 motion-safe:md:py-0"
+      data-seam-morph
+      data-from="#f2ebdd"
+      data-to="#faf6ef"
     >
-      {/* Ink-wash atmosphere — a SUPPORTING TEXTURE, not a wall. `multiply`
-          drops the art's white field so only the ink mountains, the grey
-          cloud/smoke, the ember sun and the gold line remain, and opacity is
-          dialed right down so it reads as a faint atmosphere behind the photos
-          rather than competing with them. A warm `sepia`+`hue-rotate` filter
-          pulls the cool grey ink toward the mural's warm brown so it belongs to
-          the same hand-drawn world instead of reading as a third art style.
-          The art is a wide panoramic: `cover` fills the full-screen pinned
-          section on desktop, `contain` keeps the whole composition on mobile.
-          The section's overflow-hidden means it never adds a sideways
-          scrollbar. */}
+      <SeamThread />
+      {/* Ink-wash atmosphere — a faint, warm supporting texture behind the
+          photos. The warmth + white-drop is BAKED into the asset
+          (gallery-bg-warm.jpg), so this layer carries no filter or mix-blend and
+          is safe to parallax. It's oversized (top -8%, h 116%) so the boundary
+          parallax never reveals a gap. Depth layer: moves at ~0.85x scroll. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0 bg-contain bg-center bg-no-repeat opacity-[0.16] mix-blend-multiply md:bg-cover"
-        style={{
-          backgroundImage: "url(/images/gallery-bg.png)",
-          filter: "sepia(0.4) saturate(1.15) hue-rotate(-12deg)",
-        }}
+        data-seam-parallax
+        data-parallax="5"
+        className="pointer-events-none absolute inset-x-0 top-[-8%] z-0 h-[116%] bg-contain bg-center bg-no-repeat opacity-[0.16] md:bg-cover"
+        style={{ backgroundImage: "url(/images/gallery-bg-warm.jpg)" }}
       />
 
       <div className="relative z-10 flex flex-col gap-10 motion-safe:md:h-screen motion-safe:md:flex-row motion-safe:md:items-center motion-safe:md:gap-0">

@@ -5,6 +5,8 @@ import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { MenuJumpNav, type JumpTarget } from "@/components/MenuJumpNav";
+import { SeamMotion } from "@/components/SeamMotion";
+import { SeamThread } from "@/components/SeamThread";
 import { ScrollReveal } from "@/components/ScrollReveal";
 
 export const metadata: Metadata = {
@@ -693,7 +695,13 @@ export default function MenuPage() {
         </div>
 
         {/* Info band */}
-        <section className="bg-cream-deep px-6 py-20">
+        <section
+          className="relative bg-cream-deep px-6 py-20"
+          data-seam-morph
+          data-from="#faf6ef"
+          data-to="#f2ebdd"
+        >
+          <SeamThread />
           <div className="mx-auto max-w-5xl text-center transform-gpu">
             <h2 className="font-serif text-4xl font-light text-foreground md:text-5xl">
               Come Hungry
@@ -737,6 +745,8 @@ export default function MenuPage() {
             </div>
           </div>
         </section>
+        {/* Calm: background continuity + seam motif only, no parallax/overlaps. */}
+        <SeamMotion calm />
       </main>
       <Footer />
     </>
