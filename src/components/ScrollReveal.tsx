@@ -1,7 +1,13 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView, type UseInViewOptions } from "framer-motion";
+import {
+  motion,
+  useInView,
+  useReducedMotion,
+  type UseInViewOptions,
+} from "framer-motion";
+import { EASE, DUR, RISE } from "@/lib/motion";
 
 interface ScrollRevealProps {
   children: React.ReactNode;
@@ -23,29 +29,44 @@ export function ScrollReveal({
   delay = 0,
   direction = "up",
   once = true,
-  duration = 0.7,
+  duration = DUR.base,
   margin = "-60px",
 }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once, margin });
+  // framer-motion does not consult prefers-reduced-motion on its own. Without
+  // this, every reveal still slid and faded for users who asked for no motion —
+  // out of step with About/Gallery, whose GSAP work is gated on a matchMedia.
+  const reduce = useReducedMotion();
 
+  // Same rise distance the GSAP entrances use, so framer + GSAP reveals share
+  // one personality across the site.
   const offsets = {
-    up: { y: 40, x: 0 },
-    down: { y: -40, x: 0 },
-    left: { y: 0, x: 40 },
-    right: { y: 0, x: -40 },
+    up: { y: RISE, x: 0 },
+    down: { y: -RISE, x: 0 },
+    left: { y: 0, x: RISE },
+    right: { y: 0, x: -RISE },
     none: { y: 0, x: 0 },
   };
 
-  const { x, y } = offsets[direction];
+  // Reduced motion: no travel, no fade-in delay — the content is simply there.
+  const { x, y } = reduce ? { x: 0, y: 0 } : offsets[direction];
 
   return (
     <motion.div
       ref={ref}
       className={className}
-      initial={{ opacity: 0, y, x }}
-      animate={inView ? { opacity: 1, y: 0, x: 0 } : { opacity: 0, y, x }}
-      transition={{ duration, ease: [0.25, 0.46, 0.45, 0.94], delay }}
+      initial={reduce ? false : { opacity: 0, y, x }}
+      animate={
+        reduce
+          ? { opacity: 1, y: 0, x: 0 }
+          : inView
+            ? { opacity: 1, y: 0, x: 0 }
+            : { opacity: 0, y, x }
+      }
+      transition={
+        reduce ? { duration: 0 } : { duration, ease: EASE.outArr, delay }
+      }
     >
       {children}
     </motion.div>

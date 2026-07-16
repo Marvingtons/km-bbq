@@ -5,11 +5,14 @@ import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { MenuJumpNav, type JumpTarget } from "@/components/MenuJumpNav";
+import { SeamMotion } from "@/components/SeamMotion";
+import { SeamThread } from "@/components/SeamThread";
+import { ScrollReveal } from "@/components/ScrollReveal";
 
 export const metadata: Metadata = {
-  title: "Full Menu — KM.BBQ",
+  title: "Menu | KM.BBQ",
   description:
-    "The full KM.BBQ spread — all-you-can-eat, self-serve charcoal Korean BBQ. Beef, pork, chicken, seafood, banchan, and premium cuts, all included in one per-person price.",
+    "The full KM.BBQ menu. All-you-can-eat, self-serve Korean BBQ over live charcoal, with beef, pork, chicken, seafood, banchan, and premium cuts all included in one per-person price.",
 };
 
 // ---------------------------------------------------------------------------
@@ -47,7 +50,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Beef Bulgogi",
         korean: "불고기",
-        desc: "Thin ribeye in a soy, sesame, and pear marinade — sweet, savory, and quick on the grill.",
+        desc: "Thin ribeye in a soy, sesame, and pear marinade. Sweet, savory, and fast on the grill.",
         image: "/images/bulgogi.png",
       },
       {
@@ -58,7 +61,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Beef Brisket",
         korean: "차돌박이",
-        desc: "Paper-thin brisket that sears in seconds — dip in sesame oil and a pinch of salt.",
+        desc: "Paper-thin brisket that sears in seconds. Dip it in sesame oil and a pinch of salt.",
         image: "/images/chadolbaegi.png",
       },
     ],
@@ -70,7 +73,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Sliced Pork Belly",
         korean: "삼겹살",
-        desc: "Thick-cut pork belly grilled crisp-edged and juicy — wrap it up your way.",
+        desc: "Thick-cut pork belly, grilled crisp and juicy. Wrap it up your way.",
         image: "/images/samgyeopsal.png",
       },
       {
@@ -81,7 +84,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Spicy Pork Belly",
         korean: "제육볶음",
-        desc: "Pork belly in a gochujang chili marinade — sweet heat with a smoky finish.",
+        desc: "Pork belly in a gochujang chili marinade. Sweet heat with a smoky finish.",
         image: "/images/spicy-pork-belly.png",
       },
     ],
@@ -123,14 +126,16 @@ const CATEGORIES: Category[] = [
       {
         name: "Fresh Fish Fillet",
         korean: "생선",
-        desc: "Mild white fish fillet — light and flaky straight off the grill.",
+        desc: "Mild white fish fillet, light and flaky straight off the grill.",
         image: "/images/fresh-fish-fillet.png",
       },
       {
         name: "Spicy Squid",
         korean: "오징어",
         desc: "Tender squid tossed in a spicy chili marinade with a smoky char.",
-        image: "/images/spicy-squid.png",
+        // Stand-in until a squid shot exists: the spicy-octopus photo is the
+        // same gochujang-coated cephalopod presentation. Swap when shot.
+        image: "/images/spicy-octopus.png",
       },
     ],
   },
@@ -198,7 +203,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Salt Beansprout",
         korean: "콩나물",
-        desc: "Crisp seasoned bean sprouts — a cool, clean side.",
+        desc: "Crisp seasoned bean sprouts. A cool, clean side.",
         image: "/images/salt-beansprout.png",
       },
     ],
@@ -218,7 +223,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Kimchi",
         korean: "김치",
-        desc: "House-fermented napa cabbage — bold, tangy, and a little spicy.",
+        desc: "House-fermented napa cabbage. Tangy and a little spicy.",
         image: "/images/kimchi.png",
       },
       {
@@ -254,7 +259,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Plain Rice",
         korean: "밥",
-        desc: "Warm steamed white rice — the perfect base.",
+        desc: "Warm steamed white rice. The perfect base.",
         image: "/images/plain-rice.png",
       },
     ],
@@ -277,7 +282,7 @@ const CATEGORIES: Category[] = [
       },
       {
         name: "Ice Cream",
-        desc: "A cold, sweet finish — self-serve and unlimited.",
+        desc: "A cold, sweet finish. Self-serve and unlimited.",
         image: "/images/ice-cream.png",
       },
     ],
@@ -293,7 +298,7 @@ const PREMIUM: Item[] = [
   },
   {
     name: "Beef Finger Meat",
-    desc: "Prized meat from between the ribs — deeply beefy and tender.",
+    desc: "Prized meat from between the ribs. Deeply beefy and tender.",
     image: "/images/beef-finger-meat.png",
   },
   {
@@ -319,7 +324,9 @@ const PREMIUM: Item[] = [
   {
     name: "Beef Skirt Steak",
     desc: "Richly marbled skirt steak that chars beautifully.",
-    image: "/images/beef-skirt-steak.png",
+    // Stand-in until a skirt-steak shot exists: prime-new-york-steak is the
+    // same raw, marbled-beef presentation. Swap when shot.
+    image: "/images/prime-new-york-steak.png",
   },
   {
     name: "Mussels",
@@ -361,27 +368,41 @@ const imageExists = (image: string) =>
 function ItemMedia({ item }: { item: Item }) {
   if (item.image && imageExists(item.image)) {
     return (
-      <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden bg-neutral-100">
+      <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden rounded-card bg-cream-deep">
         <Image
           src={item.image}
           alt={item.name}
           fill
-          className="object-cover"
+          className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
           sizes={IMAGE_SIZES}
         />
       </div>
     );
   }
 
-  // Tasteful placeholder: a soft cream gradient with the dish's serif initial,
-  // so cards without a photo still read as intentional rather than broken.
+  // Branded fallback: a warm cream tile with a faint ember wash, the KM.BBQ
+  // flame glyph, and the wordmark — so a dish still awaiting a photo reads as an
+  // intentional, on-brand card rather than an empty/missing slot.
   return (
     <div
       aria-hidden="true"
-      className="mb-4 flex aspect-[16/9] w-full items-center justify-center overflow-hidden bg-gradient-to-br from-[#f3ebdd] to-[#e7dac3]"
+      className="mb-4 flex aspect-[16/9] w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-card bg-cream-deep"
+      style={{
+        backgroundImage:
+          "radial-gradient(80% 90% at 50% 20%, color-mix(in srgb, var(--color-ember) 12%, transparent) 0%, transparent 70%)",
+      }}
     >
-      <span className="font-serif text-5xl font-light text-[#c8b692] select-none">
-        {item.name.charAt(0)}
+      <svg
+        width="30"
+        height="30"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className="text-ember/70"
+      >
+        <path d="M12 2c.4 3.1-1.6 4.6-3 6.2C7.4 9.9 6 11.6 6 14a6 6 0 0 0 12 0c0-1.8-.8-3.3-1.8-4.6-.3 1-.9 1.7-1.8 2C15 9 14.4 6.3 12 2Zm0 17.5A2.6 2.6 0 0 1 9.4 17c0-1.2.8-2 1.5-2.8.3.6.8 1 1.5 1.2.7-.3 1-.8 1.1-1.5.8.8 1.2 1.6 1.2 2.6a2.6 2.6 0 0 1-2.7 3Z" />
+      </svg>
+      <span className="font-sans text-[10px] font-semibold uppercase tracking-[0.25em] text-warm-muted select-none">
+        KM<span className="text-ember/70">·</span>BBQ
       </span>
     </div>
   );
@@ -396,22 +417,27 @@ function ItemCard({
 }) {
   const accent =
     variant === "premium"
-      ? "border-brand-orange/30 bg-white"
+      ? "border-ember/30 bg-cream"
       : variant === "signature"
-        ? "border-brand-blue/30 bg-white"
-        : "border-neutral-200 bg-white";
+        ? "border-ember/30 bg-cream"
+        : "border-ink/10 bg-cream";
 
   const topBar =
     variant === "premium"
-      ? "bg-brand-orange"
+      ? "bg-ember"
       : variant === "signature"
-        ? "bg-brand-blue"
+        ? "bg-ember"
         : null;
 
   return (
     <div className="group h-full">
+      {/* transform-gpu: promotes the whole card to its own compositing layer so
+          its text rasterizes with uniform grayscale AA. Without it, the light
+          warm-gray body copy picks up blue/red subpixel-AA fringing on Windows
+          (ClearType), which reads as a multi-color tint / rendering bug. Same
+          fix as the "The Grill Awaits" subtitle in About. */}
       <div
-        className={`relative flex h-full flex-col border ${accent} p-5 transition-shadow hover:shadow-md`}
+        className={`relative flex h-full flex-col overflow-hidden rounded-card border ${accent} p-5 transition-[transform,box-shadow] duration-300 transform-gpu hover:-translate-y-1 hover:border-ember/40 hover:shadow-card`}
       >
         {topBar && (
           <span
@@ -424,15 +450,15 @@ function ItemCard({
           {item.name}
         </h3>
         {item.korean && (
-          <p className="font-sans text-sm font-light text-foreground/40">
+          <p className="font-sans text-sm font-light text-warm-muted">
             {item.korean}
           </p>
         )}
-        <p className="mt-2 font-sans text-sm font-light leading-relaxed text-foreground/60">
+        <p className="mt-2 font-sans text-sm font-light leading-relaxed text-warm">
           {item.desc}
         </p>
         {item.note && (
-          <p className="mt-3 font-sans text-xs font-medium uppercase tracking-[0.12em] text-brand-red">
+          <p className="mt-3 font-sans text-xs font-medium uppercase tracking-[0.12em] text-ember-deep">
             {item.note}
           </p>
         )}
@@ -444,24 +470,28 @@ function ItemCard({
 function CategorySection({ category }: { category: Category }) {
   return (
     <section id={slugify(category.name)} className="mt-16 scroll-mt-32 first:mt-0">
-      <div className="mb-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-[#e4d9c4] pb-4">
-        <h2 className="font-serif text-3xl font-light text-foreground md:text-4xl">
-          {category.name}
-        </h2>
-        {category.korean && (
-          <span className="font-sans text-base font-light text-foreground/40">
-            {category.korean}
-          </span>
-        )}
-        {category.tag && (
-          <span className="ml-auto font-sans text-xs font-medium uppercase tracking-[0.2em] text-brand-orange">
-            {category.tag}
-          </span>
-        )}
-      </div>
+      <ScrollReveal>
+        <div className="mb-7 flex transform-gpu flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-ink/10 pb-4">
+          <h2 className="font-serif text-3xl font-light text-foreground md:text-4xl">
+            {category.name}
+          </h2>
+          {category.korean && (
+            <span className="font-sans text-base font-light text-warm-muted">
+              {category.korean}
+            </span>
+          )}
+          {category.tag && (
+            <span className="ml-auto font-sans text-xs font-medium uppercase tracking-[0.2em] text-ember-deep">
+              {category.tag}
+            </span>
+          )}
+        </div>
+      </ScrollReveal>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {category.items.map((item) => (
-          <ItemCard key={item.name} item={item} />
+        {category.items.map((item, i) => (
+          <ScrollReveal key={item.name} className="h-full" delay={(i % 6) * 0.06}>
+            <ItemCard item={item} />
+          </ScrollReveal>
         ))}
       </div>
     </section>
@@ -485,37 +515,42 @@ function TierSection({
 }) {
   const shell =
     variant === "premium"
-      ? "border-brand-orange/25 bg-[#fbf6ee]"
-      : "border-brand-blue/20 bg-[#f2f4fc]";
-  const labelColor =
-    variant === "premium" ? "text-brand-orange" : "text-brand-blue";
+      ? "border-ember/25 bg-cream"
+      : "border-ember/20 bg-cream";
+  // ember-deep, not ember: this is small uppercase label text on cream, where
+  // plain ember only reaches 3.19:1 (below AA for normal text).
+  const labelColor = "text-ember-deep";
 
   return (
     <section
       id={variant}
-      className={`mt-12 scroll-mt-32 rounded-2xl border ${shell} p-6 sm:p-10`}
+      className={`mt-12 scroll-mt-32 rounded-card border ${shell} p-6 sm:p-10`}
     >
-      <div className="mb-8 text-center">
-        <p
-          className={`mb-3 font-sans text-xs font-semibold uppercase tracking-[0.3em] ${labelColor}`}
-        >
-          {label}
-        </p>
-        <h2 className="font-serif text-3xl font-light text-foreground md:text-4xl">
-          {title}
-          {korean && (
-            <span className="ml-3 align-middle font-sans text-base font-light text-foreground/40">
-              {korean}
-            </span>
-          )}
-        </h2>
-        <p className="mx-auto mt-3 max-w-xl font-sans text-sm font-light text-foreground/60">
-          {blurb}
-        </p>
-      </div>
+      <ScrollReveal>
+        <div className="mb-8 transform-gpu text-center">
+          <p
+            className={`mb-3 font-sans text-xs font-semibold uppercase tracking-[0.3em] ${labelColor}`}
+          >
+            {label}
+          </p>
+          <h2 className="font-serif text-3xl font-light text-foreground md:text-4xl">
+            {title}
+            {korean && (
+              <span className="ml-3 align-middle font-sans text-base font-light text-warm-muted">
+                {korean}
+              </span>
+            )}
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl font-sans text-sm font-light text-warm">
+            {blurb}
+          </p>
+        </div>
+      </ScrollReveal>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((item) => (
-          <ItemCard key={item.name} item={item} variant={variant} />
+        {items.map((item, i) => (
+          <ScrollReveal key={item.name} className="h-full" delay={(i % 6) * 0.06}>
+            <ItemCard item={item} variant={variant} />
+          </ScrollReveal>
         ))}
       </div>
     </section>
@@ -538,75 +573,81 @@ export default function MenuPage() {
   return (
     <>
       <Navbar />
-      <main className="bg-brand-cream">
+      <main className="bg-cream">
         {/* Header */}
         <section className="px-6 pt-32 pb-12 sm:pt-36 lg:pt-40">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="mb-5 font-sans text-xs font-semibold uppercase tracking-[0.3em] text-brand-orange">
+          {/* transform-gpu: promote the header copy to its own compositing
+              layer so it rasterizes with uniform grayscale AA. Without it the
+              light warm-gray text picks up red/blue subpixel (ClearType)
+              fringing on Windows that reads as a multi-color tint. */}
+          <div className="mx-auto max-w-3xl text-center transform-gpu">
+            <p className="mb-5 font-sans text-xs font-semibold uppercase tracking-[0.3em] text-ember-deep">
               All-You-Can-Eat · Self-Serve · Charcoal
             </p>
             <h1 className="font-serif text-5xl font-light leading-tight text-foreground sm:text-6xl">
-              The Full <em className="italic text-brand-blue">Spread</em>
+              The Full <em className="italic text-ember">Spread</em>
             </h1>
-            <p className="mx-auto mt-6 max-w-xl font-sans text-base font-light leading-relaxed text-foreground/60">
+            <p className="mx-auto mt-6 max-w-xl font-sans text-base font-light leading-relaxed text-warm">
               Pick whatever you like, grill it your way over live charcoal, and
               eat all you want. One price, everything included.
             </p>
 
-            {/* Price band */}
-            <div className="mx-auto mt-9 inline-flex items-stretch rounded-2xl border border-[#e4d9c4] bg-white shadow-[0_8px_30px_-18px_rgba(26,26,26,0.45)]">
-              <div className="px-6 py-5 text-center sm:px-10">
-                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground/45">
+            {/* Price band — full-width and evenly split on phones so the third
+                cell never runs past the viewport edge; the compact inline pill
+                returns from sm up. */}
+            <div className="mx-auto mt-9 flex w-full max-w-md items-stretch rounded-card border border-ink/10 bg-cream shadow-card sm:inline-flex sm:w-auto sm:max-w-none">
+              <div className="flex-1 px-3 py-5 text-center sm:flex-none sm:px-10">
+                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-warm-muted">
                   Lunch
                 </p>
-                <p className="mt-1 font-serif text-3xl font-light text-brand-red sm:text-4xl">
+                <p className="mt-1 font-serif text-2xl font-light text-ember sm:text-4xl">
                   $21.99
                 </p>
-                <p className="mt-1 font-sans text-xs font-light text-foreground/40">
+                <p className="mt-1 font-sans text-xs font-light text-warm-muted">
                   per person
                 </p>
               </div>
-              <div aria-hidden="true" className="w-px bg-[#e4d9c4]" />
-              <div className="px-6 py-5 text-center sm:px-10">
-                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground/45">
+              <div aria-hidden="true" className="w-px bg-ink/10" />
+              <div className="flex-1 px-3 py-5 text-center sm:flex-none sm:px-10">
+                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-warm-muted">
                   Dinner
                 </p>
-                <p className="mt-1 font-serif text-3xl font-light text-brand-red sm:text-4xl">
+                <p className="mt-1 font-serif text-2xl font-light text-ember sm:text-4xl">
                   $30.99
                 </p>
-                <p className="mt-1 font-sans text-xs font-light text-foreground/40">
+                <p className="mt-1 font-sans text-xs font-light text-warm-muted">
                   per person
                 </p>
               </div>
-              <div aria-hidden="true" className="w-px bg-[#e4d9c4]" />
-              <div className="px-6 py-5 text-center sm:px-10">
-                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground/45">
+              <div aria-hidden="true" className="w-px bg-ink/10" />
+              <div className="flex-1 px-3 py-5 text-center sm:flex-none sm:px-10">
+                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-warm-muted">
                   Seating
                 </p>
-                <p className="mt-1 font-serif text-3xl font-light text-brand-blue sm:text-4xl">
+                <p className="mt-1 font-serif text-2xl font-light text-ember sm:text-4xl">
                   90 min
                 </p>
-                <p className="mt-1 font-sans text-xs font-light text-foreground/40">
+                <p className="mt-1 font-sans text-xs font-light text-warm-muted">
                   per table
                 </p>
               </div>
             </div>
 
-            <p className="mt-6 font-sans text-sm font-light text-foreground/50">
+            <p className="mt-6 font-sans text-sm font-light text-warm">
               Walk-in only · No reservations needed
             </p>
-            <p className="mt-2 font-sans text-sm font-light text-foreground/50">
-              Feeling lucky? Stop our clock at exactly{" "}
-              <span className="font-medium text-brand-red">10.00 seconds</span>{" "}
-              and your next barbecue is free.
+            <p className="mt-2 font-sans text-sm font-light text-warm">
+              Stop our clock at exactly{" "}
+              <span className="font-medium text-ember-deep">10.00 seconds</span>{" "}
+              and your next visit is free.
             </p>
           </div>
         </section>
 
         {/* Included strip — hairline dividers, no box */}
         <section className="px-6 pb-4">
-          <div className="mx-auto max-w-4xl text-center">
-            <p className="mb-4 font-sans text-[11px] font-medium uppercase tracking-[0.25em] text-foreground/40">
+          <div className="mx-auto max-w-4xl text-center transform-gpu">
+            <p className="mb-4 font-sans text-[11px] font-medium uppercase tracking-[0.25em] text-warm-muted">
               Included with every meal
             </p>
             <ul
@@ -616,9 +657,9 @@ export default function MenuPage() {
               {INCLUDED.map((label, i) => (
                 <li
                   key={label}
-                  className={`px-5 py-1 font-sans text-sm font-light text-[#5a5550] ${
+                  className={`px-5 py-1 font-sans text-sm font-light text-warm ${
                     i < INCLUDED.length - 1
-                      ? "border-r border-[#ddd2bf]"
+                      ? "border-r border-ink/10"
                       : ""
                   }`}
                 >
@@ -634,8 +675,8 @@ export default function MenuPage() {
 
         {/* Categories */}
         <div className="mx-auto max-w-7xl px-6 pt-12 pb-20">
-          <p className="mb-10 text-center font-serif text-lg font-light italic text-foreground/55">
-            Everything is included in the all-you-can-eat price — no per-item
+          <p className="mb-10 transform-gpu text-center font-serif text-lg font-light italic text-warm">
+            Everything is included in the all-you-can-eat price. No per-item
             charges.
           </p>
 
@@ -647,49 +688,55 @@ export default function MenuPage() {
           <TierSection
             label="Premium"
             title="Premium Selection"
-            blurb="A step up in cut and indulgence — included for everyone at the table."
+            blurb="The good stuff. Included for everyone at the table, same as the rest of the menu."
             items={PREMIUM}
             variant="premium"
           />
         </div>
 
         {/* Info band */}
-        <section className="bg-[#f3ebdd] px-6 py-20">
-          <div className="mx-auto max-w-5xl text-center">
+        <section
+          className="relative bg-cream-deep px-6 py-20"
+          data-seam-morph
+          data-from="#faf6ef"
+          data-to="#f2ebdd"
+        >
+          <SeamThread />
+          <div className="mx-auto max-w-5xl text-center transform-gpu">
             <h2 className="font-serif text-4xl font-light text-foreground md:text-5xl">
               Come Hungry
             </h2>
             <div className="mt-12 grid gap-10 sm:grid-cols-3">
               <div>
-                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-brand-orange">
+                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ember-deep">
                   Hours
                 </h3>
-                <p className="mt-4 font-sans text-sm font-light leading-relaxed text-foreground/70">
+                <p className="mt-4 font-sans text-sm font-light leading-relaxed text-warm">
                   Sun–Thu 12:00 PM – 9:30 PM
                   <br />
                   Fri–Sat 12:00 PM – 10:00 PM
                 </p>
               </div>
               <div>
-                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-brand-orange">
+                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ember-deep">
                   Location
                 </h3>
-                <p className="mt-4 font-sans text-sm font-light leading-relaxed text-foreground/70">
+                <p className="mt-4 font-sans text-sm font-light leading-relaxed text-warm">
                   2216 S El Camino Real #108–109
                   <br />
                   Oceanside, CA 92054
                 </p>
               </div>
               <div>
-                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-brand-orange">
+                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ember-deep">
                   Walk-In
                 </h3>
-                <p className="mt-4 font-sans text-sm font-light leading-relaxed text-foreground/70">
+                <p className="mt-4 font-sans text-sm font-light leading-relaxed text-warm">
                   No reservations
                   <br />
                   <a
                     href="tel:+17604331888"
-                    className="font-medium text-brand-blue transition-colors hover:text-brand-orange"
+                    className="font-medium text-ember-deep underline-offset-4 hover:underline"
                   >
                     (760) 433-1888
                   </a>
@@ -698,6 +745,8 @@ export default function MenuPage() {
             </div>
           </div>
         </section>
+        {/* Calm: background continuity + seam motif only, no parallax/overlaps. */}
+        <SeamMotion calm />
       </main>
       <Footer />
     </>

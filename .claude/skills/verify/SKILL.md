@@ -23,5 +23,5 @@ In scripts: `const { chromium } = require("playwright-core")`.
 
 Gotchas / flows worth driving:
 - **Preloader**: plays on every full document load, including refreshes (no session gate; it's in the SSR HTML, so animation starts at first paint). It's time-choreographed, so screenshot beats drift; capture several frames. Reduced motion: `newContext({ reducedMotion: "reduce" })` must show the finished badge instantly. While the overlay is up, `<html>` has class `preloading` (scroll lock + HeroVideo holds on its poster; video resumes when the class is removed).
-- Hero assets the preloader gates on: `/images/hero-poster3.jpg`, `/videos/hero-video3.mp4`.
+- Hero media (HeroVideo holds the poster while `preloading`, then plays): `/images/kmbbq-hero-poster.jpg`, `/videos/kmbbq-hero.mp4`. The preloader itself is time-based and gates on nothing.
 - Menu page: missing photos render lettered placeholder tiles (build-time `fs.existsSync`), not broken images.

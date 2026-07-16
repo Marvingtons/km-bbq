@@ -63,7 +63,7 @@ export function MenuJumpNav({ targets }: { targets: JumpTarget[] }) {
   return (
     <nav
       aria-label="Menu categories"
-      className="sticky top-[64px] z-40 border-b border-[#e4d9c4] bg-brand-cream/95 px-6 backdrop-blur-sm"
+      className="sticky top-[64px] z-40 border-b border-ink/10 bg-cream/95 px-6 backdrop-blur-sm"
     >
       <ul
         ref={listRef}
@@ -81,8 +81,8 @@ export function MenuJumpNav({ targets }: { targets: JumpTarget[] }) {
                 aria-current={isActive ? "true" : undefined}
                 className={`inline-block whitespace-nowrap rounded-full border px-4 py-1.5 font-sans text-xs font-medium uppercase tracking-[0.12em] transition-colors ${
                   isActive
-                    ? "border-brand-blue bg-brand-blue text-white"
-                    : "border-[#ddd2bf] bg-white/60 text-foreground/60 hover:border-brand-blue/50 hover:text-brand-blue"
+                    ? "border-ember-deep bg-ember-deep text-white"
+                    : "border-ink/15 bg-cream/60 text-warm hover:border-ember-deep/50 hover:text-ember-deep"
                 }`}
               >
                 {label}

@@ -3,9 +3,9 @@
 import { useEffect, useRef } from "react";
 
 /**
- * The hero's grill clip. Autoplays muted like the old full-bleed hero, but
- * honors prefers-reduced-motion by pausing on the poster frame instead of
- * looping (the file is already trimmed to a 10s loop).
+ * The hero's grill clip. Autoplays muted, but honors prefers-reduced-motion by
+ * pausing on the poster frame instead of looping. The poster is the clip's
+ * first frame so the reveal from the preloader is seamless.
  *
  * While the intro preloader is up (html.preloading), the video holds on its
  * first frame and starts from the top as the overlay begins to fade, so the
@@ -57,8 +57,8 @@ export function HeroVideo({ className = "" }: { className?: string }) {
     <video
       ref={ref}
       className={className}
-      src="/videos/hero-video3.mp4"
-      poster="/images/hero-poster3.jpg"
+      src="/videos/kmbbq-hero.mp4"
+      poster="/images/kmbbq-hero-poster.jpg"
       autoPlay
       muted
       loop
