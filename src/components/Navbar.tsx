@@ -73,7 +73,7 @@ export function Navbar() {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         solid
-          ? "bg-cream/90 backdrop-blur-md border-b border-black/[0.06] shadow-[0_1px_24px_-12px_rgba(26,26,26,0.35)]"
+          ? "bg-cream/90 backdrop-blur-md border-b border-black/[0.06] shadow-warm"
           : "bg-transparent"
       }`}
     >

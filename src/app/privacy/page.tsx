@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
+import { PHONE, ADDRESS } from "@/lib/restaurant";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — KM.BBQ",
@@ -55,8 +56,8 @@ export default function PrivacyPage() {
       <section>
         <h2>Contact</h2>
         <p>
-          Questions about this policy? Call us at (760) 433-1888 or visit us at
-          2216 S El Camino Real #108–109, Oceanside, CA 92054.
+          Questions about this policy? Call us at {PHONE.display} or visit us at{" "}
+          {ADDRESS.street}, {ADDRESS.region}.
         </p>
       </section>
     </LegalPage>

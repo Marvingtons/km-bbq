@@ -5,6 +5,7 @@ import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PillLink } from "./PillLink";
+import { ScrollReveal } from "./ScrollReveal";
 import { MOTION, NAV_H } from "@/lib/motion";
 import { useScrollRefresh } from "@/lib/useScrollRefresh";
 
@@ -343,10 +344,40 @@ export function About() {
         </div>
       </div>
 
+      {/* Mobile mural band — the brand signature can't be absent on phones,
+          where there's no room for the full-height desktop stage. A compact
+          horizontal band of the same transparent mural art (both halves meeting
+          at center, on cream) sits above the story and enters with the shared
+          reveal. Hidden at md+, where the pinned stage takes over. */}
+      <ScrollReveal className="md:hidden px-6 pt-10">
+        <div className="relative mx-auto flex aspect-[2/1] w-full max-w-md">
+          <div className="relative h-full w-1/2">
+            <Image
+              src="/images/mural-left.webp"
+              alt=""
+              aria-hidden="true"
+              fill
+              sizes="50vw"
+              className="select-none object-contain object-right"
+            />
+          </div>
+          <div className="relative h-full w-1/2">
+            <Image
+              src="/images/mural-right.webp"
+              alt=""
+              aria-hidden="true"
+              fill
+              sizes="50vw"
+              className="select-none object-contain object-left"
+            />
+          </div>
+        </div>
+      </ScrollReveal>
+
       {/* Text — revealed in the gap on desktop with motion; flows below the
-          mural on mobile and for prefers-reduced-motion (where the mural stays
-          whole), so the copy is always visible. */}
-      <div className="relative z-10 px-6 pb-20 pt-8 md:pt-0 motion-safe:md:absolute motion-safe:md:inset-x-0 motion-safe:md:top-0 motion-safe:md:h-screen motion-safe:md:flex motion-safe:md:items-center motion-safe:md:justify-center motion-safe:md:px-6 motion-safe:md:pb-0">
+          mural band on mobile and for prefers-reduced-motion (where the mural
+          stays whole), so the copy is always visible. */}
+      <div className="relative z-10 px-6 pb-20 pt-6 md:pt-0 motion-safe:md:absolute motion-safe:md:inset-x-0 motion-safe:md:top-0 motion-safe:md:h-screen motion-safe:md:flex motion-safe:md:items-center motion-safe:md:justify-center motion-safe:md:px-6 motion-safe:md:pb-0">
         <div
           className="about-text mx-auto w-full text-center"
           style={{
