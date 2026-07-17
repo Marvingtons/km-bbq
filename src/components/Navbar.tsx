@@ -87,7 +87,7 @@ export function Navbar() {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         solid
-          ? "bg-brand-cream/90 backdrop-blur-md border-b border-black/[0.06] shadow-[0_1px_24px_-12px_rgba(26,26,26,0.35)]"
+          ? "bg-cream/90 backdrop-blur-md border-b border-black/[0.06] shadow-[0_1px_24px_-12px_rgba(26,26,26,0.35)]"
           : "bg-transparent"
       }`}
     >
@@ -116,27 +116,24 @@ export function Navbar() {
                 <Link
                   href={hrefFor(link)}
                   aria-current={isActive ? "page" : undefined}
-                  className="group relative inline-block py-1 text-[11.5px] font-medium uppercase tracking-[0.16em] transition-colors duration-300"
-                  style={{
-                    color: onLight
+                  className={`group relative inline-block py-1 text-[11.5px] font-medium uppercase tracking-[0.16em] transition-colors duration-300 ${
+                    onLight
                       ? isActive
-                        ? "#1A36AF"
-                        : "#2a2a2a"
+                        ? "text-ember-deep"
+                        : "text-foreground"
                       : isActive
-                        ? "#ffffff"
-                        : "rgba(255,255,255,0.82)",
-                  }}
+                        ? "text-white"
+                        : "text-white/80"
+                  }`}
                 >
                   {link.label}
-                  {/* Underline grows in from the left on hover / when active. */}
+                  {/* Underline grows in from the left on hover / when active.
+                      Ember is the one accent, on both the transparent-over-hero
+                      and solid-cream states. */}
                   <span
-                    className={`pointer-events-none absolute -bottom-0.5 left-0 h-px origin-left transition-transform duration-[250ms] ease-out group-hover:scale-x-100 ${
+                    className={`pointer-events-none absolute -bottom-0.5 left-0 h-px w-full origin-left bg-ember transition-transform duration-[250ms] ease-out group-hover:scale-x-100 ${
                       isActive ? "scale-x-100" : "scale-x-0"
                     }`}
-                    style={{
-                      width: "100%",
-                      backgroundColor: onLight ? "#1A36AF" : "#F18B23",
-                    }}
                   />
                 </Link>
               </li>
@@ -153,19 +150,16 @@ export function Navbar() {
           aria-controls="mobile-menu"
         >
           <motion.span
-            className="block h-0.5 w-6 rounded-full"
+            className={`block h-0.5 w-6 rounded-full ${onLight ? "bg-foreground" : "bg-white"}`}
             animate={menuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
-            style={{ backgroundColor: onLight ? "#1a1a1a" : "#ffffff" }}
           />
           <motion.span
-            className="block h-0.5 w-4 rounded-full"
+            className={`block h-0.5 w-4 rounded-full ${onLight ? "bg-foreground" : "bg-white"}`}
             animate={menuOpen ? { opacity: 0 } : { opacity: 1 }}
-            style={{ backgroundColor: onLight ? "#1a1a1a" : "#ffffff" }}
           />
           <motion.span
-            className="block h-0.5 w-6 rounded-full"
+            className={`block h-0.5 w-6 rounded-full ${onLight ? "bg-foreground" : "bg-white"}`}
             animate={menuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
-            style={{ backgroundColor: onLight ? "#1a1a1a" : "#ffffff" }}
           />
         </button>
       </nav>
@@ -182,7 +176,7 @@ export function Navbar() {
         {menuOpen && (
           <motion.div
             id="mobile-menu"
-            className="fixed inset-0 z-40 flex flex-col bg-brand-cream px-9 pt-28 lg:hidden"
+            className="fixed inset-0 z-40 flex flex-col bg-cream px-9 pt-28 lg:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -206,12 +200,13 @@ export function Navbar() {
                       href={hrefFor(link)}
                       onClick={() => setMenuOpen(false)}
                       aria-current={isActive ? "page" : undefined}
-                      className="group relative inline-block text-sm font-medium uppercase tracking-[0.18em] transition-colors duration-300"
-                      style={{ color: isActive ? "#1A36AF" : "#2a2a2a" }}
+                      className={`group relative inline-block text-sm font-medium uppercase tracking-[0.18em] transition-colors duration-300 ${
+                        isActive ? "text-ember-deep" : "text-foreground"
+                      }`}
                     >
                       {link.label}
                       <span
-                        className={`pointer-events-none absolute -bottom-1 left-0 h-px w-full origin-left bg-brand-blue transition-transform duration-[250ms] ease-out group-hover:scale-x-100 ${
+                        className={`pointer-events-none absolute -bottom-1 left-0 h-px w-full origin-left bg-ember transition-transform duration-[250ms] ease-out group-hover:scale-x-100 ${
                           isActive ? "scale-x-100" : "scale-x-0"
                         }`}
                       />

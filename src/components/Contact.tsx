@@ -20,7 +20,7 @@ export function Contact() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-16 text-center">
           <ScrollReveal {...REVEAL}>
-            <p className="mb-4 font-sans text-xs font-medium tracking-[0.3em] uppercase text-brand-orange">
+            <p className="mb-4 font-sans text-xs font-medium tracking-[0.3em] uppercase text-ember">
               Find Us
             </p>
           </ScrollReveal>
@@ -47,7 +47,7 @@ export function Contact() {
                   {HOURS.map(({ day, time }) => (
                     <div
                       key={day}
-                      className="flex items-start justify-between border-b border-[#e3dfd6] pb-3 font-sans text-sm"
+                      className="flex items-start justify-between border-b border-paper-line pb-3 font-sans text-sm"
                     >
                       <dt className="text-foreground/70">{day}</dt>
                       <dd className="font-medium text-foreground">{time}</dd>
@@ -70,7 +70,7 @@ export function Contact() {
                   <br />
                   <a
                     href="tel:+17604331888"
-                    className="mt-2 inline-block text-brand-orange hover:underline underline-offset-4"
+                    className="mt-2 inline-block text-ember hover:underline underline-offset-4"
                   >
                     (760) 433-1888
                   </a>
@@ -83,7 +83,7 @@ export function Contact() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="KM BBQ on Instagram"
-                    className="text-foreground/60 transition-colors hover:text-brand-orange"
+                    className="text-foreground/60 transition-colors hover:text-ember"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -107,7 +107,7 @@ export function Contact() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="KM BBQ on TikTok"
-                    className="text-foreground/60 transition-colors hover:text-brand-orange"
+                    className="text-foreground/60 transition-colors hover:text-ember"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -126,7 +126,7 @@ export function Contact() {
 
             {/* Map placeholder */}
             <ScrollReveal {...REVEAL} delay={0.08}>
-              <div className="aspect-video w-full overflow-hidden border border-[#e3dfd6]">
+              <div className="aspect-video w-full overflow-hidden border border-paper-line">
                 <iframe
                   title="Map to KM BBQ Oceanside"
                   src="https://www.google.com/maps?q=2216+S+El+Camino+Real+%23108-109,+Oceanside,+CA+92054&output=embed"

@@ -151,7 +151,7 @@ export function Gallery() {
         {/* Heading — the fixed anchor. Sits centered on the left while the
             photos stream past on desktop; flows on top on mobile. */}
         <div className="shrink-0 px-6 text-center motion-safe:md:w-[32%] motion-safe:md:px-12 motion-safe:md:text-left">
-          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-brand-orange">
+          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember">
             Gallery
           </p>
           <h2
@@ -164,7 +164,7 @@ export function Gallery() {
             href="https://www.instagram.com/kmkoreanbbq/"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-8 inline-block font-sans text-sm font-medium text-brand-pink underline-offset-4 hover:underline"
+            className="mt-8 inline-block font-sans text-sm font-medium text-ember-deep underline-offset-4 hover:underline"
           >
             Follow us on Instagram →
           </a>
@@ -216,7 +216,7 @@ export function Gallery() {
             strokeWidth={2}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="gallery-swipe-hint h-4 w-4 text-brand-orange"
+            className="gallery-swipe-hint h-4 w-4 text-ember"
           >
             <path d="M5 12h14M13 6l6 6-6 6" />
           </svg>

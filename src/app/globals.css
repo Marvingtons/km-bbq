@@ -5,18 +5,29 @@
   --foreground: #1a1a1a;
 }
 
+/* ---------------------------------------------------------------------------
+   The one reduced token set. Every section is derived from these — there is a
+   single page surface (cream), a single accent (ember), and one warm shadow.
+   Blue and pink live ONLY inside the logo artwork (raw hex in Logo/Preloader
+   SVGs); they are intentionally absent here so no section can reach for them.
+   --------------------------------------------------------------------------- */
 @theme inline {
-  --color-brand-blue: #1A36AF;
-  --color-brand-orange: #F18B23;
-  /* Dark gold for small text on cream — brand-orange itself fails AA there. */
-  --color-brand-orange-deep: #9A5A1A;
-  --color-brand-red: #EC2229;
-  --color-brand-pink: #ED397D;
-  --color-brand-cream: #FAF4EC;
+  --color-cream: #FAF4EC; /* the ONE page surface */
+  --color-paper: #F3EBDD; /* the one warmer band/fill (info band, placeholders) */
+  --color-paper-line: #E4D9C4; /* the one hairline/border tint */
+  --color-foreground: var(--foreground); /* headings + strong text */
+  --color-body: #5A5550; /* solid body copy on cream (≈ foreground/70) */
+  --color-ember: #F18B23; /* the ONE accent */
+  /* Deep ember for small text/labels on cream — ember itself fails AA there. */
+  --color-ember-deep: #9A5A1A;
+  --color-red: #EC2229; /* SANCTIONED ONLY: menu prices + the house game */
+  --color-charcoal: #1A1A1A; /* footer surface */
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-serif: var(--font-cormorant), Georgia, serif;
   --font-sans: var(--font-inter), system-ui, sans-serif;
+  /* The one warm elevation shadow, formalizing rgba(120,60,20,…). */
+  --shadow-warm: 0 2px 16px rgb(120 60 20 / 0.08);
+  --shadow-warm-lg: 0 6px 24px rgb(120 60 20 / 0.14);
 }
 
 html {
@@ -36,20 +47,19 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Visible keyboard focus everywhere. Brand orange reads on both the cream
-   pages and the charcoal footer; the offset keeps it clear of tight pills
-   and underlined nav links. */
+/* Visible keyboard focus everywhere. Ember reads on both the cream pages and
+   the charcoal footer; the offset keeps it clear of tight pills and underlined
+   nav links. */
 :focus-visible {
-  outline: 2px solid var(--color-brand-orange);
+  outline: 2px solid var(--color-ember);
   outline-offset: 3px;
   border-radius: 2px;
 }
 
-/* Custom global scrollbar — ultra-slim with a defined dark track so it reads
-   as an intentional thin rail over BOTH dark and light sections (a transparent
-   track exposed the light page background as a pale sliver on the right edge).
-   The thumb is a soft charcoal that stays legible on any section color.
-   Purely visual; works alongside Lenis smooth scrolling. */
+/* Custom global scrollbar — ultra-slim, cream track with a translucent warm
+   thumb so it reads as an intentional thin rail on the cream page (the site is
+   one surface now, so a warm rail sits quietly against it). Purely visual;
+   works alongside Lenis smooth scrolling. */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px; /* covers horizontal scroll areas */
@@ -58,23 +68,23 @@ body {
 ::-webkit-scrollbar-track,
 ::-webkit-scrollbar-track-piece,
 ::-webkit-scrollbar-corner {
-  background: #2a2a2e;
+  background: var(--color-cream);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #6f6a64;
+  background: rgb(120 60 20 / 0.35);
   border-radius: 10px;
   transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #5c574f;
+  background: rgb(120 60 20 / 0.5);
 }
 
 /* Firefox fallback (no webkit pseudo-elements). */
 html {
   scrollbar-width: thin;
-  scrollbar-color: #6f6a64 #2a2a2e;
+  scrollbar-color: rgb(120 60 20 / 0.4) var(--color-cream);
 }
 
 /* Hide scrollbar during preloader */

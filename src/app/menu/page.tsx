@@ -378,9 +378,9 @@ function ItemMedia({ item }: { item: Item }) {
   return (
     <div
       aria-hidden="true"
-      className="mb-4 flex aspect-[16/9] w-full items-center justify-center overflow-hidden bg-gradient-to-br from-[#f3ebdd] to-[#e7dac3]"
+      className="mb-4 flex aspect-[16/9] w-full items-center justify-center overflow-hidden bg-gradient-to-br from-paper to-paper-line"
     >
-      <span className="font-serif text-5xl font-light text-[#c8b692] select-none">
+      <span className="font-serif text-5xl font-light text-ember-deep/35 select-none">
         {item.name.charAt(0)}
       </span>
     </div>
@@ -396,10 +396,10 @@ function ItemCard({
 }) {
   const accent =
     variant === "premium"
-      ? "border-brand-orange/30 bg-white"
+      ? "border-ember/30 bg-white"
       : "border-neutral-200 bg-white";
 
-  const topBar = variant === "premium" ? "bg-brand-orange" : null;
+  const topBar = variant === "premium" ? "bg-ember" : null;
 
   return (
     <div className="group h-full">
@@ -425,7 +425,7 @@ function ItemCard({
           {item.desc}
         </p>
         {item.note && (
-          <p className="mt-3 font-sans text-xs font-medium uppercase tracking-[0.12em] text-brand-red">
+          <p className="mt-3 font-sans text-xs font-medium uppercase tracking-[0.12em] text-red">
             {item.note}
           </p>
         )}
@@ -437,7 +437,7 @@ function ItemCard({
 function CategorySection({ category }: { category: Category }) {
   return (
     <section id={slugify(category.name)} className="mt-16 scroll-mt-32 first:mt-0">
-      <div className="mb-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-[#e4d9c4] pb-4">
+      <div className="mb-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-paper-line pb-4">
         <h2 className="font-serif text-3xl font-light text-foreground md:text-4xl">
           {category.name}
         </h2>
@@ -447,7 +447,7 @@ function CategorySection({ category }: { category: Category }) {
           </span>
         )}
         {category.tag && (
-          <span className="ml-auto font-sans text-xs font-medium uppercase tracking-[0.2em] text-brand-orange">
+          <span className="ml-auto font-sans text-xs font-medium uppercase tracking-[0.2em] text-ember">
             {category.tag}
           </span>
         )}
@@ -476,8 +476,8 @@ function TierSection({
   items: Item[];
   variant: "premium";
 }) {
-  const shell = "border-brand-orange/25 bg-[#fbf6ee]";
-  const labelColor = "text-brand-orange";
+  const shell = "border-ember/25 bg-paper";
+  const labelColor = "text-ember";
 
   return (
     <section
@@ -527,15 +527,15 @@ export default function MenuPage() {
   return (
     <>
       <Navbar />
-      <main className="bg-brand-cream">
+      <main className="bg-cream">
         {/* Header */}
         <section className="px-6 pt-32 pb-12 sm:pt-36 lg:pt-40">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="mb-5 font-sans text-xs font-semibold uppercase tracking-[0.3em] text-brand-orange">
+            <p className="mb-5 font-sans text-xs font-semibold uppercase tracking-[0.3em] text-ember">
               All-You-Can-Eat · Self-Serve · Charcoal
             </p>
             <h1 className="font-serif text-5xl font-light leading-tight text-foreground sm:text-6xl">
-              The Full <em className="italic text-brand-blue">Spread</em>
+              The Full <em className="italic text-ember">Spread</em>
             </h1>
             <p className="mx-auto mt-6 max-w-xl font-sans text-base font-light leading-relaxed text-foreground/60">
               Pick whatever you like, grill it your way over live charcoal, and
@@ -543,36 +543,36 @@ export default function MenuPage() {
             </p>
 
             {/* Price band */}
-            <div className="mx-auto mt-9 inline-flex items-stretch rounded-2xl border border-[#e4d9c4] bg-white shadow-[0_8px_30px_-18px_rgba(26,26,26,0.45)]">
+            <div className="mx-auto mt-9 inline-flex items-stretch rounded-2xl border border-paper-line bg-white shadow-[0_8px_30px_-18px_rgba(26,26,26,0.45)]">
               <div className="px-6 py-5 text-center sm:px-10">
                 <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground/45">
                   Lunch
                 </p>
-                <p className="mt-1 font-serif text-3xl font-light text-brand-red sm:text-4xl">
+                <p className="mt-1 font-serif text-3xl font-light text-red sm:text-4xl">
                   $21.99
                 </p>
                 <p className="mt-1 font-sans text-xs font-light text-foreground/40">
                   per person
                 </p>
               </div>
-              <div aria-hidden="true" className="w-px bg-[#e4d9c4]" />
+              <div aria-hidden="true" className="w-px bg-paper-line" />
               <div className="px-6 py-5 text-center sm:px-10">
                 <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground/45">
                   Dinner
                 </p>
-                <p className="mt-1 font-serif text-3xl font-light text-brand-red sm:text-4xl">
+                <p className="mt-1 font-serif text-3xl font-light text-red sm:text-4xl">
                   $30.99
                 </p>
                 <p className="mt-1 font-sans text-xs font-light text-foreground/40">
                   per person
                 </p>
               </div>
-              <div aria-hidden="true" className="w-px bg-[#e4d9c4]" />
+              <div aria-hidden="true" className="w-px bg-paper-line" />
               <div className="px-6 py-5 text-center sm:px-10">
                 <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground/45">
                   Seating
                 </p>
-                <p className="mt-1 font-serif text-3xl font-light text-brand-blue sm:text-4xl">
+                <p className="mt-1 font-serif text-3xl font-light text-ember-deep sm:text-4xl">
                   90 min
                 </p>
                 <p className="mt-1 font-sans text-xs font-light text-foreground/40">
@@ -586,7 +586,7 @@ export default function MenuPage() {
             </p>
             <p className="mt-2 font-sans text-sm font-light text-foreground/50">
               Feeling lucky? Stop our clock at exactly{" "}
-              <span className="font-medium text-brand-red">10.00 seconds</span>{" "}
+              <span className="font-medium text-red">10.00 seconds</span>{" "}
               and your next barbecue is free.
             </p>
           </div>
@@ -605,9 +605,9 @@ export default function MenuPage() {
               {INCLUDED.map((label, i) => (
                 <li
                   key={label}
-                  className={`px-5 py-1 font-sans text-sm font-light text-[#5a5550] ${
+                  className={`px-5 py-1 font-sans text-sm font-light text-body ${
                     i < INCLUDED.length - 1
-                      ? "border-r border-[#ddd2bf]"
+                      ? "border-r border-paper-line"
                       : ""
                   }`}
                 >
@@ -643,14 +643,14 @@ export default function MenuPage() {
         </div>
 
         {/* Info band */}
-        <section className="bg-[#f3ebdd] px-6 py-20">
+        <section className="bg-paper px-6 py-20">
           <div className="mx-auto max-w-5xl text-center">
             <h2 className="font-serif text-4xl font-light text-foreground md:text-5xl">
               Come Hungry
             </h2>
             <div className="mt-12 grid gap-10 sm:grid-cols-3">
               <div>
-                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-brand-orange">
+                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ember">
                   Hours
                 </h3>
                 <p className="mt-4 font-sans text-sm font-light leading-relaxed text-foreground/70">
@@ -660,7 +660,7 @@ export default function MenuPage() {
                 </p>
               </div>
               <div>
-                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-brand-orange">
+                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ember">
                   Location
                 </h3>
                 <p className="mt-4 font-sans text-sm font-light leading-relaxed text-foreground/70">
@@ -670,7 +670,7 @@ export default function MenuPage() {
                 </p>
               </div>
               <div>
-                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-brand-orange">
+                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ember">
                   Walk-In
                 </h3>
                 <p className="mt-4 font-sans text-sm font-light leading-relaxed text-foreground/70">
@@ -678,7 +678,7 @@ export default function MenuPage() {
                   <br />
                   <a
                     href="tel:+17604331888"
-                    className="font-medium text-brand-blue transition-colors hover:text-brand-orange"
+                    className="font-semibold text-ember-deep transition-colors hover:text-ember"
                   >
                     (760) 433-1888
                   </a>

@@ -37,7 +37,7 @@ export function Preloader() {
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed inset-0 z-[200] flex items-center justify-center overflow-hidden bg-brand-cream"
+          className="fixed inset-0 z-[200] flex items-center justify-center overflow-hidden bg-cream"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.9, ease: [0.43, 0.13, 0.23, 0.96] }}
@@ -171,7 +171,7 @@ export function Preloader() {
               {/* Negative margin cancels the last letter's tracking so the
                   line optically centers under the wordmark */}
               <motion.p
-                className="mr-[-0.35em] font-sans text-xs font-medium uppercase tracking-[0.35em] text-brand-orange-deep"
+                className="mr-[-0.35em] font-sans text-xs font-medium uppercase tracking-[0.35em] text-ember-deep"
                 initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, ease: "easeOut", delay: 1.25 }}

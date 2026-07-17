@@ -360,7 +360,7 @@ export function About() {
             padding: "2.5rem 1.5rem",
           }}
         >
-          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-brand-orange">
+          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember">
             Our Story
           </p>
           <h2
@@ -368,7 +368,7 @@ export function About() {
             className="font-serif text-4xl font-light leading-snug text-foreground md:text-5xl"
           >
             A Tradition{" "}
-            <em className="italic text-brand-blue">Born in Fire</em>
+            <em className="italic text-ember">Born in Fire</em>
           </h2>
           <div className="mt-8 space-y-5 font-sans text-sm font-light leading-relaxed text-foreground/80">
             <p>
@@ -388,7 +388,7 @@ export function About() {
           </div>
           <Link
             href="/menu"
-            className="relative isolate mt-10 inline-flex items-center gap-2 overflow-hidden rounded-full border border-brand-orange px-8 py-3 font-sans text-sm font-medium text-brand-orange transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-brand-orange before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
+            className="relative isolate mt-10 inline-flex items-center gap-2 overflow-hidden rounded-full border border-ember px-8 py-3 font-sans text-sm font-medium text-ember transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
           >
             Explore our menu
             <span aria-hidden="true">→</span>
@@ -405,7 +405,7 @@ export function About() {
       <div className="grill-layer relative z-10 px-6 pb-24 motion-safe:lg:absolute motion-safe:lg:inset-x-0 motion-safe:lg:top-0 motion-safe:lg:h-screen motion-safe:lg:flex motion-safe:lg:items-center motion-safe:lg:justify-center motion-safe:lg:pb-0 motion-safe:lg:pt-[var(--nav-h)]">
         <div className="mx-auto w-full max-w-4xl text-center lg:max-w-7xl">
           <div className="grill-head">
-            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-brand-orange">
+            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember">
               House Favorites
             </p>
             <h2
@@ -461,7 +461,7 @@ export function About() {
                         }
                       />
                       {dish.tag && (
-                        <span className="absolute left-2 top-2 z-10 bg-brand-orange px-2 py-1 font-sans text-[10px] font-medium uppercase tracking-widest text-white">
+                        <span className="absolute left-2 top-2 z-10 bg-ember px-2 py-1 font-sans text-[10px] font-medium uppercase tracking-widest text-white">
                           {dish.tag}
                         </span>
                       )}
@@ -498,7 +498,7 @@ export function About() {
           <div className="grill-cta mt-6">
             <Link
               href="/menu"
-              className="relative isolate inline-flex overflow-hidden rounded-full border border-brand-orange px-8 py-3 font-sans text-sm font-medium text-brand-orange transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-brand-orange before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
+              className="relative isolate inline-flex overflow-hidden rounded-full border border-ember px-8 py-3 font-sans text-sm font-medium text-ember transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
             >
               View Full Menu
             </Link>

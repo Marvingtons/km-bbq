@@ -25,7 +25,7 @@ export function Hero() {
       {/* Content */}
       <div className="relative z-10 mx-auto max-w-5xl px-6 text-center text-white">
         <motion.p
-          className="mb-4 font-sans text-sm font-medium tracking-[0.35em] uppercase text-brand-orange"
+          className="mb-4 font-sans text-sm font-medium tracking-[0.35em] uppercase text-ember"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
@@ -41,7 +41,7 @@ export function Hero() {
         >
           {/* TODO(step6): Replace headline */}
           Fire, Flavor,{" "}
-          <em className="italic text-brand-orange">Tradition.</em>
+          <em className="italic text-ember">Tradition.</em>
         </motion.h1>
 
         <motion.p
@@ -62,13 +62,13 @@ export function Hero() {
         >
           <motion.a
             href="/menu"
-            className="group relative inline-flex flex-col items-center gap-3 font-sans text-[0.7rem] font-light tracking-[0.45em] uppercase text-white/90 transition-colors duration-700 hover:text-brand-orange"
+            className="group relative inline-flex flex-col items-center gap-3 font-sans text-[0.7rem] font-light tracking-[0.45em] uppercase text-white/90 transition-colors duration-700 hover:text-ember"
             whileTap={{ scale: 0.99 }}
           >
             {/* Hairline above — a quiet frame, the way fine menus are set */}
             <span
               aria-hidden="true"
-              className="block h-px w-10 bg-white/40 transition-all duration-700 ease-out group-hover:w-16 group-hover:bg-brand-orange"
+              className="block h-px w-10 bg-white/40 transition-all duration-700 ease-out group-hover:w-16 group-hover:bg-ember"
             />
 
             <span className="relative inline-flex items-center gap-3 pl-[0.45em]">
@@ -91,7 +91,7 @@ export function Hero() {
             {/* Hairline below — extends outward on hover */}
             <span
               aria-hidden="true"
-              className="block h-px w-10 bg-white/40 transition-all duration-700 ease-out group-hover:w-16 group-hover:bg-brand-orange"
+              className="block h-px w-10 bg-white/40 transition-all duration-700 ease-out group-hover:w-16 group-hover:bg-ember"
             />
           </motion.a>
         </motion.div>

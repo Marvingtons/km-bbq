@@ -73,19 +73,19 @@ export function Footer() {
 
   return (
     <footer
-      className="relative overflow-hidden bg-foreground px-6 py-20 text-white/60"
+      className="relative overflow-hidden bg-charcoal px-6 py-20 text-white/60"
       role="contentinfo"
     >
       {/* Top accent line */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-orange/60 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ember/60 to-transparent"
       />
 
       {/* Ambient warm glow for depth */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-brand-orange/10 blur-[120px]"
+        className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-ember/10 blur-[120px]"
       />
 
       <div className="relative mx-auto max-w-7xl">
@@ -104,11 +104,11 @@ export function Footer() {
             </p>
             <a
               href="tel:+17604331888"
-              className="group mt-5 inline-flex items-center gap-2 font-serif text-2xl text-white/90 transition-colors hover:text-brand-orange"
+              className="group mt-5 inline-flex items-center gap-2 font-serif text-2xl text-white/90 transition-colors hover:text-ember"
             >
               <span
                 aria-hidden="true"
-                className="text-brand-orange transition-transform duration-300 group-hover:scale-110"
+                className="text-ember transition-transform duration-300 group-hover:scale-110"
               >
                 ☎
               </span>
@@ -130,7 +130,7 @@ export function Footer() {
                   >
                     <span
                       aria-hidden="true"
-                      className="mr-0 h-px w-0 bg-brand-orange transition-all duration-300 group-hover:mr-2 group-hover:w-4"
+                      className="mr-0 h-px w-0 bg-ember transition-all duration-300 group-hover:mr-2 group-hover:w-4"
                     />
                     {label}
                   </a>
@@ -150,7 +150,7 @@ export function Footer() {
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/60 transition-all duration-300 hover:-translate-y-1 hover:border-brand-orange/60 hover:bg-brand-orange/10 hover:text-brand-orange hover:shadow-[0_8px_24px_-8px] hover:shadow-brand-orange/40"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/60 transition-all duration-300 hover:-translate-y-1 hover:border-ember/60 hover:bg-ember/10 hover:text-ember hover:shadow-[0_8px_24px_-8px] hover:shadow-ember/40"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -177,7 +177,7 @@ export function Footer() {
               href="https://norvix.ai/"
               target="_blank"
               rel="noopener noreferrer"
-              className="transition-colors hover:text-brand-orange"
+              className="transition-colors hover:text-ember"
             >
               Crafted by Norvix
             </a>
