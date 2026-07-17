@@ -23,6 +23,11 @@ export function Hero() {
       />
 
       {/* Content */}
+      {/* TODO(step6): the dark hero is held out of scope. When it's addressed,
+          conform its deviations to the unified system: the eyebrow (text-sm /
+          0.35em vs the site's text-xs / 0.3em ember-deep), the hairline "View
+          Menu" CTA (either adopt the ember pill or sanction it as the one
+          exception), and its 700ms hover timings (the site standard is 300ms). */}
       <div className="relative z-10 mx-auto max-w-5xl px-6 text-center text-white">
         <motion.p
           className="mb-4 font-sans text-sm font-medium tracking-[0.35em] uppercase text-ember"

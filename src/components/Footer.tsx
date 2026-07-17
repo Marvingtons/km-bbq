@@ -104,7 +104,7 @@ export function Footer() {
             </p>
             <a
               href="tel:+17604331888"
-              className="group mt-5 inline-flex items-center gap-2 font-serif text-2xl text-white/90 transition-colors hover:text-ember"
+              className="group mt-5 inline-flex items-center gap-2 font-sans text-lg font-semibold text-white/90 transition-colors hover:text-ember"
             >
               <span
                 aria-hidden="true"
@@ -118,7 +118,7 @@ export function Footer() {
 
           {/* Navigation */}
           <nav aria-label="Footer navigation" className="md:col-span-4">
-            <h2 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+            <h2 className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-white/60">
               Explore
             </h2>
             <ul className="mt-5 grid grid-cols-2 gap-x-8 gap-y-3" role="list">
@@ -141,7 +141,7 @@ export function Footer() {
 
           {/* Socials */}
           <div className="md:col-span-3">
-            <h2 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+            <h2 className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-white/60">
               Follow Us
             </h2>
             <div className="mt-5 flex gap-3">

@@ -140,14 +140,14 @@ export function Challenge() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-14 text-center">
           <ScrollReveal {...REVEAL}>
-            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember">
+            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
               The House Game
             </p>
           </ScrollReveal>
           <ScrollReveal {...REVEAL} delay={0.05}>
             <h2
               id="challenge-heading"
-              className="font-serif text-5xl font-light text-foreground md:text-6xl"
+              className="font-serif text-4xl font-light text-foreground md:text-5xl"
             >
               Feeling <em className="italic text-ember">Lucky?</em>
             </h2>
@@ -163,7 +163,7 @@ export function Challenge() {
 
         <ScrollReveal {...REVEAL} delay={0.12}>
           <div className="mx-auto flex max-w-md flex-col items-center">
-            <span className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-foreground/45">
+            <span className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
               The Clock
             </span>
 

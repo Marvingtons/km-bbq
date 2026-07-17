@@ -136,12 +136,12 @@ export function Gallery() {
         {/* Heading — the fixed anchor. Sits centered on the left while the
             photos stream past on desktop; flows on top on mobile. */}
         <div className="shrink-0 px-6 text-center motion-safe:md:w-[32%] motion-safe:md:px-12 motion-safe:md:text-left">
-          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember">
+          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
             Gallery
           </p>
           <h2
             id="gallery-heading"
-            className="font-serif text-5xl font-light text-foreground md:text-6xl"
+            className="font-serif text-4xl font-light text-foreground md:text-5xl"
           >
             Seen Through Fire
           </h2>
@@ -177,7 +177,7 @@ export function Gallery() {
                     Visible per-tile on mobile; on desktop it starts hidden and
                     the timeline fades in only the centered tile's caption. */}
                 <figcaption className="gallery-caption pointer-events-none absolute inset-x-0 bottom-0 flex items-end bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 pt-12 opacity-100 motion-safe:md:opacity-0">
-                  <span className="font-sans text-[11px] font-medium uppercase tracking-[0.25em] text-white">
+                  <span className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-white">
                     {item.caption}
                   </span>
                 </figcaption>
@@ -190,7 +190,7 @@ export function Gallery() {
             scroll-driven track that needs no hint; on phones the photo row is a
             native horizontal swipe carousel, so cue the sideways gesture. */}
         <div className="flex items-center justify-center gap-2 px-6 md:hidden">
-          <span className="font-sans text-[11px] font-medium uppercase tracking-[0.25em] text-foreground/60">
+          <span className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-foreground/60">
             Swipe to explore
           </span>
           <svg

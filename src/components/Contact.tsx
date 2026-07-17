@@ -20,14 +20,14 @@ export function Contact() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-16 text-center">
           <ScrollReveal {...REVEAL}>
-            <p className="mb-4 font-sans text-xs font-medium tracking-[0.3em] uppercase text-ember">
+            <p className="mb-4 font-sans text-xs font-medium tracking-[0.3em] uppercase text-ember-deep">
               Find Us
             </p>
           </ScrollReveal>
           <ScrollReveal {...REVEAL} delay={0.05}>
             <h2
               id="contact-heading"
-              className="font-serif text-5xl font-light text-foreground md:text-6xl"
+              className="font-serif text-4xl font-light text-foreground md:text-5xl"
             >
               Come to the Table
             </h2>
@@ -40,7 +40,7 @@ export function Contact() {
             {/* Hours */}
             <ScrollReveal {...REVEAL}>
               <div>
-                <h3 className="font-serif text-2xl font-light text-foreground mb-5">
+                <h3 className="font-serif text-2xl md:text-3xl font-light text-foreground mb-5">
                   Hours
                 </h3>
                 <dl className="space-y-3">
@@ -60,7 +60,7 @@ export function Contact() {
             {/* Address */}
             <ScrollReveal {...REVEAL} delay={0.05}>
               <div>
-                <h3 className="font-serif text-2xl font-light text-foreground mb-4">
+                <h3 className="font-serif text-2xl md:text-3xl font-light text-foreground mb-4">
                   Location
                 </h3>
                 <address className="not-italic font-sans text-sm font-light leading-relaxed text-foreground/70">
@@ -70,7 +70,7 @@ export function Contact() {
                   <br />
                   <a
                     href="tel:+17604331888"
-                    className="mt-2 inline-block text-ember hover:underline underline-offset-4"
+                    className="mt-2 inline-block font-semibold text-ember-deep hover:underline underline-offset-4"
                   >
                     (760) 433-1888
                   </a>

@@ -360,7 +360,7 @@ export function About() {
             padding: "2.5rem 1.5rem",
           }}
         >
-          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember">
+          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
             Our Story
           </p>
           <h2
@@ -405,7 +405,7 @@ export function About() {
       <div className="grill-layer relative z-10 px-6 pb-24 motion-safe:lg:absolute motion-safe:lg:inset-x-0 motion-safe:lg:top-0 motion-safe:lg:h-screen motion-safe:lg:flex motion-safe:lg:items-center motion-safe:lg:justify-center motion-safe:lg:pb-0 motion-safe:lg:pt-[var(--nav-h)]">
         <div className="mx-auto w-full max-w-4xl text-center lg:max-w-7xl">
           <div className="grill-head">
-            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember">
+            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
               House Favorites
             </p>
             <h2
@@ -461,7 +461,7 @@ export function About() {
                         }
                       />
                       {dish.tag && (
-                        <span className="absolute left-2 top-2 z-10 bg-ember px-2 py-1 font-sans text-[10px] font-medium uppercase tracking-widest text-white">
+                        <span className="absolute left-2 top-2 z-10 bg-ember-deep px-2 py-1 font-sans text-[10px] font-medium uppercase tracking-widest text-white">
                           {dish.tag}
                         </span>
                       )}
