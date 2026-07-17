@@ -57,7 +57,7 @@ export function HeroVideo({ className = "" }: { className?: string }) {
     <video
       ref={ref}
       className={className}
-      src="/videos/hero-video3.mp4"
+      src="https://pub-364f647b29874b09922e1889f267c323.r2.dev/kmbbq-hero.mp4"
       poster="/images/hero-poster3.jpg"
       autoPlay
       muted
