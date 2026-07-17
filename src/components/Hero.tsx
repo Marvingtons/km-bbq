@@ -11,19 +11,28 @@ export function Hero() {
   return (
     <section
       id="home"
-      className="relative flex min-h-screen items-center justify-center overflow-hidden"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-charcoal"
       aria-label="Hero"
     >
       {/* Background video — holds its first frame while the preloader is up
           and starts the loop from the top as the overlay fades. The poster
-          paints the first frame immediately while the clip streams in. */}
+          paints the first frame immediately while the clip streams in; the
+          section's charcoal base covers any moment before the poster paints so
+          there's never a cream flash. */}
       <HeroVideo className="absolute inset-0 h-full w-full object-cover" />
 
-      {/* Dark gradient overlay — the mid-band is the scrim under the subtext,
-          so keep it strong enough for AA contrast over bright grill footage. */}
+      {/* Legibility scrim, tuned to the new (warm, bright) R2 clip. The text
+          band spikes near-white on the hero-moment frames, so a warm-dark
+          radial sits behind the centered copy (enough for AA on the white
+          headline + subtext) while a light floor knocks down the peaks — both
+          fade out toward the edges so the warm grill footage still reads. */}
       <div
-        className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/55 to-black/70"
+        className="absolute inset-0"
         aria-hidden="true"
+        style={{
+          background:
+            "radial-gradient(ellipse 72% 56% at 50% 50%, rgba(20,14,10,0.58) 0%, rgba(20,14,10,0.34) 47%, rgba(20,14,10,0.06) 80%, transparent 100%), linear-gradient(rgba(20,14,10,0.4) 0%, rgba(20,14,10,0.14) 17%, rgba(20,14,10,0.12) 66%, rgba(20,14,10,0.34) 100%)",
+        }}
       />
 
       {/* Content */}
