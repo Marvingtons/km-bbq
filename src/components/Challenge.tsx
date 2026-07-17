@@ -13,6 +13,9 @@ const dseg7 = localFont({
   src: "../fonts/DSEG7Classic-Bold.woff2",
   weight: "700",
   display: "swap",
+  // Below-the-fold decorative LED face — don't preload it site-wide (it was
+  // being preloaded on every route, including /menu where it never renders).
+  preload: false,
 });
 
 // The house game, exactly as played at the restaurant: a clock counts up and
