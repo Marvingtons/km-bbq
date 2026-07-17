@@ -135,7 +135,7 @@ export function Challenge() {
     <section
       id="challenge"
       aria-labelledby="challenge-heading"
-      className="bg-white px-6 py-28"
+      className="bg-cream px-6 py-28"
     >
       <div className="mx-auto max-w-7xl">
         <div className="mb-14 text-center">

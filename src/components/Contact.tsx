@@ -14,7 +14,7 @@ export function Contact() {
   return (
     <section
       id="contact"
-      className="bg-[#F7F5F1] py-28 px-6"
+      className="bg-cream py-28 px-6"
       aria-labelledby="contact-heading"
     >
       <div className="mx-auto max-w-7xl">

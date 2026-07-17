@@ -120,33 +120,18 @@ export function Gallery() {
 
   const refresh = () => ScrollTrigger.refresh();
 
+  // overflow-hidden keeps the horizontal motion inside the section — the page
+  // itself never scrolls sideways at any width. Plain cream surface: the
+  // ink-wash / gold-squiggle backdrop (a residual third visual language whose
+  // gold line also ran into the next section's seam) has been removed so the
+  // section reads as one cream field with the rest of the site.
   return (
     <section
       ref={sectionRef}
       id="gallery"
       aria-labelledby="gallery-heading"
-      // overflow-hidden keeps the horizontal motion inside the section — the
-      // page itself never scrolls sideways at any width. The warm cream base
-      // (#FAF4EC) sits under the faded ink-wash background so it reads on a
-      // consistent tone.
-      className="relative overflow-hidden py-20 motion-safe:md:py-0"
-      style={{ backgroundColor: "#FAF4EC" }}
+      className="relative overflow-hidden bg-cream py-20 motion-safe:md:py-0"
     >
-      {/* Ink-wash atmosphere — lowest layer (z-0), behind the photos and
-          heading. Faded to 60% so it reads as backdrop while the food photos
-          (which sit at z-10) stay the clear focus. The art is a wide panoramic,
-          so on desktop (md+) we use `cover` to fill the full-screen pinned
-          section edge-to-edge with no letterboxing; on narrow/mobile screens
-          `contain` keeps the whole wide composition visible. Either way any
-          space the art doesn't reach is the section's matching cream base
-          (#FAF4EC), so there's no visible seam. The section's overflow-hidden
-          means it never adds a sideways scrollbar. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-0 bg-contain bg-center bg-no-repeat opacity-60 md:bg-cover"
-        style={{ backgroundImage: "url(/images/gallery-bg.png)" }}
-      />
-
       <div className="relative z-10 flex flex-col gap-10 motion-safe:md:h-screen motion-safe:md:flex-row motion-safe:md:items-center motion-safe:md:gap-0">
         {/* Heading — the fixed anchor. Sits centered on the left while the
             photos stream past on desktop; flows on top on mobile. */}

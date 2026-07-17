@@ -293,17 +293,17 @@ export function About() {
       ref={sectionRef}
       id="about"
       aria-labelledby="about-heading"
-      className="relative overflow-hidden bg-white"
+      className="relative overflow-hidden bg-cream"
       style={{ ["--nav-h" as string]: "68px" } as React.CSSProperties}
     >
-      {/* Mural stage (>= md only — hidden on mobile, where it's omitted
-          entirely). The halves are `object-contain` everywhere so the whole
-          illustration is always shown — nothing is cropped. The art sits on a
-          white field that blends into this section's white background, so the
-          contain letterboxing is invisible and the two halves meet flush at the
-          center seam. On desktop the stage is full height (vertically centered
-          art); on reduced motion it keeps the mural's natural ~2535:1240
-          combined ratio inside the content column. */}
+      {/* Mural stage (>= md only — hidden on mobile, where a simplified band
+          renders instead, see below). The halves are `object-contain` so the
+          whole illustration is always shown — nothing is cropped. The mural art
+          is transparent (white field baked out to WebP), so it sits directly on
+          this section's cream surface with no field to blend and the two halves
+          meet flush at the center seam. On desktop the stage is full height
+          (vertically centered art); on reduced motion it keeps the mural's
+          natural ~2535:1240 combined ratio inside the content column. */}
       {/* pointer-events-none: this stage overlays the story/grill layers
           (z-20 over z-10) and is purely decorative — without it, it swallows
           every click meant for the buttons revealed in the gap beneath. */}
@@ -312,7 +312,7 @@ export function About() {
           {/* Left half */}
           <div className="mural-half-left absolute left-0 top-0 h-full w-1/2 will-change-transform">
             <Image
-              src="/images/mural-left.png"
+              src="/images/mural-left.webp"
               alt=""
               aria-hidden="true"
               fill
@@ -330,7 +330,7 @@ export function About() {
           {/* Right half */}
           <div className="mural-half-right absolute right-0 top-0 h-full w-1/2 will-change-transform">
             <Image
-              src="/images/mural-right.png"
+              src="/images/mural-right.webp"
               alt=""
               aria-hidden="true"
               fill
