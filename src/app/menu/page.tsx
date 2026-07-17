@@ -392,21 +392,14 @@ function ItemCard({
   variant = "default",
 }: {
   item: Item;
-  variant?: "default" | "premium" | "signature";
+  variant?: "default" | "premium";
 }) {
   const accent =
     variant === "premium"
       ? "border-brand-orange/30 bg-white"
-      : variant === "signature"
-        ? "border-brand-blue/30 bg-white"
-        : "border-neutral-200 bg-white";
+      : "border-neutral-200 bg-white";
 
-  const topBar =
-    variant === "premium"
-      ? "bg-brand-orange"
-      : variant === "signature"
-        ? "bg-brand-blue"
-        : null;
+  const topBar = variant === "premium" ? "bg-brand-orange" : null;
 
   return (
     <div className="group h-full">
@@ -481,14 +474,10 @@ function TierSection({
   korean?: string;
   blurb: string;
   items: Item[];
-  variant: "premium" | "signature";
+  variant: "premium";
 }) {
-  const shell =
-    variant === "premium"
-      ? "border-brand-orange/25 bg-[#fbf6ee]"
-      : "border-brand-blue/20 bg-[#f2f4fc]";
-  const labelColor =
-    variant === "premium" ? "text-brand-orange" : "text-brand-blue";
+  const shell = "border-brand-orange/25 bg-[#fbf6ee]";
+  const labelColor = "text-brand-orange";
 
   return (
     <section

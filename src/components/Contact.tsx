@@ -29,7 +29,6 @@ export function Contact() {
               id="contact-heading"
               className="font-serif text-5xl font-light text-foreground md:text-6xl"
             >
-              {/* TODO: heading */}
               Come to the Table
             </h2>
           </ScrollReveal>

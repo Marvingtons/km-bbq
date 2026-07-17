@@ -39,7 +39,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.4 }}
         >
-          {/* TODO: Replace headline */}
+          {/* TODO(step6): Replace headline */}
           Fire, Flavor,{" "}
           <em className="italic text-brand-orange">Tradition.</em>
         </motion.h1>
