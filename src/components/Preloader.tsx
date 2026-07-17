@@ -53,7 +53,7 @@ export function Preloader() {
               background:
                 "radial-gradient(circle, rgba(241,139,35,0.55) 0%, rgba(236,34,41,0.28) 32%, rgba(250,244,236,0) 68%)",
             }}
-            initial={{ opacity: 0, scale: 0.3 }}
+            initial={reduceMotion ? false : { opacity: 0, scale: 0.3 }}
             animate={{
               opacity: [0, 0.6, 0.45, 0.7, 0.5],
               scale: [0.3, 1.05, 0.92, 1.08, 1],
@@ -92,7 +92,7 @@ export function Preloader() {
                   strokeWidth="1.6"
                   strokeLinecap="round"
                   strokeDasharray="314.16"
-                  initial={{ strokeDashoffset: 314.16, opacity: 0 }}
+                  initial={reduceMotion ? false : { strokeDashoffset: 314.16, opacity: 0 }}
                   animate={{ strokeDashoffset: 0, opacity: 0.9 }}
                   transition={{ duration: 1.7, ease: "easeOut", delay: 0.3 }}
                   style={{ filter: "drop-shadow(0 0 4px rgba(241,139,35,0.7))" }}
@@ -105,7 +105,7 @@ export function Preloader() {
                 width="75%"
                 height="66%"
                 aria-hidden="true"
-                initial={{ opacity: 0, scale: 0.85 }}
+                initial={reduceMotion ? false : { opacity: 0, scale: 0.85 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.7, ease: [0.34, 1.56, 0.64, 1] }}
               >
@@ -141,7 +141,7 @@ export function Preloader() {
                   stroke="#FFFFFF"
                   strokeWidth="0.8388"
                   d="m78.1 200c0.5 3.7-5.3 5-5.6 7.2-0.2 1.5 0.9 3.4 2 3.4s3.4-0.8 4.8 0.4c0.4 0.7-4 4 0.2 5.3 1.6 0.4 3.4 0.4 4.1-0.4 1.1-1.1 1.9-3.9 2.7-3.4 4.2 2.5 6.7 2.7 8.2 0.7 1-1.2 0.8-1.5 2.3-0.9 3.2 1.2 7.3 2.7 7-4.3 0-1.5 1.2-2.7 0.3-3.3-1.6-1.1-1.8 2.9-3.3 3.1-2 0 0.1-2.2-0.3-4.5-0.7-3.2-4.4-3.5-5.5-6.8-0.5-0.5-1.3 0.1-1.5 1.2-0.2 3.2 3.1 5.1 3 6.4l-2.5 2.2c-0.6-1.7-2.3-4.1-3.5-4.2-1-0.1 0 4.2-0.2 4.4-0.7 0.8-3.7 1.4-4.3 0.2-0.3-2.4 0.6-7.8-2-9.1-1-0.2-1.2 0.4-1 1.3 1 5-2 7.4-3.7 6.6-2.2-1.5 2-2.6 0.4-4.8-0.2-0.6-1.8-2.3-1.6-0.7z"
-                  initial={{ scale: 0, opacity: 0 }}
+                  initial={reduceMotion ? false : { scale: 0, opacity: 0 }}
                   animate={{
                     scale: [0, 1.35, 0.95, 1.05, 0.98, 1.02, 1],
                     opacity: [0, 1, 0.9, 1, 0.85, 1, 1],

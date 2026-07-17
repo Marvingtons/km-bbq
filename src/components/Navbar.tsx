@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Logo } from "./Logo";
+import { useActiveSection } from "@/lib/useActiveSection";
 
 // `hash` links point at sections on the home page; `route` links point at a
 // dedicated route. From the home page a section link is a same-page hash; from
@@ -23,7 +24,20 @@ export function Navbar() {
 
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [active, setActive] = useState(isHome ? "home" : "menu");
+  const reduce = useReducedMotion();
+
+  // Track which section is in view so the matching link stays underlined. Only
+  // relevant on the home page, where the sections live — and only for hash
+  // links (MENU is a route, so no homepage section may activate it). Shared
+  // observer logic with the menu jump nav via useActiveSection.
+  const [active] = useActiveSection(
+    NAV_LINKS.filter((link) => link.hash).map((link) => link.id),
+    {
+      enabled: isHome,
+      initial: isHome ? "home" : "menu",
+      rootMargin: "-45% 0px -45% 0px",
+    }
+  );
 
   const hrefFor = (link: (typeof NAV_LINKS)[number]) =>
     link.route ?? (isHome ? link.hash! : `/${link.hash}`);
@@ -34,34 +48,6 @@ export function Navbar() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  // Track which section is in view so the matching link stays underlined.
-  // Only relevant on the home page, where the sections actually live — and
-  // only for hash links: route links (MENU) point at other pages, so no
-  // homepage section may activate them.
-  useEffect(() => {
-    if (!isHome) return;
-
-    const sections = NAV_LINKS.filter((link) => link.hash)
-      .map(({ id }) => document.getElementById(id))
-      .filter((el): el is HTMLElement => el !== null);
-    if (sections.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        if (visible[0]) setActive(visible[0].target.id);
-      },
-      // A band around the vertical centre keeps the active link in sync with
-      // the section the viewer is actually reading.
-      { rootMargin: "-45% 0px -45% 0px", threshold: [0, 0.25, 0.5, 1] }
-    );
-
-    sections.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [isHome]);
 
   // Lock body scroll while the mobile menu is open, and close on Escape.
   useEffect(() => {
@@ -177,10 +163,10 @@ export function Navbar() {
           <motion.div
             id="mobile-menu"
             className="fixed inset-0 z-40 flex flex-col bg-cream px-9 pt-28 lg:hidden"
-            initial={{ opacity: 0 }}
+            initial={reduce ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
+            transition={{ duration: reduce ? 0 : 0.35, ease: "easeOut" }}
             role="dialog"
             aria-modal="true"
             aria-label="Site menu"
@@ -191,10 +177,14 @@ export function Navbar() {
                 return (
                   <motion.li
                     key={link.label}
-                    initial={{ opacity: 0, y: 12 }}
+                    initial={reduce ? false : { opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
-                    transition={{ delay: 0.08 + i * 0.06, duration: 0.4, ease: "easeOut" }}
+                    transition={
+                      reduce
+                        ? { duration: 0 }
+                        : { delay: 0.08 + i * 0.06, duration: 0.4, ease: "easeOut" }
+                    }
                   >
                     <Link
                       href={hrefFor(link)}

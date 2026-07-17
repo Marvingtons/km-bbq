@@ -1,9 +1,13 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { HeroVideo } from "./HeroVideo";
 
 export function Hero() {
+  // Gate the mount fade-ups: under reduced motion each element renders at its
+  // final state (initial=false) instead of sliding in.
+  const reduce = useReducedMotion();
+
   return (
     <section
       id="home"
@@ -31,7 +35,7 @@ export function Hero() {
       <div className="relative z-10 mx-auto max-w-5xl px-6 text-center text-white">
         <motion.p
           className="mb-4 font-sans text-sm font-medium tracking-[0.35em] uppercase text-ember"
-          initial={{ opacity: 0, y: 20 }}
+          initial={reduce ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
         >
@@ -40,7 +44,7 @@ export function Hero() {
 
         <motion.h1
           className="font-serif text-5xl font-light leading-tight tracking-tight sm:text-6xl md:text-7xl"
-          initial={{ opacity: 0, y: 30 }}
+          initial={reduce ? false : { opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.4 }}
         >
@@ -51,7 +55,7 @@ export function Hero() {
 
         <motion.p
           className="mx-auto mt-6 max-w-xl font-sans text-base font-light leading-relaxed text-white/90"
-          initial={{ opacity: 0, y: 20 }}
+          initial={reduce ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.65 }}
         >
@@ -61,7 +65,7 @@ export function Hero() {
 
         <motion.div
           className="mt-10 flex justify-center"
-          initial={{ opacity: 0, y: 20 }}
+          initial={reduce ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.85 }}
         >

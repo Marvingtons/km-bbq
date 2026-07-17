@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { MenuJumpNav, type JumpTarget } from "@/components/MenuJumpNav";
+import { HOURS, ADDRESS, PHONE } from "@/lib/restaurant";
 
 export const metadata: Metadata = {
   title: "Full Menu — KM.BBQ",
@@ -361,7 +362,7 @@ const imageExists = (image: string) =>
 function ItemMedia({ item }: { item: Item }) {
   if (item.image && imageExists(item.image)) {
     return (
-      <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden bg-neutral-100">
+      <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden rounded-lg bg-paper">
         <Image
           src={item.image}
           alt={item.name}
@@ -378,7 +379,7 @@ function ItemMedia({ item }: { item: Item }) {
   return (
     <div
       aria-hidden="true"
-      className="mb-4 flex aspect-[16/9] w-full items-center justify-center overflow-hidden bg-gradient-to-br from-paper to-paper-line"
+      className="mb-4 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-paper to-paper-line"
     >
       <span className="font-serif text-5xl font-light text-ember-deep/35 select-none">
         {item.name.charAt(0)}
@@ -394,18 +395,11 @@ function ItemCard({
   item: Item;
   variant?: "default" | "premium";
 }) {
-  const accent =
-    variant === "premium"
-      ? "border-ember/30 bg-white"
-      : "border-neutral-200 bg-white";
-
   const topBar = variant === "premium" ? "bg-ember" : null;
 
   return (
     <div className="group h-full">
-      <div
-        className={`relative flex h-full flex-col border ${accent} p-5 transition-shadow hover:shadow-md`}
-      >
+      <div className="relative flex h-full flex-col overflow-hidden rounded-xl bg-white p-5 shadow-warm transition-shadow duration-300 hover:shadow-warm-lg">
         {topBar && (
           <span
             aria-hidden="true"
@@ -482,7 +476,7 @@ function TierSection({
   return (
     <section
       id={variant}
-      className={`mt-12 scroll-mt-32 rounded-2xl border ${shell} p-6 sm:p-10`}
+      className={`mt-12 scroll-mt-32 rounded-xl border ${shell} p-6 sm:p-10`}
     >
       <div className="mb-8 text-center">
         <p
@@ -543,7 +537,7 @@ export default function MenuPage() {
             </p>
 
             {/* Price band */}
-            <div className="mx-auto mt-9 inline-flex items-stretch rounded-2xl border border-paper-line bg-white shadow-[0_8px_30px_-18px_rgba(26,26,26,0.45)]">
+            <div className="mx-auto mt-9 inline-flex items-stretch overflow-hidden rounded-xl bg-white shadow-warm">
               <div className="px-6 py-5 text-center sm:px-10">
                 <p className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
                   Lunch
@@ -654,9 +648,12 @@ export default function MenuPage() {
                   Hours
                 </h3>
                 <p className="mt-4 font-sans text-sm font-light leading-relaxed text-foreground/70">
-                  Sun–Thu 12:00 PM – 9:30 PM
-                  <br />
-                  Fri–Sat 12:00 PM – 10:00 PM
+                  {HOURS.map(({ short, time }, i) => (
+                    <span key={short}>
+                      {short} {time}
+                      {i < HOURS.length - 1 && <br />}
+                    </span>
+                  ))}
                 </p>
               </div>
               <div>
@@ -664,9 +661,9 @@ export default function MenuPage() {
                   Location
                 </h3>
                 <p className="mt-4 font-sans text-sm font-light leading-relaxed text-foreground/70">
-                  2216 S El Camino Real #108–109
+                  {ADDRESS.street}
                   <br />
-                  Oceanside, CA 92054
+                  {ADDRESS.region}
                 </p>
               </div>
               <div>
@@ -677,10 +674,10 @@ export default function MenuPage() {
                   No reservations
                   <br />
                   <a
-                    href="tel:+17604331888"
+                    href={PHONE.href}
                     className="font-semibold text-ember-deep transition-colors hover:text-ember"
                   >
-                    (760) 433-1888
+                    {PHONE.display}
                   </a>
                 </p>
               </div>

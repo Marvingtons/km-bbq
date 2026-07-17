@@ -4,6 +4,8 @@ import { useLayoutEffect, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { MOTION } from "@/lib/motion";
+import { useScrollRefresh } from "@/lib/useScrollRefresh";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -94,7 +96,7 @@ export function Gallery() {
             anticipatePin: 1,
             // Numeric scrub (not `true`) eases the row toward the scroll
             // position so the travel never snaps notch-to-notch.
-            scrub: 1,
+            scrub: MOTION.scrub,
             invalidateOnRefresh: true,
             onRefresh: updateCaptions,
             onUpdate: updateCaptions,
@@ -106,17 +108,12 @@ export function Gallery() {
       }
     );
 
-    // Re-measure pin distance once async content settles (images already call
-    // refresh on load, but fonts / final window load can shift layout too).
-    const refreshST = () => ScrollTrigger.refresh();
-    window.addEventListener("load", refreshST);
-    document.fonts?.ready.then(refreshST);
-
     return () => {
-      window.removeEventListener("load", refreshST);
       mm.revert();
     };
   }, []);
+
+  useScrollRefresh();
 
   const refresh = () => ScrollTrigger.refresh();
 
@@ -162,7 +159,7 @@ export function Gallery() {
             {GALLERY_ITEMS.map((item) => (
               <figure
                 key={item.id}
-                className="gallery-tile group relative h-[52vh] shrink-0 snap-start overflow-hidden rounded-xl bg-neutral-200 shadow-[0_18px_56px_-12px_rgba(0,0,0,0.62)] motion-safe:md:h-[60vh]"
+                className="gallery-tile group relative h-[52vh] shrink-0 snap-start overflow-hidden rounded-xl bg-paper shadow-warm motion-safe:md:h-[60vh]"
                 style={{ aspectRatio: String(item.ratio) }}
               >
                 <Image

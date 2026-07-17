@@ -15,8 +15,6 @@ const dseg7 = localFont({
   display: "swap",
 });
 
-const REVEAL = { margin: "0px 0px -20% 0px", duration: 0.45 } as const;
-
 // The house game, exactly as played at the restaurant: a clock counts up and
 // one press of the red button stops it. Land on 10.00 seconds flat and your
 // next barbecue is free. This section is a practice round — the copy is
@@ -139,12 +137,12 @@ export function Challenge() {
     >
       <div className="mx-auto max-w-7xl">
         <div className="mb-14 text-center">
-          <ScrollReveal {...REVEAL}>
+          <ScrollReveal>
             <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
               The House Game
             </p>
           </ScrollReveal>
-          <ScrollReveal {...REVEAL} delay={0.05}>
+          <ScrollReveal delay={0.05}>
             <h2
               id="challenge-heading"
               className="font-serif text-4xl font-light text-foreground md:text-5xl"
@@ -152,7 +150,7 @@ export function Challenge() {
               Feeling <em className="italic text-ember">Lucky?</em>
             </h2>
           </ScrollReveal>
-          <ScrollReveal {...REVEAL} delay={0.1}>
+          <ScrollReveal delay={0.1}>
             <p className="mx-auto mt-6 max-w-xl font-sans text-base font-light leading-relaxed text-foreground/60">
               By the door hangs a clock and a single red button. Every table
               gets one press per visit — stop the clock at exactly 10.00
@@ -161,7 +159,7 @@ export function Challenge() {
           </ScrollReveal>
         </div>
 
-        <ScrollReveal {...REVEAL} delay={0.12}>
+        <ScrollReveal delay={0.12}>
           <div className="mx-auto flex max-w-md flex-col items-center">
             <span className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
               The Clock

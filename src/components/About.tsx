@@ -2,9 +2,11 @@
 
 import { useLayoutEffect, useRef } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { PillLink } from "./PillLink";
+import { MOTION, NAV_H } from "@/lib/motion";
+import { useScrollRefresh } from "@/lib/useScrollRefresh";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -167,7 +169,7 @@ export function About() {
               // frame-for-frame. This is what makes the mural open/ignite
               // feel smooth rather than stepping in hard chunks with each
               // wheel/trackpad notch.
-              scrub: 0.8,
+              scrub: MOTION.scrub,
               invalidateOnRefresh: true,
             },
           });
@@ -232,9 +234,9 @@ export function About() {
           const textCol = q(".about-text");
           gsap.from(textCol, {
             opacity: 0,
-            y: 24,
-            duration: 0.7,
-            ease: "power2.out",
+            y: MOTION.rise,
+            duration: MOTION.duration,
+            ease: MOTION.gsapEase,
             scrollTrigger: {
               trigger: textCol[0],
               start: "top 88%",
@@ -248,9 +250,9 @@ export function About() {
           // entrance the story gets, feature card first.
           gsap.from(grillHead, {
             opacity: 0,
-            y: 24,
-            duration: 0.7,
-            ease: "power2.out",
+            y: MOTION.rise,
+            duration: MOTION.duration,
+            ease: MOTION.gsapEase,
             scrollTrigger: {
               trigger: grillHead[0],
               start: "top 88%",
@@ -259,10 +261,10 @@ export function About() {
 
           gsap.from(grillDishes, {
             opacity: 0,
-            y: 24,
-            duration: 0.6,
-            stagger: 0.08,
-            ease: "power2.out",
+            y: MOTION.rise,
+            duration: MOTION.duration,
+            stagger: MOTION.stagger,
+            ease: MOTION.gsapEase,
             scrollTrigger: {
               trigger: grillDishes[0],
               start: "top 90%",
@@ -272,19 +274,12 @@ export function About() {
       }
     );
 
-    // Re-measure pin start/end once async content settles. The mural <img>s
-    // already call refresh on load, but fonts and the final window load can
-    // also shift layout; measuring against stale sizes is what makes the pin
-    // jump on the first scroll instead of scrubbing from the right spot.
-    const refreshST = () => ScrollTrigger.refresh();
-    window.addEventListener("load", refreshST);
-    document.fonts?.ready.then(refreshST);
-
     return () => {
-      window.removeEventListener("load", refreshST);
       mm.revert();
     };
   }, []);
+
+  useScrollRefresh();
 
   const refresh = () => ScrollTrigger.refresh();
 
@@ -294,7 +289,7 @@ export function About() {
       id="about"
       aria-labelledby="about-heading"
       className="relative overflow-hidden bg-cream"
-      style={{ ["--nav-h" as string]: "68px" } as React.CSSProperties}
+      style={{ ["--nav-h" as string]: `${NAV_H}px` } as React.CSSProperties}
     >
       {/* Mural stage (>= md only — hidden on mobile, where a simplified band
           renders instead, see below). The halves are `object-contain` so the
@@ -386,13 +381,9 @@ export function About() {
               kind of meal you remember.
             </p>
           </div>
-          <Link
-            href="/menu"
-            className="relative isolate mt-10 inline-flex items-center gap-2 overflow-hidden rounded-full border border-ember px-8 py-3 font-sans text-sm font-medium text-ember transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
-          >
+          <PillLink href="/menu" arrow className="mt-10">
             Explore our menu
-            <span aria-hidden="true">→</span>
-          </Link>
+          </PillLink>
         </div>
       </div>
 
@@ -438,12 +429,12 @@ export function About() {
                   key={dish.name}
                   className={`grill-dish group h-full will-change-transform ${span}`}
                 >
-                  <div className="flex h-full flex-col bg-white p-5 text-left shadow-[0_2px_16px_rgba(120,60,20,0.08)] transition-shadow duration-300 hover:shadow-[0_6px_24px_rgba(120,60,20,0.14)]">
+                  <div className="flex h-full flex-col overflow-hidden rounded-xl bg-white p-5 text-left shadow-warm transition-shadow duration-300 hover:shadow-warm-lg">
                     {/* Feature photo stretches to fill the two-row card; the
                         others crop slightly wider at lg so both grid rows plus
                         the header and CTA share one pinned viewport. */}
                     <div
-                      className={`relative w-full overflow-hidden bg-neutral-100 ${
+                      className={`relative w-full overflow-hidden rounded-lg bg-paper ${
                         isFeature
                           ? "aspect-[16/9] lg:aspect-auto lg:min-h-0 lg:flex-1"
                           : "aspect-[16/9] lg:aspect-[2/1]"
@@ -496,12 +487,7 @@ export function About() {
             })}
           </div>
           <div className="grill-cta mt-6">
-            <Link
-              href="/menu"
-              className="relative isolate inline-flex overflow-hidden rounded-full border border-ember px-8 py-3 font-sans text-sm font-medium text-ember transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
-            >
-              View Full Menu
-            </Link>
+            <PillLink href="/menu">View Full Menu</PillLink>
           </div>
         </div>
       </div>
