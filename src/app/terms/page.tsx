@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
 import { PHONE, ADDRESS } from "@/lib/restaurant";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Terms of Service — KM.BBQ",
+export const metadata: Metadata = pageMeta({
+  title: "Terms of Service",
   description:
-    "Terms of use for the KM.BBQ website — all-you-can-eat Korean BBQ in Oceanside, CA.",
-};
+    "The terms for using the KM.BBQ website, all-you-can-eat Korean BBQ in Oceanside, CA.",
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (

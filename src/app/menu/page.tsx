@@ -5,13 +5,17 @@ import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { MenuJumpNav, type JumpTarget } from "@/components/MenuJumpNav";
+import { BreadcrumbSchema } from "@/components/RestaurantSchema";
 import { HOURS, ADDRESS, PHONE } from "@/lib/restaurant";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Full Menu — KM.BBQ",
+export const metadata: Metadata = pageMeta({
+  title: "Full Menu | KM.BBQ Korean BBQ in Oceanside",
   description:
-    "The full KM.BBQ spread — all-you-can-eat, self-serve charcoal Korean BBQ. Beef, pork, chicken, seafood, banchan, and premium cuts, all included in one per-person price.",
-};
+    "The full KM.BBQ spread: beef, pork, chicken, seafood, banchan, and premium cuts. All-you-can-eat, self-serve, and grilled over live charcoal in Oceanside, CA.",
+  path: "/menu",
+  titleAbsolute: true,
+});
 
 // ---------------------------------------------------------------------------
 // Menu data
@@ -520,8 +524,14 @@ const JUMP_TARGETS: JumpTarget[] = [
 export default function MenuPage() {
   return (
     <>
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", path: "/" },
+          { name: "Menu", path: "/menu" },
+        ]}
+      />
       <Navbar />
-      <main className="bg-cream">
+      <main id="main-content" tabIndex={-1} className="bg-cream focus:outline-none">
         {/* Header */}
         <section className="px-6 pt-32 pb-12 sm:pt-36 lg:pt-40">
           <div className="mx-auto max-w-3xl text-center">

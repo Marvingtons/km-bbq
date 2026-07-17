@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
 import { PHONE, ADDRESS } from "@/lib/restaurant";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy — KM.BBQ",
+export const metadata: Metadata = pageMeta({
+  title: "Privacy Policy",
   description:
     "How KM.BBQ in Oceanside, CA handles information collected through our website.",
-};
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (
