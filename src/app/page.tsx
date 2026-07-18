@@ -12,7 +12,7 @@ import { pageMeta } from "@/lib/seo";
 export const metadata: Metadata = pageMeta({
   title: "KM.BBQ | All-You-Can-Eat Korean BBQ in Oceanside",
   description:
-    "All-you-can-eat, self-serve Korean BBQ grilled over live charcoal in Oceanside, CA. Pick what you like, grill it your way, and eat all you want. Walk-ins welcome.",
+    "All-you-can-eat, self-serve Korean BBQ grilled at your table in Oceanside, CA. Pick what you like, grill it your way, and eat all you want. Walk-ins welcome.",
   path: "/",
   titleAbsolute: true,
 });

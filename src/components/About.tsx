@@ -65,7 +65,7 @@ const FEATURED_DISHES: Dish[] = [
     name: "Galbi",
     korean: "갈비",
     description:
-      "Short ribs marinated in a soy-pear blend, grilled over live charcoal until caramelized.",
+      "Short ribs marinated in a soy-pear blend, grilled at your table until caramelized.",
     image: "/images/galbi.png",
     tag: "Signature",
   },
@@ -399,7 +399,7 @@ export function About() {
           <div className="mt-8 space-y-5 font-sans text-sm font-light leading-relaxed text-foreground/80">
             <p>
               KM.BBQ started with one idea: really good Korean BBQ that you cook
-              yourself. Every table gets its own live charcoal grill.
+              yourself. Every table gets its own grill, gas or charcoal.
             </p>
             <p>
               We pick our meat carefully and marinate it in house, using recipes

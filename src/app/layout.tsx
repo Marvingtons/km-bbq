@@ -27,14 +27,14 @@ export const metadata: Metadata = {
     template: "%s | KM.BBQ",
   },
   description:
-    "All-you-can-eat, self-serve Korean BBQ grilled over live charcoal in Oceanside, CA. Pick what you like, grill it your way, and eat all you want.",
+    "All-you-can-eat, self-serve Korean BBQ grilled at your table in Oceanside, CA. Pick what you like, grill it your way, and eat all you want.",
   applicationName: BUSINESS.name,
   keywords: [
     "Korean BBQ Oceanside",
     "all you can eat Korean BBQ",
     "KBBQ Oceanside",
     "AYCE Korean BBQ",
-    "charcoal grill Korean barbecue",
+    "table grill Korean barbecue",
     "KM BBQ",
   ],
   robots: { index: true, follow: true },
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     url: SITE_URL,
     title: "KM.BBQ | All-You-Can-Eat Korean BBQ in Oceanside",
     description:
-      "Self-serve Korean BBQ grilled over live charcoal in Oceanside, CA. One price, everything included.",
+      "Self-serve Korean BBQ grilled at your table in Oceanside, CA. One price, everything included.",
     images: [
       {
         url: "/og.png",
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "KM.BBQ | All-You-Can-Eat Korean BBQ in Oceanside",
     description:
-      "Self-serve Korean BBQ grilled over live charcoal in Oceanside, CA. One price, everything included.",
+      "Self-serve Korean BBQ grilled at your table in Oceanside, CA. One price, everything included.",
     images: ["/og.png"],
   },
 };

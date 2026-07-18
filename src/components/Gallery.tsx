@@ -20,7 +20,7 @@ interface GalleryItem {
 }
 
 const GALLERY_ITEMS: GalleryItem[] = [
-  { id: 1, src: "/images/live-grill.png", alt: "Live charcoal grill at KM BBQ", caption: "Live Grill", ratio: 1.5 },
+  { id: 1, src: "/images/live-grill.png", alt: "Built-in grill at a table at KM BBQ", caption: "Table Grill", ratio: 1.5 },
   { id: 2, src: "/images/banchan-spread.png", alt: "Banchan side dishes", caption: "Banchan", ratio: 1.0 },
   { id: 3, src: "/images/marbled-wagyu.png", alt: "Marbled wagyu on the grill", caption: "Marbled Wagyu", ratio: 0.72 },
   { id: 4, src: "/images/interior.png", alt: "KM BBQ interior", caption: "Interior", ratio: 1.5 },

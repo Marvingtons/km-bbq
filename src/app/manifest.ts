@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "KM.BBQ Korean BBQ",
     short_name: "KM.BBQ",
     description:
-      "All-you-can-eat, self-serve Korean BBQ grilled over live charcoal in Oceanside, CA.",
+      "All-you-can-eat, self-serve Korean BBQ grilled at your table in Oceanside, CA.",
     start_url: "/",
     display: "standalone",
     background_color: "#FAF4EC",

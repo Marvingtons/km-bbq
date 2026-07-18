@@ -68,7 +68,7 @@ export function Footer() {
             </div>
             <p className="mt-5 max-w-xs font-sans text-sm font-light leading-relaxed text-white/60">
               All-you-can-eat Korean BBQ in Oceanside, California. You pick the
-              cuts and grill them yourself over live charcoal.
+              cuts and grill them yourself right at your table.
             </p>
             <SocialLinks tone="dark" className="mt-6 md:mt-auto md:pt-6" />
           </div>

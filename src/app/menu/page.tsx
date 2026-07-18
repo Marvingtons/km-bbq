@@ -12,7 +12,7 @@ import { pageMeta } from "@/lib/seo";
 export const metadata: Metadata = pageMeta({
   title: "Full Menu | KM.BBQ Korean BBQ in Oceanside",
   description:
-    "The full KM.BBQ spread: beef, pork, chicken, seafood, banchan, and premium cuts. All-you-can-eat, self-serve, and grilled over live charcoal in Oceanside, CA.",
+    "The full KM.BBQ spread: beef, pork, chicken, seafood, banchan, and premium cuts. All-you-can-eat, self-serve, and grilled at your table in Oceanside, CA.",
   path: "/menu",
   titleAbsolute: true,
 });
@@ -80,7 +80,7 @@ const CATEGORIES: Category[] = [
       },
       {
         name: "Pork Chop",
-        desc: "Simply seasoned pork, charred over live charcoal for a smoky bite.",
+        desc: "Simply seasoned pork, charred on your own grill for a smoky bite.",
         image: "/images/pork-chop.png",
       },
       {
@@ -175,7 +175,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Pumpkin",
         korean: "호박",
-        desc: "Sweet slices that caramelize beautifully over charcoal.",
+        desc: "Sweet slices that caramelize beautifully over the grill.",
         image: "/images/pumpkin.png",
       },
       {
@@ -536,13 +536,13 @@ export default function MenuPage() {
         <section className="px-6 pt-32 pb-12 sm:pt-36 lg:pt-40">
           <div className="mx-auto max-w-3xl text-center">
             <p className="mb-5 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-              All-You-Can-Eat · Self-Serve · Charcoal
+              All-You-Can-Eat · Self-Serve · Grill Your Own
             </p>
             <h1 className="font-serif text-5xl font-light leading-tight text-foreground sm:text-6xl">
               The Full <em className="italic text-ember">Spread</em>
             </h1>
             <p className="mx-auto mt-6 max-w-xl font-sans text-base font-light leading-relaxed text-foreground/60">
-              Pick whatever you like, grill it your way over live charcoal, and
+              Pick whatever you like, grill it your way at your table, and
               eat all you want. One price, everything included.
             </p>
 
