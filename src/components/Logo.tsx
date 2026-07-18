@@ -1,10 +1,27 @@
+import { useId } from "react";
+
 interface LogoProps {
   size?: number;
   className?: string;
 }
 
+/**
+ * The canonical KM.BBQ mark — the true-vector version of the storefront sign,
+ * inlined so it renders crisp everywhere (Navbar, Footer, Preloader) and so the
+ * preloader can build it path by path (each path carries `logo-path`, in
+ * document order: badge, K, flame, M, dot, B, B, Q).
+ *
+ * The script paths are unified to one pink (#ED397D) — the source SVG mixed
+ * #ED397D and #EE3C81. The mark keeps its real sign colors (blue/pink/red/
+ * orange); these are sanctioned as logo-only in the token system and must not
+ * leak into any other UI.
+ */
 export function Logo({ size = 160, className }: LogoProps) {
   const height = Math.round(size * (44 / 180));
+  // Unique gradient id per instance: the mark renders more than once per page
+  // (navbar + footer + preloader), and duplicate SVG ids break url(#) refs when
+  // one instance unmounts. useId is SSR-stable; strip the colons for url() use.
+  const gradId = "km-k-grad-" + useId().replace(/[^a-zA-Z0-9-]/g, "");
 
   return (
     <svg
@@ -18,7 +35,7 @@ export function Logo({ size = 160, className }: LogoProps) {
     >
       <defs>
         <linearGradient
-          id="km-k-gradient"
+          id={gradId}
           x1="79.2"
           x2="100.6"
           y1="-371"
@@ -30,51 +47,56 @@ export function Logo({ size = 160, className }: LogoProps) {
           <stop stopColor="#F58721" offset="1" />
         </linearGradient>
       </defs>
-      {/* Blue badge circle */}
+      {/* 1 — blue badge circle */}
       <path
+        className="logo-path"
         fill="#1A36AF"
         d="m85 179c-8.8 2.1-18.5 10-18.5 21 0 9.6 7.4 20.6 22.5 20.9 13.1 0.2 22.5-9.9 22.5-20.9s-9.4-24-26.5-21z"
       />
-      {/* Orange K letter */}
+      {/* 2 — gradient K */}
       <path
+        className="logo-path"
         d="m80.2 184.8v20.2h5l0.4-4 2-1.9c0.6-0.7 3.2 3.8 5.4 5.9h5.5v-1l-6.8-8.4 8.9-9.4-0.1-0.5-5.8-0.1-8.9 9.8-0.2-10.4-5.4-0.2z"
-        fill="url(#km-k-gradient)"
+        fill={`url(#${gradId})`}
         stroke="#BD752E"
         strokeWidth=".2"
       />
-      {/* Red flame */}
+      {/* 3 — red flame */}
       <path
+        className="logo-path"
         fill="#EC2229"
         stroke="#FFFFFF"
         strokeWidth="0.8388"
         d="m78.1 200c0.5 3.7-5.3 5-5.6 7.2-0.2 1.5 0.9 3.4 2 3.4s3.4-0.8 4.8 0.4c0.4 0.7-4 4 0.2 5.3 1.6 0.4 3.4 0.4 4.1-0.4 1.1-1.1 1.9-3.9 2.7-3.4 4.2 2.5 6.7 2.7 8.2 0.7 1-1.2 0.8-1.5 2.3-0.9 3.2 1.2 7.3 2.7 7-4.3 0-1.5 1.2-2.7 0.3-3.3-1.6-1.1-1.8 2.9-3.3 3.1-2 0 0.1-2.2-0.3-4.5-0.7-3.2-4.4-3.5-5.5-6.8-0.5-0.5-1.3 0.1-1.5 1.2-0.2 3.2 3.1 5.1 3 6.4l-2.5 2.2c-0.6-1.7-2.3-4.1-3.5-4.2-1-0.1 0 4.2-0.2 4.4-0.7 0.8-3.7 1.4-4.3 0.2-0.3-2.4 0.6-7.8-2-9.1-1-0.2-1.2 0.4-1 1.3 1 5-2 7.4-3.7 6.6-2.2-1.5 2-2.6 0.4-4.8-0.2-0.6-1.8-2.3-1.6-0.7z"
       />
-      {/* TODO(step6): the wordmark uses two near-identical pinks — #ED397D here
-          vs #EE3C81 on the letterforms below. Reconcile to one when the logo is
-          recolored to the ember/charcoal system (held out of scope this pass). */}
-      {/* Pink M wordmark */}
+      {/* 4 — script M */}
       <path
+        className="logo-path"
         fill="#ED397D"
         d="m128.5 187.7c-3.1 1.8-15.1 13.8-15.1 20.8 0.1 5.5 6 4.9 11 2.8v-0.3c-1.5-0.7-4.4-1.9-4.6-6.4 0-4.1 3-8.5 4-10.4-0.2-0.2 2.5 11.8 6.6 17.1 0.9 1 2 1.5 3.5 1.4 1.9-0.1 4.3-0.6 5.8-1.4 0.1-0.2-3.4-1.1-3.6-5.6-0.6-7.2 3.4-11.7 3.4-11.7 0.9 4 2.8 14.4 6.6 18 2.9-1.1 8.4-3.7 8.9-4.6-8.1 0-10.3-14-11.1-20-1.7 0.3-8.1 6.8-11.3 13.6-2.2-4-3.7-11.9-4.1-13.3z"
       />
-      {/* Pink dot accent */}
+      {/* 5 — script dot */}
       <path
-        fill="#EE3C81"
+        className="logo-path"
+        fill="#ED397D"
         d="m154.1 209c-1.1 4.2 5.9 4.4 8.4 0.6 1.6-4.2-5.4-5.4-8-1.1"
       />
-      {/* Pink B (first) */}
+      {/* 6 — script B */}
       <path
-        fill="#EE3C81"
+        className="logo-path"
+        fill="#ED397D"
         d="m180.5 198.7c2.4-1.5 6.2-4.7 2.4-10.1-5.9 1.5-10.4 2-18.5 2 1 1.2 2.6 2.8 3 5.8 0.7 5.5 0.8 10.5 0.2 15.8 1.6-0.6 5.3 0.7 8.9 0.4 7.5-0.6 14.6-6.6 12.6-14.9l-8.6 1zm-7.5-6.3c6.1-1.4 5.5 1.6 5.5 2.6-0.4 2.4-2.9 4.5-5.1 4.6l-0.4-7.2zm1.1 18.5c-0.2-2.5-0.1-5.5-0.5-9 2.4-0.5 7-1.3 9-0.4 1.4 4.5-4.7 10.9-8.5 9.4z"
       />
-      {/* Pink Q (second B) */}
+      {/* 7 — script B */}
       <path
-        fill="#EE3C81"
+        className="logo-path"
+        fill="#ED397D"
         d="m199.9 198.9c2.2-1.2 6.5-5.3 2.7-9.3-0.6-0.6-1-0.1-3.2 0.1-2.2 0.3-7 0.7-9.3 0.7-1.7 0-3 0-3.6 0.6 1.4 1.6 2.2 2.7 2.5 4.9 0.7 4.8 1 10.7 0.4 16.2 1.2-0.5 4.2 0.5 8 0.4 4.2-0.1 10.6-3.5 11.5-9.6 0-2-0.2-3.7-1-4.8l-8 0.8zm-5.4-6.4c3.2-0.6 5.4-0.6 5.5 2.1 0.1 2-2 4.9-5.1 5l-0.4-7.1zm0.9 18.1c-0.3-2 0-4.6-0.5-8.6 2.7-0.4 6.6-1.3 8.2-0.3 0.8 3.5-3.4 10.4-7.7 8.9z"
       />
-      {/* Pink Q letter */}
+      {/* 8 — script Q */}
       <path
-        fill="#EE3C81"
+        className="logo-path"
+        fill="#ED397D"
         d="m231.7 210c0-0.6-2.3 1.1-4.2 1.1-1.1 0-2.6-1.4-3.1-2.2 1.6-1 4.8-3.5 5.1-8.7 0.4-4.7-3.4-10.2-10-10.2-5.6 0-10.6 4.6-11 10.2 0 3.8 2.1 9.4 9.1 10.4-0.6 0.4-1.4 2.3-1.2 2.1 1-0.5 2.8-1.8 4.1-1.7 1.4 0.1 3.2 2.9 5.4 3 2 0 5.1-2.6 5.8-4zm-8.5-2.1c-2.1-1.3-3.3 0-4.1 0.5-6.1-0.4-8.6-12-3.7-15.9 6-3.9 11.8 7.4 7.8 14.6"
       />
     </svg>

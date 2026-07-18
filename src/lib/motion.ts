@@ -23,6 +23,34 @@ export const MOTION = {
 /** Fixed site-header height, in px. One value; sections and jump offsets read it. */
 export const NAV_H = 68;
 
+/**
+ * Preloader choreography. The mark building is the point, so these beats are
+ * deliberately longer than a minimal loader — but the timeline is load-aware
+ * (the HOLD is skipped when the page is already ready) so it never feels stuck.
+ * All values in seconds.
+ */
+export const PRELOADER = {
+  /** Ember hairline scales in beneath the mark. */
+  line: 0.5,
+  /** Per-path fade+rise as the 8 lockup paths build in document order. */
+  pathIn: 0.5,
+  pathStagger: 0.11,
+  pathRise: 8,
+  /** The whole lockup settles from 1.04 -> 1 across the entire build. */
+  lockupScaleFrom: 1.04,
+  build: 2.2,
+  /** "Korean Barbecue" eyebrow, overlapping the build's tail. */
+  eyebrow: 0.5,
+  /** Rest beat with the mark fully assembled (skipped if the page is ready). */
+  hold: 0.7,
+  /** Line stretches, lockup fades, cream field wipes upward. */
+  exit: 0.8,
+  exitLineStretch: 3,
+  exitLockupScale: 0.985,
+  ease: "expo.out",
+  exitEase: "power4.inOut",
+} as const;
+
 export const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 /**

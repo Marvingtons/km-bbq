@@ -1,187 +1,175 @@
 "use client";
 
-import { useState, useEffect, useSyncExternalStore } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { gsap } from "gsap";
+import { Logo } from "./Logo";
+import { PRELOADER, REDUCED_MOTION_QUERY } from "@/lib/motion";
 
-// The intro plays once per tab session. sessionStorage is client-only, so it
-// is read through useSyncExternalStore: the server snapshot says "already
-// shown" (no overlay in the SSR HTML) and the client re-renders with the real
-// value right after hydration — no setState-in-effect, no hydration mismatch.
+// The intro plays once per tab session, and not at all under reduced motion —
+// in both cases this component never mounts (no overlay in the DOM, no flash).
+// sessionStorage/matchMedia are client-only, so they're read through
+// useSyncExternalStore: the server snapshot says "skip" (no overlay in the SSR
+// HTML — the page renders and paints underneath first), and the client
+// re-renders with the real answer right after hydration.
 const subscribe = () => () => {};
-const wasShown = () => sessionStorage.getItem("km-preloader-shown") === "1";
+const shouldSkip = () =>
+  sessionStorage.getItem("km-preloader-shown") === "1" ||
+  window.matchMedia(REDUCED_MOTION_QUERY).matches;
 const serverSnapshot = () => true;
 
+/**
+ * The preloader: a cream field over the already-rendering page, on which the
+ * real sign mark builds itself. Beats (see PRELOADER in lib/motion.ts):
+ *
+ *   1. LINE IN — ember hairline scales in beneath the mark.
+ *   2. MARK BUILDS — the 8 logo paths stagger in, in document order (badge, K,
+ *      flame, M, dot, B, B, Q), while the whole lockup settles 1.04 -> 1.
+ *   3. EYEBROW — "Korean Barbecue" fades in below the line, overlapping.
+ *   4. HOLD — a deliberate rest with the mark assembled. Load-aware: if the
+ *      page is already ready when the mark finishes assembling, the hold is
+ *      skipped and the exit plays immediately; if the page is still loading
+ *      after the hold, the assembled mark simply holds (no spinner) until the
+ *      window load event, then exits.
+ *   5. EXIT — the line stretches to 3x, the lockup fades, and the cream field
+ *      wipes upward to reveal the hero; the line reads as the sweeping edge.
+ */
 export function Preloader() {
   const [dismissed, setDismissed] = useState(false);
-  const reduceMotion = useReducedMotion();
-  const alreadyShown = useSyncExternalStore(subscribe, wasShown, serverSnapshot);
-  const visible = !alreadyShown && !dismissed;
+  const skip = useSyncExternalStore(subscribe, shouldSkip, serverSnapshot);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const visible = !skip && !dismissed;
 
   useEffect(() => {
     if (!visible) return;
+    const root = rootRef.current;
+    if (!root) return;
+
+    // Mark shown immediately so an in-session navigation mid-animation still
+    // skips the loader on the next page; lock scroll while the overlay is up
+    // (html.preloading also holds the hero video on its first frame).
+    sessionStorage.setItem("km-preloader-shown", "1");
     document.documentElement.classList.add("preloading");
 
-    const timer = setTimeout(() => {
-      sessionStorage.setItem("km-preloader-shown", "1");
-      document.documentElement.classList.remove("preloading");
-      setDismissed(true);
-    }, 3000);
+    const q = gsap.utils.selector(root);
+    const isLoaded = () => document.readyState === "complete";
+    const onWindowLoad = () => tl.play("exit");
+
+    const tl = gsap.timeline({ defaults: { ease: PRELOADER.ease } });
+
+    // 1 — LINE IN
+    tl.fromTo(
+      q(".pre-line"),
+      { scaleX: 0.3, autoAlpha: 0 },
+      { scaleX: 1, autoAlpha: 1, duration: PRELOADER.line },
+      0
+    );
+    // 2 — MARK BUILDS: paths in document order + one slow breath on the lockup
+    tl.fromTo(
+      q(".logo-path"),
+      { autoAlpha: 0, y: PRELOADER.pathRise },
+      {
+        autoAlpha: 1,
+        y: 0,
+        duration: PRELOADER.pathIn,
+        stagger: PRELOADER.pathStagger,
+      },
+      0.15
+    );
+    tl.fromTo(
+      q(".pre-lockup"),
+      { scale: PRELOADER.lockupScaleFrom },
+      { scale: 1, duration: PRELOADER.build },
+      0
+    );
+    // 3 — EYEBROW, overlapping the build's tail
+    tl.fromTo(
+      q(".pre-eyebrow"),
+      { autoAlpha: 0, y: 6 },
+      { autoAlpha: 1, y: 0, duration: PRELOADER.eyebrow },
+      PRELOADER.build - 2 * PRELOADER.eyebrow
+    );
+
+    // 4 — assembled checkpoint: page already loaded -> skip the HOLD.
+    tl.addLabel("assembled", PRELOADER.build);
+    tl.call(() => {
+      if (isLoaded()) tl.play("exit");
+    });
+    tl.to({}, { duration: PRELOADER.hold }); // the deliberate rest beat
+    // Still not loaded after the hold: park on the assembled mark (no spinner,
+    // no pulse) and exit the moment the window load event lands.
+    tl.call(() => {
+      if (!isLoaded()) {
+        tl.pause();
+        window.addEventListener("load", onWindowLoad, { once: true });
+      }
+    });
+
+    // 5 — EXIT: the hero video restarts from frame one as the wipe begins.
+    tl.addLabel("exit");
+    tl.call(
+      () => document.documentElement.classList.remove("preloading"),
+      [],
+      "exit"
+    );
+    tl.to(
+      q(".pre-lockup"),
+      {
+        autoAlpha: 0,
+        scale: PRELOADER.exitLockupScale,
+        duration: 0.5,
+        ease: "power2.out",
+      },
+      "exit"
+    );
+    tl.to(
+      q(".pre-eyebrow"),
+      { autoAlpha: 0, duration: 0.4, ease: "power2.out" },
+      "exit"
+    );
+    tl.to(
+      q(".pre-line"),
+      {
+        scaleX: PRELOADER.exitLineStretch,
+        duration: PRELOADER.exit,
+        ease: PRELOADER.exitEase,
+      },
+      "exit"
+    );
+    tl.to(
+      root,
+      { yPercent: -100, duration: PRELOADER.exit, ease: PRELOADER.exitEase },
+      "exit"
+    );
+    tl.call(() => setDismissed(true)); // unmount: overlay leaves the DOM
 
     return () => {
-      clearTimeout(timer);
+      window.removeEventListener("load", onWindowLoad);
+      tl.kill();
       document.documentElement.classList.remove("preloading");
     };
   }, [visible]);
 
+  if (!visible) return null;
+
   return (
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          className="fixed inset-0 z-[200] flex items-center justify-center overflow-hidden bg-cream"
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.9, ease: [0.43, 0.13, 0.23, 0.96] }}
-          aria-label="Loading KM.BBQ"
-          role="status"
-        >
-          {/* Ignition glow — warm fire light blooming from the badge */}
-          <motion.div
-            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            style={{
-              width: "min(640px, 150vw)",
-              height: "min(640px, 150vw)",
-              background:
-                "radial-gradient(circle, rgba(241,139,35,0.55) 0%, rgba(236,34,41,0.28) 32%, rgba(250,244,236,0) 68%)",
-            }}
-            initial={reduceMotion ? false : { opacity: 0, scale: 0.3 }}
-            animate={{
-              opacity: [0, 0.6, 0.45, 0.7, 0.5],
-              scale: [0.3, 1.05, 0.92, 1.08, 1],
-            }}
-            transition={{ duration: 2.6, ease: "easeOut", times: [0, 0.25, 0.5, 0.75, 1] }}
-            aria-hidden="true"
-          />
-
-          <div className="relative flex flex-col items-center gap-6">
-            {/* Badge with ember ring */}
-            <div
-              className="relative flex items-center justify-center"
-              style={{ width: "min(192px, 80vw)", height: "min(192px, 80vw)" }}
-            >
-              {/* Igniting ring — fire-colored sweep */}
-              <motion.svg
-                width="100%"
-                height="100%"
-                viewBox="0 0 110 110"
-                className="absolute inset-0 -rotate-90"
-                aria-hidden="true"
-              >
-                <defs>
-                  <linearGradient id="pre-ring-grad" x1="0" y1="0" x2="1" y2="1">
-                    <stop stopColor="#EBA039" offset="0" />
-                    <stop stopColor="#F18B23" offset="0.5" />
-                    <stop stopColor="#EC2229" offset="1" />
-                  </linearGradient>
-                </defs>
-                <motion.circle
-                  cx="55"
-                  cy="55"
-                  r="50"
-                  fill="none"
-                  stroke="url(#pre-ring-grad)"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeDasharray="314.16"
-                  initial={reduceMotion ? false : { strokeDashoffset: 314.16, opacity: 0 }}
-                  animate={{ strokeDashoffset: 0, opacity: 0.9 }}
-                  transition={{ duration: 1.7, ease: "easeOut", delay: 0.3 }}
-                  style={{ filter: "drop-shadow(0 0 4px rgba(241,139,35,0.7))" }}
-                />
-              </motion.svg>
-
-              {/* Badge SVG — circular badge portion */}
-              <motion.svg
-                viewBox="64 177 52 46"
-                width="75%"
-                height="66%"
-                aria-hidden="true"
-                initial={reduceMotion ? false : { opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.7, ease: [0.34, 1.56, 0.64, 1] }}
-              >
-                <defs>
-                  <linearGradient
-                    id="pre-k-grad"
-                    x1="79.2"
-                    x2="100.6"
-                    y1="-371"
-                    y2="-371"
-                    gradientTransform="matrix(1 0 0 -1 0 3)"
-                    gradientUnits="userSpaceOnUse"
-                  >
-                    <stop stopColor="#EBA039" offset="0" />
-                    <stop stopColor="#F58721" offset="1" />
-                  </linearGradient>
-                </defs>
-                {/* Blue circle */}
-                <path
-                  fill="#1A36AF"
-                  d="m85 179c-8.8 2.1-18.5 10-18.5 21 0 9.6 7.4 20.6 22.5 20.9 13.1 0.2 22.5-9.9 22.5-20.9s-9.4-24-26.5-21z"
-                />
-                {/* K letter */}
-                <path
-                  d="m80.2 184.8v20.2h5l0.4-4 2-1.9c0.6-0.7 3.2 3.8 5.4 5.9h5.5v-1l-6.8-8.4 8.9-9.4-0.1-0.5-5.8-0.1-8.9 9.8-0.2-10.4-5.4-0.2z"
-                  fill="url(#pre-k-grad)"
-                  stroke="#BD752E"
-                  strokeWidth=".2"
-                />
-                {/* Igniting flame — spark, flare, then a living flicker */}
-                <motion.path
-                  fill="#EC2229"
-                  stroke="#FFFFFF"
-                  strokeWidth="0.8388"
-                  d="m78.1 200c0.5 3.7-5.3 5-5.6 7.2-0.2 1.5 0.9 3.4 2 3.4s3.4-0.8 4.8 0.4c0.4 0.7-4 4 0.2 5.3 1.6 0.4 3.4 0.4 4.1-0.4 1.1-1.1 1.9-3.9 2.7-3.4 4.2 2.5 6.7 2.7 8.2 0.7 1-1.2 0.8-1.5 2.3-0.9 3.2 1.2 7.3 2.7 7-4.3 0-1.5 1.2-2.7 0.3-3.3-1.6-1.1-1.8 2.9-3.3 3.1-2 0 0.1-2.2-0.3-4.5-0.7-3.2-4.4-3.5-5.5-6.8-0.5-0.5-1.3 0.1-1.5 1.2-0.2 3.2 3.1 5.1 3 6.4l-2.5 2.2c-0.6-1.7-2.3-4.1-3.5-4.2-1-0.1 0 4.2-0.2 4.4-0.7 0.8-3.7 1.4-4.3 0.2-0.3-2.4 0.6-7.8-2-9.1-1-0.2-1.2 0.4-1 1.3 1 5-2 7.4-3.7 6.6-2.2-1.5 2-2.6 0.4-4.8-0.2-0.6-1.8-2.3-1.6-0.7z"
-                  initial={reduceMotion ? false : { scale: 0, opacity: 0 }}
-                  animate={{
-                    scale: [0, 1.35, 0.95, 1.05, 0.98, 1.02, 1],
-                    opacity: [0, 1, 0.9, 1, 0.85, 1, 1],
-                  }}
-                  transition={{
-                    duration: 2.2,
-                    ease: "easeOut",
-                    delay: 0.45,
-                    times: [0, 0.18, 0.32, 0.5, 0.68, 0.85, 1],
-                  }}
-                  style={{ transformOrigin: "85px 210px" }}
-                />
-              </motion.svg>
-            </div>
-
-            {/* Wordmark + subtitle — staggered fade-up on the badge's center
-                axis. Reduced motion skips straight to the final state. */}
-            <div className="flex flex-col items-center gap-2">
-              <motion.p
-                className="font-serif text-5xl font-medium tracking-[0.06em] text-foreground"
-                initial={reduceMotion ? false : { opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.9, ease: "easeOut", delay: 1.0 }}
-              >
-                KM.BBQ
-              </motion.p>
-              {/* Negative margin cancels the last letter's tracking so the
-                  line optically centers under the wordmark */}
-              <motion.p
-                className="mr-[-0.35em] font-sans text-xs font-medium uppercase tracking-[0.35em] text-ember-deep"
-                initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, ease: "easeOut", delay: 1.25 }}
-              >
-                Korean Barbecue
-              </motion.p>
-            </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div
+      ref={rootRef}
+      className="fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden bg-cream"
+      role="status"
+      aria-label="KM.BBQ is loading"
+    >
+      {/* Elements start CSS-hidden so nothing flashes before the timeline's
+          first tick; GSAP owns their states from there. */}
+      <div className="pre-lockup w-[min(70vw,340px)] [&_.logo-path]:opacity-0">
+        <Logo size={340} className="h-auto w-full" />
+      </div>
+      <div
+        aria-hidden="true"
+        className="pre-line mt-7 h-0.5 w-[120px] rounded-full bg-ember opacity-0"
+      />
+      <p className="pre-eyebrow mr-[-0.34em] mt-6 font-sans text-xs font-medium uppercase tracking-[0.34em] text-ember-deep opacity-0">
+        Korean Barbecue
+      </p>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { Logo } from "./Logo";
 import { SocialLinks } from "./SocialLinks";
 import { PHONE, ADDRESS, HOURS, DIRECTIONS_URL } from "@/lib/restaurant";
 
@@ -64,13 +64,7 @@ export function Footer() {
               into empty space below the tagline. */}
           <div className="flex flex-col md:col-span-4">
             <div className={topRow}>
-              <Image
-                src="/logos/km-bbq-logo.svg"
-                alt="KM.BBQ logo"
-                width={150}
-                height={36}
-                className="opacity-90"
-              />
+              <Logo size={148} className="opacity-90" />
             </div>
             <p className="mt-5 max-w-xs font-sans text-sm font-light leading-relaxed text-white/60">
               All-you-can-eat Korean BBQ, grilled over live charcoal in
