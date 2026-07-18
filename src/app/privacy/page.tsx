@@ -18,7 +18,7 @@ export default function PrivacyPage() {
         <p>
           KM.BBQ (&ldquo;we,&rdquo; &ldquo;us&rdquo;) operates the website
           kmbbq.vercel.app. This policy describes what information is handled
-          when you visit our site. We are a restaurant, not a data business —
+          when you visit our site. We are a restaurant, not a data business, so
           we collect as little as possible.
         </p>
       </section>
@@ -58,8 +58,8 @@ export default function PrivacyPage() {
       <section>
         <h2>Contact</h2>
         <p>
-          Questions about this policy? Call us at {PHONE.display} or visit us at{" "}
-          {ADDRESS.street}, {ADDRESS.region}.
+          For questions about this policy, call us at {PHONE.display} or visit
+          us at {ADDRESS.street}, {ADDRESS.region}.
         </p>
       </section>
     </LegalPage>

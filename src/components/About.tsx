@@ -80,7 +80,7 @@ const FEATURED_DISHES: Dish[] = [
     name: "Chadolbaegi",
     korean: "차돌박이",
     description:
-      "Paper-thin brisket slices that cook in seconds — dipped in sesame oil and salt.",
+      "Paper-thin brisket that cooks in seconds. Dip it in sesame oil and salt.",
     image: "/images/chadolbaegi.png",
     tag: "Chef's Pick",
   },
@@ -88,14 +88,14 @@ const FEATURED_DISHES: Dish[] = [
     name: "Bulgogi",
     korean: "불고기",
     description:
-      "Tender ribeye in a sesame-ginger marinade — the classic that never disappoints.",
+      "Tender ribeye in a sesame-ginger marinade. A classic for a reason.",
     image: "/images/bulgogi.png",
   },
   {
     name: "Kimchi",
     korean: "김치",
     description:
-      "House-fermented napa cabbage with gochugaru, garlic, and ginger — bold, smoky, addictive.",
+      "House-fermented napa cabbage. Tangy, a little spicy, and hard to put down.",
     image: "/images/kimchi.png",
   },
 ];
@@ -387,33 +387,32 @@ export function About() {
           }}
         >
           <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-            Our Story
+            Our story
           </p>
           <h2
             id="about-heading"
             className="font-serif text-4xl font-light leading-snug text-foreground md:text-5xl"
           >
-            A Tradition{" "}
-            <em className="italic text-ember">Born in Fire</em>
+            It started with a{" "}
+            <em className="italic text-ember">grill</em>
           </h2>
           <div className="mt-8 space-y-5 font-sans text-sm font-light leading-relaxed text-foreground/80">
             <p>
-              KM.BBQ was born from a simple obsession: the perfect bite. We bring
-              the warmth of Korean family grilling to every table — live charcoal,
-              hand-trimmed cuts, and banchan made fresh daily.
+              KM.BBQ started with one idea: really good Korean BBQ that you cook
+              yourself. Every table gets its own live charcoal grill.
             </p>
             <p>
-              We source our meats from trusted partners, choosing quality over
-              convenience. Every cut is marinated in-house using recipes passed
-              down through generations, balanced with our own modern touches.
+              We pick our meat carefully and marinate it in house, using recipes
+              we have leaned on for years. You grill it fresh, right where you
+              sit, cooked exactly how you like it.
             </p>
             <p>
-              This is not fast food. This is slow fire, shared plates, and the
-              kind of meal you remember.
+              Pull up a chair and take your time. Order more whenever you want.
+              Good food, a hot grill, and no reason to rush.
             </p>
           </div>
           <PillLink href="/menu" arrow className="mt-10">
-            Explore our menu
+            See the menu
           </PillLink>
         </div>
       </div>
@@ -428,21 +427,21 @@ export function About() {
         <div className="mx-auto w-full max-w-4xl text-center lg:max-w-7xl">
           <div className="grill-head">
             <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-              House Favorites
+              House favorites
             </p>
             <h2
               id="menu-heading"
               className="font-serif text-4xl font-light text-foreground md:text-5xl"
             >
-              The Grill Awaits
+              What to grill first
             </h2>
             {/* transform-gpu: this light gray text picks up blue subpixel-AA
                 fringing on some words when rasterized in the main layer —
                 looks like link styling. Its own compositing layer rasterizes
                 with uniform grayscale AA. */}
             <p className="mx-auto mt-3 max-w-xl transform-gpu font-sans text-base font-light text-foreground/60">
-              A taste of what&rsquo;s waiting at your table &mdash; signature
-              cuts, classics, and the banchan that brings it all together.
+              A few of the ones people order again and again. The full lineup is
+              on the menu.
             </p>
           </div>
           {/* Feature grid: Galbi anchors the left half at full height; the
@@ -518,7 +517,7 @@ export function About() {
             })}
           </div>
           <div className="grill-cta mt-6">
-            <PillLink href="/menu">View Full Menu</PillLink>
+            <PillLink href="/menu">See the full menu</PillLink>
           </div>
         </div>
       </div>

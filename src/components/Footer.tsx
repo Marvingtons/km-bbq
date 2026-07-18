@@ -67,8 +67,8 @@ export function Footer() {
               <Logo size={148} className="opacity-90" />
             </div>
             <p className="mt-5 max-w-xs font-sans text-sm font-light leading-relaxed text-white/60">
-              All-you-can-eat Korean BBQ, grilled over live charcoal in
-              Oceanside, California.
+              All-you-can-eat Korean BBQ in Oceanside, California. You pick the
+              cuts and grill them yourself over live charcoal.
             </p>
             <SocialLinks tone="dark" className="mt-6 md:mt-auto md:pt-6" />
           </div>
@@ -182,7 +182,7 @@ export function Footer() {
               rel="noopener noreferrer"
               className="transition-colors hover:text-ember"
             >
-              Crafted by Norvix
+              Site by Norvix
             </a>
           </div>
         </div>

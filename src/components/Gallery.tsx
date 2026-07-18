@@ -38,6 +38,9 @@ const PACE = 0.55;
 
 export function Gallery() {
   const sectionRef = useRef<HTMLElement>(null);
+  // One refresh after ALL tile images settle, instead of one per <img> load.
+  // Eight rapid ScrollTrigger.refresh() calls used to thrash layout on load.
+  const loadedRef = useRef(0);
 
   useLayoutEffect(() => {
     const mm = gsap.matchMedia();
@@ -54,6 +57,9 @@ export function Gallery() {
         const track = q(".gallery-track")[0] as HTMLElement;
         const wrapper = track.parentElement as HTMLElement;
         const tiles = q(".gallery-tile") as HTMLElement[];
+        const caps = tiles.map(
+          (t) => t.querySelector(".gallery-caption") as HTMLElement | null
+        );
 
         // Total sideways distance: full row width minus the visible window to
         // its right of the heading. Read live (invalidateOnRefresh) so it stays
@@ -61,25 +67,43 @@ export function Gallery() {
         const getTravel = () =>
           Math.max(0, track.scrollWidth - wrapper.clientWidth);
 
-        // Fade the caption of whichever tile is nearest screen-center in, the
-        // rest out — animating opacity only. Driven from the scrub onUpdate so
-        // it tracks the smoothed scroll position.
+        // --- Caption crossfade WITHOUT per-frame layout reads ----------------
+        // Fade in the caption of whichever tile is nearest screen-center, the
+        // rest out. The obvious version calls getBoundingClientRect() on all 8
+        // tiles every scrub frame, which is a forced synchronous layout and
+        // spikes frame times on slower machines. Instead each tile's
+        // screen-center is measured ONCE (on refresh/resize) along with the
+        // track's x at that moment; per frame the live center is derived from
+        // the track's transform delta, read from GSAP's cache. No layout.
+        let metrics: { center: number; half: number }[] = [];
+        let baseX = 0;
+        let viewCenter = window.innerWidth / 2;
+
         const updateCaptions = () => {
-          const center = window.innerWidth / 2;
-          tiles.forEach((tile) => {
-            const rect = tile.getBoundingClientRect();
-            const tileCenter = rect.left + rect.width / 2;
-            const dist = Math.abs(tileCenter - center);
-            // Full opacity within ~15% of the tile's half-width of center,
-            // faded out by ~75% — a smooth crossfade as tiles pass through.
+          const dx = ((gsap.getProperty(track, "x") as number) || 0) - baseX;
+          for (let i = 0; i < tiles.length; i++) {
+            const m = metrics[i];
+            const cap = caps[i];
+            if (!m || !cap) continue;
+            const dist = Math.abs(m.center + dx - viewCenter);
+            // Full opacity within ~30% of half-width of center, faded by ~120%.
             const o = gsap.utils.clamp(
               0,
               1,
-              1 - (dist - rect.width * 0.15) / (rect.width * 0.6)
+              1 - (dist - m.half * 0.3) / (m.half * 1.2)
             );
-            const cap = tile.querySelector(".gallery-caption") as HTMLElement;
-            if (cap) gsap.set(cap, { opacity: o });
+            gsap.set(cap, { opacity: o });
+          }
+        };
+
+        const measure = () => {
+          baseX = (gsap.getProperty(track, "x") as number) || 0;
+          viewCenter = window.innerWidth / 2;
+          metrics = tiles.map((t) => {
+            const r = t.getBoundingClientRect();
+            return { center: r.left + r.width / 2, half: r.width / 2 };
           });
+          updateCaptions();
         };
 
         gsap.set(track, { x: 0 });
@@ -98,7 +122,9 @@ export function Gallery() {
             // position so the travel never snaps notch-to-notch.
             scrub: MOTION.scrub,
             invalidateOnRefresh: true,
-            onRefresh: updateCaptions,
+            // Re-measure on refresh (layout may have changed); per frame only
+            // the cheap transform-delta read runs.
+            onRefresh: measure,
             onUpdate: updateCaptions,
           },
         });
@@ -115,7 +141,12 @@ export function Gallery() {
 
   useScrollRefresh();
 
-  const refresh = () => ScrollTrigger.refresh();
+  // Refresh exactly once, after the last tile image settles, rather than once
+  // per load event (which fired 8 refreshes in quick succession on first paint).
+  const onTileLoad = () => {
+    loadedRef.current += 1;
+    if (loadedRef.current >= GALLERY_ITEMS.length) ScrollTrigger.refresh();
+  };
 
   // overflow-hidden keeps the horizontal motion inside the section — the page
   // itself never scrolls sideways at any width. Plain cream surface: the
@@ -140,7 +171,7 @@ export function Gallery() {
             id="gallery-heading"
             className="font-serif text-4xl font-light text-foreground md:text-5xl"
           >
-            Seen Through Fire
+            A look inside
           </h2>
           <a
             href="https://www.instagram.com/kmkoreanbbq/"
@@ -155,7 +186,10 @@ export function Gallery() {
         {/* Photo row. On desktop the GSAP timeline translates this track; on
             mobile / reduced motion the wrapper is a native snap carousel. */}
         <div className="overflow-x-auto px-6 [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory motion-safe:md:flex-1 motion-safe:md:overflow-hidden motion-safe:md:px-0 [&::-webkit-scrollbar]:hidden">
-          <div className="gallery-track flex items-center gap-5 pr-6 will-change-transform motion-safe:md:gap-8 motion-safe:md:pr-[12vw]">
+          {/* No permanent will-change here: it promotes the whole 8-tile row to
+              its own layer for the life of the page, which costs more memory
+              than it saves. GSAP promotes during the tween itself. */}
+          <div className="gallery-track flex items-center gap-5 pr-6 motion-safe:md:gap-8 motion-safe:md:pr-[12vw]">
             {GALLERY_ITEMS.map((item) => (
               <figure
                 key={item.id}
@@ -168,7 +202,7 @@ export function Gallery() {
                   fill
                   sizes="(max-width: 768px) 70vw, 40vw"
                   className="object-cover"
-                  onLoad={refresh}
+                  onLoad={onTileLoad}
                 />
                 {/* Caption: dark bottom gradient + small letter-spaced label.
                     Visible per-tile on mobile; on desktop it starts hidden and

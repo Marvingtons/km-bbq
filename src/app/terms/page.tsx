@@ -17,7 +17,7 @@ export default function TermsPage() {
         <h2>Acceptance of Terms</h2>
         <p>
           By using the KM.BBQ website you agree to these terms. If you do not
-          agree, please do not use the site — but do come eat with us anyway.
+          agree, please do not use the site, but do come eat with us anyway.
         </p>
       </section>
       <section>
@@ -41,9 +41,9 @@ export default function TermsPage() {
       <section>
         <h2>Intellectual Property</h2>
         <p>
-          All content on this site — text, photography, logos, and design — is
-          the property of KM.BBQ or its licensors and may not be reproduced
-          without permission.
+          All content on this site, including text, photography, logos, and
+          design, is the property of KM.BBQ or its licensors and may not be
+          reproduced without permission.
         </p>
       </section>
       <section>
@@ -53,7 +53,7 @@ export default function TermsPage() {
           kind. To the fullest extent permitted by law, KM.BBQ is not liable
           for any damages arising from your use of the site. Consuming raw or
           undercooked meats or seafood may increase your risk of foodborne
-          illness — please grill thoroughly.
+          illness, so please grill thoroughly.
         </p>
       </section>
       <section>
@@ -66,7 +66,7 @@ export default function TermsPage() {
       <section>
         <h2>Contact</h2>
         <p>
-          Questions? Call {PHONE.display} or visit us at {ADDRESS.street},{" "}
+          For questions, call {PHONE.display} or visit us at {ADDRESS.street},{" "}
           {ADDRESS.region}.
         </p>
       </section>

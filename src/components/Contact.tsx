@@ -1,6 +1,7 @@
 import { ScrollReveal } from "./ScrollReveal";
 import { SocialLinks } from "./SocialLinks";
-import { HOURS, ADDRESS, PHONE } from "@/lib/restaurant";
+import { ContactMap } from "./ContactMap";
+import { HOURS, ADDRESS, PHONE, DIRECTIONS_URL } from "@/lib/restaurant";
 
 export function Contact() {
   return (
@@ -13,7 +14,7 @@ export function Contact() {
         <div className="mb-16 text-center">
           <ScrollReveal>
             <p className="mb-4 font-sans text-xs font-medium tracking-[0.3em] uppercase text-ember-deep">
-              Find Us
+              Find us
             </p>
           </ScrollReveal>
           <ScrollReveal delay={0.05}>
@@ -21,7 +22,7 @@ export function Contact() {
               id="contact-heading"
               className="font-serif text-4xl font-light text-foreground md:text-5xl"
             >
-              Come to the Table
+              Stop by
             </h2>
           </ScrollReveal>
         </div>
@@ -55,14 +56,24 @@ export function Contact() {
                 <h3 className="font-serif text-2xl md:text-3xl font-light text-foreground mb-4">
                   Location
                 </h3>
+                {/* Both lines are live: the address opens maps, the number
+                    dials. On a phone these are the two things anyone is here
+                    for, so neither should be plain text. */}
                 <address className="not-italic font-sans text-sm font-light leading-relaxed text-foreground/70">
-                  {ADDRESS.street}
-                  <br />
-                  {ADDRESS.region}
+                  <a
+                    href={DIRECTIONS_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block underline-offset-4 hover:underline"
+                  >
+                    {ADDRESS.street}
+                    <br />
+                    {ADDRESS.region}
+                  </a>
                   <br />
                   <a
                     href={PHONE.href}
-                    className="mt-2 inline-block font-semibold text-ember-deep hover:underline underline-offset-4"
+                    className="mt-2 inline-flex min-h-11 items-center font-semibold text-ember-deep underline-offset-4 hover:underline"
                   >
                     {PHONE.display}
                   </a>
@@ -73,17 +84,11 @@ export function Contact() {
               </div>
             </ScrollReveal>
 
-            {/* Map placeholder */}
+            {/* Map. A baked static render rather than a Google embed — same
+                information, none of the third-party JS or cookies. */}
             <ScrollReveal delay={0.08}>
-              <div className="aspect-video w-full overflow-hidden border border-paper-line">
-                <iframe
-                  title="Map to KM BBQ Oceanside"
-                  src="https://www.google.com/maps?q=2216+S+El+Camino+Real+%23108-109,+Oceanside,+CA+92054&output=embed"
-                  className="h-full w-full border-0"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  allowFullScreen
-                />
+              <div className="aspect-video w-full overflow-hidden rounded-xl border border-paper-line">
+                <ContactMap />
               </div>
             </ScrollReveal>
           </div>
