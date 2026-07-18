@@ -188,8 +188,12 @@ export function Navbar() {
             />
           </Link>
 
-          {/* Desktop links */}
-          <ul className="hidden items-center gap-9 lg:flex" role="list">
+          {/* Desktop links. Rhythm note: the bar has room to spare at 1280 (logo +
+              links + pill measure ~780px inside an 1184px track), so the links
+              get real air rather than the tight gap-9 they had. The pill takes
+              an extra margin on top of the gap so the CTA reads as its own
+              element instead of a sixth nav item. */}
+          <ul className="hidden items-center gap-10 lg:flex xl:gap-12" role="list">
             {NAV_LINKS.map((link) => {
               const isActive = active === link.id;
               return (
@@ -220,7 +224,7 @@ export function Navbar() {
                 redundant, while calling is the one action the bar cannot
                 otherwise offer. Outline pill in both states, ember on cream and
                 white over the video. */}
-            <li>
+            <li className="ms-3 xl:ms-5">
               <a
                 href={PHONE.href}
                 className={`inline-flex min-h-11 items-center rounded-full border px-5 py-2 text-[11.5px] font-semibold uppercase tracking-[0.14em] transition-colors duration-300 ${
