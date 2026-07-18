@@ -66,7 +66,7 @@ export function MenuJumpNav({ targets }: { targets: JumpTarget[] }) {
                 data-target={id}
                 onClick={(e) => jump(e, id)}
                 aria-current={isActive ? "true" : undefined}
-                className={`inline-block whitespace-nowrap rounded-full border px-4 py-1.5 font-sans text-xs font-medium uppercase tracking-[0.12em] transition-colors ${
+                className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-full border px-4 py-1.5 font-sans text-xs font-medium uppercase tracking-[0.12em] transition-colors ${
                   isActive
                     ? "border-ember-deep bg-ember-deep text-white"
                     : "border-paper-line bg-white/60 text-foreground/60 hover:border-ember-deep/50 hover:text-ember-deep"

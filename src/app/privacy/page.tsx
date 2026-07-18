@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
-import { PHONE, ADDRESS } from "@/lib/restaurant";
+import { PHONE, ADDRESS, DIRECTIONS_URL } from "@/lib/restaurant";
 import { pageMeta } from "@/lib/seo";
 
 export const metadata: Metadata = pageMeta({
@@ -58,8 +58,20 @@ export default function PrivacyPage() {
       <section>
         <h2>Contact</h2>
         <p>
-          For questions about this policy, call us at {PHONE.display} or visit
-          us at {ADDRESS.street}, {ADDRESS.region}.
+          For questions about this policy, call us at{" "}
+          <a href={PHONE.href} className="underline underline-offset-4">
+            {PHONE.display}
+          </a>{" "}
+          or visit us at{" "}
+          <a
+            href={DIRECTIONS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-4"
+          >
+            {ADDRESS.street}, {ADDRESS.region}
+          </a>
+          .
         </p>
       </section>
     </LegalPage>

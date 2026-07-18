@@ -685,7 +685,7 @@ export default function MenuPage() {
                   <br />
                   <a
                     href={PHONE.href}
-                    className="font-semibold text-ember-deep transition-colors hover:text-ember"
+                    className="inline-flex min-h-11 items-center font-semibold text-ember-deep transition-colors hover:text-ember"
                   >
                     {PHONE.display}
                   </a>

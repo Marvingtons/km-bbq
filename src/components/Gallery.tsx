@@ -177,7 +177,7 @@ export function Gallery() {
             href="https://www.instagram.com/kmkoreanbbq/"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-8 inline-block font-sans text-sm font-medium text-ember-deep underline-offset-4 hover:underline"
+            className="mt-8 inline-flex min-h-11 items-center font-sans text-sm font-medium text-ember-deep underline-offset-4 hover:underline"
           >
             Follow us on Instagram →
           </a>

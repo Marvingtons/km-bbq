@@ -482,7 +482,7 @@ export function About() {
                         }
                       />
                       {dish.tag && (
-                        <span className="absolute left-2 top-2 z-10 bg-ember-deep px-2 py-1 font-sans text-[10px] font-medium uppercase tracking-widest text-white">
+                        <span className="absolute left-2 top-2 z-10 bg-ember-deep px-2 py-1 font-sans text-[11px] font-medium uppercase tracking-widest text-white">
                           {dish.tag}
                         </span>
                       )}

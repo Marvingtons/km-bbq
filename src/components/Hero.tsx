@@ -76,7 +76,7 @@ export function Hero() {
               sits inside the video's own orange hue range, so it stops
               separating from the background no matter how the scrim is tuned. */}
           <motion.p
-            className="mb-3 px-6 font-sans text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-white sm:text-xs lg:px-16"
+            className="mb-3 px-6 font-sans text-xs font-semibold uppercase tracking-[0.28em] text-white lg:px-16"
             {...rise(0)}
           >
             {EYEBROW}

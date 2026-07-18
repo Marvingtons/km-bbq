@@ -1,0 +1,15 @@
+<!--
+  The badge, simplified for 16px and 32px: disc + K only, no flame.
+
+  At 16px the full badge's flame is ~11px wide of fine interlocking curves
+  overlapping the K's lower half. It stops reading as a flame and just fills the
+  bottom of the disc with red noise, which is exactly where the K's legs need
+  contrast. Dropping it lets the K read as a K at tab size.
+
+  The K is also scaled up ~18% about the disc centre and set solid (no gradient,
+  no hairline stroke — neither survives 16px) so it carries more of the mark.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="66 176.73 46 46" width="46" height="46">
+  <path fill="#1A36AF" d="m85 179c-8.8 2.1-18.5 10-18.5 21 0 9.6 7.4 20.6 22.5 20.9 13.1 0.2 22.5-9.9 22.5-20.9s-9.4-24-26.5-21z"/>
+  <path fill="#F58721" transform="translate(89 199.73) scale(1.18) translate(-89 -199.73)" d="m80.2 184.8v20.2h5l0.4-4 2-1.9c0.6-0.7 3.2 3.8 5.4 5.9h5.5v-1l-6.8-8.4 8.9-9.4-0.1-0.5-5.8-0.1-8.9 9.8-0.2-10.4-5.4-0.2z"/>
+</svg>

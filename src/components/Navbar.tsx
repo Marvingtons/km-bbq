@@ -180,7 +180,7 @@ export function Navbar() {
           <Link
             href="/"
             aria-label="KM.BBQ, back to top"
-            className="flex items-center transition-opacity duration-300 hover:opacity-80"
+            className="flex min-h-11 items-center transition-opacity duration-300 hover:opacity-80"
           >
             <Logo
               size={onLight ? 104 : 116}

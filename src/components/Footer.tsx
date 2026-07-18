@@ -88,7 +88,7 @@ export function Footer() {
             <div className="mt-5 flex flex-col gap-3">
               <a
                 href={PHONE.href}
-                className="group inline-flex items-center gap-2 font-sans text-base font-semibold text-white/90 transition-colors hover:text-ember"
+                className="group inline-flex min-h-11 items-center gap-2 font-sans text-base font-semibold text-white/90 transition-colors hover:text-ember"
               >
                 <span className="text-ember transition-transform duration-300 group-hover:scale-110">
                   <PhoneIcon />
@@ -99,7 +99,7 @@ export function Footer() {
                 href={DIRECTIONS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex w-fit items-center gap-1.5 font-sans text-sm font-medium text-ember transition-colors hover:text-white"
+                className="group inline-flex min-h-11 w-fit items-center gap-1.5 font-sans text-sm font-medium text-ember transition-colors hover:text-white"
               >
                 Get directions
                 <span
@@ -145,7 +145,7 @@ export function Footer() {
                 <li key={navLabel}>
                   <a
                     href={href}
-                    className="group inline-flex items-center font-sans text-sm text-white/70 transition-colors hover:text-white"
+                    className="group inline-flex min-h-11 items-center font-sans text-sm text-white/70 transition-colors hover:text-white"
                   >
                     <span
                       aria-hidden="true"
@@ -165,11 +165,17 @@ export function Footer() {
           </p>
           {/* flex-wrap + centred so the legal links wrap as whole phrases at
               375 instead of breaking mid-label. */}
-          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-sans text-xs">
-            <a href="/privacy" className="transition-colors hover:text-white">
+          <div className="flex flex-wrap items-center justify-center gap-x-5 font-sans text-xs">
+            <a
+              href="/privacy"
+              className="inline-flex min-h-11 items-center transition-colors hover:text-white"
+            >
               Privacy Policy
             </a>
-            <a href="/terms" className="transition-colors hover:text-white">
+            <a
+              href="/terms"
+              className="inline-flex min-h-11 items-center transition-colors hover:text-white"
+            >
               Terms of Service
             </a>
             {/* Decorative divider only when the row sits on one line. */}
@@ -180,7 +186,7 @@ export function Footer() {
               href="https://norvix.ai/"
               target="_blank"
               rel="noopener noreferrer"
-              className="transition-colors hover:text-ember"
+              className="inline-flex min-h-11 items-center transition-colors hover:text-ember"
             >
               Site by Norvix
             </a>
