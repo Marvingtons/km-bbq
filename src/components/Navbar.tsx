@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Logo } from "./Logo";
+import { SocialLinks } from "./SocialLinks";
 import { useActiveSection } from "@/lib/useActiveSection";
+import { getLenis } from "@/lib/lenis";
+import { PHONE, HOURS, DIRECTIONS_URL } from "@/lib/restaurant";
 
 // `hash` links point at sections on the home page; `route` links point at a
 // dedicated route. From the home page a section link is a same-page hash; from
@@ -18,6 +21,11 @@ const NAV_LINKS = [
   { label: "Contact", id: "contact", hash: "#contact" },
 ];
 
+// Everything focusable inside the overlay, in DOM order — the focus trap walks
+// this list rather than a hand-maintained set of refs.
+const FOCUSABLE =
+  'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export function Navbar() {
   const pathname = usePathname();
   const isHome = pathname === "/";
@@ -25,6 +33,9 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const reduce = useReducedMotion();
+
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   // Track which section is in view so the matching link stays underlined. Only
   // relevant on the home page, where the sections live — and only for hash
@@ -49,162 +60,311 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Lock body scroll while the mobile menu is open, and close on Escape.
-  useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMenuOpen(false);
-    };
-    if (menuOpen) window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [menuOpen]);
+  const close = useCallback(() => setMenuOpen(false), []);
 
-  // On routes other than the home page there is no dark hero behind the bar,
-  // so it always reads as the solid light treatment (legible over the cream
-  // page) rather than the transparent-over-video state.
+  // Close on route change, so tapping a link navigates and leaves the overlay.
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  // Overlay behaviour while open: lock scroll, trap focus, Escape closes, and
+  // focus returns to the trigger on close.
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    // Lenis animates window scroll every frame, so overflow:hidden alone does
+    // not hold it — it has to be stopped explicitly. Under reduced motion
+    // there is no Lenis instance, and the overflow lock is what does the work.
+    const lenis = getLenis();
+    lenis?.stop();
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    // The close control IS the trigger (the X replaces the hamburger in place),
+    // and it lives in the header rather than the overlay — so the trap has to
+    // span both, with the trigger first. Focus lands on it when the menu opens,
+    // which is also where a keyboard user most wants to be.
+    const focusables = () => {
+      const nodes =
+        overlayRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? [];
+      const trigger = triggerRef.current;
+      return trigger ? [trigger, ...Array.from(nodes)] : Array.from(nodes);
+    };
+
+    triggerRef.current?.focus();
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        close();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const list = focusables();
+      if (list.length === 0) return;
+      const firstEl = list[0];
+      const lastEl = list[list.length - 1];
+      // Wrap at both ends so Tab can never reach the page behind the overlay.
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault();
+        lastEl.focus();
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault();
+        firstEl.focus();
+      }
+    };
+
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+      lenis?.start();
+      triggerRef.current?.focus();
+    };
+  }, [menuOpen, close]);
+
+  // On routes other than the home page there is no video behind the bar, so it
+  // always reads as the solid cream treatment rather than transparent-over-hero.
   const solid = scrolled || !isHome;
+  // While the overlay is up it supplies the cream field itself, so the bar
+  // drops both of its own layers — but the logo and trigger still need the
+  // dark-on-cream treatment.
   const onLight = solid || menuOpen;
+
+  // Link colour by state. Over the hero the links are white on video; once the
+  // cream bar has faded in they are foreground on cream.
+  const linkColor = (isActive: boolean) =>
+    solid
+      ? isActive
+        ? "text-ember-deep"
+        : "text-foreground hover:text-ember-deep"
+      : isActive
+        ? "text-white"
+        : "text-white/85 hover:text-white";
 
   return (
     <>
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        solid
-          ? "bg-cream/90 backdrop-blur-md border-b border-black/[0.06] shadow-warm"
-          : "bg-transparent"
-      }`}
-    >
-      <nav
-        className="mx-auto flex max-w-7xl items-center justify-between px-7 py-5 lg:px-12"
-        aria-label="Main navigation"
+      {/* The overlay is a sibling of <header>, so it would paint over the logo
+          and trigger no matter what z-index those children carry — the header
+          raises above it while the menu is open instead. */}
+      <header
+        className={`fixed inset-x-0 top-0 ${menuOpen ? "z-[60]" : "z-50"}`}
       >
-        {/* Logo */}
-        <Link
-          href="/"
-          aria-label="KM.BBQ — go to top"
-          className="flex items-center transition-opacity duration-300 hover:opacity-80"
+        {/* Two stacked layers, cross-faded by opacity rather than animating
+            background-color: only opacity and transform are animated, which
+            keeps the bar off the paint path while the hero video plays.
+
+            Layer 1 — scrim strip. The new hero video is bright and warm, so
+            white links and the logo need a little help at the top of frame.
+            This is a short gradient confined to the nav zone, not a wash over
+            the whole video. */}
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-0 bg-gradient-to-b from-black/45 via-black/20 to-transparent transition-opacity duration-500 ${
+            onLight ? "opacity-0" : "opacity-100"
+          } motion-reduce:transition-none`}
+        />
+        {/* Layer 2 — the solid cream bar. Hidden while the overlay is open,
+            since the overlay is already a full cream field. */}
+        <div
+          aria-hidden="true"
+          className={`absolute inset-0 border-b border-black/[0.06] bg-cream/90 shadow-warm backdrop-blur-md transition-opacity duration-500 ${
+            solid && !menuOpen ? "opacity-100" : "opacity-0"
+          } motion-reduce:transition-none`}
+        />
+
+        <nav
+          className="relative mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-12"
+          aria-label="Main navigation"
         >
-          <Logo
-            size={solid ? 108 : 120}
-            className="transition-all duration-500 ease-out"
-          />
-        </Link>
+          <Link
+            href="/"
+            aria-label="KM.BBQ, back to top"
+            className="flex items-center transition-opacity duration-300 hover:opacity-80"
+          >
+            <Logo
+              size={onLight ? 104 : 116}
+              className="transition-all duration-500 ease-out"
+            />
+          </Link>
 
-        {/* Desktop links */}
-        <ul className="hidden items-center gap-10 lg:flex" role="list">
-          {NAV_LINKS.map((link) => {
-            const isActive = active === link.id;
-            return (
-              <li key={link.label}>
-                <Link
-                  href={hrefFor(link)}
-                  aria-current={isActive ? "page" : undefined}
-                  className={`group relative inline-block py-1 text-[11.5px] font-medium uppercase tracking-[0.16em] transition-colors duration-300 ${
-                    onLight
-                      ? isActive
-                        ? "text-ember-deep"
-                        : "text-foreground"
-                      : isActive
-                        ? "text-white"
-                        : "text-white/80"
-                  }`}
-                >
-                  {link.label}
-                  {/* Underline grows in from the left on hover / when active.
-                      Ember is the one accent, on both the transparent-over-hero
-                      and solid-cream states. */}
-                  <span
-                    className={`pointer-events-none absolute -bottom-0.5 left-0 h-px w-full origin-left bg-ember transition-transform duration-[250ms] ease-out group-hover:scale-x-100 ${
-                      isActive ? "scale-x-100" : "scale-x-0"
-                    }`}
-                  />
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+          {/* Desktop links */}
+          <ul className="hidden items-center gap-9 lg:flex" role="list">
+            {NAV_LINKS.map((link) => {
+              const isActive = active === link.id;
+              return (
+                <li key={link.label}>
+                  <Link
+                    href={hrefFor(link)}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`group relative inline-block py-1 text-[11.5px] font-medium uppercase tracking-[0.16em] transition-colors duration-300 ${linkColor(
+                      isActive
+                    )}`}
+                  >
+                    {link.label}
+                    {/* The one active/hover indicator: an ember hairline that
+                        grows from the left. Same treatment in both scroll
+                        states and in the mobile overlay. */}
+                    <span
+                      className={`pointer-events-none absolute -bottom-0.5 left-0 h-px w-full origin-left bg-ember transition-transform duration-[250ms] ease-out group-hover:scale-x-100 motion-reduce:transition-none ${
+                        isActive ? "scale-x-100" : "scale-x-0"
+                      }`}
+                    />
+                  </Link>
+                </li>
+              );
+            })}
 
-        {/* Hamburger */}
-        <button
-          className="flex flex-col items-end gap-1.5 p-1 lg:hidden"
-          onClick={() => setMenuOpen((o) => !o)}
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
-          aria-expanded={menuOpen}
-          aria-controls="mobile-menu"
-        >
-          <motion.span
-            className={`block h-0.5 w-6 rounded-full ${onLight ? "bg-foreground" : "bg-white"}`}
-            animate={menuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
-          />
-          <motion.span
-            className={`block h-0.5 w-4 rounded-full ${onLight ? "bg-foreground" : "bg-white"}`}
-            animate={menuOpen ? { opacity: 0 } : { opacity: 1 }}
-          />
-          <motion.span
-            className={`block h-0.5 w-6 rounded-full ${onLight ? "bg-foreground" : "bg-white"}`}
-            animate={menuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
-          />
-        </button>
-      </nav>
-    </header>
+            {/* CTA. The phone number rather than a "Find us" link: Contact is
+                already in the bar above, so a second route link would be
+                redundant, while calling is the one action the bar cannot
+                otherwise offer. Outline pill in both states, ember on cream and
+                white over the video. */}
+            <li>
+              <a
+                href={PHONE.href}
+                className={`inline-flex min-h-11 items-center rounded-full border px-5 py-2 text-[11.5px] font-semibold uppercase tracking-[0.14em] transition-colors duration-300 ${
+                  solid
+                    ? "border-ember-deep text-ember-deep hover:bg-ember-deep hover:text-white"
+                    : "border-white/70 text-white hover:bg-white hover:text-foreground"
+                }`}
+              >
+                {PHONE.display}
+              </a>
+            </li>
+          </ul>
 
-    {/* Mobile menu — rendered as a sibling of <header>, NOT a child. The header
-        carries `backdrop-blur-md` when solid, and an ancestor's backdrop-filter
-        makes `position: fixed` descendants resolve against that ancestor instead
-        of the viewport — which collapsed this overlay to the header's height and
-        let the page (e.g. gallery photos) show through below it. As a sibling it
-        fills the viewport. It sits at z-40, just under the header (z-50), so the
-        close button stays visible and tappable on top. */}
+          {/* Mobile trigger. 48px target, and it stays in place when the
+              overlay opens so the X replaces it exactly. */}
+          <button
+            ref={triggerRef}
+            type="button"
+            className="relative z-[60] -mr-2 flex h-12 w-12 items-center justify-center lg:hidden"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+          >
+            <span className="relative block h-4 w-6" aria-hidden="true">
+              {[
+                { top: "top-0", open: "translate-y-[7px] rotate-45" },
+                { top: "top-[7px]", open: "opacity-0" },
+                { top: "top-[14px]", open: "-translate-y-[7px] -rotate-45" },
+              ].map((bar, i) => (
+                <span
+                  key={i}
+                  className={`absolute left-0 h-0.5 w-6 rounded-full transition-all duration-300 ease-out motion-reduce:transition-none ${
+                    bar.top
+                  } ${menuOpen ? `bg-foreground ${bar.open}` : onLight ? "bg-foreground" : "bg-white"}`}
+                />
+              ))}
+            </span>
+          </button>
+        </nav>
+      </header>
+
+      {/* Full-screen mobile takeover. Rendered as a sibling of <header>, NOT a
+          child: the header carries backdrop-blur when solid, and an ancestor's
+          backdrop-filter makes `position: fixed` descendants resolve against
+          that ancestor instead of the viewport — which collapsed this overlay
+          to the header's height. */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
             id="mobile-menu"
-            className="fixed inset-0 z-40 flex flex-col bg-cream px-9 pt-28 lg:hidden"
+            ref={overlayRef}
+            className="fixed inset-0 z-[55] flex flex-col overflow-y-auto bg-cream px-6 pb-8 pt-24 lg:hidden"
             initial={reduce ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: reduce ? 0 : 0.35, ease: "easeOut" }}
+            exit={reduce ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ duration: reduce ? 0 : 0.28, ease: "easeOut" }}
             role="dialog"
             aria-modal="true"
             aria-label="Site menu"
           >
-            <ul className="flex flex-col gap-9" role="list">
+            {/* 1 — the links, as large display type. This is where the serif
+                gets to be big. */}
+            <ul className="flex flex-col" role="list">
               {NAV_LINKS.map((link, i) => {
                 const isActive = active === link.id;
                 return (
                   <motion.li
                     key={link.label}
-                    initial={reduce ? false : { opacity: 0, y: 12 }}
+                    initial={reduce ? false : { opacity: 0, y: 14 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
                     transition={
                       reduce
                         ? { duration: 0 }
-                        : { delay: 0.08 + i * 0.06, duration: 0.4, ease: "easeOut" }
+                        : { delay: 0.06 + i * 0.055, duration: 0.38, ease: "easeOut" }
                     }
                   >
                     <Link
                       href={hrefFor(link)}
-                      onClick={() => setMenuOpen(false)}
+                      onClick={close}
                       aria-current={isActive ? "page" : undefined}
-                      className={`group relative inline-block text-sm font-medium uppercase tracking-[0.18em] transition-colors duration-300 ${
-                        isActive ? "text-ember-deep" : "text-foreground"
-                      }`}
+                      className="group relative inline-flex min-h-12 items-center py-1.5 font-serif text-[2.5rem] font-light leading-tight text-foreground transition-colors duration-300 sm:text-5xl"
                     >
                       {link.label}
-                      <span
-                        className={`pointer-events-none absolute -bottom-1 left-0 h-px w-full origin-left bg-ember transition-transform duration-[250ms] ease-out group-hover:scale-x-100 ${
-                          isActive ? "scale-x-100" : "scale-x-0"
-                        }`}
-                      />
+                      {isActive && (
+                        <span
+                          aria-hidden="true"
+                          className="ml-3 inline-block h-1.5 w-1.5 rounded-full bg-ember align-middle"
+                        />
+                      )}
                     </Link>
                   </motion.li>
                 );
               })}
             </ul>
+
+            {/* 2 — the two things a phone visitor actually needs. */}
+            <motion.div
+              className="mt-8 flex flex-col gap-3"
+              initial={reduce ? false : { opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={
+                reduce
+                  ? { duration: 0 }
+                  : { delay: 0.06 + NAV_LINKS.length * 0.055, duration: 0.38, ease: "easeOut" }
+              }
+            >
+              <a
+                href={PHONE.href}
+                className="inline-flex min-h-12 items-center justify-center rounded-full bg-ember-deep px-6 py-3 font-sans text-sm font-semibold text-white transition-colors duration-300 hover:bg-foreground"
+              >
+                Call {PHONE.display}
+              </a>
+              <a
+                href={DIRECTIONS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-12 items-center justify-center rounded-full border border-ember-deep px-6 py-3 font-sans text-sm font-semibold text-ember-deep transition-colors duration-300 hover:bg-ember-deep hover:text-white"
+              >
+                Get directions
+              </a>
+            </motion.div>
+
+            {/* 3 — small footer strip: hours summary + the shared socials. */}
+            <motion.div
+              className="mt-auto pt-10"
+              initial={reduce ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={
+                reduce
+                  ? { duration: 0 }
+                  : { delay: 0.2 + NAV_LINKS.length * 0.055, duration: 0.4 }
+              }
+            >
+              <dl className="font-sans text-sm text-body">
+                {HOURS.map(({ short, time }) => (
+                  <div key={short} className="flex justify-between border-t border-paper-line py-2">
+                    <dt>{short}</dt>
+                    <dd className="font-medium text-foreground">{time}</dd>
+                  </div>
+                ))}
+              </dl>
+              <SocialLinks tone="light" className="mt-5" />
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
