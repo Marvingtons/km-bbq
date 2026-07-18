@@ -1,0 +1,34 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "km-bbq-website",
+  "main": ".open-next/worker.js",
+
+  // 2024-09-23 or later is required for nodejs_compat to imply nodejs_compat_v2,
+  // which the adapter depends on.
+  "compatibility_date": "2025-08-21",
+
+  // nodejs_compat is required by @opennextjs/cloudflare.
+  //
+  // global_fetch_strictly_public makes a global fetch() to our own origin go out
+  // to the public internet edge instead of looping back inside the Worker. The
+  // Cloudflare framework guide omits this flag; the OpenNext get-started page
+  // and every example in the adapter's repo include it. Following the adapter.
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+
+  // next/image support. The Workers runtime has no sharp, so Next's own image
+  // optimizer cannot run; this binding hands resizing to Cloudflare Images
+  // instead. See DEPLOY.md ("Images") for why this rather than `unoptimized`,
+  // and for the change that would let us drop it.
+  "images": {
+    "binding": "IMAGES"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}

@@ -1,5 +1,3 @@
-import fs from "node:fs";
-import path from "node:path";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
@@ -8,6 +6,7 @@ import { MenuJumpNav, type JumpTarget } from "@/components/MenuJumpNav";
 import { BreadcrumbSchema } from "@/components/RestaurantSchema";
 import { HOURS, ADDRESS, PHONE } from "@/lib/restaurant";
 import { pageMeta } from "@/lib/seo";
+import { publicFileExists } from "@/lib/imageManifest.generated";
 
 export const metadata: Metadata = pageMeta({
   title: "Full Menu | KM.BBQ Korean BBQ in Oceanside",
@@ -354,10 +353,15 @@ const INCLUDED = [
 const IMAGE_SIZES = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw";
 
 // Every item carries its expected image path (see MISSING_IMAGES.md), but a
-// photo may not have been shot yet. Resolve against public/ at render time so
-// an absent file gets the lettered placeholder instead of a broken <img>.
-const imageExists = (image: string) =>
-  fs.existsSync(path.join(process.cwd(), "public", image));
+// photo may not have been shot yet, and an absent file should get the lettered
+// placeholder rather than a broken <img>.
+//
+// This used to be fs.existsSync against process.cwd(), which only worked
+// because the page is prerendered on a Node build machine. The Cloudflare
+// Workers runtime has neither a filesystem nor a meaningful cwd, so the answer
+// now comes from a manifest generated at build time. Same behaviour, and
+// node:fs stays out of the Worker bundle.
+const imageExists = publicFileExists;
 
 // ---------------------------------------------------------------------------
 // Presentational pieces
