@@ -6,6 +6,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PillLink } from "./PillLink";
 import { ScrollReveal } from "./ScrollReveal";
+import { SeamThread } from "./SeamThread";
 import { MOTION, NAV_H } from "@/lib/motion";
 import { useScrollRefresh } from "@/lib/useScrollRefresh";
 
@@ -292,6 +293,7 @@ export function About() {
       className="relative overflow-hidden bg-cream"
       style={{ ["--nav-h" as string]: `${NAV_H}px` } as React.CSSProperties}
     >
+      <SeamThread />
       {/* Mural stage (>= md only — hidden on mobile, where a simplified band
           renders instead, see below). The halves are `object-contain` so the
           whole illustration is always shown — nothing is cropped. The mural art
@@ -520,6 +522,33 @@ export function About() {
             <PillLink href="/menu">See the full menu</PillLink>
           </div>
         </div>
+      </div>
+
+      {/* Seam: About -> Gallery. A couple of mural accents drift down past the
+          boundary and fade, so the illustrated world trails off into the
+          photography instead of stopping at a border. In the original this sat
+          at the mural/favorites seam, which no longer exists as a boundary. */}
+      <div
+        className="mural-trail pointer-events-none absolute inset-x-0 bottom-6 z-[13] flex items-center justify-center gap-16 motion-reduce:hidden"
+        aria-hidden="true"
+      >
+        <span
+          className="block h-2.5 w-2.5 rounded-full"
+          style={{ background: "var(--color-ember)", opacity: 0.7 }}
+        />
+        <svg width="34" height="14" viewBox="0 0 34 14" fill="none">
+          <path
+            d="M1 9c5-6 10 4 16-1s10-6 16 2"
+            stroke="var(--color-body)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeOpacity="0.6"
+          />
+        </svg>
+        <span
+          className="block h-2 w-2 rounded-full"
+          style={{ background: "var(--color-ember)", opacity: 0.6 }}
+        />
       </div>
     </section>
   );

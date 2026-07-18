@@ -44,7 +44,10 @@ export function Footer() {
 
   return (
     <footer
-      className="relative overflow-hidden bg-charcoal px-6 py-20 text-white/70"
+      // -mt-6 pulls the dark footer up under the cream by a hair so the two
+      // surfaces overlap rather than abut; SeamMotion lags the content inside
+      // as it enters. The footer's own ember hairline is the seam itself.
+      className="relative -mt-6 overflow-hidden bg-charcoal px-6 py-20 text-white/70"
       role="contentinfo"
     >
       {/* Top accent line: the one designed seam (Contact -> Footer). */}

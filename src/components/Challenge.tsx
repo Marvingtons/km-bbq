@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import localFont from "next/font/local";
 import { gsap } from "gsap";
 import { ScrollReveal } from "./ScrollReveal";
+import { SeamThread } from "./SeamThread";
 import { prefersReducedMotion } from "@/lib/motion";
 
 // Seven-segment face for the LED clock — bundled locally (SIL OFL, see
@@ -182,8 +183,13 @@ export function Challenge() {
     <section
       id="challenge"
       aria-labelledby="challenge-heading"
-      className="bg-cream px-6 py-24 md:py-28"
+      className="relative bg-cream px-6 py-24 md:py-28"
+      // Arrives carrying the Gallery's paper and settles back onto cream.
+      data-seam-morph
+      data-from="#F3EBDD"
+      data-to="#FAF4EC"
     >
+      <SeamThread />
       {/* max-w-xl, not max-w-7xl: the game is one object, and a wide container
           left it floating in dead cream at 1440. */}
       <div className="mx-auto max-w-xl">

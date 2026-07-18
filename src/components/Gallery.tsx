@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SeamThread } from "./SeamThread";
 import { MOTION } from "@/lib/motion";
 import { useScrollRefresh } from "@/lib/useScrollRefresh";
 
@@ -158,8 +159,29 @@ export function Gallery() {
       ref={sectionRef}
       id="gallery"
       aria-labelledby="gallery-heading"
-      className="relative overflow-hidden bg-cream py-20 motion-safe:md:py-0"
+      className="relative overflow-hidden bg-paper py-20 motion-safe:md:py-0"
+      // Background continuity: arrives carrying About's cream and settles onto
+      // its own paper tone across the first ~30vh, so the boundary is a change
+      // of light rather than a change of panel.
+      data-seam-morph
+      data-from="#FAF4EC"
+      data-to="#F3EBDD"
     >
+      <SeamThread />
+
+      {/* Ink-wash atmosphere — a faint, warm supporting texture behind the
+          photos. The warmth and the white-drop are BAKED into the asset
+          (gallery-bg-warm.jpg), so this layer carries no filter and no
+          mix-blend and is therefore safe to parallax. Oversized (top -8%,
+          h 116%) so the drift never reveals a gap at either edge. */}
+      <div
+        aria-hidden="true"
+        data-seam-parallax
+        data-parallax="5"
+        className="pointer-events-none absolute inset-x-0 top-[-8%] z-0 h-[116%] bg-contain bg-center bg-no-repeat opacity-[0.16] md:bg-cover"
+        style={{ backgroundImage: "url(/images/gallery-bg-warm.jpg)" }}
+      />
+
       <div className="relative z-10 flex flex-col gap-10 motion-safe:md:h-screen motion-safe:md:flex-row motion-safe:md:items-center motion-safe:md:gap-0">
         {/* Heading — the fixed anchor. Sits centered on the left while the
             photos stream past on desktop; flows on top on mobile. */}

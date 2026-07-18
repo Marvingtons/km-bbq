@@ -54,6 +54,14 @@ export const PRELOADER = {
 export const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 /**
+ * The positive form, for gsap.matchMedia(). Everything scroll-driven registers
+ * inside this query so reduced motion gets the plain stacked page by
+ * construction — the timelines are never created at all, rather than created
+ * and then skipped.
+ */
+export const MOTION_OK = "(prefers-reduced-motion: no-preference)";
+
+/**
  * Imperative reduced-motion check for GSAP / vanilla contexts (SSR-safe).
  * React components should use `useReducedMotion()` from framer-motion instead.
  */

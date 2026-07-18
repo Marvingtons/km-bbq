@@ -7,6 +7,7 @@ import { Challenge } from "@/components/Challenge";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 import { RestaurantSchema } from "@/components/RestaurantSchema";
+import { SeamMotion } from "@/components/SeamMotion";
 import { pageMeta } from "@/lib/seo";
 
 export const metadata: Metadata = pageMeta({
@@ -22,12 +23,14 @@ export default function Home() {
     <>
       <RestaurantSchema />
       <Navbar />
-      <main id="main-content" tabIndex={-1} className="focus:outline-none">
+      <main id="main-content" tabIndex={-1} className="relative focus:outline-none">
         <Hero />
         <About />
         <Gallery />
         <Challenge />
         <Contact />
+        {/* Scroll-driven transitions across every section boundary. */}
+        <SeamMotion />
       </main>
       <Footer />
     </>

@@ -1,15 +1,19 @@
 import { ScrollReveal } from "./ScrollReveal";
 import { SocialLinks } from "./SocialLinks";
 import { ContactMap } from "./ContactMap";
+import { SeamThread } from "./SeamThread";
 import { HOURS, ADDRESS, PHONE, DIRECTIONS_URL } from "@/lib/restaurant";
 
 export function Contact() {
   return (
     <section
       id="contact"
-      className="bg-cream py-28 px-6"
+      className="relative bg-cream py-28 px-6"
       aria-labelledby="contact-heading"
     >
+      {/* Same tone as the Challenge above it, so this seam is the thread motif
+          alone — no morph. Not every boundary needs to change colour. */}
+      <SeamThread />
       <div className="mx-auto max-w-7xl">
         <div className="mb-16 text-center">
           <ScrollReveal>
