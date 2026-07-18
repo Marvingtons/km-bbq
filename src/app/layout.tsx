@@ -38,15 +38,20 @@ export const metadata: Metadata = {
     "KM BBQ",
   ],
   robots: { index: true, follow: true },
-  // src/app/favicon.ico, icon.png and apple-icon.png are picked up by the file
-  // convention on their own. These entries add the two hand-tuned tab sizes,
-  // which are a SIMPLIFIED mark (disc + K, no flame — the flame turns to noise
-  // below ~48px) and so cannot be generated from icon.png by downscaling.
+  // The two tab sizes are a SIMPLIFIED mark (disc + K, no flame — the flame
+  // turns to noise below ~48px), so they cannot be produced by downscaling
+  // icon.png and have to be declared by hand.
+  //
+  // `apple` is listed explicitly even though src/app/apple-icon.png would
+  // normally be found by the file convention: declaring `icons` at all replaces
+  // that detection, and without this line the apple-touch-icon <link> silently
+  // stops being emitted. (favicon.ico is the exception — it keeps being added.)
   icons: {
     icon: [
       { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
       { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
     ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
   alternates: { canonical: SITE_URL },
   openGraph: {
