@@ -1,62 +1,55 @@
-import Image from "next/image";
-import { DIRECTIONS_URL } from "@/lib/restaurant";
+import { ADDRESS_PARTS, BUSINESS, DIRECTIONS_URL } from "@/lib/restaurant";
 
-// A warm static map instead of a Google embed. The iframe embed this replaces
-// worked, but it pulled ~1MB of third-party JS and set cookies on every visit —
-// a bad trade on a page whose majority visitor is on a phone. The map here is a
-// baked OpenStreetMap render (/public/images/contact-map.jpg, toned to the cream
-// palette), and the thing a visitor actually wants — turn-by-turn directions —
-// is a real link that needs no API key.
+// A real, interactive Google Map again, replacing the baked static render.
+//
+// Two source URLs, picked at build time:
+//
+//   WITH a key  -> the official Maps Embed API. This is the supported product,
+//                  it is what Google documents, and it will not change under us.
+//   WITHOUT one -> the keyless `output=embed` URL. Same interactive map, no
+//                  account required, which is what ships until a key is set.
+//
+// NOTE on the ember pin: neither embed can restyle the map or recolour the
+// marker. Custom styling and a custom marker need the Maps JavaScript API, a
+// different (heavier) integration that also has to be initialised client-side.
+// That is worth doing only if the styled look is wanted badly enough to carry
+// the extra script; the standard embed inside the system card radius is what
+// this ships, per the fallback in the brief.
+//
+// NEXT_PUBLIC_* is inlined by the bundler at build time, so this is a static
+// string in the output and adds no runtime environment dependency (which
+// matters on the Workers runtime, where there is no Node process env).
+const KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-// The pin's tip lands on the storefront at the image's centre point.
-function EmberPin() {
-  return (
-    <svg
-      width="34"
-      height="46"
-      viewBox="0 0 36 48"
-      className="drop-shadow-[0_6px_10px_rgb(120_60_20/0.4)]"
-      aria-hidden="true"
-    >
-      <path
-        d="M18 0C8.06 0 0 8.06 0 18c0 12.5 18 30 18 30s18-17.5 18-30C36 8.06 27.94 0 18 0z"
-        fill="var(--color-ember)"
-        stroke="var(--color-ember-deep)"
-        strokeWidth="1.5"
-      />
-      <circle cx="18" cy="18" r="6.5" fill="var(--color-cream)" />
-    </svg>
-  );
-}
+// Business name first, and WITHOUT the suite number. Geocoding the raw
+// "#108-109" made the map label the pin "#108 #109" instead of the restaurant;
+// leading with the name gets the business itself, which is what a visitor is
+// looking for on the map. The suite is still shown in the address text beside
+// the map, where it is the part that actually helps you find the door.
+const QUERY = `${BUSINESS.name}, ${ADDRESS_PARTS.street.replace(/\s*#.*$/, "")}, ${ADDRESS_PARTS.city}, ${ADDRESS_PARTS.state} ${ADDRESS_PARTS.zip}`;
+
+const SRC = KEY
+  ? `https://www.google.com/maps/embed/v1/place?key=${KEY}&q=${encodeURIComponent(QUERY)}&zoom=16`
+  : `https://www.google.com/maps?q=${encodeURIComponent(QUERY)}&z=16&output=embed`;
 
 export function ContactMap() {
   return (
     <div className="relative h-full w-full bg-paper">
-      <Image
-        src="/images/contact-map.jpg"
-        alt="Map showing KM.BBQ on South El Camino Real in Oceanside"
-        fill
-        sizes="(max-width: 1024px) 100vw, 1024px"
-        className="object-cover"
+      <iframe
+        // The map sits below the fold, so it must not compete for bandwidth or
+        // main thread with the hero. Lazy keeps it out of the LCP path entirely.
+        loading="lazy"
+        src={SRC}
+        title="Map showing KM.BBQ on South El Camino Real in Oceanside"
+        className="h-full w-full border-0"
+        referrerPolicy="no-referrer-when-downgrade"
+        allowFullScreen
       />
-      {/* Soft warm scrim: ties the render to the cream page and softens the
-          cropped edge so it reads as part of the surface, not a pasted tile. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-charcoal/15 via-transparent to-cream/20"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-full"
-      >
-        <EmberPin />
-      </div>
-      {/* Required OpenStreetMap attribution. */}
-      <span className="pointer-events-none absolute bottom-1.5 left-2.5 font-sans text-[10px] text-foreground/55">
-        © OpenStreetMap
-      </span>
 
-      {/* 44px min height keeps this a comfortable thumb target on a phone. */}
+      {/* Directions stay a real link rather than relying on the embed's own
+          controls: it is the one thing a visitor actually came here to do, and
+          it works the same whether or not the iframe has loaded.
+          min-h-11 keeps it a comfortable thumb target on a phone. */}
       <a
         href={DIRECTIONS_URL}
         target="_blank"

@@ -100,8 +100,9 @@ export function Contact() {
         </div>
 
         {/* Map runs the full width of the section container, under both cards.
-            A baked static render rather than a Google embed — same information,
-            none of the third-party JS or cookies. */}
+            An interactive Google embed, lazy-loaded so it stays out of the LCP
+            path. The card radius is clipped by the wrapper's overflow-hidden,
+            so the iframe inherits the system shape. */}
         <ScrollReveal delay={0.08}>
           <div className="mt-6 aspect-[16/10] w-full overflow-hidden rounded-2xl border border-paper-line shadow-warm md:aspect-[21/9]">
             <ContactMap />
