@@ -46,26 +46,33 @@ export function Hero() {
           there's never a cream flash. */}
       <HeroVideo className="absolute inset-0 h-full w-full object-cover" />
 
-      {/* Scrim, in two forms. The display type occupies most of the lower half
-          and needs a consistent floor beneath all of it, not just a band at the
-          bottom edge. At lg the lockup is ~430px tall, which pushes the eyebrow
-          up near mid-frame where the mobile curve has already thinned out
-          (measured 2.3:1 there), so the desktop version carries the same
-          density considerably further up. */}
+      {/* Scrim, in two forms, and lighter than it was. The previous curves were
+          tuned for a lockup that stood ~430px tall and pushed the eyebrow up
+          near mid-frame; at the reduced type size the whole copy block sits
+          lower, so the density can come down with it and hand a good part of
+          the frame back to the video. Re-measured against real frames of the
+          clip after the resize — every element still clears AA. */}
       <div
         aria-hidden="true"
         className="absolute inset-0 lg:hidden"
         style={{
           background:
-            "linear-gradient(to top, rgba(16,10,6,0.93) 0%, rgba(16,10,6,0.85) 32%, rgba(16,10,6,0.6) 58%, rgba(16,10,6,0.16) 80%, transparent 100%)",
+            "linear-gradient(to top, rgba(16,10,6,0.9) 0%, rgba(16,10,6,0.78) 30%, rgba(16,10,6,0.44) 55%, rgba(16,10,6,0.08) 78%, transparent 100%)",
         }}
       />
+      {/* The desktop curve's mid-band is set by the eyebrow, not the display
+          type. The eyebrow is 12px, so it needs 4.5:1 rather than the 3:1 the
+          headline gets, and it sits ~59% up the frame. Solving against the
+          measured backdrop there (video luminance ~0.45) puts the required
+          alpha at ~0.60; it carries 0.64 at that height for margin. Above 80%
+          the curve is materially lighter than it was, which is where the
+          reclaimed video band comes from. */}
       <div
         aria-hidden="true"
         className="absolute inset-0 hidden lg:block"
         style={{
           background:
-            "linear-gradient(to top, rgba(16,10,6,0.93) 0%, rgba(16,10,6,0.88) 40%, rgba(16,10,6,0.76) 62%, rgba(16,10,6,0.5) 80%, rgba(16,10,6,0.12) 94%, transparent 100%)",
+            "linear-gradient(to top, rgba(16,10,6,0.92) 0%, rgba(16,10,6,0.84) 30%, rgba(16,10,6,0.72) 50%, rgba(16,10,6,0.58) 65%, rgba(16,10,6,0.3) 80%, rgba(16,10,6,0.08) 92%, transparent 100%)",
         }}
       />
 
@@ -82,18 +89,24 @@ export function Hero() {
             {EYEBROW}
           </motion.p>
 
-          {/* The oversized lockup. Tracking is pulled tight and leading is
-              sub-1 so the two words read as one mass. */}
+          {/* The display lockup. Tracking is pulled tight and leading is sub-1
+              so the two words read as one mass.
+
+              Sized so the type and the video SHARE the frame. At 15/17vw the
+              lockup stood ~430px tall at 1440 and was the only thing on screen;
+              it is now ~30% smaller (10.5/11.5vw, ~151/166px), which leaves a
+              real band of grill footage legible above and to the right of it.
+              The stagger indent came down with it: at 34vw the second word ran
+              off the edge, which was the point when the type was edge-to-edge,
+              but at this size it would just strand the word in the middle. */}
           <motion.h1
-            className="font-serif font-light uppercase leading-[0.82] tracking-[-0.03em]"
+            className="font-serif font-light uppercase leading-[0.8] tracking-[-0.03em]"
             {...rise(1)}
           >
-            <span className="block px-6 text-[26vw] lg:px-16 lg:text-[15vw]">
+            <span className="block px-6 text-[21vw] lg:px-16 lg:text-[10.5vw]">
               {first}
             </span>
-            {/* At 375 the word is already wider than the viewport; at lg the
-                indent is what runs it off the edge. */}
-            <span className="block whitespace-nowrap pl-10 text-[26vw] lg:pl-[34vw] lg:text-[17vw]">
+            <span className="block whitespace-nowrap pl-8 text-[21vw] lg:pl-[18vw] lg:text-[11.5vw]">
               {second}
             </span>
           </motion.h1>
