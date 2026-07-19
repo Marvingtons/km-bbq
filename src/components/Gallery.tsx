@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -36,11 +36,18 @@ const GALLERY_ITEMS: GalleryItem[] = [
 // traverse, which testers found sluggish.
 const PACE = 0.55;
 
+// The first two tiles are what the viewer is looking at when the gallery
+// arrives, so they load eagerly at high priority; everything past them stays
+// lazy. Keeping this as a constant rather than a magic index so the count and
+// the reason travel together.
+const EAGER_TILES = 2;
+
 export function Gallery() {
   const sectionRef = useRef<HTMLElement>(null);
-  // One refresh after ALL tile images settle, instead of one per <img> load.
-  // Eight rapid ScrollTrigger.refresh() calls used to thrash layout on load.
-  const loadedRef = useRef(0);
+  // Debounce handle + the last measured track width, for the load-settle
+  // refresh below.
+  const refreshTimer = useRef<number | null>(null);
+  const lastWidth = useRef(0);
 
   useLayoutEffect(() => {
     const mm = gsap.matchMedia();
@@ -141,12 +148,44 @@ export function Gallery() {
 
   useScrollRefresh();
 
-  // Refresh exactly once, after the last tile image settles, rather than once
-  // per load event (which fired 8 refreshes in quick succession on first paint).
+  // Refresh once after image loads SETTLE, and only if they actually changed
+  // the row's width.
+  //
+  // The previous version counted to 8 and refreshed on the last load. Because
+  // tiles past the first two are lazy, that last load happens while the pinned
+  // track is being scrolled horizontally — so a full ScrollTrigger.refresh()
+  // (recomputing every trigger and all pin spacing on the page) landed in the
+  // middle of the scroll. That was the ~70ms long task behind the first-view
+  // stutter; on later passes the images are cached, nothing loads mid-scroll,
+  // and the stutter is gone, which is exactly the reported symptom.
+  //
+  // Now: each load pushes a 150ms debounce, the work is deferred to idle, and
+  // it bails entirely when scrollWidth is unchanged (the common case, since
+  // every tile's box is fixed by its aspect-ratio before the image arrives).
   const onTileLoad = () => {
-    loadedRef.current += 1;
-    if (loadedRef.current >= GALLERY_ITEMS.length) ScrollTrigger.refresh();
+    const track = sectionRef.current?.querySelector<HTMLElement>(".gallery-track");
+    if (!track) return;
+    if (refreshTimer.current !== null) window.clearTimeout(refreshTimer.current);
+    refreshTimer.current = window.setTimeout(() => {
+      refreshTimer.current = null;
+      const w = track.scrollWidth;
+      if (w === lastWidth.current) return; // layout never moved: nothing to do
+      lastWidth.current = w;
+      const run = () => ScrollTrigger.refresh();
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(run, { timeout: 500 });
+      } else {
+        run();
+      }
+    }, 150);
   };
+
+  useEffect(
+    () => () => {
+      if (refreshTimer.current !== null) window.clearTimeout(refreshTimer.current);
+    },
+    []
+  );
 
   // overflow-hidden keeps the horizontal motion inside the section — the page
   // itself never scrolls sideways at any width. Plain cream surface: the
@@ -210,10 +249,13 @@ export function Gallery() {
               its own layer for the life of the page, which costs more memory
               than it saves. GSAP promotes during the tween itself. */}
           <div className="gallery-track flex items-center gap-5 pr-6 motion-safe:md:gap-8 motion-safe:md:pr-[12vw]">
-            {GALLERY_ITEMS.map((item) => (
+            {GALLERY_ITEMS.map((item, i) => (
               <figure
                 key={item.id}
                 className="gallery-tile group relative h-[52vh] shrink-0 snap-start overflow-hidden rounded-xl bg-paper shadow-warm motion-safe:md:h-[60vh]"
+                // Fixed height + aspect-ratio means every tile's box exists at
+                // its final size before its image arrives, so a load can never
+                // shift the row. This is what keeps CLS at 0 here.
                 style={{ aspectRatio: String(item.ratio) }}
               >
                 <Image
@@ -222,6 +264,12 @@ export function Gallery() {
                   fill
                   sizes="(max-width: 768px) 70vw, 40vw"
                   className="object-cover"
+                  // The first two are decoded before the viewer reaches them;
+                  // the rest stay lazy so the page does not pull 8 photos up
+                  // front. decoding is explicit rather than relying on the
+                  // default.
+                  priority={i < EAGER_TILES}
+                  decoding="async"
                   onLoad={onTileLoad}
                 />
                 {/* Caption: dark bottom gradient + small letter-spaced label.
