@@ -12,46 +12,13 @@ import { useScrollRefresh } from "@/lib/useScrollRefresh";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Shared geometry for the seam lines. Two identical segments overlap at the
-// seam at rest (looking like one line); each rides its half's inner edge
-// outward during the split because it is a child of that half.
-const lineBase: React.CSSProperties = {
-  position: "absolute",
-  top: 0,
-  bottom: 0,
-  borderRadius: 2,
-  transformOrigin: "top center",
-  pointerEvents: "none",
-};
-
-// Brushed-steel line — always present in the mural (the pre-existing seam).
-const steelLineStyle: React.CSSProperties = {
-  ...lineBase,
-  width: 3,
-  background:
-    "linear-gradient(180deg, #4a4a4e 0%, #6f6f74 30%, #9a9aa0 50%, #6f6f74 70%, #4a4a4e 100%)",
-  boxShadow: "0 0 5px rgba(140,140,150,.55), 0 0 10px rgba(140,140,150,.3)",
-  zIndex: 10,
-};
-
-// Fire overlay — sits exactly on top of the steel line and "ignites" it from
-// top to bottom on scroll. Hidden by default (scaleY 0); the fallback / reduced
-// motion state simply shows the cool steel line beneath.
-const fireLineStyle: React.CSSProperties = {
-  ...lineBase,
-  // Ignite from the top of the bar downward when this screen comes into view.
-  transformOrigin: "top center",
-  width: 4,
-  background:
-    "linear-gradient(180deg, #fff7cc 0%, #ffd24a 16%, #ff9c1f 42%, #ff5a1f 68%, #d11e0c 100%)",
-  boxShadow:
-    "0 0 6px rgba(255,170,50,.95), 0 0 16px rgba(255,90,20,.7), 0 0 30px rgba(255,60,10,.45)",
-  transform: "scaleY(0)",
-  // Hint the compositor: this line is animated (scaleY) on scrub, so keep it
-  // on its own GPU layer to avoid layout-driven jank during the ignite.
-  willChange: "transform",
-  zIndex: 11,
-};
+// NOTE: the full-height seam line (a brushed-steel bar with a fire overlay
+// that ignited top-to-bottom, then rode each half's inner edge outward) has
+// been removed. It read as a hard mechanical wipe — the mural looked sliced
+// rather than opened. The reveal is now dimensional: the halves start slightly
+// overscaled and pushed toward centre, then drift apart and settle with a
+// parallax offset against the story column. The only rule left in this section
+// is a short ember hairline under the story heading.
 
 interface Dish {
   name: string;
@@ -132,22 +99,25 @@ export function About() {
         const grillDishes = q(".grill-dish");
 
         if (md) {
-          const fireLines = q(".mural-line-fire");
           const leftHalf = q(".mural-half-left");
           const rightHalf = q(".mural-half-right");
+          const muralInner = q(".mural-parallax");
           const textCol = q(".about-text");
+          const textRule = q(".about-rule");
           const grillLayer = q(".grill-layer");
           const grillCta = q(".grill-cta");
 
-          // Animated start state: steel line already showing (its default),
-          // fire not yet ignited, mural closed, story hidden. autoAlpha
-          // (opacity + visibility) so a hidden layer never intercepts clicks
-          // meant for the visible one — on lg the two layers overlap
+          // Animated start state: the mural sits slightly overscaled and pushed
+          // toward centre, as though the world is still closed in on itself.
+          // It opens from there rather than being cut down the middle.
+          // autoAlpha (opacity + visibility) so a hidden layer never intercepts
+          // clicks meant for the visible one — on lg the two layers overlap
           // absolutely in the stage.
-          gsap.set(fireLines, { scaleY: 0, transformOrigin: "top center" });
-          gsap.set(leftHalf, { xPercent: 0 });
-          gsap.set(rightHalf, { xPercent: 0 });
-          gsap.set(textCol, { autoAlpha: 0, scale: 0.92 });
+          gsap.set([leftHalf, rightHalf], { scale: 1.04 });
+          gsap.set(leftHalf, { xPercent: 3 });
+          gsap.set(rightHalf, { xPercent: -3 });
+          gsap.set(textCol, { autoAlpha: 0, y: MOTION.rise });
+          gsap.set(textRule, { scaleX: 0, transformOrigin: "left center" });
           if (lg) gsap.set(grillLayer, { autoAlpha: 0 });
 
           const tl = gsap.timeline({
@@ -176,32 +146,50 @@ export function About() {
             },
           });
 
-          // PHASE 1 (progress 0 -> 0.13): fire ignites down the existing
-          // steel line, top -> bottom, mural still closed.
-          tl.fromTo(fireLines, { scaleY: 0 }, { scaleY: 1, duration: 0.13 }, 0);
+          // PHASE 1 (progress 0 -> 0.40): the world eases open. The halves
+          // drift apart to 36% open while their overscale settles back to 1,
+          // so the movement reads as depth resolving rather than two panels
+          // being pulled aside. xPercent is relative to the half's own width
+          // (50% of the stage), so -36% / +36% opens a centred gap of ~36% of
+          // the stage while leaving mural bands framing each side.
+          // `power2.out` on the position, linear on the scale: the drift
+          // decelerates into place (the "settle") while the scale keeps
+          // resolving underneath it.
+          tl.to(leftHalf, { xPercent: -36, duration: 0.4, ease: "power2.out" }, 0);
+          tl.to(rightHalf, { xPercent: 36, duration: 0.4, ease: "power2.out" }, 0);
+          tl.to([leftHalf, rightHalf], { scale: 1, duration: 0.4 }, 0);
 
-          // PHASE 2 (0.13 -> 0.40): halves slide to 36% open; each carries
-          // its line segment along its inner edge. xPercent is relative to
-          // the half's own width (50% of the stage), so -36% / +36% opens a
-          // centered gap of ~36% of the stage while leaving mural bands
-          // framing each side. The story fades in and gets a beat of
-          // stillness (0.40 -> 0.52) to read.
-          tl.to(leftHalf, { xPercent: -36, duration: 0.27 }, 0.13);
-          tl.to(rightHalf, { xPercent: 36, duration: 0.27 }, 0.13);
-          tl.to(textCol, { autoAlpha: 1, scale: 1, duration: 0.16 }, 0.18);
+          // DEPTH. The halves also drift vertically across the whole pin at
+          // roughly 0.9x the copy's rate, so the mural sits behind the story
+          // rather than on the same plane. Body copy never moves.
+          tl.fromTo(
+            muralInner,
+            { yPercent: -1.6 },
+            { yPercent: 1.6, duration: 1 },
+            0
+          );
+
+          // PHASE 2 (0.16 -> 0.36): the story arrives AFTER the halves have
+          // begun settling, on the shared rise/duration, then gets a beat of
+          // stillness (to 0.52) to read. Its ember rule draws in underneath
+          // the heading once the copy is up — the only rule in the section now.
+          tl.to(
+            textCol,
+            { autoAlpha: 1, y: 0, duration: 0.2, ease: MOTION.gsapEase },
+            0.16
+          );
+          tl.to(textRule, { scaleX: 1, duration: 0.14 }, 0.3);
 
           // PHASE 3 (0.52 -> 1.0): the mural keeps opening out — each half
-          // moves slightly past its full width so the art and its glowing
-          // seam line have fully left the viewport by the end of the pin.
-          // No close, one continuous motion.
-          // ±110 rather than ±100: the seam lines overhang each half's inner
-          // edge by ~2px and glow up to ~30px, so at exactly ±100 an orange
-          // sliver would stay pinned to the viewport edges. The extra 10% of
-          // travel (≥ ~38px at md and up) carries the line and its glow fully
-          // off-screen, and only right at the end of the pin.
-          tl.to(leftHalf, { xPercent: -110, duration: 0.48 }, 0.52);
-          tl.to(rightHalf, { xPercent: 110, duration: 0.48 }, 0.52);
-          tl.to(textCol, { autoAlpha: 0, scale: 0.95, duration: 0.1 }, 0.52);
+          // moves past its own width so the art has fully left the viewport by
+          // the end of the pin. No close, one continuous motion.
+          // ±104 rather than ±100 leaves a little margin against the vertical
+          // parallax drift, so neither half can leave a sliver at the edge.
+          // (This used to be ±110 to clear the seam line's 30px glow; with the
+          // line gone, the art itself is all that has to clear.)
+          tl.to(leftHalf, { xPercent: -104, duration: 0.48 }, 0.52);
+          tl.to(rightHalf, { xPercent: 104, duration: 0.48 }, 0.52);
+          tl.to(textCol, { autoAlpha: 0, y: -MOTION.rise / 2, duration: 0.1 }, 0.52);
 
           if (lg) {
             // The story hands the stage to the featured cuts: the Grill
@@ -307,6 +295,12 @@ export function About() {
           every click meant for the buttons revealed in the gap beneath. */}
       <div className="pointer-events-none hidden md:block relative z-20 px-6 md:px-0 motion-safe:md:min-h-screen">
         <div className="relative mx-auto aspect-[2535/1240] w-full max-w-7xl overflow-hidden md:mx-0 md:aspect-auto md:h-screen md:max-w-none">
+          {/* Depth layer: carries BOTH halves on a slow vertical drift (~0.9x
+              the story column's rate) across the pin, so the mural reads as
+              sitting behind the copy rather than on the same plane. Separate
+              from the halves themselves so their own open/settle transform is
+              never fighting the parallax on the same element. */}
+          <div className="mural-parallax absolute inset-0 will-change-transform">
           {/* Left half */}
           <div className="mural-half-left absolute left-0 top-0 h-full w-1/2 will-change-transform">
             <Image
@@ -319,10 +313,6 @@ export function About() {
               onLoad={refresh}
               className="select-none object-contain object-right"
             />
-            {/* seam line glued to this half's inner (right) edge: steel always
-                visible, fire overlay ignites on scroll */}
-            <div className="mural-line-steel" style={{ ...steelLineStyle, right: -1.5 }} />
-            <div className="mural-line-fire" style={{ ...fireLineStyle, right: -2 }} />
           </div>
 
           {/* Right half */}
@@ -337,12 +327,8 @@ export function About() {
               onLoad={refresh}
               className="select-none object-contain object-left"
             />
-            {/* seam line glued to this half's inner (left) edge: steel always
-                visible, fire overlay ignites on scroll */}
-            <div className="mural-line-steel" style={{ ...steelLineStyle, left: -1.5 }} />
-            <div className="mural-line-fire" style={{ ...fireLineStyle, left: -2 }} />
           </div>
-
+          </div>
         </div>
       </div>
 
@@ -398,6 +384,14 @@ export function About() {
             It started with a{" "}
             <em className="italic text-ember">grill</em>
           </h2>
+          {/* The section's one rule, replacing the full-height seam that used
+              to split the mural. It draws in from the left after the copy has
+              risen. Defaults to fully drawn, so the no-JS and reduced-motion
+              states show a static hairline rather than nothing. */}
+          <span
+            aria-hidden="true"
+            className="about-rule mx-auto mt-5 block h-px w-16 bg-ember"
+          />
           <div className="mt-8 space-y-5 font-sans text-sm font-light leading-relaxed text-foreground/80">
             <p>
               KM.BBQ started with one idea: really good Korean BBQ that you cook
