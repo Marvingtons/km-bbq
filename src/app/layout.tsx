@@ -38,9 +38,11 @@ export const metadata: Metadata = {
     "KM BBQ",
   ],
   robots: { index: true, follow: true },
-  // The two tab sizes are a SIMPLIFIED mark (disc + K, no flame — the flame
-  // turns to noise below ~48px), so they cannot be produced by downscaling
-  // icon.png and have to be declared by hand.
+  // The two tab sizes come from a SIMPLIFIED master (assets/km-bbq-badge-small
+  // .svg): same three elements as the full badge, but the flame redrawn as one
+  // solid lick, because the real flame's interlocking curves turn to noise
+  // below ~48px. They cannot be produced by downscaling icon.png, so they are
+  // declared by hand.
   //
   // `apple` is listed explicitly even though src/app/apple-icon.png would
   // normally be found by the file convention: declaring `icons` at all replaces
