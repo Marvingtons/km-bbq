@@ -38,11 +38,12 @@ export const metadata: Metadata = {
     "KM BBQ",
   ],
   robots: { index: true, follow: true },
-  // The two tab sizes come from a SIMPLIFIED master (assets/km-bbq-badge-small
-  // .svg): same three elements as the full badge, but the flame redrawn as one
-  // solid lick, because the real flame's interlocking curves turn to noise
-  // below ~48px. They cannot be produced by downscaling icon.png, so they are
-  // declared by hand.
+  // The two tab sizes come from their OWN masters, each rendered natively at
+  // that exact pixel size (see tools/build-icons.mjs): 32 from the three-lick
+  // flame, 16 from the merged thick lick. Measured against real pixels, the
+  // canonical flame is already mush at 32 and the three-lick version collapses
+  // at 16, so neither tab size can be produced by downscaling icon.png. Hence
+  // declaring them by hand here.
   //
   // `apple` is listed explicitly even though src/app/apple-icon.png would
   // normally be found by the file convention: declaring `icons` at all replaces

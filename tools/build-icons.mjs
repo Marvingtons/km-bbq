@@ -7,10 +7,20 @@
  * screenshot suite, so this adds no new toolchain — notably no sharp, which
  * would be a native build for a job we run by hand a few times a year.
  *
- * Two masters, because the mark does not survive uniform scaling:
- *   km-bbq-badge.svg        full badge (disc + K + flame), used 180px and up
- *   km-bbq-badge-small.svg  disc + enlarged K, no flame, used at 16/32
- * See the comment in the small master for why the flame comes out.
+ * THREE masters, because the mark does not survive uniform scaling. Every size
+ * is rendered natively from its master at exactly that pixel size — nothing is
+ * produced by downscaling a larger raster:
+ *
+ *   km-bbq-badge.svg        full badge, real 8-curve flame.   180 / 192 / 512
+ *   km-bbq-badge-small.svg  flame simplified to three licks.  32
+ *   km-bbq-badge-16.svg     flame merged into one thick lick. 16
+ *
+ * The split is measured, not assumed. Rendering all three at both tab sizes and
+ * comparing the actual pixels: the full badge's flame is red mush across the
+ * K's legs by 32px, so it is not used below 180. The three-lick master still
+ * reads as fire at 32 but collapses to a shapeless blob at 16. The merged lick
+ * is the only one that holds a recognisable silhouette at 16 while leaving the
+ * K's legs legible.
  *
  * Everything is written straight to disk, and the ICO is assembled here rather
  * than shelling out to ImageMagick.
@@ -86,14 +96,16 @@ const out = async (rel, buf) => {
 const main = async () => {
   const full = await read("assets/km-bbq-badge.svg");
   const small = await read("assets/km-bbq-badge-small.svg");
+  const tiny = await read("assets/km-bbq-badge-16.svg");
 
   const browser = await chromium.launch();
   const page = await browser.newPage({ deviceScaleFactor: 1 });
 
   console.log("icons:");
 
-  // Tab sizes: simplified master, transparent.
-  const png16 = await render(page, small, 16);
+  // Tab sizes: each from the master that survives it, rendered natively at
+  // that exact size rather than downscaled from one large raster.
+  const png16 = await render(page, tiny, 16);
   const png32 = await render(page, small, 32);
   await out("public/favicon-16.png", png16);
   await out("public/favicon-32.png", png32);
