@@ -86,6 +86,25 @@ export const viewport: Viewport = {
   themeColor: "#FAF4EC",
 };
 
+/**
+ * Runs synchronously while the browser parses <head>, BEFORE first paint.
+ *
+ * The overlay ships visible in the server HTML (`data-preloader="run"` is the
+ * SSR default), so a first-time visitor can never see a frame of the hero
+ * before the cream field. This script handles the reverse flash: a returning
+ * visitor, or anyone on reduced motion, gets `skip` set here — before paint —
+ * so they never see the overlay either.
+ *
+ * Doing this in an effect (or even useLayoutEffect) is too late: both run after
+ * hydration, and on a slow connection the browser paints the server HTML long
+ * before React loads. See node_modules/next/dist/docs/01-app/02-guides/
+ * preventing-flash-before-hydration.md.
+ *
+ * `preloading` is set here too, not in the effect, so the scroll lock and the
+ * hero video's hold-on-frame-one are active from the very first paint.
+ */
+const PRELOADER_INIT = `(function(){try{var d=document.documentElement;if(sessionStorage.getItem("km-preloader-shown")==="1"||window.matchMedia("(prefers-reduced-motion: reduce)").matches){d.setAttribute("data-preloader","skip")}else{d.classList.add("preloading")}}catch(e){document.documentElement.setAttribute("data-preloader","skip")}})()`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -94,8 +113,22 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      // The SSR default is "run" so the overlay is painted from the first
+      // frame; the inline script below flips it to "skip" when appropriate.
+      data-preloader="run"
+      // The inline script mutates <html> before React hydrates, so the DOM and
+      // the server payload legitimately disagree here.
+      suppressHydrationWarning
       className={`${cormorant.variable} ${inter.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: PRELOADER_INIT }} />
+        {/* Without JS the script never runs and the overlay would sit there
+            forever, so hide it outright. */}
+        <noscript>
+          <style>{`.preloader-overlay{display:none!important}`}</style>
+        </noscript>
+      </head>
       <body className="min-h-full bg-cream text-foreground">
         {/* Keyboard skip link — hidden until focused, then a visible ember pill
             at the top-left. Jumps past the nav to the page's main content. */}

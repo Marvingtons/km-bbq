@@ -1,21 +1,21 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { Logo } from "./Logo";
-import { PRELOADER, REDUCED_MOTION_QUERY } from "@/lib/motion";
+import { PRELOADER } from "@/lib/motion";
 
-// The intro plays once per tab session, and not at all under reduced motion —
-// in both cases this component never mounts (no overlay in the DOM, no flash).
-// sessionStorage/matchMedia are client-only, so they're read through
-// useSyncExternalStore: the server snapshot says "skip" (no overlay in the SSR
-// HTML — the page renders and paints underneath first), and the client
-// re-renders with the real answer right after hydration.
-const subscribe = () => () => {};
-const shouldSkip = () =>
-  sessionStorage.getItem("km-preloader-shown") === "1" ||
-  window.matchMedia(REDUCED_MOTION_QUERY).matches;
-const serverSnapshot = () => true;
+// The overlay's markup is ALWAYS server-rendered, so it is present and painted
+// in the very first frame. Whether it is actually shown is decided by the
+// inline script in the layout, which sets data-preloader on <html> before
+// paint; CSS keys off that attribute.
+//
+// This replaces a useSyncExternalStore approach whose server snapshot said
+// "skip". That kept the overlay out of the SSR HTML entirely, so the hero
+// painted first and the overlay only appeared once React had hydrated — which
+// is exactly the flash this component exists to prevent.
+const shouldRun = () =>
+  document.documentElement.getAttribute("data-preloader") === "run";
 
 /**
  * The preloader: a cream field over the already-rendering page, on which the
@@ -35,20 +35,19 @@ const serverSnapshot = () => true;
  */
 export function Preloader() {
   const [dismissed, setDismissed] = useState(false);
-  const skip = useSyncExternalStore(subscribe, shouldSkip, serverSnapshot);
   const rootRef = useRef<HTMLDivElement>(null);
-  const visible = !skip && !dismissed;
 
   useEffect(() => {
-    if (!visible) return;
+    // The inline script already decided this, before paint.
+    if (!shouldRun()) return;
     const root = rootRef.current;
     if (!root) return;
 
     // Mark shown immediately so an in-session navigation mid-animation still
-    // skips the loader on the next page; lock scroll while the overlay is up
-    // (html.preloading also holds the hero video on its first frame).
+    // skips the loader on the next page. (`preloading` was already added by the
+    // inline script, so the scroll lock and the hero video's hold have been
+    // active since the first frame.)
     sessionStorage.setItem("km-preloader-shown", "1");
-    document.documentElement.classList.add("preloading");
 
     const q = gsap.utils.selector(root);
     const isLoaded = () => document.readyState === "complete";
@@ -140,21 +139,29 @@ export function Preloader() {
       { yPercent: -100, duration: PRELOADER.exit, ease: PRELOADER.exitEase },
       "exit"
     );
-    tl.call(() => setDismissed(true)); // unmount: overlay leaves the DOM
+    tl.call(() => {
+      // Flip the attribute before unmounting: if anything ever remounts this
+      // component in-session, CSS keeps the overlay hidden rather than letting
+      // the intro replay.
+      document.documentElement.setAttribute("data-preloader", "skip");
+      setDismissed(true); // unmount: overlay leaves the DOM
+    });
 
     return () => {
       window.removeEventListener("load", onWindowLoad);
       tl.kill();
       document.documentElement.classList.remove("preloading");
     };
-  }, [visible]);
+  }, []);
 
-  if (!visible) return null;
+  if (dismissed) return null;
 
   return (
     <div
       ref={rootRef}
-      className="fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden bg-cream"
+      // `preloader-overlay` carries the visibility rule (globals.css) plus the
+      // failsafe that clears it if JS never gets to run the timeline.
+      className="preloader-overlay fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden bg-cream"
       role="status"
       aria-label="KM.BBQ is loading"
     >

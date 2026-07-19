@@ -92,6 +92,33 @@ html.preloading {
   overflow: hidden;
 }
 
+/* ---------------------------------------------------------------------------
+   Preloader visibility. The overlay is server-rendered and therefore painted
+   in the first frame; the inline script in the layout sets data-preloader on
+   <html> before paint, and these rules decide from that. A returning visitor
+   or anyone on reduced motion gets "skip" and never sees it at all.
+   --------------------------------------------------------------------------- */
+html[data-preloader="skip"] .preloader-overlay {
+  display: none;
+}
+
+/* Failsafe. The overlay now ships in the HTML rather than being mounted by JS,
+   which means a JS failure would otherwise strand a visitor on a blank cream
+   field. If the timeline has not dismissed it within 10s (it normally finishes
+   in ~4s, and waits on window load only when the page is still streaming),
+   clear it so the site is always reachable. Purely a safety net: under normal
+   operation the element is long gone before this fires. */
+@keyframes preloader-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.preloader-overlay {
+  animation: preloader-failsafe 0.4s linear 10s forwards;
+}
+
 /* Gallery mobile swipe hint — a small horizontal nudge that loops to signal
    the photo row scrolls sideways. Respect reduced-motion by holding still. */
 @keyframes swipe-nudge {
