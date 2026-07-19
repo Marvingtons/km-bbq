@@ -66,6 +66,23 @@ a preview version without promoting it. That is usually what you want.
 
 CLI alternative for a one-off: `npm run deploy`.
 
+### "could not determine executable to run"
+
+If the build fails on `npx opennextjs-cloudflare build` with this, the adapter is
+missing from the package.json that CI checked out. Before touching dependencies,
+check that the commit adding it was actually pushed:
+
+```
+git log --oneline origin/main..HEAD          # unpushed commits
+git show origin/main:package.json | grep opennext
+```
+
+Cloudflare builds `origin/main`, not your working tree. An adapter that is
+installed locally and absent from the branch CI cloned produces exactly this
+error, and reinstalling locally will not fix it — pushing will. `npm ci` on the
+build machine reads `package-lock.json`, so package.json and the lockfile must
+be committed together.
+
 ---
 
 ## Environment variables
@@ -192,8 +209,11 @@ Against the **production domain**, not the `*.workers.dev` preview:
       so check the network tab, not just the poster frame.
 - [ ] **Favicon**: the K badge shows in the tab. Hard-reload; browsers cache
       favicons aggressively and will keep serving the old one.
-- [ ] `/favicon.ico`, `/favicon-16.png`, `/favicon-32.png`, `/icon-192.png`,
-      `/icon-512.png`, `/icon-maskable-512.png`, `/apple-icon.png` all 200.
+- [ ] `/icon-192.png`, `/icon-512.png`, `/icon-maskable-512.png`,
+      `/apple-icon.png` all 200. `/icon-192.png` is the tab icon.
+- [ ] `/favicon.ico`, `/favicon-16.png` and `/favicon-32.png` all **404**. They
+      were removed deliberately; a favicon.ico coming back would silently win
+      the tab back, since browsers prefer it over the declared `<link>`.
 - [ ] `/manifest.webmanifest` resolves and its icon URLs 200.
 - [ ] **OG image**: paste the URL into a card validator and confirm
       `https://<domain>/og.png` loads (this is what `metadataBase` governs).

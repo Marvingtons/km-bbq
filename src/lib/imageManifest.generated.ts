@@ -6,8 +6,6 @@
 // render time — which the Cloudflare Workers runtime cannot do.
 
 const PUBLIC_FILES = new Set<string>([
-  "/favicon-16.png",
-  "/favicon-32.png",
   "/icon-192.png",
   "/icon-512.png",
   "/icon-maskable-512.png",
@@ -17,6 +15,7 @@ const PUBLIC_FILES = new Set<string>([
   "/images/bulgogi.png",
   "/images/butter-garlic-jumbo-shrimp.png",
   "/images/chadolbaegi.png",
+  "/images/contact-map.jpg",
   "/images/corn-cheese.png",
   "/images/drinks.png",
   "/images/fresh-fish-fillet.png",
@@ -34,12 +33,15 @@ const PUBLIC_FILES = new Set<string>([
   "/images/japchae.png",
   "/images/kimchi-fried-rice.png",
   "/images/kimchi.png",
+  "/images/kmbbq-hero-poster.jpg",
   "/images/lettuce-salad.png",
   "/images/live-grill.png",
   "/images/marbled-wagyu.png",
   "/images/marinated-chef-beef.png",
+  "/images/mural-left-cream.png",
   "/images/mural-left.png",
   "/images/mural-left.webp",
+  "/images/mural-right-cream.png",
   "/images/mural-right.png",
   "/images/mural-right.webp",
   "/images/mushroom.png",
@@ -66,6 +68,7 @@ const PUBLIC_FILES = new Set<string>([
   "/images/table.png",
   "/images/teriyaki-beef.png",
   "/og.png",
+  "/videos/kmbbq-hero.mp4",
 ]);
 
 /** True when `src` (a site-absolute path like "/images/galbi.png") exists. */

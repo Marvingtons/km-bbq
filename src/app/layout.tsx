@@ -38,22 +38,17 @@ export const metadata: Metadata = {
     "KM BBQ",
   ],
   robots: { index: true, follow: true },
-  // The two tab sizes come from their OWN masters, each rendered natively at
-  // that exact pixel size (see tools/build-icons.mjs): 32 from the three-lick
-  // flame, 16 from the merged thick lick. Measured against real pixels, the
-  // canonical flame is already mush at 32 and the three-lick version collapses
-  // at 16, so neither tab size can be produced by downscaling icon.png. Hence
-  // declaring them by hand here.
+  // One source for the tab icon: /icon-192.png, left to the browser to
+  // downscale. This replaces the per-size masters (favicon-16/32.png) that
+  // tools/build-icons.mjs used to emit — those files are gone, so declaring
+  // them here would 404.
   //
   // `apple` is listed explicitly even though src/app/apple-icon.png would
   // normally be found by the file convention: declaring `icons` at all replaces
   // that detection, and without this line the apple-touch-icon <link> silently
-  // stops being emitted. (favicon.ico is the exception — it keeps being added.)
+  // stops being emitted.
   icons: {
-    icon: [
-      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
-    ],
+    icon: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
     apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
   alternates: { canonical: SITE_URL },

@@ -1,4 +1,4 @@
-import type Lenis from "@studio-freight/lenis";
+import type Lenis from "lenis";
 
 // The Lenis instance lives in the SmoothScroll provider; anything that needs
 // programmatic smooth scrolling (e.g. the menu jump nav) reads it from here.
