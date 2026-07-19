@@ -141,6 +141,15 @@ html[data-preloader="skip"] .preloader-overlay {
   .gallery-swipe-hint {
     animation: none;
   }
+
+  /* ScrollReveal's entrance is a fade + rise driven by inline styles. Pin the
+     revealed state here so the content is readable at first paint, before any
+     JS runs and regardless of what the server rendered — this is what keeps
+     the reduced-motion site from coming up blank. */
+  .scroll-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* House Game LED clock — the colon blinks at 1Hz while the clock idles at

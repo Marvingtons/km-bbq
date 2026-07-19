@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView, useReducedMotion, type UseInViewOptions } from "framer-motion";
+import { motion, useInView, type UseInViewOptions } from "framer-motion";
 import { MOTION } from "@/lib/motion";
 
 interface ScrollRevealProps {
@@ -19,8 +19,15 @@ interface ScrollRevealProps {
 
 // The one reveal in the site. A fade + short rise built entirely on the shared
 // MOTION constants (duration, rise, ease), so every entrance animates alike.
-// Honors prefers-reduced-motion by rendering the content statically — no fade,
-// no offset — which is what makes the reduced-motion site fully readable.
+//
+// Reduced motion is handled in CSS (`.scroll-reveal` in globals.css), not by
+// branching here. Branching on useReducedMotion() shipped a bug: the hook can
+// only know the media query on the client, so the server always rendered the
+// animated branch with an inline `opacity: 0`, and the reduced-motion client
+// then rendered a plain <div> carrying no style prop at all. React kept the
+// server's inline opacity, and every revealed section on the site stayed
+// invisible forever. One render path plus a CSS guard that applies at first
+// paint means there is no mismatch to resolve and no JS to wait for.
 export function ScrollReveal({
   children,
   className,
@@ -32,11 +39,6 @@ export function ScrollReveal({
 }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once, margin });
-  const reduce = useReducedMotion();
-
-  if (reduce) {
-    return <div className={className}>{children}</div>;
-  }
 
   const offsets = {
     up: { y: MOTION.rise, x: 0 },
@@ -50,7 +52,7 @@ export function ScrollReveal({
   return (
     <motion.div
       ref={ref}
-      className={className}
+      className={className ? `scroll-reveal ${className}` : "scroll-reveal"}
       initial={{ opacity: 0, y, x }}
       animate={inView ? { opacity: 1, y: 0, x: 0 } : { opacity: 0, y, x }}
       transition={{ duration, ease: MOTION.ease, delay }}
