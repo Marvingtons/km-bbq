@@ -36,7 +36,7 @@ export function ContactMap() {
         src="/images/contact-map.jpg"
         alt="Map showing KM.BBQ on South El Camino Real in Oceanside"
         fill
-        sizes="(max-width: 1024px) 100vw, 60vw"
+        sizes="(max-width: 1024px) 100vw, 1024px"
         className="object-cover"
       />
       {/* Soft warm scrim: ties the render to the cream page and softens the
