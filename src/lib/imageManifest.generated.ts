@@ -17,7 +17,6 @@ const PUBLIC_FILES = new Set<string>([
   "/images/bulgogi.png",
   "/images/butter-garlic-jumbo-shrimp.png",
   "/images/chadolbaegi.png",
-  "/images/contact-map.jpg",
   "/images/corn-cheese.png",
   "/images/drinks.png",
   "/images/fresh-fish-fillet.png",
