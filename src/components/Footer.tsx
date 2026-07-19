@@ -47,7 +47,7 @@ export function Footer() {
       // -mt-6 pulls the dark footer up under the cream by a hair so the two
       // surfaces overlap rather than abut; SeamMotion lags the content inside
       // as it enters. The footer's own ember hairline is the seam itself.
-      className="relative -mt-6 overflow-hidden bg-charcoal px-6 py-20 text-white/70"
+      className="relative -mt-6 overflow-hidden bg-charcoal px-6 pb-10 pt-14 text-white/70"
       role="contentinfo"
     >
       {/* Top accent line: the one designed seam (Contact -> Footer). */}
@@ -63,8 +63,11 @@ export function Footer() {
 
       <div className="relative mx-auto max-w-7xl">
         <div className="grid gap-12 md:grid-cols-12 md:gap-8">
-          {/* Brand — socials sit at the column's foot so it doesn't trail off
-              into empty space below the tagline. */}
+          {/* Brand. The socials used to be pushed to the column's foot with
+              md:mt-auto, which only worked while this was the tallest column;
+              once Explore went back to a single column it stretched a 100px
+              hole between the tagline and the icons. They sit directly under
+              the tagline now and the column simply ends where it ends. */}
           <div className="flex flex-col md:col-span-4">
             <div className={topRow}>
               <Logo size={148} className="opacity-90" />
@@ -73,7 +76,7 @@ export function Footer() {
               All-you-can-eat Korean BBQ in Oceanside, California. You pick the
               cuts and grill them yourself right at your table.
             </p>
-            <SocialLinks tone="dark" className="mt-6 md:mt-auto md:pt-6" />
+            <SocialLinks tone="dark" className="mt-6" />
           </div>
 
           {/* Visit — NAP block + actions */}
@@ -138,12 +141,11 @@ export function Footer() {
             <div className={topRow}>
               <h2 className={label}>Explore</h2>
             </div>
-            {/* Two columns so a 5-item nav doesn't run 60px past every other
-                column and leave the row visually lopsided. */}
-            <ul
-              className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 md:grid-cols-1 lg:grid-cols-2"
-              role="list"
-            >
+            {/* One column. Five items across two columns leaves Contact
+                orphaned on a row by itself and the 44px tap targets blow the
+                row heights out — the ragged result cost more than the 60px of
+                column height it was trying to save. */}
+            <ul className="mt-5 space-y-1" role="list">
               {NAV_LINKS.map(({ label: navLabel, href }) => (
                 <li key={navLabel}>
                   <a
@@ -162,7 +164,7 @@ export function Footer() {
           </nav>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-7 text-white/55 sm:flex-row">
+        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-white/55 sm:flex-row">
           <p className="font-sans text-xs">
             &copy; {year} KM.BBQ. All rights reserved.
           </p>
