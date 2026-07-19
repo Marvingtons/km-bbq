@@ -131,6 +131,16 @@ export function About() {
               end: "+=260%",
               pin: true,
               pinSpacing: true,
+              // Pin by transform rather than position:fixed. Functionally the
+              // same pin, but the fixed swap is reported by the browser as a
+              // layout shift of roughly a full viewport (~0.98 CLS each time
+              // this engages and releases) even though nothing visibly jumps,
+              // because pinSpacing already compensates the flow. Transforms are
+              // not layout shifts, so this removes the CLS without changing
+              // what the user sees. It is also the setting GSAP recommends when
+              // a smooth-scroll library owns the scroll position, which Lenis
+              // does here.
+              pinType: "transform",
               // Switch to position:fixed one tick early so the browser
               // doesn't show a one-frame compositing jump (the mural
               // appearing to nudge sideways) at the instant the pin engages.

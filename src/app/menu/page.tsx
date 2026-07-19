@@ -12,7 +12,7 @@ import { publicFileExists } from "@/lib/imageManifest.generated";
 export const metadata: Metadata = pageMeta({
   title: "Full Menu | KM.BBQ Korean BBQ in Oceanside",
   description:
-    "The full KM.BBQ spread: beef, pork, chicken, seafood, banchan, and premium cuts. All-you-can-eat, self-serve, and grilled at your table in Oceanside, CA.",
+    "The full KM.BBQ spread: beef, pork, chicken, seafood, banchan, short ribs and steak. All-you-can-eat, self-serve, and grilled at your table in Oceanside, CA.",
   path: "/menu",
   titleAbsolute: true,
 });

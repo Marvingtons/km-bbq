@@ -70,15 +70,21 @@ CLI alternative for a one-off: `npm run deploy`.
 
 ## Environment variables
 
-**The site currently needs none.** This is worth stating plainly, because it is
-easy to assume otherwise:
+**The site needs none to deploy and run.** One is optional. Stating both
+plainly, because it is easy to assume otherwise:
 
-- There is **no `process.env` reference anywhere in `src/`**.
-- There is **no Google Maps API key**. `ContactMap` renders a static image
-  (`/images/contact-map.jpg`) with a plain "Get directions" link to
-  google.com/maps. That was a deliberate choice and it needs no key, so there is
-  nothing to set and nothing to fall back to. If a live embed is ever restored,
-  `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` would need adding here and to the dashboard.
+| Variable | Required? | Effect if unset |
+| --- | --- | --- |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | **Optional** | The contact map falls back to Google's keyless `output=embed` URL. Same interactive map, same pin, no account needed. Setting it switches to the official Maps Embed API, which is the supported product and will not change under us. |
+
+- The only `process.env` reference in `src/` is that key, read in
+  [`src/components/ContactMap.tsx`](src/components/ContactMap.tsx). `ContactMap`
+  is a server component, so the value is read during render and never reaches
+  the client bundle. On Workers `process.env` resolves through `nodejs_compat`,
+  so setting the variable in the dashboard is picked up without a rebuild.
+- **There is no unintentional fallback.** Without the key the map is a real,
+  interactive, correctly-pinned Google map — not a placeholder. The keyed path
+  is an upgrade, not a repair.
 - Business details (address, hours, phone, socials, `SITE_URL`) are compile-time
   constants in [`src/lib/restaurant.ts`](src/lib/restaurant.ts), not env vars.
 
