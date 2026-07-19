@@ -9,10 +9,11 @@
       "autoPort": true
     },
     {
-      "name": "start",
+      "name": "prod",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "start"],
-      "port": 3000
+      "port": 3111,
+      "autoPort": true
     }
   ]
 }

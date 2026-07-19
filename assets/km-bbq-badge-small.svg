@@ -1,0 +1,26 @@
+<!--
+  The badge, simplified for 16px and 32px: disc + K + a SIMPLIFIED flame.
+
+  The full badge's flame is ~11px wide at 16px, made of fine interlocking
+  curves that overlap the K's lower half. Rasterized at tab size it stops
+  reading as a flame and turns into red noise exactly where the K's legs need
+  contrast. The previous version of this master solved that by deleting the
+  flame; the flame is part of the mark, so it is simplified here instead.
+
+  What changed to make it survive 16px:
+  - The flame is ONE solid lick with a single silhouette, not eight overlapping
+    curves. Every feature on it is larger than a pixel at 16px.
+  - It sits mostly BELOW the K rather than across it, so the two read as
+    stacked shapes instead of competing for the same pixels.
+  - It keeps a white outline, proportionally heavier than the full badge's.
+    Red (#EC2229) on blue (#1A36AF) is nearly a luminance tie, so without that
+    separation the flame dissolves into the disc instead of sitting on it.
+  - The K is scaled up ~8% about the disc centre and lifted to clear the flame,
+    set solid (no gradient, no hairline stroke — neither survives 16px).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="66 176.73 46 46" width="46" height="46">
+  <path fill="#1A36AF" d="m85 179c-8.8 2.1-18.5 10-18.5 21 0 9.6 7.4 20.6 22.5 20.9 13.1 0.2 22.5-9.9 22.5-20.9s-9.4-24-26.5-21z"/>
+  <path fill="#F58721" transform="translate(89 199.73) scale(1.08) translate(-89 -199.73) translate(0 -2.6)" d="m80.2 184.8v20.2h5l0.4-4 2-1.9c0.6-0.7 3.2 3.8 5.4 5.9h5.5v-1l-6.8-8.4 8.9-9.4-0.1-0.5-5.8-0.1-8.9 9.8-0.2-10.4-5.4-0.2z"/>
+  <path fill="#EC2229" stroke="#FFFFFF" stroke-width="1.8" stroke-linejoin="round"
+        d="M81.4 211.6c0-3.4 1.7-5.1 3.1-7.3 0.85 2.2 1.7 3.5 2.7 4.2 0.6-2.8 1.3-4.6 2.4-6.7 1.3 2.6 2.1 4.8 3 6.1 0.7-0.85 1.3-1.7 1.9-2.9 1.5 2 2.3 4.1 2.3 6.6 0 3.1-3.4 5.3-7.7 5.3s-7.7-2.2-7.7-5.3z"/>
+</svg>

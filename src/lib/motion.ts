@@ -1,63 +1,73 @@
-/* ===========================================================================
-   MOTION — one shared vocabulary for the whole site
-   ---------------------------------------------------------------------------
-   Every animation (GSAP scroll work + framer-motion reveals) pulls its easing,
-   duration, and stagger from here so the site moves with one personality:
-   warm, smooth, a little playful. Scroll-driven motion is transform/opacity
-   only. Reduced motion is gated through ONE query/helper, never per-component
-   guesswork.
-   =========================================================================== */
+// Single source of truth for the site's motion language. Every entrance, hover
+// timing, scrub, and reduced-motion check derives from here so the whole site
+// animates with one voice instead of the per-component one-offs it grew.
 
-// The single media query every motion path checks.
+export const MOTION = {
+  /** Entrance reveal: fade + short rise. */
+  duration: 0.6,
+  rise: 24,
+  stagger: 0.08,
+  /**
+   * The one entrance ease. `ease` is the cubic-bezier for framer-motion / CSS;
+   * `gsapEase` is the nearest GSAP string for the scroll-pinned reveals that
+   * can't take a bezier array. Same felt curve, two mechanisms.
+   */
+  ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
+  gsapEase: "power2.out",
+  /** Hover / state-change timing, in ms. */
+  hoverMs: 300,
+  /** Scrub catch-up for pinned, scroll-driven timelines. */
+  scrub: 1,
+} as const;
+
+/** Fixed site-header height, in px. One value; sections and jump offsets read it. */
+export const NAV_H = 68;
+
+/**
+ * Preloader choreography. The mark building is the point, so these beats are
+ * deliberately longer than a minimal loader — but the timeline is load-aware
+ * (the HOLD is skipped when the page is already ready) so it never feels stuck.
+ * All values in seconds.
+ */
+export const PRELOADER = {
+  /** Ember hairline scales in beneath the mark. */
+  line: 0.5,
+  /** Per-path fade+rise as the 8 lockup paths build in document order. */
+  pathIn: 0.5,
+  pathStagger: 0.11,
+  pathRise: 8,
+  /** The whole lockup settles from 1.04 -> 1 across the entire build. */
+  lockupScaleFrom: 1.04,
+  build: 2.2,
+  /** "Korean Barbecue" eyebrow, overlapping the build's tail. */
+  eyebrow: 0.5,
+  /** Rest beat with the mark fully assembled (skipped if the page is ready). */
+  hold: 0.7,
+  /** Line stretches, lockup fades, cream field wipes upward. */
+  exit: 0.8,
+  exitLineStretch: 3,
+  exitLockupScale: 0.985,
+  ease: "expo.out",
+  exitEase: "power4.inOut",
+} as const;
+
+export const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
+/**
+ * The positive form, for gsap.matchMedia(). Everything scroll-driven registers
+ * inside this query so reduced motion gets the plain stacked page by
+ * construction — the timelines are never created at all, rather than created
+ * and then skipped.
+ */
 export const MOTION_OK = "(prefers-reduced-motion: no-preference)";
 
-/** SSR-safe read of the user's reduced-motion preference. */
-export function prefersReducedMotion(): boolean {
-  if (typeof window === "undefined" || !window.matchMedia) return false;
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/**
+ * Imperative reduced-motion check for GSAP / vanilla contexts (SSR-safe).
+ * React components should use `useReducedMotion()` from framer-motion instead.
+ */
+export function prefersReducedMotion() {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia(REDUCED_MOTION_QUERY).matches
+  );
 }
-
-// Easings. GSAP takes the string names; framer-motion takes the cubic-bezier
-// arrays (same curves, so both libraries feel identical).
-export const EASE = {
-  /** Default entrance: quick out, long gentle settle. */
-  out: "power3.out",
-  outArr: [0.22, 1, 0.36, 1] as [number, number, number, number],
-  /** Symmetric ease for scrubbed / reversible moves. */
-  inOut: "power2.inOut",
-  inOutArr: [0.65, 0, 0.35, 1] as [number, number, number, number],
-  /** Playful settle with a touch of overshoot — buttons, pops, the game. */
-  back: "back.out(1.7)",
-} as const;
-
-// Durations, in seconds.
-export const DUR = {
-  fast: 0.4,
-  base: 0.6,
-  slow: 0.9,
-} as const;
-
-// Stagger steps, in seconds.
-export const STAGGER = {
-  tight: 0.06,
-  base: 0.09,
-  loose: 0.14,
-} as const;
-
-/** How far cards/copy rise as they fade in (px). */
-export const RISE = 26;
-
-// framer-motion variants for the standard "fade + small rise" reveal, so
-// components share the exact curve GSAP uses. `custom` = stagger index.
-export const fadeRise = {
-  hidden: { opacity: 0, y: RISE },
-  show: (i = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: DUR.base,
-      ease: EASE.outArr,
-      delay: i * STAGGER.base,
-    },
-  }),
-};

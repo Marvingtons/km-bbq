@@ -1,83 +1,33 @@
 @import "tailwindcss";
 
-/* ===========================================================================
-   DESIGN TOKENS — single source of truth
-   ---------------------------------------------------------------------------
-   Direction: WARM, PLAYFUL, INVITING — a casual all-you-can-eat charcoal
-   Korean BBQ spot, not a dark/cinematic/premium restaurant. Bright cream
-   surfaces carry the site; warm charcoal is for TEXT and the single cozy
-   footer, never for content-section backgrounds. ONE ember accent, warm-gray
-   body text, one radius, one shadow, one section rhythm. The full-color
-   hand-drawn mural is the brand signature everything else warms up to match.
-
-   Accent rule: use --color-ember for LARGE display type on cream, solid fills
-   and non-text marks; use --color-ember-deep for anything small — labels,
-   links, fills behind white text, and the focus ring. Plain ember only reaches
-   3.19:1 on cream and 2.90:1 on cream-deep, which fails AA as normal text.
-
-   Every section pulls from these; nothing hard-codes a hex. (The LED clock in
-   Challenge.tsx is the one sanctioned exception — it's a physical prop, not a
-   surface, so it keeps its literal device colors.)
-   =========================================================================== */
-
 :root {
-  /* Page defaults: warm cream base, warm near-black ink (not neutral #1a1a1a,
-     so the /70 /60 /40 text opacities used across the site read as warm
-     grays automatically). */
-  --background: #faf6ef; /* cream */
-  --foreground: #241c16; /* warm near-black ink */
+  --background: #FAF4EC;
+  --foreground: #1a1a1a;
 }
 
+/* ---------------------------------------------------------------------------
+   The one reduced token set. Every section is derived from these — there is a
+   single page surface (cream), a single accent (ember), and one warm shadow.
+   Blue and pink live ONLY inside the logo artwork (raw hex in Logo/Preloader
+   SVGs); they are intentionally absent here so no section can reach for them.
+   --------------------------------------------------------------------------- */
 @theme inline {
-  /* ---- Surfaces --------------------------------------------------------- */
-  --color-charcoal: #1a1512;          /* primary dark surface: hero scrim, footer, feature moments */
-  --color-charcoal-elevated: #241d18; /* raised dark surface: cards/props on charcoal */
-  --color-cream: #faf6ef;             /* primary light surface / page base */
-  --color-cream-deep: #f2ebdd;        /* alternating light section / recessed field */
-
-  /* ---- Accent — the ONE accent ----------------------------------------- */
-  --color-ember: #e0662b;             /* ember-orange: the single accent, everywhere */
-  --color-ember-deep: #a8481c;        /* darker ember — AA-safe for small text / links on cream */
-
-  /* ---- Text (warm grays) ------------------------------------------------ */
-  --color-ink: #241c16;               /* strong text / headings on cream (the "charcoal" ink) */
-  --color-warm: #5c5148;              /* body text on cream (warm gray) — 7.15:1 on cream */
-  --color-warm-muted: #73675c;        /* muted / secondary text on cream. Darkened from #8a7d6f,
-                                         which only reached 3.72:1 on cream / 3.38:1 on cream-deep
-                                         and failed AA as normal text. Now 5.10:1 / 4.63:1 — passes
-                                         on BOTH light surfaces while staying clearly lighter than
-                                         --color-warm, so the type hierarchy survives. */
-  --color-body: #5c5148;              /* canonical body-copy token — same value as --color-warm,
-                                         named per the brand spec. Use `text-body` for long-form
-                                         prose (see LegalPage) so it never rides on an alpha of
-                                         --foreground, which fringes red/blue under Windows
-                                         ClearType and reads as a multi-color tint. */
-
-  /* ---- One-of primitives ------------------------------------------------ */
-  --radius-card: 0.875rem;            /* the single card/container radius — friendly & rounded to
-                                         suit the warm, playful direction (pills stay pills) */
-  --shadow-card: 0 16px 40px -20px rgba(74, 44, 22, 0.42); /* the single elevation shadow — warm,
-                                         soft, tinted toward ember-brown, never neutral black */
-  --spacing-section: 7rem;            /* the single section vertical rhythm (py-section) */
-
-  /* ---- Type ------------------------------------------------------------- */
-  --font-serif: var(--font-cormorant), Georgia, serif; /* editorial display */
-  --font-sans: var(--font-inter), system-ui, sans-serif; /* body */
-
-  /* ---- Semantic bg/fg --------------------------------------------------- */
+  --color-cream: #FAF4EC; /* the ONE page surface */
+  --color-paper: #F3EBDD; /* the one warmer band/fill (info band, placeholders) */
+  --color-paper-line: #E4D9C4; /* the one hairline/border tint */
+  --color-foreground: var(--foreground); /* headings + strong text */
+  --color-body: #5A5550; /* solid body copy on cream (≈ foreground/70) */
+  --color-ember: #F18B23; /* the ONE accent */
+  /* Deep ember for small text/labels on cream — ember itself fails AA there. */
+  --color-ember-deep: #9A5A1A;
+  --color-red: #EC2229; /* SANCTIONED ONLY: menu prices + the house game */
+  --color-charcoal: #1A1A1A; /* footer surface */
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-
-  /* ---- Legacy aliases --------------------------------------------------- */
-  /* Only Preloader.tsx (being replaced separately) still reaches for brand-*
-     class names. They are repointed onto the warm palette so it resolves
-     on-brand rather than reintroducing a competing hue. Everything else uses
-     the semantic tokens above. The brand-blue / -red / -pink aliases were
-     dropped: nothing referenced them, and keeping a blue and a magenta on
-     standby invites the old direction back in. */
-  --color-brand-cream: var(--color-cream);
-  --color-brand-orange: var(--color-ember);
-  --color-brand-orange-deep: var(--color-ember-deep);
+  --font-serif: var(--font-cormorant), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  /* The one warm elevation shadow, formalizing rgba(120,60,20,…). */
+  --shadow-warm: 0 2px 16px rgb(120 60 20 / 0.08);
+  --shadow-warm-lg: 0 6px 24px rgb(120 60 20 / 0.14);
 }
 
 html {
@@ -97,22 +47,19 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Visible keyboard focus everywhere. Uses ember-deep, not ember: WCAG requires
-   3:1 for non-text indicators, and plain ember only reached 2.90:1 against
-   cream-deep. ember-deep clears the bar on every surface the ring can land on
-   — cream 5.40:1, cream-deep 4.91:1, charcoal 3.11:1. The offset keeps it
-   clear of tight pills and underlined nav links. */
+/* Visible keyboard focus everywhere. Ember reads on both the cream pages and
+   the charcoal footer; the offset keeps it clear of tight pills and underlined
+   nav links. */
 :focus-visible {
-  outline: 2px solid var(--color-ember-deep);
+  outline: 2px solid var(--color-ember);
   outline-offset: 3px;
   border-radius: 2px;
 }
 
-/* Custom global scrollbar — ultra-slim with a defined dark track so it reads
-   as an intentional thin rail over BOTH dark and light sections (a transparent
-   track exposed the light page background as a pale sliver on the right edge).
-   The thumb is a soft charcoal that stays legible on any section color.
-   Purely visual; works alongside Lenis smooth scrolling. */
+/* Custom global scrollbar — ultra-slim, cream track with a translucent warm
+   thumb so it reads as an intentional thin rail on the cream page (the site is
+   one surface now, so a warm rail sits quietly against it). Purely visual;
+   works alongside Lenis smooth scrolling. */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px; /* covers horizontal scroll areas */
@@ -121,30 +68,55 @@ body {
 ::-webkit-scrollbar-track,
 ::-webkit-scrollbar-track-piece,
 ::-webkit-scrollbar-corner {
-  background: var(--color-charcoal-elevated);
+  background: var(--color-cream);
 }
 
 ::-webkit-scrollbar-thumb {
-  /* Mid warm-gray between --color-warm and --color-warm-muted; no exact token
-     for a 5px thumb, kept literal on purpose. */
-  background: #6f665c;
+  background: rgb(120 60 20 / 0.35);
   border-radius: 10px;
   transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-warm);
+  background: rgb(120 60 20 / 0.5);
 }
 
 /* Firefox fallback (no webkit pseudo-elements). */
 html {
   scrollbar-width: thin;
-  scrollbar-color: #6f665c var(--color-charcoal-elevated);
+  scrollbar-color: rgb(120 60 20 / 0.4) var(--color-cream);
 }
 
 /* Hide scrollbar during preloader */
 html.preloading {
   overflow: hidden;
+}
+
+/* ---------------------------------------------------------------------------
+   Preloader visibility. The overlay is server-rendered and therefore painted
+   in the first frame; the inline script in the layout sets data-preloader on
+   <html> before paint, and these rules decide from that. A returning visitor
+   or anyone on reduced motion gets "skip" and never sees it at all.
+   --------------------------------------------------------------------------- */
+html[data-preloader="skip"] .preloader-overlay {
+  display: none;
+}
+
+/* Failsafe. The overlay now ships in the HTML rather than being mounted by JS,
+   which means a JS failure would otherwise strand a visitor on a blank cream
+   field. If the timeline has not dismissed it within 10s (it normally finishes
+   in ~4s, and waits on window load only when the page is still streaming),
+   clear it so the site is always reachable. Purely a safety net: under normal
+   operation the element is long gone before this fires. */
+@keyframes preloader-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.preloader-overlay {
+  animation: preloader-failsafe 0.4s linear 10s forwards;
 }
 
 /* Gallery mobile swipe hint — a small horizontal nudge that loops to signal
@@ -169,83 +141,14 @@ html.preloading {
   .gallery-swipe-hint {
     animation: none;
   }
-}
 
-/* About MURAL idle motion — the hand-drawn brand mural breathes at rest so it
-   never feels like a flat sticker. These run on INNER layers only; the OUTER
-   cluster wrappers carry the scroll-driven parallax (GSAP writes their
-   transform), so idle + parallax never fight over the same property.
-
-   mural-bob: a gentle vertical float with an optional micro-tilt — used on the
-   playful foreground characters (the fire mascot, the tiger). Each instance
-   sets its own --bob / --tilt / duration / delay inline so nothing marches in
-   lockstep. Transform-only, compositor-friendly. */
-@keyframes mural-bob {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-  }
-  50% {
-    transform: translate3d(0, var(--bob, -8px), 0) rotate(var(--tilt, 0deg));
-  }
-}
-
-.mural-bob {
-  animation: mural-bob var(--bob-dur, 6s) ease-in-out infinite;
-  animation-delay: var(--bob-delay, 0s);
-}
-
-/* mural-drift: a slow 2-axis wander for the faint BACKGROUND scatter marks, so
-   the deepest parallax plane shimmers almost imperceptibly. */
-@keyframes mural-drift {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-  50% {
-    transform: translate3d(var(--dx, 10px), var(--dy, -6px), 0);
-  }
-}
-
-.mural-drift {
-  animation: mural-drift var(--drift-dur, 12s) ease-in-out infinite;
-  animation-delay: var(--drift-delay, 0s);
-}
-
-/* Idle motion halts while the mural is off-screen (JS toggles .mural-paused via
-   an IntersectionObserver) — no wasted animation frames or layers off-screen. */
-.mural-paused .mural-bob,
-.mural-paused .mural-drift {
-  animation-play-state: paused;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mural-bob,
-  .mural-drift {
-    animation: none;
-  }
-}
-
-/* Footer hairline shimmer — a brighter ember glint travels along the ember
-   divider above the footer, a slow ambient touch. Transform-only; the parent
-   line clips it (overflow-hidden). Held still for reduced motion. */
-@keyframes footer-shimmer {
-  0% {
-    transform: translateX(-140%);
-  }
-  100% {
-    transform: translateX(380%);
-  }
-}
-
-.footer-shimmer {
-  animation: footer-shimmer 7s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .footer-shimmer {
-    animation: none;
-    opacity: 0;
+  /* ScrollReveal's entrance is a fade + rise driven by inline styles. Pin the
+     revealed state here so the content is readable at first paint, before any
+     JS runs and regardless of what the server rendered — this is what keeps
+     the reduced-motion site from coming up blank. */
+  .scroll-reveal {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 

@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
+import { PHONE, ADDRESS, DIRECTIONS_URL } from "@/lib/restaurant";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Terms of Service | KM.BBQ",
+export const metadata: Metadata = pageMeta({
+  title: "Terms of Service",
   description:
-    "Terms of use for the KM.BBQ website. All-you-can-eat Korean BBQ in Oceanside, CA.",
-};
+    "The terms for using the KM.BBQ website, all-you-can-eat Korean BBQ in Oceanside, CA.",
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (
@@ -63,8 +66,20 @@ export default function TermsPage() {
       <section>
         <h2>Contact</h2>
         <p>
-          For questions, call (760) 433-1888 or visit us at 2216 S El Camino
-          Real #108–109, Oceanside, CA 92054.
+          For questions, call{" "}
+          <a href={PHONE.href} className="underline underline-offset-4">
+            {PHONE.display}
+          </a>{" "}
+          or visit us at{" "}
+          <a
+            href={DIRECTIONS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-4"
+          >
+            {ADDRESS.street}, {ADDRESS.region}
+          </a>
+          .
         </p>
       </section>
     </LegalPage>

@@ -13,13 +13,19 @@ gsap.registerPlugin(ScrollTrigger);
    Coordinates everything that happens at a section boundary so the page reads
    as one continuous piece instead of stacked panels. Nothing here pins or eats
    scroll distance; every effect rides normal scrolling and only ever scrubs
-   transform / opacity / clip-path / background-color. All of it lives inside a
-   `MOTION_OK` matchMedia, so reduced-motion users get the plain stacked
-   sections (static backgrounds, threads shown fully drawn, no parallax).
+   transform / opacity / background-color / stroke-dashoffset. All of it lives
+   inside a `MOTION_OK` matchMedia, so reduced-motion users get plain stacked
+   sections (static backgrounds, no parallax) — the timelines are never built
+   at all.
 
-   `calm` (used on /menu) keeps only the two seam-safe effects — background
-   continuity and the thread motif — and skips parallax / overlaps in the dense
-   list content.
+   `calm` (used on /menu) keeps only the seam-safe effect, background
+   continuity, and skips parallax and handoffs in the dense list content.
+
+   NOTE ON STRUCTURE: the original version of this ran across six boundaries,
+   including one between the About mural and House Favorites. Those are one
+   section now (the consolidation pass merged them, and above lg they share a
+   pinned stage), so that internal seam is gone and the mural's trailing marks
+   were repointed at the real About -> Gallery boundary instead.
    =========================================================================== */
 
 export function SeamMotion({ calm = false }: { calm?: boolean }) {
@@ -28,7 +34,13 @@ export function SeamMotion({ calm = false }: { calm?: boolean }) {
 
     mm.add(MOTION_OK, () => {
       const sel = (s: string) => document.querySelector<HTMLElement>(s);
-      const boundaryZone = { start: "top bottom", end: "top 70%", scrub: true } as const;
+      // Boundary zones are short and sit in the upper viewport, so a seam
+      // resolves as it arrives rather than trailing the whole section.
+      const boundaryZone = {
+        start: "top bottom",
+        end: "top 70%",
+        scrub: true,
+      } as const;
 
       // 1 — BACKGROUND CONTINUITY. Each flagged section scrubs its background
       // from the previous section's tone (matched at the seam) to its own base
@@ -47,25 +59,10 @@ export function SeamMotion({ calm = false }: { calm?: boolean }) {
         );
       });
 
-      // 2 — CONNECTIVE MOTIF. The ember thread at each seam draws itself down as
-      // the seam scrolls up through the upper viewport. stroke-dashoffset only.
-      gsap.utils.toArray<SVGLineElement>(".seam-thread-line").forEach((line) => {
-        const host = (line.closest(".seam-thread") as HTMLElement) ?? line;
-        gsap.fromTo(
-          line,
-          { strokeDashoffset: 72 },
-          {
-            strokeDashoffset: 0,
-            ease: "none",
-            scrollTrigger: { trigger: host, start: "top 88%", end: "top 52%", scrub: true },
-          }
-        );
-      });
-
       if (calm) return; // /menu stays calm past this point.
 
       // 3 — DEPTH. Decorative background textures drift at ~0.85x scroll so the
-      // boundary zones feel layered, never body copy. transform only.
+      // boundary zones feel layered. Body copy never moves. transform only.
       gsap.utils.toArray<HTMLElement>("[data-seam-parallax]").forEach((el) => {
         const amt = Number(el.dataset.parallax ?? 6);
         gsap.fromTo(
@@ -84,16 +81,23 @@ export function SeamMotion({ calm = false }: { calm?: boolean }) {
         );
       });
 
-      // 4 — HANDOFF: House Favorites -> Gallery. The featured Galbi card releases
-      // with a slight lag (moves a touch slower than scroll) as the section
-      // exits, so it hangs on while the gallery heading rises to meet it.
-      const galbi = sel('[aria-labelledby="favorites-heading"] .grill-dish');
+      // 4 — HANDOFF: the featured Galbi card releases with a slight lag (moves
+      // a touch slower than scroll) as About exits, so it hangs on while the
+      // gallery rises to meet it.
+      //
+      // yPercent 2, not 7. At 7 this pushed the card down ~40px on a 571px
+      // card, and since the card sits directly above the "See the full menu"
+      // pill, the lag drove it straight into the button exactly when the
+      // button became visible. The pinned stage has no spare height to simply
+      // push the pill further down, so the lag itself had to come back to
+      // where it reads as a release (~11px) rather than a shove.
+      const galbi = sel("#about .grill-dish");
       if (galbi) {
         gsap.fromTo(
           galbi,
           { yPercent: 0 },
           {
-            yPercent: 7,
+            yPercent: 2,
             ease: "none",
             scrollTrigger: {
               trigger: galbi.closest("section"),
@@ -105,13 +109,13 @@ export function SeamMotion({ calm = false }: { calm?: boolean }) {
         );
       }
 
-      // 5 — HARD CUT: Hero -> About. The mural's first scattered elements drift
-      // up into the last of the hero, so the illustrated world arrives before
-      // the section does. transform + opacity.
-      const dots = gsap.utils.toArray<HTMLElement>(".hero-arrival > *");
-      if (dots.length) {
+      // 5 — HARD CUT: Hero -> About. The mural's first scattered marks drift up
+      // into the last of the hero, so the illustrated world arrives before the
+      // section does. transform + opacity.
+      const arrival = gsap.utils.toArray<HTMLElement>(".hero-arrival > *");
+      if (arrival.length) {
         gsap.fromTo(
-          dots,
+          arrival,
           { yPercent: 70, autoAlpha: 0 },
           {
             yPercent: -45,
@@ -128,9 +132,9 @@ export function SeamMotion({ calm = false }: { calm?: boolean }) {
         );
       }
 
-      // 6 — HANDOFF: About mural -> House Favorites. A couple of mural accents
-      // drift down past the boundary and fade, so the illustrated world trails
-      // off into the photography world instead of stopping at a border.
+      // 6 — HANDOFF: About -> Gallery. A couple of mural accents drift down past
+      // the boundary and fade, so the illustrated world trails off into the
+      // photography instead of stopping at a border.
       const trail = gsap.utils.toArray<HTMLElement>(".mural-trail > *");
       if (trail.length) {
         gsap.fromTo(
@@ -141,6 +145,13 @@ export function SeamMotion({ calm = false }: { calm?: boolean }) {
             autoAlpha: 0,
             ease: "none",
             stagger: 0.06,
+            // Without this, the from-state (autoAlpha 0.7) renders on load and
+            // the marks sit visible for the whole section, not just at the
+            // boundary — including behind the "See the full menu" pill, which
+            // is an OUTLINE pill and therefore transparent at rest, so they
+            // showed straight through it. The marks now stay hidden (CSS
+            // opacity-0) until this trigger actually starts near the seam.
+            immediateRender: false,
             scrollTrigger: {
               trigger: sel("#about"),
               start: "bottom 75%",
@@ -152,9 +163,9 @@ export function SeamMotion({ calm = false }: { calm?: boolean }) {
       }
 
       // 7 — HARD CUT: Contact -> Footer. The dark footer settles up under the
-      // cream — its content lags slightly as it enters, so the page feels like
-      // it comes to rest on a surface rather than hitting a wall. The ember
-      // hairline (already there, and shimmering) is the seam. transform only.
+      // cream: its content lags slightly as it enters, so the page comes to
+      // rest on a surface rather than hitting a wall. The footer's own ember
+      // hairline is the seam. transform only.
       const footerInner = sel("footer > .relative");
       if (footerInner) {
         gsap.fromTo(

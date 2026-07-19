@@ -1,43 +1,29 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { getLenis } from "@/lib/lenis";
+import { useActiveSection } from "@/lib/useActiveSection";
+import { NAV_H } from "@/lib/motion";
 
 export interface JumpTarget {
   label: string;
   id: string;
 }
 
-// Clearance for content jumped to: fixed site header (~68px) plus this bar.
+// Clearance for content jumped to: fixed site header (NAV_H) plus this bar.
 // Sections also carry scroll-mt as a fallback for native hash navigation.
-const SCROLL_OFFSET = -128;
+const SCROLL_OFFSET = -(NAV_H + 60);
 
 export function MenuJumpNav({ targets }: { targets: JumpTarget[] }) {
-  const [active, setActive] = useState<string | null>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
   // Highlight the category whose section currently crosses the upper part of
   // the viewport. Sections are tall and contiguous, so a narrow band keeps
-  // exactly one active at a time.
-  useEffect(() => {
-    const sections = targets
-      .map(({ id }) => document.getElementById(id))
-      .filter((el): el is HTMLElement => el !== null);
-    if (sections.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        if (visible[0]) setActive(visible[0].target.id);
-      },
-      { rootMargin: "-25% 0px -65% 0px", threshold: [0, 0.1, 0.5, 1] }
-    );
-
-    sections.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [targets]);
+  // exactly one active at a time. Shared observer logic with the site navbar.
+  const [active] = useActiveSection(
+    targets.map(({ id }) => id),
+    { rootMargin: "-25% 0px -65% 0px", threshold: [0, 0.1, 0.5, 1] }
+  );
 
   // Keep the active pill visible in the horizontally scrollable strip.
   useEffect(() => {
@@ -63,7 +49,8 @@ export function MenuJumpNav({ targets }: { targets: JumpTarget[] }) {
   return (
     <nav
       aria-label="Menu categories"
-      className="sticky top-[64px] z-40 border-b border-ink/10 bg-cream/95 px-6 backdrop-blur-sm"
+      className="sticky z-40 border-b border-paper-line bg-cream/95 px-6 backdrop-blur-sm"
+      style={{ top: NAV_H }}
     >
       <ul
         ref={listRef}
@@ -79,10 +66,10 @@ export function MenuJumpNav({ targets }: { targets: JumpTarget[] }) {
                 data-target={id}
                 onClick={(e) => jump(e, id)}
                 aria-current={isActive ? "true" : undefined}
-                className={`inline-block whitespace-nowrap rounded-full border px-4 py-1.5 font-sans text-xs font-medium uppercase tracking-[0.12em] transition-colors ${
+                className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-full border px-4 py-1.5 font-sans text-xs font-medium uppercase tracking-[0.12em] transition-colors ${
                   isActive
                     ? "border-ember-deep bg-ember-deep text-white"
-                    : "border-ink/15 bg-cream/60 text-warm hover:border-ember-deep/50 hover:text-ember-deep"
+                    : "border-paper-line bg-white/60 text-foreground/60 hover:border-ember-deep/50 hover:text-ember-deep"
                 }`}
               >
                 {label}

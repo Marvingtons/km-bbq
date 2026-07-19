@@ -1,19 +1,21 @@
-import fs from "node:fs";
-import path from "node:path";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { MenuJumpNav, type JumpTarget } from "@/components/MenuJumpNav";
 import { SeamMotion } from "@/components/SeamMotion";
-import { SeamThread } from "@/components/SeamThread";
-import { ScrollReveal } from "@/components/ScrollReveal";
+import { BreadcrumbSchema } from "@/components/RestaurantSchema";
+import { HOURS, ADDRESS, PHONE } from "@/lib/restaurant";
+import { pageMeta } from "@/lib/seo";
+import { publicFileExists } from "@/lib/imageManifest.generated";
 
-export const metadata: Metadata = {
-  title: "Menu | KM.BBQ",
+export const metadata: Metadata = pageMeta({
+  title: "Full Menu | KM.BBQ Korean BBQ in Oceanside",
   description:
-    "The full KM.BBQ menu. All-you-can-eat, self-serve Korean BBQ over live charcoal, with beef, pork, chicken, seafood, banchan, and premium cuts all included in one per-person price.",
-};
+    "The full KM.BBQ spread: beef, pork, chicken, seafood, banchan, short ribs and steak. All-you-can-eat, self-serve, and grilled at your table in Oceanside, CA.",
+  path: "/menu",
+  titleAbsolute: true,
+});
 
 // ---------------------------------------------------------------------------
 // Menu data
@@ -78,7 +80,7 @@ const CATEGORIES: Category[] = [
       },
       {
         name: "Pork Chop",
-        desc: "Simply seasoned pork, charred over live charcoal for a smoky bite.",
+        desc: "Simply seasoned pork, charred on your own grill for a smoky bite.",
         image: "/images/pork-chop.png",
       },
       {
@@ -133,9 +135,7 @@ const CATEGORIES: Category[] = [
         name: "Spicy Squid",
         korean: "오징어",
         desc: "Tender squid tossed in a spicy chili marinade with a smoky char.",
-        // Stand-in until a squid shot exists: the spicy-octopus photo is the
-        // same gochujang-coated cephalopod presentation. Swap when shot.
-        image: "/images/spicy-octopus.png",
+        image: "/images/spicy-squid.png",
       },
     ],
   },
@@ -175,7 +175,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Pumpkin",
         korean: "호박",
-        desc: "Sweet slices that caramelize beautifully over charcoal.",
+        desc: "Sweet slices that caramelize beautifully over the grill.",
         image: "/images/pumpkin.png",
       },
       {
@@ -324,9 +324,7 @@ const PREMIUM: Item[] = [
   {
     name: "Beef Skirt Steak",
     desc: "Richly marbled skirt steak that chars beautifully.",
-    // Stand-in until a skirt-steak shot exists: prime-new-york-steak is the
-    // same raw, marbled-beef presentation. Swap when shot.
-    image: "/images/prime-new-york-steak.png",
+    image: "/images/beef-skirt-steak.png",
   },
   {
     name: "Mussels",
@@ -356,10 +354,15 @@ const INCLUDED = [
 const IMAGE_SIZES = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw";
 
 // Every item carries its expected image path (see MISSING_IMAGES.md), but a
-// photo may not have been shot yet. Resolve against public/ at render time so
-// an absent file gets the lettered placeholder instead of a broken <img>.
-const imageExists = (image: string) =>
-  fs.existsSync(path.join(process.cwd(), "public", image));
+// photo may not have been shot yet, and an absent file should get the lettered
+// placeholder rather than a broken <img>.
+//
+// This used to be fs.existsSync against process.cwd(), which only worked
+// because the page is prerendered on a Node build machine. The Cloudflare
+// Workers runtime has neither a filesystem nor a meaningful cwd, so the answer
+// now comes from a manifest generated at build time. Same behaviour, and
+// node:fs stays out of the Worker bundle.
+const imageExists = publicFileExists;
 
 // ---------------------------------------------------------------------------
 // Presentational pieces
@@ -368,41 +371,27 @@ const imageExists = (image: string) =>
 function ItemMedia({ item }: { item: Item }) {
   if (item.image && imageExists(item.image)) {
     return (
-      <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden rounded-card bg-cream-deep">
+      <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden rounded-lg bg-paper">
         <Image
           src={item.image}
           alt={item.name}
           fill
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+          className="object-cover"
           sizes={IMAGE_SIZES}
         />
       </div>
     );
   }
 
-  // Branded fallback: a warm cream tile with a faint ember wash, the KM.BBQ
-  // flame glyph, and the wordmark — so a dish still awaiting a photo reads as an
-  // intentional, on-brand card rather than an empty/missing slot.
+  // Tasteful placeholder: a soft cream gradient with the dish's serif initial,
+  // so cards without a photo still read as intentional rather than broken.
   return (
     <div
       aria-hidden="true"
-      className="mb-4 flex aspect-[16/9] w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-card bg-cream-deep"
-      style={{
-        backgroundImage:
-          "radial-gradient(80% 90% at 50% 20%, color-mix(in srgb, var(--color-ember) 12%, transparent) 0%, transparent 70%)",
-      }}
+      className="mb-4 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-paper to-paper-line"
     >
-      <svg
-        width="30"
-        height="30"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="text-ember/70"
-      >
-        <path d="M12 2c.4 3.1-1.6 4.6-3 6.2C7.4 9.9 6 11.6 6 14a6 6 0 0 0 12 0c0-1.8-.8-3.3-1.8-4.6-.3 1-.9 1.7-1.8 2C15 9 14.4 6.3 12 2Zm0 17.5A2.6 2.6 0 0 1 9.4 17c0-1.2.8-2 1.5-2.8.3.6.8 1 1.5 1.2.7-.3 1-.8 1.1-1.5.8.8 1.2 1.6 1.2 2.6a2.6 2.6 0 0 1-2.7 3Z" />
-      </svg>
-      <span className="font-sans text-[10px] font-semibold uppercase tracking-[0.25em] text-warm-muted select-none">
-        KM<span className="text-ember/70">·</span>BBQ
+      <span className="font-serif text-5xl font-light text-ember-deep/35 select-none">
+        {item.name.charAt(0)}
       </span>
     </div>
   );
@@ -413,32 +402,13 @@ function ItemCard({
   variant = "default",
 }: {
   item: Item;
-  variant?: "default" | "premium" | "signature";
+  variant?: "default" | "premium";
 }) {
-  const accent =
-    variant === "premium"
-      ? "border-ember/30 bg-cream"
-      : variant === "signature"
-        ? "border-ember/30 bg-cream"
-        : "border-ink/10 bg-cream";
-
-  const topBar =
-    variant === "premium"
-      ? "bg-ember"
-      : variant === "signature"
-        ? "bg-ember"
-        : null;
+  const topBar = variant === "premium" ? "bg-ember" : null;
 
   return (
     <div className="group h-full">
-      {/* transform-gpu: promotes the whole card to its own compositing layer so
-          its text rasterizes with uniform grayscale AA. Without it, the light
-          warm-gray body copy picks up blue/red subpixel-AA fringing on Windows
-          (ClearType), which reads as a multi-color tint / rendering bug. Same
-          fix as the "The Grill Awaits" subtitle in About. */}
-      <div
-        className={`relative flex h-full flex-col overflow-hidden rounded-card border ${accent} p-5 transition-[transform,box-shadow] duration-300 transform-gpu hover:-translate-y-1 hover:border-ember/40 hover:shadow-card`}
-      >
+      <div className="relative flex h-full flex-col overflow-hidden rounded-xl bg-white p-5 shadow-warm transition-shadow duration-300 hover:shadow-warm-lg">
         {topBar && (
           <span
             aria-hidden="true"
@@ -450,15 +420,15 @@ function ItemCard({
           {item.name}
         </h3>
         {item.korean && (
-          <p className="font-sans text-sm font-light text-warm-muted">
+          <p className="font-sans text-sm font-light text-foreground/40">
             {item.korean}
           </p>
         )}
-        <p className="mt-2 font-sans text-sm font-light leading-relaxed text-warm">
+        <p className="mt-2 font-sans text-sm font-light leading-relaxed text-foreground/60">
           {item.desc}
         </p>
         {item.note && (
-          <p className="mt-3 font-sans text-xs font-medium uppercase tracking-[0.12em] text-ember-deep">
+          <p className="mt-3 font-sans text-xs font-medium uppercase tracking-[0.12em] text-red">
             {item.note}
           </p>
         )}
@@ -470,28 +440,24 @@ function ItemCard({
 function CategorySection({ category }: { category: Category }) {
   return (
     <section id={slugify(category.name)} className="mt-16 scroll-mt-32 first:mt-0">
-      <ScrollReveal>
-        <div className="mb-7 flex transform-gpu flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-ink/10 pb-4">
-          <h2 className="font-serif text-3xl font-light text-foreground md:text-4xl">
-            {category.name}
-          </h2>
-          {category.korean && (
-            <span className="font-sans text-base font-light text-warm-muted">
-              {category.korean}
-            </span>
-          )}
-          {category.tag && (
-            <span className="ml-auto font-sans text-xs font-medium uppercase tracking-[0.2em] text-ember-deep">
-              {category.tag}
-            </span>
-          )}
-        </div>
-      </ScrollReveal>
+      <div className="mb-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-paper-line pb-4">
+        <h2 className="font-serif text-2xl font-light text-foreground md:text-3xl">
+          {category.name}
+        </h2>
+        {category.korean && (
+          <span className="font-sans text-base font-light text-foreground/40">
+            {category.korean}
+          </span>
+        )}
+        {category.tag && (
+          <span className="ml-auto font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
+            {category.tag}
+          </span>
+        )}
+      </div>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {category.items.map((item, i) => (
-          <ScrollReveal key={item.name} className="h-full" delay={(i % 6) * 0.06}>
-            <ItemCard item={item} />
-          </ScrollReveal>
+        {category.items.map((item) => (
+          <ItemCard key={item.name} item={item} />
         ))}
       </div>
     </section>
@@ -511,46 +477,37 @@ function TierSection({
   korean?: string;
   blurb: string;
   items: Item[];
-  variant: "premium" | "signature";
+  variant: "premium";
 }) {
-  const shell =
-    variant === "premium"
-      ? "border-ember/25 bg-cream"
-      : "border-ember/20 bg-cream";
-  // ember-deep, not ember: this is small uppercase label text on cream, where
-  // plain ember only reaches 3.19:1 (below AA for normal text).
+  const shell = "border-ember/25 bg-paper";
   const labelColor = "text-ember-deep";
 
   return (
     <section
       id={variant}
-      className={`mt-12 scroll-mt-32 rounded-card border ${shell} p-6 sm:p-10`}
+      className={`mt-12 scroll-mt-32 rounded-xl border ${shell} p-6 sm:p-10`}
     >
-      <ScrollReveal>
-        <div className="mb-8 transform-gpu text-center">
-          <p
-            className={`mb-3 font-sans text-xs font-semibold uppercase tracking-[0.3em] ${labelColor}`}
-          >
-            {label}
-          </p>
-          <h2 className="font-serif text-3xl font-light text-foreground md:text-4xl">
-            {title}
-            {korean && (
-              <span className="ml-3 align-middle font-sans text-base font-light text-warm-muted">
-                {korean}
-              </span>
-            )}
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl font-sans text-sm font-light text-warm">
-            {blurb}
-          </p>
-        </div>
-      </ScrollReveal>
+      <div className="mb-8 text-center">
+        <p
+          className={`mb-3 font-sans text-xs font-medium uppercase tracking-[0.3em] ${labelColor}`}
+        >
+          {label}
+        </p>
+        <h2 className="font-serif text-2xl font-light text-foreground md:text-3xl">
+          {title}
+          {korean && (
+            <span className="ml-3 align-middle font-sans text-base font-light text-foreground/40">
+              {korean}
+            </span>
+          )}
+        </h2>
+        <p className="mx-auto mt-3 max-w-xl font-sans text-sm font-light text-foreground/60">
+          {blurb}
+        </p>
+      </div>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((item, i) => (
-          <ScrollReveal key={item.name} className="h-full" delay={(i % 6) * 0.06}>
-            <ItemCard item={item} variant={variant} />
-          </ScrollReveal>
+        {items.map((item) => (
+          <ItemCard key={item.name} item={item} variant={variant} />
         ))}
       </div>
     </section>
@@ -572,82 +529,82 @@ const JUMP_TARGETS: JumpTarget[] = [
 export default function MenuPage() {
   return (
     <>
+      <BreadcrumbSchema
+        items={[
+          { name: "Home", path: "/" },
+          { name: "Menu", path: "/menu" },
+        ]}
+      />
       <Navbar />
-      <main className="bg-cream">
+      <main id="main-content" tabIndex={-1} className="bg-cream focus:outline-none">
         {/* Header */}
         <section className="px-6 pt-32 pb-12 sm:pt-36 lg:pt-40">
-          {/* transform-gpu: promote the header copy to its own compositing
-              layer so it rasterizes with uniform grayscale AA. Without it the
-              light warm-gray text picks up red/blue subpixel (ClearType)
-              fringing on Windows that reads as a multi-color tint. */}
-          <div className="mx-auto max-w-3xl text-center transform-gpu">
-            <p className="mb-5 font-sans text-xs font-semibold uppercase tracking-[0.3em] text-ember-deep">
-              All-You-Can-Eat · Self-Serve · Charcoal
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="mb-5 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
+              All-You-Can-Eat · Self-Serve · Grill Your Own
             </p>
             <h1 className="font-serif text-5xl font-light leading-tight text-foreground sm:text-6xl">
               The Full <em className="italic text-ember">Spread</em>
             </h1>
-            <p className="mx-auto mt-6 max-w-xl font-sans text-base font-light leading-relaxed text-warm">
-              Pick whatever you like, grill it your way over live charcoal, and
+            <p className="mx-auto mt-6 max-w-xl font-sans text-base font-light leading-relaxed text-foreground/60">
+              Pick whatever you like, grill it your way at your table, and
               eat all you want. One price, everything included.
             </p>
 
-            {/* Price band — full-width and evenly split on phones so the third
-                cell never runs past the viewport edge; the compact inline pill
-                returns from sm up. */}
-            <div className="mx-auto mt-9 flex w-full max-w-md items-stretch rounded-card border border-ink/10 bg-cream shadow-card sm:inline-flex sm:w-auto sm:max-w-none">
-              <div className="flex-1 px-3 py-5 text-center sm:flex-none sm:px-10">
-                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-warm-muted">
+            {/* Price band */}
+            <div className="mx-auto mt-9 inline-flex items-stretch overflow-hidden rounded-xl bg-white shadow-warm">
+              <div className="px-6 py-5 text-center sm:px-10">
+                <p className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
                   Lunch
                 </p>
-                <p className="mt-1 font-serif text-2xl font-light text-ember sm:text-4xl">
+                <p className="mt-1 font-serif text-3xl font-light text-red sm:text-4xl">
                   $21.99
                 </p>
-                <p className="mt-1 font-sans text-xs font-light text-warm-muted">
+                <p className="mt-1 font-sans text-xs font-light text-foreground/40">
                   per person
                 </p>
               </div>
-              <div aria-hidden="true" className="w-px bg-ink/10" />
-              <div className="flex-1 px-3 py-5 text-center sm:flex-none sm:px-10">
-                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-warm-muted">
+              <div aria-hidden="true" className="w-px bg-paper-line" />
+              <div className="px-6 py-5 text-center sm:px-10">
+                <p className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
                   Dinner
                 </p>
-                <p className="mt-1 font-serif text-2xl font-light text-ember sm:text-4xl">
+                <p className="mt-1 font-serif text-3xl font-light text-red sm:text-4xl">
                   $30.99
                 </p>
-                <p className="mt-1 font-sans text-xs font-light text-warm-muted">
+                <p className="mt-1 font-sans text-xs font-light text-foreground/40">
                   per person
                 </p>
               </div>
-              <div aria-hidden="true" className="w-px bg-ink/10" />
-              <div className="flex-1 px-3 py-5 text-center sm:flex-none sm:px-10">
-                <p className="font-sans text-[11px] font-medium uppercase tracking-[0.2em] text-warm-muted">
+              <div aria-hidden="true" className="w-px bg-paper-line" />
+              <div className="px-6 py-5 text-center sm:px-10">
+                <p className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
                   Seating
                 </p>
-                <p className="mt-1 font-serif text-2xl font-light text-ember sm:text-4xl">
+                <p className="mt-1 font-serif text-3xl font-light text-ember-deep sm:text-4xl">
                   90 min
                 </p>
-                <p className="mt-1 font-sans text-xs font-light text-warm-muted">
+                <p className="mt-1 font-sans text-xs font-light text-foreground/40">
                   per table
                 </p>
               </div>
             </div>
 
-            <p className="mt-6 font-sans text-sm font-light text-warm">
+            <p className="mt-6 font-sans text-sm font-light text-foreground/50">
               Walk-in only · No reservations needed
             </p>
-            <p className="mt-2 font-sans text-sm font-light text-warm">
+            <p className="mt-2 font-sans text-sm font-light text-foreground/50">
               Stop our clock at exactly{" "}
-              <span className="font-medium text-ember-deep">10.00 seconds</span>{" "}
-              and your next visit is free.
+              <span className="font-medium text-red">10.00 seconds</span>{" "}
+              and your next barbecue is free.
             </p>
           </div>
         </section>
 
         {/* Included strip — hairline dividers, no box */}
         <section className="px-6 pb-4">
-          <div className="mx-auto max-w-4xl text-center transform-gpu">
-            <p className="mb-4 font-sans text-[11px] font-medium uppercase tracking-[0.25em] text-warm-muted">
+          <div className="mx-auto max-w-4xl text-center">
+            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
               Included with every meal
             </p>
             <ul
@@ -657,9 +614,9 @@ export default function MenuPage() {
               {INCLUDED.map((label, i) => (
                 <li
                   key={label}
-                  className={`px-5 py-1 font-sans text-sm font-light text-warm ${
+                  className={`px-5 py-1 font-sans text-sm font-light text-body ${
                     i < INCLUDED.length - 1
-                      ? "border-r border-ink/10"
+                      ? "border-r border-paper-line"
                       : ""
                   }`}
                 >
@@ -675,7 +632,7 @@ export default function MenuPage() {
 
         {/* Categories */}
         <div className="mx-auto max-w-7xl px-6 pt-12 pb-20">
-          <p className="mb-10 transform-gpu text-center font-serif text-lg font-light italic text-warm">
+          <p className="mb-10 text-center font-sans text-base font-light text-foreground/55">
             Everything is included in the all-you-can-eat price. No per-item
             charges.
           </p>
@@ -694,58 +651,63 @@ export default function MenuPage() {
           />
         </div>
 
-        {/* Info band */}
+        {/* Info band. The one seam on this page: it arrives carrying the cream
+            of the category list above and settles onto its own paper tone. */}
         <section
-          className="relative bg-cream-deep px-6 py-20"
+          className="relative bg-paper px-6 py-20"
           data-seam-morph
-          data-from="#faf6ef"
-          data-to="#f2ebdd"
+          data-from="#FAF4EC"
+          data-to="#F3EBDD"
         >
-          <SeamThread />
-          <div className="mx-auto max-w-5xl text-center transform-gpu">
+          <div className="mx-auto max-w-5xl text-center">
             <h2 className="font-serif text-4xl font-light text-foreground md:text-5xl">
               Come Hungry
             </h2>
             <div className="mt-12 grid gap-10 sm:grid-cols-3">
               <div>
-                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ember-deep">
+                <h3 className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
                   Hours
                 </h3>
-                <p className="mt-4 font-sans text-sm font-light leading-relaxed text-warm">
-                  Sun–Thu 12:00 PM – 9:30 PM
-                  <br />
-                  Fri–Sat 12:00 PM – 10:00 PM
+                <p className="mt-4 font-sans text-sm font-light leading-relaxed text-foreground/70">
+                  {HOURS.map(({ short, time }, i) => (
+                    <span key={short}>
+                      {short} {time}
+                      {i < HOURS.length - 1 && <br />}
+                    </span>
+                  ))}
                 </p>
               </div>
               <div>
-                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ember-deep">
+                <h3 className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
                   Location
                 </h3>
-                <p className="mt-4 font-sans text-sm font-light leading-relaxed text-warm">
-                  2216 S El Camino Real #108–109
+                <p className="mt-4 font-sans text-sm font-light leading-relaxed text-foreground/70">
+                  {ADDRESS.street}
                   <br />
-                  Oceanside, CA 92054
+                  {ADDRESS.region}
                 </p>
               </div>
               <div>
-                <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-ember-deep">
+                <h3 className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
                   Walk-In
                 </h3>
-                <p className="mt-4 font-sans text-sm font-light leading-relaxed text-warm">
+                <p className="mt-4 font-sans text-sm font-light leading-relaxed text-foreground/70">
                   No reservations
                   <br />
                   <a
-                    href="tel:+17604331888"
-                    className="font-medium text-ember-deep underline-offset-4 hover:underline"
+                    href={PHONE.href}
+                    className="inline-flex min-h-11 items-center font-semibold text-ember-deep transition-colors hover:text-ember"
                   >
-                    (760) 433-1888
+                    {PHONE.display}
                   </a>
                 </p>
               </div>
             </div>
           </div>
         </section>
-        {/* Calm: background continuity + seam motif only, no parallax/overlaps. */}
+
+        {/* Calm mode: background continuity only. The dense list content gets
+            no parallax and no overlap handoffs. */}
         <SeamMotion calm />
       </main>
       <Footer />

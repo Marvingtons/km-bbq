@@ -15,19 +15,19 @@ export function LegalPage({
   return (
     <>
       <Navbar />
-      <main className="bg-cream px-6 pt-32 pb-24 sm:pt-36">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="bg-cream px-6 pt-32 pb-24 focus:outline-none sm:pt-36"
+      >
         <article className="mx-auto max-w-2xl">
           <h1 className="font-serif text-4xl font-light leading-tight text-foreground sm:text-5xl">
             {title}
           </h1>
-          <p className="mt-3 font-sans text-xs font-medium uppercase tracking-[0.2em] text-warm-muted">
+          <p className="mt-3 font-sans text-xs font-medium uppercase tracking-[0.3em] text-foreground/40">
             Last updated {updated}
           </p>
-          {/* Solid --color-body, not an alpha of --foreground: alpha-composited
-              light text picks up red/blue subpixel fringing under Windows
-              ClearType. transform-gpu forces uniform grayscale AA, matching the
-              cards elsewhere on the site. */}
-          <div className="mt-10 space-y-8 transform-gpu font-sans text-sm font-light leading-relaxed text-body [&_h2]:font-serif [&_h2]:text-2xl [&_h2]:font-light [&_h2]:text-foreground [&_p]:mt-3">
+          <div className="mt-10 space-y-8 font-sans text-sm font-light leading-relaxed text-foreground/75 [&_h2]:font-serif [&_h2]:text-2xl [&_h2]:font-light [&_h2]:text-foreground [&_p]:mt-3">
             {children}
           </div>
         </article>

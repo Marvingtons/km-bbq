@@ -1,105 +1,113 @@
 import { ScrollReveal } from "./ScrollReveal";
+import { SocialLinks } from "./SocialLinks";
 import { ContactMap } from "./ContactMap";
-import { SocialChips } from "./SocialLinks";
-import { SeamThread } from "./SeamThread";
+import { HOURS, ADDRESS, PHONE, DIRECTIONS_URL } from "@/lib/restaurant";
 
-const HOURS = [
-  { day: "Sunday – Thursday", time: "12:00 PM – 9:30 PM" },
-  { day: "Friday – Saturday", time: "12:00 PM – 10:00 PM" },
-];
-
-// Reveal as soon as an element's top clears the bottom fifth of the viewport,
-// and keep the animation short — fast scrollers were reaching this section
-// before the default (later, 0.7s) reveal made the content legible.
-const REVEAL = { margin: "0px 0px -20% 0px", duration: 0.45 } as const;
+// The two things a visitor is here for — when you are open, and where you are —
+// sit side by side as a pair of cards rather than as two stacked runs of text in
+// a narrow column. The card treatment is the site's own: paper-line hairline,
+// warm shadow, same radius as the map below.
+// p-5 at 375: at p-7 the card walls left the hours rows ~270px of usable width
+// and both the day range and the time wrapped mid-phrase.
+const card =
+  "h-full rounded-2xl border border-paper-line bg-white/70 p-5 shadow-warm sm:p-8";
 
 export function Contact() {
   return (
     <section
       id="contact"
-      className="relative bg-cream-deep py-section px-6"
+      className="relative bg-cream px-6 py-24"
       aria-labelledby="contact-heading"
     >
-      <SeamThread />
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-16 text-center">
-          <ScrollReveal {...REVEAL}>
-            <p className="mb-4 transform-gpu font-sans text-xs font-medium tracking-[0.3em] uppercase text-ember-deep">
+      {/* max-w-5xl, not 7xl: wide enough for the card pair and the map to feel
+          like one composition, narrow enough that neither is adrift in cream. */}
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-12 text-center">
+          <ScrollReveal>
+            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
               Find us
             </p>
           </ScrollReveal>
-          <ScrollReveal {...REVEAL} delay={0.05}>
+          <ScrollReveal delay={0.05}>
             <h2
               id="contact-heading"
-              className="transform-gpu font-serif text-5xl font-light text-foreground md:text-6xl"
+              className="font-serif text-4xl font-light text-foreground md:text-5xl"
             >
               Stop by
             </h2>
           </ScrollReveal>
         </div>
 
-        <div className="mx-auto max-w-5xl">
-          {/* Hours + Location share one card grid: matched padding, the locked
-              radius and elevation shadow. Stacks on mobile, two-up on desktop. */}
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Hours */}
-            <ScrollReveal {...REVEAL}>
-              <div className="flex h-full flex-col rounded-card bg-cream p-6 shadow-card transform-gpu">
-                <h3 className="mb-5 font-serif text-2xl font-light text-foreground">
-                  Hours
-                </h3>
-                <dl className="space-y-3">
-                  {HOURS.map(({ day, time }) => (
-                    <div
-                      key={day}
-                      className="flex items-start justify-between border-b border-ink/10 pb-3 font-sans text-sm"
-                    >
-                      <dt className="text-warm">{day}</dt>
-                      <dd className="font-medium text-foreground">{time}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-            </ScrollReveal>
-
-            {/* Location */}
-            <ScrollReveal {...REVEAL} delay={0.05}>
-              <div className="flex h-full flex-col rounded-card bg-cream p-6 shadow-card transform-gpu">
-                <h3 className="mb-4 font-serif text-2xl font-light text-foreground">
-                  Location
-                </h3>
-                <address className="not-italic font-sans text-sm leading-relaxed text-warm">
-                  2216 S El Camino Real #108–109
-                  <br />
-                  Oceanside, CA 92054
-                  <br />
-                  <a
-                    href="tel:+17604331888"
-                    className="mt-2 inline-block text-ember-deep underline-offset-4 hover:underline"
+        {/* items-stretch + h-full on the cards so the pair shares one height
+            whatever the hours table does. */}
+        <div className="grid items-stretch gap-6 md:grid-cols-2">
+          <ScrollReveal className="h-full">
+            <div className={card}>
+              <h3 className="mb-5 font-serif text-2xl font-light text-foreground">
+                Hours
+              </h3>
+              <dl className="space-y-3">
+                {HOURS.map(({ days, time }) => (
+                  <div
+                    key={days}
+                    className="flex items-start justify-between gap-3 border-b border-paper-line pb-3 font-sans text-sm last:border-b-0 last:pb-0"
                   >
-                    (760) 433-1888
-                  </a>
-                </address>
+                    <dt className="text-foreground/70">{days}</dt>
+                    {/* The time is the answer; never let it break across
+                        lines even when the day range does. */}
+                    <dd className="whitespace-nowrap font-medium text-foreground">
+                      {time}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-5 font-sans text-xs font-light text-foreground/50">
+                Walk-in only. No reservations needed.
+              </p>
+            </div>
+          </ScrollReveal>
 
-                {/* Socials — same chip treatment as the footer, in the light
-                    tone for the cream card. */}
-                <SocialChips
-                  tone="light"
-                  only={["Instagram", "TikTok"]}
-                  className="mt-auto pt-6"
-                />
-              </div>
-            </ScrollReveal>
-          </div>
-
-          {/* Map — brand-styled (warm cream/charcoal, ember pin) in its own
-              card, sharing the locked radius and shadow. */}
-          <ScrollReveal {...REVEAL} delay={0.08}>
-            <div className="mt-6 aspect-video w-full overflow-hidden rounded-card border border-ink/10 shadow-card">
-              <ContactMap />
+          <ScrollReveal delay={0.05} className="h-full">
+            <div className={card}>
+              <h3 className="mb-4 font-serif text-2xl font-light text-foreground">
+                Location
+              </h3>
+              {/* Both lines are live: the address opens maps, the number dials.
+                  On a phone these are the two things anyone is here for, so
+                  neither should be plain text. */}
+              <address className="font-sans text-sm font-light not-italic leading-relaxed text-foreground/70">
+                <a
+                  href={DIRECTIONS_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block underline-offset-4 hover:underline"
+                >
+                  {ADDRESS.street}
+                  <br />
+                  {ADDRESS.region}
+                </a>
+                <br />
+                <a
+                  href={PHONE.href}
+                  className="mt-2 inline-flex min-h-11 items-center font-semibold text-ember-deep underline-offset-4 hover:underline"
+                >
+                  {PHONE.display}
+                </a>
+              </address>
+              <SocialLinks tone="light" className="mt-5" />
             </div>
           </ScrollReveal>
         </div>
+
+        {/* Map runs the full width of the section container, under both cards.
+            An interactive Google embed, lazy-loaded so it stays out of the LCP
+            path. The card radius is clipped by the wrapper's overflow-hidden,
+            so the iframe inherits the system shape. */}
+        <ScrollReveal delay={0.08}>
+          <div className="mt-6 aspect-[16/10] w-full overflow-hidden rounded-2xl border border-paper-line shadow-warm md:aspect-[21/9]">
+            <ContactMap />
+          </div>
+        </ScrollReveal>
       </div>
     </section>
   );

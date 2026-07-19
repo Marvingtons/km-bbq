@@ -1,0 +1,21 @@
+<!--
+  The KM.BBQ badge, extracted from the canonical logo (assets/km-bbq-logo.svg):
+  the blue disc, the orange K, and the red flame. No wordmark.
+
+  The source logo's viewBox is "59 177.6 180 44" with the badge occupying only
+  its left end. Measured in a browser via getBBox(), the badge's true bounds are
+  x 66.5, y 178.56, 45 x 42.34 (the disc bounds it; the flame sits inside).
+  Squaring that on its centre (89, 199.73) at a side of 46 gives the viewBox
+  below: a hair of padding, badge centred, no wordmark whitespace.
+
+  This is the master for every rasterized icon. See tools/build-icons.mjs.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="66 176.73 46 46" width="46" height="46">
+  <linearGradient id="k" x1="79.2" x2="100.6" y1="-371" y2="-371" gradientTransform="matrix(1 0 0 -1 0 3)" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#EBA039" offset="0"/>
+    <stop stop-color="#F58721" offset="1"/>
+  </linearGradient>
+  <path fill="#1A36AF" d="m85 179c-8.8 2.1-18.5 10-18.5 21 0 9.6 7.4 20.6 22.5 20.9 13.1 0.2 22.5-9.9 22.5-20.9s-9.4-24-26.5-21z"/>
+  <path fill="url(#k)" stroke="#BD752E" stroke-width=".2" d="m80.2 184.8v20.2h5l0.4-4 2-1.9c0.6-0.7 3.2 3.8 5.4 5.9h5.5v-1l-6.8-8.4 8.9-9.4-0.1-0.5-5.8-0.1-8.9 9.8-0.2-10.4-5.4-0.2z"/>
+  <path fill="#EC2229" stroke="#FFFFFF" stroke-width="0.8388" d="m78.1 200c0.5 3.7-5.3 5-5.6 7.2-0.2 1.5 0.9 3.4 2 3.4s3.4-0.8 4.8 0.4c0.4 0.7-4 4 0.2 5.3 1.6 0.4 3.4 0.4 4.1-0.4 1.1-1.1 1.9-3.9 2.7-3.4 4.2 2.5 6.7 2.7 8.2 0.7 1-1.2 0.8-1.5 2.3-0.9 3.2 1.2 7.3 2.7 7-4.3 0-1.5 1.2-2.7 0.3-3.3-1.6-1.1-1.8 2.9-3.3 3.1-2 0 0.1-2.2-0.3-4.5-0.7-3.2-4.4-3.5-5.5-6.8-0.5-0.5-1.3 0.1-1.5 1.2-0.2 3.2 3.1 5.1 3 6.4l-2.5 2.2c-0.6-1.7-2.3-4.1-3.5-4.2-1-0.1 0 4.2-0.2 4.4-0.7 0.8-3.7 1.4-4.3 0.2-0.3-2.4 0.6-7.8-2-9.1-1-0.2-1.2 0.4-1 1.3 1 5-2 7.4-3.7 6.6-2.2-1.5 2-2.6 0.4-4.8-0.2-0.6-1.8-2.3-1.6-0.7z"/>
+</svg>

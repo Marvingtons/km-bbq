@@ -1,0 +1,23 @@
+<!--
+  The badge at 16px ONLY: disc + K + ONE thick merged flame.
+
+  At 16px the whole flame is about 7x5 device pixels. Anything with internal
+  structure — the real badge's eight interlocking curves, or even the three
+  broad licks of the 32px master — lands as red mush directly under the K,
+  which is where the K's legs need contrast most. So this variant merges the
+  licks into a single bold silhouette with one shallow notch: enough to read as
+  fire rather than a drop, with no feature smaller than a pixel.
+
+  The white outline is proportionally heavier again than the 32px master's.
+  Red (#EC2229) on blue (#1A36AF) is close to a luminance tie, so the outline
+  is doing the separation work, not the hue difference.
+
+  The K is solid (no gradient, no hairline stroke — neither survives 16px),
+  scaled up and lifted to keep its legs clear of the flame.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="66 176.73 46 46" width="46" height="46">
+  <path fill="#1A36AF" d="m85 179c-8.8 2.1-18.5 10-18.5 21 0 9.6 7.4 20.6 22.5 20.9 13.1 0.2 22.5-9.9 22.5-20.9s-9.4-24-26.5-21z"/>
+  <path fill="#F58721" transform="translate(89 199.73) scale(1.12) translate(-89 -199.73) translate(0 -3.1)" d="m80.2 184.8v20.2h5l0.4-4 2-1.9c0.6-0.7 3.2 3.8 5.4 5.9h5.5v-1l-6.8-8.4 8.9-9.4-0.1-0.5-5.8-0.1-8.9 9.8-0.2-10.4-5.4-0.2z"/>
+  <path fill="#EC2229" stroke="#FFFFFF" stroke-width="2.2" stroke-linejoin="round"
+        d="M82 211.5c0-4 2.6-6.2 4.4-9.4 1.1 2.7 2 4.2 3.1 5.1 1-2 2-3.6 3.2-5.6 2.1 2.9 3.3 5.8 3.3 9.9 0 3.4-3.1 5.7-7 5.7s-7-2.3-7-5.7z"/>
+</svg>

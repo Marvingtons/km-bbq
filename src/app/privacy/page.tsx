@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
+import { PHONE, ADDRESS, DIRECTIONS_URL } from "@/lib/restaurant";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy | KM.BBQ",
+export const metadata: Metadata = pageMeta({
+  title: "Privacy Policy",
   description:
     "How KM.BBQ in Oceanside, CA handles information collected through our website.",
-};
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (
@@ -55,8 +58,20 @@ export default function PrivacyPage() {
       <section>
         <h2>Contact</h2>
         <p>
-          For questions about this policy, call us at (760) 433-1888 or visit
-          us at 2216 S El Camino Real #108–109, Oceanside, CA 92054.
+          For questions about this policy, call us at{" "}
+          <a href={PHONE.href} className="underline underline-offset-4">
+            {PHONE.display}
+          </a>{" "}
+          or visit us at{" "}
+          <a
+            href={DIRECTIONS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-4"
+          >
+            {ADDRESS.street}, {ADDRESS.region}
+          </a>
+          .
         </p>
       </section>
     </LegalPage>

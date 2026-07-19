@@ -2,58 +2,22 @@
 
 import { useLayoutEffect, useRef } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { EASE, DUR, STAGGER, RISE, MOTION_OK } from "@/lib/motion";
-import { SeamThread } from "./SeamThread";
+import { PillLink } from "./PillLink";
+import { ScrollReveal } from "./ScrollReveal";
+import { MOTION, NAV_H } from "@/lib/motion";
+import { useScrollRefresh } from "@/lib/useScrollRefresh";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ===========================================================================
-   ABOUT — the hand-drawn brand MURAL, brought to life
-   ---------------------------------------------------------------------------
-   The full-color mural is KM.BBQ's signature. Two illustrated clusters
-   (mural-left / mural-right) frame the story copy; a faint doodle-scatter
-   sits behind. Three depth planes drift at DIFFERENT scroll speeds so the
-   flat art reads as a living scene:
-
-     • scatter  (deepest)  → drifts SLOW      (.mural-scatter, parallax y ±30)
-     • copy     (middle)   → drifts a touch   (.mural-copy-parallax, y ±14)
-     • clusters (front)    → drift FAST        (.mural-cluster-*, y ±80/100, +x)
-
-   The illustration PNGs are pre-multiplied against the page cream (baked at
-   build, *-cream.png) so their field already matches the page and they composite
-   normally — NO mix-blend on these moving layers (blend + transform per frame
-   was the mural's perf cost). Each cluster settles + fades in on scroll
-   (staggered), then breathes with a gentle idle bob that pauses off-screen.
-
-   Motion contract (holds 60fps): scrubbed parallax and idle motion only ever
-   touch `transform`/`opacity`, on SEPARATE nested layers (outer = parallax y,
-   inner = entrance, img = idle bob) so nothing fights for the same property, and
-   no layer carries a permanent will-change. Reduced motion / no-JS render the
-   finished, static mural with the copy fully legible — the whole GSAP block
-   lives inside a `no-preference` matchMedia.
-   =========================================================================== */
-
-// Faint background doodle-scatter — the mural's own folk-doodle vocabulary
-// (dots + brush ticks) as the deepest, slowest parallax plane. Fixed values so
-// the SSR and client renders match; each mark wanders on its own idle drift.
-const SCATTER = [
-  { l: 20, t: 24, s: 9, c: "ember", o: 0.5, dx: 14, dy: -10, dur: 12, dl: 0 },
-  { l: 72, t: 20, s: 6, c: "warm", o: 0.4, dx: -12, dy: 9, dur: 13, dl: 1.4 },
-  { l: 15, t: 62, s: 7, c: "ember", o: 0.42, dx: 9, dy: 12, dur: 14, dl: 0.7 },
-  { l: 80, t: 66, s: 5, c: "warm", o: 0.4, dx: -10, dy: -8, dur: 12.5, dl: 2.1 },
-  { l: 34, t: 82, s: 6, c: "ember", o: 0.38, dx: 11, dy: 9, dur: 15, dl: 1.1 },
-  { l: 63, t: 80, s: 5, c: "ember", o: 0.4, dx: -8, dy: 11, dur: 13.5, dl: 0.4 },
-] as const;
-
-// A couple of thin brush ticks, same deep plane — a nod to the mural's ink
-// strokes without competing with the copy.
-const TICKS = [
-  { l: 26, t: 40, w: 34, rot: -22, o: 0.28 },
-  { l: 70, t: 52, w: 28, rot: 16, o: 0.26 },
-] as const;
+// NOTE: the full-height seam line (a brushed-steel bar with a fire overlay
+// that ignited top-to-bottom, then rode each half's inner edge outward) has
+// been removed. It read as a hard mechanical wipe — the mural looked sliced
+// rather than opened. The reveal is now dimensional: the halves start slightly
+// overscaled and pushed toward centre, then drift apart and settle with a
+// parallax offset against the story column. The only rule left in this section
+// is a short ember hairline under the story heading.
 
 interface Dish {
   name: string;
@@ -68,7 +32,7 @@ const FEATURED_DISHES: Dish[] = [
     name: "Galbi",
     korean: "갈비",
     description:
-      "Short ribs marinated in a soy-pear blend, grilled over live charcoal until caramelized.",
+      "Short ribs marinated in a soy-pear blend, grilled at your table until caramelized.",
     image: "/images/galbi.png",
     tag: "Signature",
   },
@@ -104,272 +68,495 @@ const FEATURED_DISHES: Dish[] = [
 ];
 
 export function About() {
-  return (
-    <>
-      <MuralStory />
-      <HouseFavorites />
-    </>
-  );
-}
-
-/* ---------------------------------------------------------------------------
-   MURAL STORY — the warm, full-color brand band
-   --------------------------------------------------------------------------- */
-function MuralStory() {
   const sectionRef = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-
     const mm = gsap.matchMedia();
-    const q = gsap.utils.selector(el);
+    const q = gsap.utils.selector(sectionRef);
 
-    mm.add(MOTION_OK, () => {
-      const enter = q(".mural-enter");
-      const marks = q(".mural-mark");
-      const copyIn = q(".mural-copy-in");
+    // One conditions-based block because the breakpoints differ per concern:
+    // the mural pin + story reveal runs from md up, but the grill grid only
+    // joins the pinned overlay at lg — its feature-card layout is too tall
+    // for a single pinned tablet viewport, so tablets flow it statically
+    // below the stage instead. prefers-reduced-motion falls through to the
+    // default CSS state (full seamless mural, all copy visible, no pin).
+    mm.add(
+      {
+        md: "(min-width: 768px)",
+        lg: "(min-width: 1024px)",
+        motion: "(prefers-reduced-motion: no-preference)",
+      },
+      (context) => {
+        const { md, lg, motion } = context.conditions as {
+          md: boolean;
+          lg: boolean;
+          motion: boolean;
+        };
+        if (!motion) return;
 
-      // Animated start state — clusters pushed down + shrunk, marks + copy
-      // hidden. Applied in useLayoutEffect (pre-paint) so there's no flash.
-      gsap.set(enter, { autoAlpha: 0, yPercent: 6, scale: 0.965 });
-      gsap.set(marks, { autoAlpha: 0 });
-      gsap.set(copyIn, { autoAlpha: 0, y: 22 });
+        const grillHead = q(".grill-head");
+        const grillDishes = q(".grill-dish");
 
-      // Staggered settle-in on scroll-into-view: copy first, the faint scatter
-      // blooms in, then the two clusters arrive one after the other.
-      const tlIn = gsap.timeline({
-        scrollTrigger: { trigger: el, start: "top 72%", once: true },
-      });
-      tlIn
-        .to(copyIn, { autoAlpha: 1, y: 0, duration: DUR.base, ease: EASE.out })
-        .to(marks, { autoAlpha: 1, duration: DUR.base, stagger: STAGGER.tight }, 0.1)
-        .to(
-          enter,
-          {
-            autoAlpha: 1,
-            yPercent: 0,
-            scale: 1,
-            duration: DUR.slow,
-            ease: EASE.out,
-            stagger: STAGGER.loose,
-          },
-          0.08
-        );
+        if (md) {
+          const leftHalf = q(".mural-half-left");
+          const rightHalf = q(".mural-half-right");
+          const muralInner = q(".mural-parallax");
+          const textCol = q(".about-text");
+          const textRule = q(".about-rule");
+          const grillLayer = q(".grill-layer");
+          const grillCta = q(".grill-cta");
 
-      // Scrubbed parallax — one plane per depth, different travel = different
-      // speed. `ease: none` + scrub ties travel to scroll position. These write
-      // transform on the OUTER wrappers only; entrance/idle live on inner layers.
-      const scrub = (
-        targets: Element[],
-        from: gsap.TweenVars,
-        to: gsap.TweenVars
-      ) =>
-        gsap.fromTo(targets, from, {
-          ...to,
-          ease: "none",
-          scrollTrigger: {
-            trigger: el,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: true,
-            invalidateOnRefresh: true,
-          },
-        });
+          // Animated start state: the mural sits slightly overscaled and pushed
+          // toward centre, as though the world is still closed in on itself.
+          // It opens from there rather than being cut down the middle.
+          // autoAlpha (opacity + visibility) so a hidden layer never intercepts
+          // clicks meant for the visible one — on lg the two layers overlap
+          // absolutely in the stage.
+          gsap.set([leftHalf, rightHalf], { scale: 1.04 });
+          gsap.set(leftHalf, { xPercent: 3 });
+          gsap.set(rightHalf, { xPercent: -3 });
+          gsap.set(textCol, { autoAlpha: 0, y: MOTION.rise });
+          gsap.set(textRule, { scaleX: 0, transformOrigin: "left center" });
+          if (lg) gsap.set(grillLayer, { autoAlpha: 0 });
 
-      scrub(q(".mural-scatter"), { y: -30 }, { y: 30 });
-      scrub(q(".mural-copy-parallax"), { y: -14 }, { y: 14 });
-      scrub(q(".mural-cluster-left"), { y: -74, x: -8 }, { y: 74, x: 8 });
-      scrub(q(".mural-cluster-right"), { y: -98, x: 8 }, { y: 98, x: -8 });
-    });
+          const tl = gsap.timeline({
+            defaults: { ease: "none" },
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top top",
+              // Longer pin than the single-open version: the timeline now
+              // plays ignite -> open to the story -> open fully while the
+              // featured cuts build in, so each phase keeps roughly the same
+              // scroll distance per move as before.
+              end: "+=260%",
+              pin: true,
+              pinSpacing: true,
+              // Pin by transform rather than position:fixed. Functionally the
+              // same pin, but the fixed swap is reported by the browser as a
+              // layout shift of roughly a full viewport (~0.98 CLS each time
+              // this engages and releases) even though nothing visibly jumps,
+              // because pinSpacing already compensates the flow. Transforms are
+              // not layout shifts, so this removes the CLS without changing
+              // what the user sees. It is also the setting GSAP recommends when
+              // a smooth-scroll library owns the scroll position, which Lenis
+              // does here.
+              pinType: "transform",
+              // Switch to position:fixed one tick early so the browser
+              // doesn't show a one-frame compositing jump (the mural
+              // appearing to nudge sideways) at the instant the pin engages.
+              anticipatePin: 1,
+              // Numeric scrub adds a ~0.8s catch-up so the timeline eases
+              // toward the scroll position instead of snapping to it
+              // frame-for-frame. This is what makes the mural open/ignite
+              // feel smooth rather than stepping in hard chunks with each
+              // wheel/trackpad notch.
+              scrub: MOTION.scrub,
+              invalidateOnRefresh: true,
+            },
+          });
 
-    // Pause the idle bob/drift whenever the mural leaves the viewport, so it
-    // never animates (or holds a layer) off-screen. CSS reads .mural-paused.
-    const io = new IntersectionObserver(
-      ([entry]) => el.classList.toggle("mural-paused", !entry.isIntersecting),
-      { rootMargin: "0px" }
+          // PHASE 1 (progress 0 -> 0.40): the world eases open. The halves
+          // drift apart to 36% open while their overscale settles back to 1,
+          // so the movement reads as depth resolving rather than two panels
+          // being pulled aside. xPercent is relative to the half's own width
+          // (50% of the stage), so -36% / +36% opens a centred gap of ~36% of
+          // the stage while leaving mural bands framing each side.
+          // `power2.out` on the position, linear on the scale: the drift
+          // decelerates into place (the "settle") while the scale keeps
+          // resolving underneath it.
+          tl.to(leftHalf, { xPercent: -36, duration: 0.4, ease: "power2.out" }, 0);
+          tl.to(rightHalf, { xPercent: 36, duration: 0.4, ease: "power2.out" }, 0);
+          tl.to([leftHalf, rightHalf], { scale: 1, duration: 0.4 }, 0);
+
+          // DEPTH. The halves also drift vertically across the whole pin at
+          // roughly 0.9x the copy's rate, so the mural sits behind the story
+          // rather than on the same plane. Body copy never moves.
+          tl.fromTo(
+            muralInner,
+            { yPercent: -1.6 },
+            { yPercent: 1.6, duration: 1 },
+            0
+          );
+
+          // PHASE 2 (0.16 -> 0.36): the story arrives AFTER the halves have
+          // begun settling, on the shared rise/duration, then gets a beat of
+          // stillness (to 0.52) to read. Its ember rule draws in underneath
+          // the heading once the copy is up — the only rule in the section now.
+          tl.to(
+            textCol,
+            { autoAlpha: 1, y: 0, duration: 0.2, ease: MOTION.gsapEase },
+            0.16
+          );
+          tl.to(textRule, { scaleX: 1, duration: 0.14 }, 0.3);
+
+          // PHASE 3 (0.52 -> 1.0): the mural keeps opening out — each half
+          // moves past its own width so the art has fully left the viewport by
+          // the end of the pin. No close, one continuous motion.
+          // ±104 rather than ±100 leaves a little margin against the vertical
+          // parallax drift, so neither half can leave a sliver at the edge.
+          // (This used to be ±110 to clear the seam line's 30px glow; with the
+          // line gone, the art itself is all that has to clear.)
+          tl.to(leftHalf, { xPercent: -104, duration: 0.48 }, 0.52);
+          tl.to(rightHalf, { xPercent: 104, duration: 0.48 }, 0.52);
+          tl.to(textCol, { autoAlpha: 0, y: -MOTION.rise / 2, duration: 0.1 }, 0.52);
+
+          if (lg) {
+            // The story hands the stage to the featured cuts: the Grill
+            // Awaits layer builds in the widening gap — heading first, then
+            // the feature card leads the photo stagger, CTA last.
+            tl.to(grillLayer, { autoAlpha: 1, duration: 0.04 }, 0.6);
+            tl.fromTo(
+              grillHead,
+              { y: 40, autoAlpha: 0 },
+              { y: 0, autoAlpha: 1, duration: 0.16 },
+              0.6
+            );
+            tl.fromTo(
+              grillDishes,
+              { y: 70, autoAlpha: 0, scale: 0.92 },
+              { y: 0, autoAlpha: 1, scale: 1, duration: 0.16, stagger: 0.035 },
+              0.66
+            );
+            // Starts at 0.90, not 0.86: the cards are still settling out of
+            // their y:70 entrance until ~0.90 once the scrub's catch-up is
+            // accounted for, and the pill sits directly beneath them. Fading
+            // it in after they land means it is never visible at less than its
+            // full clearance from the card above it.
+            tl.fromTo(
+              grillCta,
+              { autoAlpha: 0 },
+              { autoAlpha: 1, duration: 0.1 },
+              0.9
+            );
+          }
+
+          // Recompute pin spacing once the half images have laid out.
+          ScrollTrigger.refresh();
+        } else {
+          // Mobile (no pin/split): the full mural is omitted and the story
+          // gets a gentle, non-pinned fade/slide-up as it scrolls into view.
+          const textCol = q(".about-text");
+          gsap.from(textCol, {
+            opacity: 0,
+            y: MOTION.rise,
+            duration: MOTION.duration,
+            ease: MOTION.gsapEase,
+            scrollTrigger: {
+              trigger: textCol[0],
+              start: "top 88%",
+            },
+          });
+        }
+
+        if (!lg) {
+          // Below lg the grill grid flows statically (below the pinned stage
+          // on tablets, below the story on phones) — give it the same gentle
+          // entrance the story gets, feature card first.
+          gsap.from(grillHead, {
+            opacity: 0,
+            y: MOTION.rise,
+            duration: MOTION.duration,
+            ease: MOTION.gsapEase,
+            scrollTrigger: {
+              trigger: grillHead[0],
+              start: "top 88%",
+            },
+          });
+
+          gsap.from(grillDishes, {
+            opacity: 0,
+            y: MOTION.rise,
+            duration: MOTION.duration,
+            stagger: MOTION.stagger,
+            ease: MOTION.gsapEase,
+            scrollTrigger: {
+              trigger: grillDishes[0],
+              start: "top 90%",
+            },
+          });
+        }
+      }
     );
-    io.observe(el);
-
-    // Re-measure once fonts/images settle so parallax ranges line up.
-    const refreshST = () => ScrollTrigger.refresh();
-    window.addEventListener("load", refreshST);
-    document.fonts?.ready.then(refreshST);
 
     return () => {
-      window.removeEventListener("load", refreshST);
-      io.disconnect();
       mm.revert();
     };
   }, []);
+
+  useScrollRefresh();
+
+  const refresh = () => ScrollTrigger.refresh();
 
   return (
     <section
       ref={sectionRef}
       id="about"
       aria-labelledby="about-heading"
-      className="relative isolate overflow-hidden bg-cream scroll-mt-20"
+      className="relative overflow-hidden bg-cream"
+      style={{ ["--nav-h" as string]: `${NAV_H}px` } as React.CSSProperties}
     >
-      <SeamThread />
-      <div className="relative flex min-h-[42rem] items-center justify-center px-6 py-section md:min-h-[46rem]">
-        {/* ---- SCATTER (z-0, deepest / slowest) ------------------------- */}
-        <div
-          className="mural-scatter pointer-events-none absolute inset-0 z-0"
-          aria-hidden="true"
-        >
-          {SCATTER.map((m, i) => (
-            <span
-              key={`d${i}`}
-              className="mural-mark mural-drift absolute block rounded-full"
-              style={
-                {
-                  left: `${m.l}%`,
-                  top: `${m.t}%`,
-                  width: m.s,
-                  height: m.s,
-                  opacity: m.o,
-                  background:
-                    m.c === "ember"
-                      ? "var(--color-ember)"
-                      : "var(--color-warm-muted)",
-                  "--dx": `${m.dx}px`,
-                  "--dy": `${m.dy}px`,
-                  "--drift-dur": `${m.dur}s`,
-                  "--drift-delay": `${m.dl}s`,
-                } as React.CSSProperties
-              }
-            />
-          ))}
-          {TICKS.map((t, i) => (
-            <span
-              key={`t${i}`}
-              className="mural-mark mural-drift absolute block h-[3px] rounded-full"
-              style={
-                {
-                  left: `${t.l}%`,
-                  top: `${t.t}%`,
-                  width: t.w,
-                  opacity: t.o,
-                  background: "var(--color-ember)",
-                  transform: `rotate(${t.rot}deg)`,
-                  "--dx": "8px",
-                  "--dy": "-6px",
-                  "--drift-dur": "16s",
-                  "--drift-delay": `${i * 1.3}s`,
-                } as React.CSSProperties
-              }
-            />
-          ))}
-        </div>
-
-        {/* ---- CLUSTERS (z-10, front / fastest) ------------------------- */}
-        {/* Left cluster — tiger, drummer, hanok, stews. The PNG is pre-baked
-            against page cream, so it composites normally (no blend on this
-            moving layer). Outer wrapper = parallax; inner = entrance; img = bob. */}
-        <div className="mural-cluster-left pointer-events-none absolute inset-y-0 -left-[5%] z-10 w-[56%] max-w-[540px] sm:w-[46%] md:w-[39%]">
-          <div className="mural-enter absolute inset-0 flex items-center">
+      {/* Mural stage (>= md only — hidden on mobile, where a simplified band
+          renders instead, see below). The halves are `object-contain` so the
+          whole illustration is always shown — nothing is cropped. The mural art
+          is transparent (white field baked out to WebP), so it sits directly on
+          this section's cream surface with no field to blend and the two halves
+          meet flush at the center seam. On desktop the stage is full height
+          (vertically centered art); on reduced motion it keeps the mural's
+          natural ~2535:1240 combined ratio inside the content column. */}
+      {/* pointer-events-none: this stage overlays the story/grill layers
+          (z-20 over z-10) and is purely decorative — without it, it swallows
+          every click meant for the buttons revealed in the gap beneath. */}
+      <div className="pointer-events-none hidden md:block relative z-20 px-6 md:px-0 motion-safe:md:min-h-screen">
+        <div className="relative mx-auto aspect-[2535/1240] w-full max-w-7xl overflow-hidden md:mx-0 md:aspect-auto md:h-screen md:max-w-none">
+          {/* Depth layer: carries BOTH halves on a slow vertical drift (~0.9x
+              the story column's rate) across the pin, so the mural reads as
+              sitting behind the copy rather than on the same plane. Separate
+              from the halves themselves so their own open/settle transform is
+              never fighting the parallax on the same element. */}
+          <div className="mural-parallax absolute inset-0 will-change-transform">
+          {/* Left half */}
+          <div className="mural-half-left absolute left-0 top-0 h-full w-1/2 will-change-transform">
             <Image
-              src="/images/mural-left-cream.png"
+              src="/images/mural-left.webp"
               alt=""
               aria-hidden="true"
-              width={886}
-              height={886}
-              className="mural-bob h-auto w-full object-contain"
-              style={{ "--bob": "-10px", "--bob-dur": "7s" } as React.CSSProperties}
-              sizes="(max-width: 768px) 56vw, 39vw"
+              fill
+              sizes="50vw"
+              draggable={false}
+              onLoad={refresh}
+              className="select-none object-contain object-right"
             />
           </div>
-        </div>
 
-        {/* Right cluster — grill, mask, the fire mascot, soju, pine. */}
-        <div className="mural-cluster-right pointer-events-none absolute inset-y-0 -right-[5%] z-10 w-[56%] max-w-[540px] sm:w-[46%] md:w-[39%]">
-          <div className="mural-enter absolute inset-0 flex items-center">
+          {/* Right half */}
+          <div className="mural-half-right absolute right-0 top-0 h-full w-1/2 will-change-transform">
             <Image
-              src="/images/mural-right-cream.png"
+              src="/images/mural-right.webp"
               alt=""
               aria-hidden="true"
-              width={886}
-              height={886}
-              className="mural-bob h-auto w-full object-contain"
-              style={
-                { "--bob": "-13px", "--bob-dur": "8.5s", "--bob-delay": "0.6s" } as React.CSSProperties
-              }
-              sizes="(max-width: 768px) 56vw, 39vw"
+              fill
+              sizes="50vw"
+              draggable={false}
+              onLoad={refresh}
+              className="select-none object-contain object-left"
             />
           </div>
-        </div>
-
-        {/* ---- EDGE FADES — melt the mural band's top & bottom into the page
-            cream so it reads as art emerging from the page, not a rectangle. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 z-[12] h-20 bg-gradient-to-b from-cream to-transparent"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-[12] h-20 bg-gradient-to-t from-cream to-transparent"
-        />
-
-        {/* ---- COPY (z-20, middle) — a soft cream field carves a clean, empty
-            reading column out of the busy mural (the composition wants an empty
-            centre); the art stays rich, full-colour, and untouched at the edges
-            and frames the story. Sized generously with a firm cream plateau so
-            the copy always lands on clean cream — even at 375px, where the
-            clusters otherwise crowded the text — rather than dimming the mural.
-            The top/bottom edge fades above keep the field from reading as a
-            hard rectangle. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-1/2 z-[15] h-[38rem] w-[46rem] max-w-[97vw] -translate-x-1/2 -translate-y-1/2"
-          style={{
-            background:
-              "radial-gradient(68% 60% at 50% 50%, var(--color-cream) 0%, var(--color-cream) 66%, color-mix(in srgb, var(--color-cream) 82%, transparent) 82%, transparent 100%)",
-          }}
-        />
-        <div className="mural-copy-parallax relative z-20 mx-auto w-full max-w-[34rem] px-2 text-center">
-          <div className="mural-copy-in">
-            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.32em] text-ember-deep">
-              Our story
-            </p>
-            <h2
-              id="about-heading"
-              className="font-serif text-4xl font-light leading-[1.12] text-ink sm:text-5xl md:text-[3.4rem]"
-            >
-              It started with a{" "}
-              <em className="italic text-ember">grill</em>
-            </h2>
-            <div className="mt-7 space-y-5 font-sans text-sm font-light leading-relaxed text-warm sm:text-base">
-              <p>
-                KM.BBQ started with one idea: really good Korean BBQ that you
-                cook yourself. Every table gets its own live charcoal grill.
-              </p>
-              <p>
-                We pick our meat carefully and marinate it in house, using
-                recipes we have leaned on for years. You grill it fresh, right
-                where you sit, cooked exactly how you like it.
-              </p>
-              <p>
-                Pull up a chair and take your time. Order more whenever you
-                want. Good food, a hot grill, and no reason to rush.
-              </p>
-            </div>
-
-            <Link
-              href="/menu"
-              className="relative isolate mt-9 inline-flex items-center gap-2 overflow-hidden rounded-full border border-ember-deep px-8 py-3 font-sans text-sm font-medium text-ember-deep transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember-deep before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
-            >
-              See the menu
-              <span aria-hidden="true">→</span>
-            </Link>
           </div>
         </div>
       </div>
 
-      {/* Seam: mural -> House Favorites. A couple of mural accents drift down
-          past the boundary and fade, so the illustrated world trails off into
-          the photography instead of stopping at a border (driven by SeamMotion). */}
+      {/* Mobile mural band — the brand signature can't be absent on phones,
+          where there's no room for the full-height desktop stage. A compact
+          horizontal band of the same transparent mural art (both halves meeting
+          at center, on cream) sits above the story and enters with the shared
+          reveal. Hidden at md+, where the pinned stage takes over. */}
+      <ScrollReveal className="md:hidden px-6 pt-10">
+        <div className="relative mx-auto flex aspect-[2/1] w-full max-w-md">
+          <div className="relative h-full w-1/2">
+            <Image
+              src="/images/mural-left.webp"
+              alt=""
+              aria-hidden="true"
+              fill
+              sizes="50vw"
+              className="select-none object-contain object-right"
+            />
+          </div>
+          <div className="relative h-full w-1/2">
+            <Image
+              src="/images/mural-right.webp"
+              alt=""
+              aria-hidden="true"
+              fill
+              sizes="50vw"
+              className="select-none object-contain object-left"
+            />
+          </div>
+        </div>
+      </ScrollReveal>
+
+      {/* Text — revealed in the gap on desktop with motion; flows below the
+          mural band on mobile and for prefers-reduced-motion (where the mural
+          stays whole), so the copy is always visible. */}
+      <div className="relative z-10 px-6 pb-20 pt-6 md:pt-0 motion-safe:md:absolute motion-safe:md:inset-x-0 motion-safe:md:top-0 motion-safe:md:h-screen motion-safe:md:flex motion-safe:md:items-center motion-safe:md:justify-center motion-safe:md:px-6 motion-safe:md:pb-0">
+        <div
+          className="about-text mx-auto w-full text-center"
+          style={{
+            maxWidth: "min(90%, 34rem)",
+            background: "transparent",
+            padding: "2.5rem 1.5rem",
+          }}
+        >
+          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
+            Our story
+          </p>
+          <h2
+            id="about-heading"
+            className="font-serif text-4xl font-light leading-snug text-foreground md:text-5xl"
+          >
+            It started with a{" "}
+            <em className="italic text-ember">grill</em>
+          </h2>
+          {/* The section's one rule, replacing the full-height seam that used
+              to split the mural. It draws in from the left after the copy has
+              risen. Defaults to fully drawn, so the no-JS and reduced-motion
+              states show a static hairline rather than nothing. */}
+          <span
+            aria-hidden="true"
+            className="about-rule mx-auto mt-5 block h-px w-16 bg-ember"
+          />
+          <div className="mt-8 space-y-5 font-sans text-sm font-light leading-relaxed text-foreground/80">
+            <p>
+              KM.BBQ started with one idea: really good Korean BBQ that you cook
+              yourself. Every table gets its own grill, gas or charcoal.
+            </p>
+            <p>
+              We pick our meat carefully and marinate it in house, using recipes
+              we have leaned on for years. You grill it fresh, right where you
+              sit, cooked exactly how you like it.
+            </p>
+            <p>
+              Pull up a chair and take your time. Order more whenever you want.
+              Good food, a hot grill, and no reason to rush.
+            </p>
+          </div>
+          <PillLink href="/menu" arrow className="mt-10">
+            See the menu
+          </PillLink>
+        </div>
+      </div>
+
+      {/* The Grill Awaits — house favorites. At lg with motion this layer
+          shares the pinned stage with the story text: the story fades out and
+          this builds in while the mural halves keep opening until they leave
+          the viewport. Below lg (and for reduced motion) it flows statically
+          after the stage — the feature-card grid is too tall to share a
+          single pinned tablet viewport. */}
+      <div className="grill-layer relative z-10 px-6 pb-24 motion-safe:lg:absolute motion-safe:lg:inset-x-0 motion-safe:lg:top-0 motion-safe:lg:h-screen motion-safe:lg:flex motion-safe:lg:items-center motion-safe:lg:justify-center motion-safe:lg:pb-0 motion-safe:lg:pt-[var(--nav-h)]">
+        <div className="mx-auto w-full max-w-4xl text-center lg:max-w-7xl">
+          <div className="grill-head">
+            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
+              House favorites
+            </p>
+            <h2
+              id="menu-heading"
+              className="font-serif text-4xl font-light text-foreground md:text-5xl"
+            >
+              What to grill first
+            </h2>
+            {/* transform-gpu: this light gray text picks up blue subpixel-AA
+                fringing on some words when rasterized in the main layer —
+                looks like link styling. Its own compositing layer rasterizes
+                with uniform grayscale AA. */}
+            <p className="mx-auto mt-3 max-w-xl transform-gpu font-sans text-base font-light text-foreground/60">
+              A few of the ones people order again and again. The full lineup is
+              on the menu.
+            </p>
+          </div>
+          {/* Feature grid: Galbi anchors the left half at full height; the
+              other four form an equal 2x2 on the right — auto-placement fills
+              them left-to-right, top-to-bottom, and the row-span keeps the
+              feature flush with the second row's bottom edge. Tablets collapse
+              to two columns with Galbi full-width on top; phones stack
+              single-file, Galbi first. */}
+          {/* Tighter head-to-grid gap at lg than elsewhere: the whole layer has
+              to fit one pinned viewport, and that reclaimed space is what pays
+              for the CTA's clearance below the grid. */}
+          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:mt-4 lg:grid-cols-4 lg:gap-7">
+            {FEATURED_DISHES.map((dish, i) => {
+              const isFeature = i === 0;
+              const span = isFeature ? "sm:col-span-2 lg:row-span-2" : "";
+              return (
+                <div
+                  key={dish.name}
+                  className={`grill-dish group h-full will-change-transform ${span}`}
+                >
+                  <div className="flex h-full flex-col overflow-hidden rounded-xl bg-white p-5 text-left shadow-warm transition-shadow duration-300 hover:shadow-warm-lg">
+                    {/* Feature photo stretches to fill the two-row card; the
+                        others crop slightly wider at lg so both grid rows plus
+                        the header and CTA share one pinned viewport. */}
+                    <div
+                      className={`relative w-full overflow-hidden rounded-lg bg-paper ${
+                        isFeature
+                          ? "aspect-[16/9] lg:aspect-auto lg:min-h-0 lg:flex-1"
+                          : "aspect-[16/9] lg:aspect-[2/1]"
+                      }`}
+                    >
+                      <Image
+                        src={dish.image}
+                        alt={dish.name}
+                        fill
+                        className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                        sizes={
+                          isFeature
+                            ? "(max-width: 1023px) 100vw, 50vw"
+                            : "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 25vw"
+                        }
+                      />
+                      {dish.tag && (
+                        <span className="absolute left-2 top-2 z-10 bg-ember-deep px-2 py-1 font-sans text-[11px] font-medium uppercase tracking-widest text-white">
+                          {dish.tag}
+                        </span>
+                      )}
+                    </div>
+                    <h3
+                      className={`mt-3 font-serif font-light text-foreground ${
+                        isFeature ? "text-lg lg:text-2xl" : "text-lg"
+                      }`}
+                    >
+                      {dish.name}{" "}
+                      <span className="font-sans text-sm font-light text-foreground/40">
+                        {dish.korean}
+                      </span>
+                    </h3>
+                    {/* The pinned stage is exactly one viewport tall, so on
+                        short desktop screens the description is the line that
+                        gets cut — drop it there rather than clipping the CTA
+                        below the fold. The feature card keeps its description:
+                        its flexible photo absorbs the height instead.
+
+                        Threshold raised 840 -> 895. Measured, the full-height
+                        layout needs ~894px of viewport; between 841 and 893 it
+                        was overflowing and pushing the CTA past the fold (at
+                        850 it hung 19px over). 900 still gets the full layout
+                        with its descriptions. */}
+                    <p
+                      className={`mt-1 font-sans text-sm font-light leading-snug text-foreground/60 ${
+                        isFeature
+                          ? ""
+                          : "motion-safe:lg:[@media(max-height:895px)]:hidden"
+                      }`}
+                    >
+                      {dish.description}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {/* Centred below the ENTIRE grid, at twice the grid's own gutter, so
+              it reads as the section's action rather than an appendage of the
+              feature card it happens to sit under. The old mt-6 (24px) put it
+              inside both that card's shadow (~30px reach) and the travel of
+              the seam handoff above. */}
+          <div className="grill-cta mt-10 flex justify-center lg:mt-12">
+            <PillLink href="/menu">See the full menu</PillLink>
+          </div>
+        </div>
+      </div>
+
+      {/* Seam: About -> Gallery. A couple of mural accents drift down past the
+          boundary and fade, so the illustrated world trails off into the
+          photography instead of stopping at a border. In the original this sat
+          at the mural/favorites seam, which no longer exists as a boundary. */}
       <div
-        className="mural-trail pointer-events-none absolute inset-x-0 bottom-6 z-[13] flex items-center justify-center gap-16 motion-reduce:hidden"
+        // z-[9], below the content layer (z-10): these are decorative accents
+        // drifting toward the Gallery seam, and at z-[13] they painted across
+        // the "See the full menu" pill during the pin.
+        // opacity-0 by default: SeamMotion fades these in only as the About ->
+        // Gallery boundary arrives (its tween is immediateRender:false). z-[9]
+        // keeps them below the content layer as well.
+        className="mural-trail pointer-events-none absolute inset-x-0 bottom-6 z-[9] flex items-center justify-center gap-16 motion-reduce:hidden [&>*]:opacity-0"
         aria-hidden="true"
       >
         <span
@@ -379,7 +566,7 @@ function MuralStory() {
         <svg width="34" height="14" viewBox="0 0 34 14" fill="none">
           <path
             d="M1 9c5-6 10 4 16-1s10-6 16 2"
-            stroke="var(--color-warm-muted)"
+            stroke="var(--color-body)"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeOpacity="0.6"
@@ -389,139 +576,6 @@ function MuralStory() {
           className="block h-2 w-2 rounded-full"
           style={{ background: "var(--color-ember)", opacity: 0.6 }}
         />
-      </div>
-    </section>
-  );
-}
-
-/* ---------------------------------------------------------------------------
-   HOUSE FAVORITES — warm cream cards, staggered reveal
-   --------------------------------------------------------------------------- */
-function HouseFavorites() {
-  const ref = useRef<HTMLElement>(null);
-
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const mm = gsap.matchMedia();
-    const q = gsap.utils.selector(el);
-
-    mm.add(MOTION_OK, () => {
-      const head = q(".grill-head");
-      const dishes = q(".grill-dish");
-
-      gsap.from(head, {
-        opacity: 0,
-        y: RISE,
-        duration: DUR.base,
-        ease: EASE.out,
-        scrollTrigger: { trigger: head[0], start: "top 88%" },
-      });
-      gsap.from(dishes, {
-        opacity: 0,
-        y: RISE,
-        duration: DUR.base,
-        stagger: STAGGER.base,
-        ease: EASE.out,
-        scrollTrigger: { trigger: dishes[0], start: "top 90%" },
-      });
-    });
-
-    return () => mm.revert();
-  }, []);
-
-  return (
-    <section
-      ref={ref}
-      aria-labelledby="favorites-heading"
-      className="relative bg-cream-deep px-6 py-section"
-      data-seam-morph
-      data-from="#faf6ef"
-      data-to="#f2ebdd"
-    >
-      <SeamThread />
-      <div className="mx-auto w-full max-w-4xl text-center lg:max-w-7xl">
-        <div className="grill-head">
-          <p className="mb-4 transform-gpu font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-            House favorites
-          </p>
-          <h2
-            id="favorites-heading"
-            className="transform-gpu font-serif text-4xl font-light text-ink md:text-5xl"
-          >
-            What to grill first
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl transform-gpu font-sans text-base font-light text-warm">
-            A few of the ones people order again and again. The full lineup is
-            on the menu.
-          </p>
-        </div>
-
-        {/* Galbi anchors the left column at full height; the other four form an
-            equal 2x2 on the right. Tablets: two columns, Galbi full-width on
-            top. Phones: single file, Galbi first. */}
-        <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7">
-          {FEATURED_DISHES.map((dish, i) => {
-            const isFeature = i === 0;
-            const span = isFeature ? "sm:col-span-2 lg:row-span-2" : "";
-            return (
-              <div
-                key={dish.name}
-                className={`grill-dish group h-full ${span}`}
-              >
-                <div className="flex h-full flex-col rounded-card bg-cream p-5 text-left shadow-card transition-[transform,box-shadow] duration-300 transform-gpu hover:-translate-y-1">
-                  <div
-                    className={`relative w-full overflow-hidden rounded-card bg-cream-deep ${
-                      isFeature
-                        ? "aspect-[16/9] lg:aspect-auto lg:min-h-0 lg:flex-1"
-                        : "aspect-[16/9] lg:aspect-[2/1]"
-                    }`}
-                  >
-                    <Image
-                      src={dish.image}
-                      alt={dish.name}
-                      fill
-                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
-                      sizes={
-                        isFeature
-                          ? "(max-width: 1023px) 100vw, 50vw"
-                          : "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 25vw"
-                      }
-                    />
-                    {dish.tag && (
-                      <span className="absolute left-2.5 top-2.5 z-10 inline-flex items-center rounded-full bg-ember-deep px-2.5 py-1 font-sans text-[10px] font-semibold uppercase tracking-[0.12em] text-white">
-                        {dish.tag}
-                      </span>
-                    )}
-                  </div>
-                  <h3
-                    className={`mt-3 font-serif font-light text-ink ${
-                      isFeature ? "text-lg lg:text-2xl" : "text-lg"
-                    }`}
-                  >
-                    {dish.name}{" "}
-                    <span className="font-sans text-sm font-light text-warm-muted">
-                      {dish.korean}
-                    </span>
-                  </h3>
-                  <p className="mt-1 font-sans text-sm font-light leading-snug text-warm">
-                    {dish.description}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="mt-8">
-          <Link
-            href="/menu"
-            className="relative isolate inline-flex overflow-hidden rounded-full border border-ember-deep px-8 py-3 font-sans text-sm font-medium text-ember-deep transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember-deep before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100"
-          >
-            See the full menu
-          </Link>
-        </div>
       </div>
     </section>
   );
