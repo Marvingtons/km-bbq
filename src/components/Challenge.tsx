@@ -182,7 +182,9 @@ export function Challenge() {
     <section
       id="challenge"
       aria-labelledby="challenge-heading"
-      className="relative bg-cream px-6 py-24 md:py-28"
+      // Deliberately shorter than the sections either side of it. This is a
+      // beat between the gallery and the visit, not a destination of its own.
+      className="relative bg-cream px-6 py-16 md:py-20"
       // Arrives carrying the Gallery's paper and settles back onto cream.
       data-seam-morph
       data-from="#F3EBDD"
@@ -208,9 +210,10 @@ export function Challenge() {
           </ScrollReveal>
           <ScrollReveal delay={0.1}>
             <p className="mx-auto mt-4 max-w-md font-sans text-base font-light leading-relaxed text-body">
-              There is a clock and a red button by our door. Stop it dead on
-              10.00 seconds and your next visit is free. Here is a practice
-              round.
+              You have seen the food. Here is what you walk past on the way in:
+              a clock and a red button by our door. Stop it dead on 10.00
+              seconds and your next visit is free. Practice here, then come
+              settle it in person.
             </p>
           </ScrollReveal>
         </div>
