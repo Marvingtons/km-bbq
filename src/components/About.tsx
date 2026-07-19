@@ -6,7 +6,6 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PillLink } from "./PillLink";
 import { ScrollReveal } from "./ScrollReveal";
-import { SeamThread } from "./SeamThread";
 import { MOTION, NAV_H } from "@/lib/motion";
 import { useScrollRefresh } from "@/lib/useScrollRefresh";
 
@@ -208,11 +207,16 @@ export function About() {
               { y: 0, autoAlpha: 1, scale: 1, duration: 0.16, stagger: 0.035 },
               0.66
             );
+            // Starts at 0.90, not 0.86: the cards are still settling out of
+            // their y:70 entrance until ~0.90 once the scrub's catch-up is
+            // accounted for, and the pill sits directly beneath them. Fading
+            // it in after they land means it is never visible at less than its
+            // full clearance from the card above it.
             tl.fromTo(
               grillCta,
               { autoAlpha: 0 },
-              { autoAlpha: 1, duration: 0.12 },
-              0.86
+              { autoAlpha: 1, duration: 0.1 },
+              0.9
             );
           }
 
@@ -281,7 +285,6 @@ export function About() {
       className="relative overflow-hidden bg-cream"
       style={{ ["--nav-h" as string]: `${NAV_H}px` } as React.CSSProperties}
     >
-      <SeamThread />
       {/* Mural stage (>= md only — hidden on mobile, where a simplified band
           renders instead, see below). The halves are `object-contain` so the
           whole illustration is always shown — nothing is cropped. The mural art
@@ -446,7 +449,10 @@ export function About() {
               feature flush with the second row's bottom edge. Tablets collapse
               to two columns with Galbi full-width on top; phones stack
               single-file, Galbi first. */}
-          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7">
+          {/* Tighter head-to-grid gap at lg than elsewhere: the whole layer has
+              to fit one pinned viewport, and that reclaimed space is what pays
+              for the CTA's clearance below the grid. */}
+          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:mt-4 lg:grid-cols-4 lg:gap-7">
             {FEATURED_DISHES.map((dish, i) => {
               const isFeature = i === 0;
               const span = isFeature ? "sm:col-span-2 lg:row-span-2" : "";
@@ -497,12 +503,18 @@ export function About() {
                         short desktop screens the description is the line that
                         gets cut — drop it there rather than clipping the CTA
                         below the fold. The feature card keeps its description:
-                        its flexible photo absorbs the height instead. */}
+                        its flexible photo absorbs the height instead.
+
+                        Threshold raised 840 -> 895. Measured, the full-height
+                        layout needs ~894px of viewport; between 841 and 893 it
+                        was overflowing and pushing the CTA past the fold (at
+                        850 it hung 19px over). 900 still gets the full layout
+                        with its descriptions. */}
                     <p
                       className={`mt-1 font-sans text-sm font-light leading-snug text-foreground/60 ${
                         isFeature
                           ? ""
-                          : "motion-safe:lg:[@media(max-height:840px)]:hidden"
+                          : "motion-safe:lg:[@media(max-height:895px)]:hidden"
                       }`}
                     >
                       {dish.description}
@@ -512,7 +524,12 @@ export function About() {
               );
             })}
           </div>
-          <div className="grill-cta mt-6">
+          {/* Centred below the ENTIRE grid, at twice the grid's own gutter, so
+              it reads as the section's action rather than an appendage of the
+              feature card it happens to sit under. The old mt-6 (24px) put it
+              inside both that card's shadow (~30px reach) and the travel of
+              the seam handoff above. */}
+          <div className="grill-cta mt-10 flex justify-center lg:mt-12">
             <PillLink href="/menu">See the full menu</PillLink>
           </div>
         </div>
@@ -523,7 +540,13 @@ export function About() {
           photography instead of stopping at a border. In the original this sat
           at the mural/favorites seam, which no longer exists as a boundary. */}
       <div
-        className="mural-trail pointer-events-none absolute inset-x-0 bottom-6 z-[13] flex items-center justify-center gap-16 motion-reduce:hidden"
+        // z-[9], below the content layer (z-10): these are decorative accents
+        // drifting toward the Gallery seam, and at z-[13] they painted across
+        // the "See the full menu" pill during the pin.
+        // opacity-0 by default: SeamMotion fades these in only as the About ->
+        // Gallery boundary arrives (its tween is immediateRender:false). z-[9]
+        // keeps them below the content layer as well.
+        className="mural-trail pointer-events-none absolute inset-x-0 bottom-6 z-[9] flex items-center justify-center gap-16 motion-reduce:hidden [&>*]:opacity-0"
         aria-hidden="true"
       >
         <span

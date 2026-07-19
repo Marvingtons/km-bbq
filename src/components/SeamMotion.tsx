@@ -15,12 +15,11 @@ gsap.registerPlugin(ScrollTrigger);
    scroll distance; every effect rides normal scrolling and only ever scrubs
    transform / opacity / background-color / stroke-dashoffset. All of it lives
    inside a `MOTION_OK` matchMedia, so reduced-motion users get plain stacked
-   sections (static backgrounds, threads shown fully drawn, no parallax) —
-   the timelines are never built at all.
+   sections (static backgrounds, no parallax) — the timelines are never built
+   at all.
 
-   `calm` (used on /menu) keeps only the two seam-safe effects, background
-   continuity and the thread motif, and skips parallax and handoffs in the
-   dense list content.
+   `calm` (used on /menu) keeps only the seam-safe effect, background
+   continuity, and skips parallax and handoffs in the dense list content.
 
    NOTE ON STRUCTURE: the original version of this ran across six boundaries,
    including one between the About mural and House Favorites. Those are one
@@ -60,28 +59,6 @@ export function SeamMotion({ calm = false }: { calm?: boolean }) {
         );
       });
 
-      // 2 — CONNECTIVE MOTIF. The ember thread at each seam draws itself down
-      // as the seam scrolls up through the boundary zone. stroke-dashoffset.
-      gsap.utils
-        .toArray<SVGLineElement>(".seam-thread-line")
-        .forEach((line) => {
-          const host = (line.closest(".seam-thread") as HTMLElement) ?? line;
-          gsap.fromTo(
-            line,
-            { strokeDashoffset: 72 },
-            {
-              strokeDashoffset: 0,
-              ease: "none",
-              scrollTrigger: {
-                trigger: host,
-                start: "top 88%",
-                end: "top 52%",
-                scrub: true,
-              },
-            }
-          );
-        });
-
       if (calm) return; // /menu stays calm past this point.
 
       // 3 — DEPTH. Decorative background textures drift at ~0.85x scroll so the
@@ -107,13 +84,20 @@ export function SeamMotion({ calm = false }: { calm?: boolean }) {
       // 4 — HANDOFF: the featured Galbi card releases with a slight lag (moves
       // a touch slower than scroll) as About exits, so it hangs on while the
       // gallery rises to meet it.
+      //
+      // yPercent 2, not 7. At 7 this pushed the card down ~40px on a 571px
+      // card, and since the card sits directly above the "See the full menu"
+      // pill, the lag drove it straight into the button exactly when the
+      // button became visible. The pinned stage has no spare height to simply
+      // push the pill further down, so the lag itself had to come back to
+      // where it reads as a release (~11px) rather than a shove.
       const galbi = sel("#about .grill-dish");
       if (galbi) {
         gsap.fromTo(
           galbi,
           { yPercent: 0 },
           {
-            yPercent: 7,
+            yPercent: 2,
             ease: "none",
             scrollTrigger: {
               trigger: galbi.closest("section"),
@@ -161,6 +145,13 @@ export function SeamMotion({ calm = false }: { calm?: boolean }) {
             autoAlpha: 0,
             ease: "none",
             stagger: 0.06,
+            // Without this, the from-state (autoAlpha 0.7) renders on load and
+            // the marks sit visible for the whole section, not just at the
+            // boundary — including behind the "See the full menu" pill, which
+            // is an OUTLINE pill and therefore transparent at rest, so they
+            // showed straight through it. The marks now stay hidden (CSS
+            // opacity-0) until this trigger actually starts near the seam.
+            immediateRender: false,
             scrollTrigger: {
               trigger: sel("#about"),
               start: "bottom 75%",

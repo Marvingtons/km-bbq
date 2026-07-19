@@ -4,7 +4,6 @@ import { useLayoutEffect, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { SeamThread } from "./SeamThread";
 import { MOTION } from "@/lib/motion";
 import { useScrollRefresh } from "@/lib/useScrollRefresh";
 
@@ -167,7 +166,6 @@ export function Gallery() {
       data-from="#FAF4EC"
       data-to="#F3EBDD"
     >
-      <SeamThread />
 
       {/* Ink-wash atmosphere — a faint, warm supporting texture behind the
           photos. The warmth and the white-drop are BAKED into the asset

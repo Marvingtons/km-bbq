@@ -4,7 +4,6 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { MenuJumpNav, type JumpTarget } from "@/components/MenuJumpNav";
 import { SeamMotion } from "@/components/SeamMotion";
-import { SeamThread } from "@/components/SeamThread";
 import { BreadcrumbSchema } from "@/components/RestaurantSchema";
 import { HOURS, ADDRESS, PHONE } from "@/lib/restaurant";
 import { pageMeta } from "@/lib/seo";
@@ -660,7 +659,6 @@ export default function MenuPage() {
           data-from="#FAF4EC"
           data-to="#F3EBDD"
         >
-          <SeamThread />
           <div className="mx-auto max-w-5xl text-center">
             <h2 className="font-serif text-4xl font-light text-foreground md:text-5xl">
               Come Hungry
@@ -708,8 +706,8 @@ export default function MenuPage() {
           </div>
         </section>
 
-        {/* Calm mode: background continuity and the thread motif only. The
-            dense list content gets no parallax and no overlap handoffs. */}
+        {/* Calm mode: background continuity only. The dense list content gets
+            no parallax and no overlap handoffs. */}
         <SeamMotion calm />
       </main>
       <Footer />
