@@ -3,9 +3,14 @@
 // phone, and links can never drift out of sync — and so structured data always
 // matches the visible content (which is what search engines check for).
 
-// Production origin. Used for metadataBase, canonical URLs, sitemap, robots, and
-// the JSON-LD `url`/`@id`. NOTE: placeholder — replace with the real production
-// domain before launch (see the "could not confirm" note in the SEO handoff).
+// Production origin, CONFIRMED. Feeds metadataBase, every canonical, the
+// OG/Twitter image URLs, sitemap.xml, robots.txt and the JSON-LD `url`/`@id`.
+//
+// This carried a "placeholder, confirm before launch" note through several
+// passes. The domain is settled, so the note is gone: this is the live origin.
+// It is a compile-time constant rather than an env var so the sitemap and
+// canonicals cannot silently fall back to a request host or localhost — the
+// single failure that makes a sitemap worthless to a crawler.
 export const SITE_URL = "https://kmbbq.com";
 
 export const BUSINESS = {
