@@ -1,4 +1,5 @@
 import { ADDRESS_PARTS, BUSINESS, DIRECTIONS_URL } from "@/lib/restaurant";
+import { StyledMap } from "./StyledMap";
 
 // A real, interactive Google Map again, replacing the baked static render.
 //
@@ -9,12 +10,16 @@ import { ADDRESS_PARTS, BUSINESS, DIRECTIONS_URL } from "@/lib/restaurant";
 //   WITHOUT one -> the keyless `output=embed` URL. Same interactive map, no
 //                  account required, which is what ships until a key is set.
 //
-// NOTE on the ember pin: neither embed can restyle the map or recolour the
-// marker. Custom styling and a custom marker need the Maps JavaScript API, a
-// different (heavier) integration that also has to be initialised client-side.
-// That is worth doing only if the styled look is wanted badly enough to carry
-// the extra script; the standard embed inside the system card radius is what
-// this ships, per the fallback in the brief.
+// STYLING: neither embed can restyle the map or recolour the marker — that is
+// a property of the iframe. So when a key IS configured the map is rendered
+// through the Maps JavaScript API instead (see StyledMap), which is the only
+// integration that takes a `styles` array and a custom pin. Cream land, warm
+// grey roads, muted green parks, low-saturation water, ember pin.
+//
+// Without a key the keyless embed is still what ships, unstyled, because the
+// alternative is no map at all. This is the one piece of the palette the site
+// cannot own on its own: Google's default blue/green is a full-width block of
+// colour from nobody's palette, and removing it needs an API key.
 //
 // NEXT_PUBLIC_* is inlined by the bundler at build time, so this is a static
 // string in the output and adds no runtime environment dependency (which
@@ -34,31 +39,51 @@ const SRC = KEY
 
 export function ContactMap() {
   return (
-    <div className="relative h-full w-full bg-paper">
-      <iframe
-        // The map sits below the fold, so it must not compete for bandwidth or
-        // main thread with the hero. Lazy keeps it out of the LCP path entirely.
-        loading="lazy"
-        src={SRC}
-        title="Map showing KM.BBQ on South El Camino Real in Oceanside"
-        className="h-full w-full border-0"
-        referrerPolicy="no-referrer-when-downgrade"
-        allowFullScreen
-      />
-
-      {/* Directions stay a real link rather than relying on the embed's own
-          controls: it is the one thing a visitor actually came here to do, and
-          it works the same whether or not the iframe has loaded.
-          min-h-11 keeps it a comfortable thumb target on a phone. */}
-      <a
-        href={DIRECTIONS_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="absolute bottom-3 right-3 z-10 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-cream/95 px-4 py-2 font-sans text-xs font-semibold text-ember-deep shadow-warm ring-1 ring-black/10 transition-colors duration-300 hover:bg-ember-deep hover:text-white focus-visible:bg-ember-deep focus-visible:text-white"
-      >
-        Get directions
-        <span aria-hidden="true">→</span>
-      </a>
+    <div className="relative h-full w-full bg-cream-deep">
+      {KEY ? (
+        <StyledMap apiKey={KEY} />
+      ) : (
+        <iframe
+          // The map sits below the fold, so it must not compete for bandwidth
+          // or main thread with the hero. Lazy keeps it out of the LCP path.
+          loading="lazy"
+          src={SRC}
+          title="Map showing KM.BBQ on South El Camino Real in Oceanside"
+          className="h-full w-full border-0"
+          referrerPolicy="no-referrer-when-downgrade"
+          allowFullScreen
+        />
+      )}
     </div>
+  );
+}
+
+/**
+ * The directions link, BELOW the map rather than floating on it.
+ *
+ * It used to sit bottom-right inside the map bounds, on top of Google's own
+ * zoom controls and the "Map data / Terms" line. Every other corner is spoken
+ * for too: the embed puts a "View larger map" chip top-left, a fullscreen
+ * control top-right and the Google logo bottom-left, and which of those appear
+ * changes with width and with hover — so there is no corner an overlaid pill
+ * can hold at every size. Below the map it collides with nothing, in either the
+ * embed or the styled configuration, and on a phone it lands where the thumb
+ * already is.
+ *
+ * It stays a real link rather than relying on the map's own controls: it is the
+ * one thing a visitor actually came here to do, and it works the same whether
+ * or not the map has loaded.
+ */
+export function DirectionsLink() {
+  return (
+    <a
+      href={DIRECTIONS_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex min-h-11 items-center gap-1.5 rounded-control border border-ember bg-cream px-5 py-2 font-sans text-eyebrow font-semibold text-ink shadow-warm transition-colors duration-[var(--dur-base)] ease-house hover:bg-ember focus-visible:bg-ember"
+    >
+      Get directions
+      <span aria-hidden="true">→</span>
+    </a>
   );
 }

@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import localFont from "next/font/local";
 import { gsap } from "gsap";
 import { ScrollReveal } from "./ScrollReveal";
-import { prefersReducedMotion } from "@/lib/motion";
+import { MuralMark } from "./MuralMark";
+import { MOTION, prefersReducedMotion } from "@/lib/motion";
 
 // Seven-segment face for the LED clock — bundled locally (SIL OFL, see
 // src/fonts/DSEG-LICENSE.txt) so the digits never depend on a CDN. Digits in
@@ -63,11 +64,18 @@ function readout(cs: number): { win: boolean; line: string } {
   return { win: false, line: `${offSec} ${dir}` };
 }
 
-const LED_RED = "#ff2a1e";
+// The LED is the site's ember-red, not a red of its own. It used to be a
+// one-off #ff2a1e; that is the same red the mural's flames and the logo's flame
+// are painted in, so it now comes from the token like everything else.
+const LED_RED = "var(--color-ember-red)";
+// The unlit segments: the same red at 8%, so the ghost layer is literally the
+// live colour turned down rather than a second dark red.
+const LED_UNLIT = "color-mix(in srgb, var(--color-ember-red) 8%, transparent)";
 
 // Shared LED text treatment: the glow is what sells it as emitted light rather
 // than red paint, and every lit layer uses the same one.
-const ledGlow = "0 0 6px rgba(255,42,30,0.55), 0 0 18px rgba(255,42,30,0.28)";
+const ledGlow =
+  "0 0 6px color-mix(in srgb, var(--color-ember-red) 55%, transparent), 0 0 18px color-mix(in srgb, var(--color-ember-red) 28%, transparent)";
 
 // Fixed burst geometry so the client render matches SSR; each ember flies to
 // its own angle/distance on a win.
@@ -91,7 +99,7 @@ function LedDot({ lit }: { lit: boolean }) {
       aria-hidden="true"
       className="mx-[0.07em] mb-[0.1em] block h-[0.15em] w-[0.15em] shrink-0 self-end rounded-[0.03em]"
       style={{
-        background: lit ? LED_RED : "rgba(255, 42, 30, 0.08)",
+        background: lit ? LED_RED : LED_UNLIT,
         boxShadow: lit ? ledGlow : undefined,
       }}
     />
@@ -193,7 +201,11 @@ export function Challenge() {
       { autoAlpha: 1 },
       {
         autoAlpha: 0.15,
-        duration: won ? 0.09 : 0.13,
+        // The flash cadence and the elastic below are the RESULT MOMENT, and
+        // the result moment is a settled part of the mechanic. Their eases come
+        // from the shared table; their beats are how fast a scoreboard blinks,
+        // which is the behaviour rather than the timing language.
+        duration: won ? MOTION.dur.press : 0.13,
         repeat: won ? 7 : 3,
         yoyo: true,
         ease: "none",
@@ -205,19 +217,22 @@ export function Challenge() {
       tl.fromTo(
         faceRef.current,
         { scale: 1 },
-        { scale: 1.06, duration: 0.14, ease: "power2.out" },
+        { scale: 1.06, duration: 0.14, ease: MOTION.gsapEase },
         0
       ).to(faceRef.current, {
         scale: 1,
-        duration: 0.6,
+        // The one spring on the site outside the dome, and the same reason:
+        // this is a physical object reacting, which is what --ease-press exists
+        // for. Stated, not invented.
+        duration: MOTION.dur.reveal,
         ease: "elastic.out(1, 0.45)",
       });
       tl.fromTo(
         glowRef.current,
         { opacity: 0 },
-        { opacity: 0.9, duration: 0.14, ease: "power2.out" },
+        { opacity: 0.9, duration: 0.14, ease: MOTION.gsapEase },
         0
-      ).to(glowRef.current, { opacity: 0, duration: 0.75, ease: "power2.out" }, 0.18);
+      ).to(glowRef.current, { opacity: 0, duration: 0.75, ease: MOTION.gsapEase }, 0.18);
 
       const sparks = sparkRef.current?.children;
       if (sparks) {
@@ -230,7 +245,7 @@ export function Challenge() {
             scale: 1,
             autoAlpha: 0,
             duration: 0.85,
-            ease: "power2.out",
+            ease: MOTION.gsapEase,
             stagger: 0.012,
           },
           0
@@ -244,39 +259,44 @@ export function Challenge() {
     };
   }, [phase, won, elapsedMs]);
 
+  // OFF-SCALE, and correctly so: the digits are sized to the PANEL they sit in,
+  // not to the page. A seven-segment readout that stepped with the type scale
+  // would stop fitting its own window. Same class of exception as the hero.
   const digitSize = "text-[clamp(38px,11vw,58px)]";
 
   return (
     <section
       id="challenge"
       aria-labelledby="challenge-heading"
-      // Deliberately shorter than the sections either side of it. This is a
-      // beat between the gallery and the visit, not a destination of its own.
-      className="relative bg-cream px-6 py-16 md:py-20"
-      // Arrives carrying the Gallery's paper and settles back onto cream.
-      data-seam-morph
-      data-from="#F3EBDD"
-      data-to="#FAF4EC"
+      // Same ground and the same padding scale as every other section. The
+      // seam-morph it used to carry (paper -> cream) is gone with the Gallery's
+      // paper ground: nothing changes underfoot here any more.
+      className="grain relative bg-cream py-section md:py-section-lg"
     >
-      {/* One column, one width. The copy used to sit in a 576px container above
-          a 448px card, which read as two mismatched stacks and made the prop
-          look adrift in the cream rather than centred under its own heading. */}
-      <div className="mx-auto flex max-w-md flex-col items-center text-center">
+      {/* THE ONE CENTRED SECTION ON THE SITE.
+          Everything else left-aligns to the page grid; centring is spent
+          exactly once, here, because the subject is a physical object bolted
+          to a wall and an object centres under its own heading. That is what
+          makes it read as a decision rather than as the default state.
+          It still sits inside `.grid-page`, so its outer margins are the same
+          margins as every other section — only its alignment differs. */}
+      <div className="grid-page">
+        <div className="col-full mx-auto flex max-w-md flex-col items-center text-center">
+        {/* This section's one voice from the mural — the flame, which is what
+            the game is about. Full colour, like the mural itself. */}
         <ScrollReveal>
-          <p className="mb-3 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-            House game
-          </p>
+          <MuralMark mark="flame" size={80} className="mb-5" />
+        </ScrollReveal>
+        <ScrollReveal delay={0.03}>
+          <p className="eyebrow mb-4">House game</p>
         </ScrollReveal>
         <ScrollReveal delay={0.05}>
-          <h2
-            id="challenge-heading"
-            className="font-serif text-4xl font-light text-foreground md:text-5xl"
-          >
-            Beat the clock
+          <h2 id="challenge-heading" className="h2-scale">
+            Beat the <em className="italic text-pink">clock</em>
           </h2>
         </ScrollReveal>
         <ScrollReveal delay={0.1}>
-          <p className="mt-4 font-sans text-base font-light leading-relaxed text-body">
+          <p className="copy mt-4">
             There is a clock and a red button by our door. Stop it dead on 10.00
             seconds and your next visit is free.
           </p>
@@ -293,12 +313,21 @@ export function Challenge() {
               focus-visible lands on the HOUSING via :has(), so tabbing to the
               button outlines the whole machine rather than ringing the dome. */}
           <div
-            className="relative mx-auto mt-9 w-full max-w-[380px] rounded-[1.4rem] p-5 shadow-[0_26px_50px_-24px_rgb(120_60_20/0.55),0_10px_20px_-14px_rgb(26_26_26/0.4)] ring-1 ring-black/40 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ember sm:p-6"
+            // rounded-prop: the one stated exception to the radius rule. This
+            // is not a card, a control or a ground — it is a picture of a
+            // machine, and a moulded corner is what a machine has.
+            className="relative mx-auto mt-9 w-full max-w-[380px] rounded-prop p-5 shadow-[0_26px_50px_-24px_rgb(120_60_20/0.55),0_10px_20px_-14px_rgb(26_26_26/0.4)] ring-1 ring-black/40 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ember sm:p-6"
+            // plum-ink, not the old neutral near-black. This and the footer are
+            // the two dark grounds on the site, and both have to hold the pink
+            // mark and the ember accent at once; the ramp is plum-ink lifted
+            // toward white at the top and dropped toward black at the bottom,
+            // so the housing is one colour lit from above rather than three
+            // greys. Same light direction as before, same material.
             style={{
               background:
-                "linear-gradient(158deg, #2b2a2f 0%, #1b1a1e 42%, #121215 100%)",
+                "linear-gradient(158deg, color-mix(in srgb, var(--color-plum-ink) 82%, white) 0%, var(--color-plum-ink) 42%, color-mix(in srgb, var(--color-plum-ink) 78%, black) 100%)",
               boxShadow:
-                "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.6)",
+                "inset 0 1px 0 rgb(255 255 255 / 0.10), inset 0 -1px 0 rgb(0 0 0 / 0.6)",
             }}
           >
             {/* Four mount screws, one per corner of the housing. */}
@@ -307,7 +336,7 @@ export function Challenge() {
                 <span
                   key={pos}
                   aria-hidden="true"
-                  className={`absolute ${pos} h-1.5 w-1.5 rounded-full bg-[#0a0a0c] shadow-[inset_0_1px_1px_rgba(255,255,255,0.16)]`}
+                  className={`absolute ${pos} h-1.5 w-1.5 rounded-full bg-[color-mix(in_srgb,var(--color-plum-ink)_55%,black)] shadow-[inset_0_1px_1px_rgb(255_255_255/0.16)]`}
                 />
               )
             )}
@@ -316,21 +345,34 @@ export function Challenge() {
                 over a light top edge, not printed on top of it. No decorative
                 dots: the housing is the decoration. */}
             <p
-              className="mb-4 text-center font-sans text-[10px] font-semibold uppercase tracking-[0.32em] text-white/35"
+              // white/50, not /35: at 10px on the housing that was 3.2:1.
+              className="mb-4 text-center font-sans text-eyebrow font-semibold uppercase tracking-[0.32em] text-white/50"
               style={{ textShadow: "0 1px 0 rgba(255,255,255,0.08)" }}
             >
               Stop the clock
             </p>
 
-            {/* LED window, recessed into the housing. */}
+            {/* LED window, recessed into the housing.
+                THREE LAYERS, all inset-0 on one box and therefore exactly
+                registered: the ghost ("8888", every segment at 8%, the way
+                unlit LEDs still catch light), the blurred glow used only by the
+                win pulse, and the live digits. Measured, all three occupy the
+                same rect, so the ghost sits BEHIND the readout and never beside
+                it.
+                aria-hidden keeps the whole panel out of the accessibility tree
+                (the live verdict is announced by the readout line below, which
+                is the aria-live region). select-none is what stops the stacked
+                layers concatenating into "88881000" when the page is selected
+                or copied, or read by anything that walks innerText — the panel
+                is a picture of a machine, not text. */}
             <div
               aria-hidden="true"
-              className="relative mx-auto flex aspect-[2.9/1] w-full items-center justify-center overflow-hidden rounded-xl"
+              className="relative mx-auto flex aspect-[2.9/1] w-full select-none items-center justify-center overflow-hidden rounded-photo"
               style={{
                 background:
-                  "linear-gradient(180deg, #0b0b0d 0%, #050506 100%)",
+                  "linear-gradient(180deg, color-mix(in srgb, var(--color-plum-ink) 45%, black) 0%, color-mix(in srgb, var(--color-plum-ink) 18%, black) 100%)",
                 boxShadow:
-                  "inset 0 2px 10px rgba(0,0,0,0.9), inset 0 -1px 0 rgba(255,255,255,0.05)",
+                  "inset 0 2px 10px rgb(0 0 0 / 0.9), inset 0 -1px 0 rgb(255 255 255 / 0.05)",
               }}
             >
               <div className={`${dseg7.className} relative ${digitSize} leading-none`}>
@@ -340,7 +382,7 @@ export function Challenge() {
                   secs="88"
                   cents="88"
                   lit={false}
-                  color="rgba(255, 42, 30, 0.08)"
+                  color={LED_UNLIT}
                   className="absolute inset-0"
                 />
                 {/* Glow flare layer — invisible until the win pulse. */}
@@ -370,9 +412,9 @@ export function Challenge() {
                 the housing never changes size between states. */}
             <p
               aria-live="polite"
-              className="mt-3 flex min-h-5 items-center justify-center text-center font-sans text-[11px] font-semibold uppercase tracking-[0.22em]"
+              className="mt-3 flex min-h-5 items-center justify-center text-center font-sans text-eyebrow font-semibold uppercase tracking-[0.22em]"
               style={{
-                color: won ? LED_RED : "rgba(255,255,255,0.5)",
+                color: won ? LED_RED : "rgb(255 255 255 / 0.5)",
                 textShadow: won ? ledGlow : undefined,
               }}
             >
@@ -382,7 +424,7 @@ export function Challenge() {
             {/* Control deck: the button is seated in the same housing, on a
                 slightly darker recess so it reads as mounted, not stacked. */}
             <div
-              className="relative mt-4 flex items-center justify-center rounded-xl py-5"
+              className="relative mt-4 flex items-center justify-center rounded-photo py-5"
               style={{
                 background: "rgba(0,0,0,0.28)",
                 boxShadow:
@@ -419,24 +461,24 @@ export function Challenge() {
                       : "Start the clock"
                 }
                 // outline-none because the ring is drawn on the housing.
-                className="group relative flex h-[74px] w-[74px] cursor-pointer items-center justify-center rounded-full outline-none sm:h-[86px] sm:w-[86px]"
+                className="group relative flex h-[74px] w-[74px] cursor-pointer items-center justify-center rounded-control outline-none sm:h-[86px] sm:w-[86px]"
               >
                 {/* Bezel the dome sits in, cut into the deck. */}
                 <span
                   aria-hidden="true"
-                  className="absolute inset-0 rounded-full"
+                  className="absolute inset-0 rounded-control"
                   style={{
                     background:
-                      "linear-gradient(158deg, #232227 0%, #131316 100%)",
+                      "linear-gradient(158deg, color-mix(in srgb, var(--color-plum-ink) 88%, white) 0%, color-mix(in srgb, var(--color-plum-ink) 92%, black) 100%)",
                     boxShadow:
-                      "inset 0 2px 5px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.06)",
+                      "inset 0 2px 5px rgb(0 0 0 / 0.8), 0 1px 0 rgb(255 255 255 / 0.06)",
                   }}
                 />
                 {/* The dome. On press it sinks INTO the housing: it scales
                     down, drops, and its cast shadow tightens to nothing. */}
                 <span
                   aria-hidden="true"
-                  className="relative block h-[76%] w-[76%] rounded-full shadow-[0_9px_16px_-4px_rgba(0,0,0,0.75)] transition-[transform,box-shadow] duration-[170ms] ease-[cubic-bezier(0.34,1.7,0.64,1)] group-hover:brightness-110 group-active:translate-y-[3px] group-active:scale-[0.93] group-active:shadow-[0_2px_4px_-2px_rgba(0,0,0,0.9)] group-active:duration-[90ms] motion-reduce:transition-none"
+                  className="relative block h-[76%] w-[76%] rounded-control shadow-[0_9px_16px_-4px_rgba(0,0,0,0.75)] transition-[transform,box-shadow] duration-[var(--dur-quick)] ease-press group-hover:brightness-110 group-active:translate-y-[3px] group-active:scale-[0.93] group-active:shadow-[0_2px_4px_-2px_rgba(0,0,0,0.9)] group-active:duration-[var(--dur-press)] motion-reduce:transition-none"
                   style={{
                     background:
                       "radial-gradient(circle at 34% 26%, #ff7a6b 0%, #f24a43 22%, #e02128 55%, #b0141b 82%, #921016 100%)",
@@ -451,11 +493,12 @@ export function Challenge() {
 
         {/* House rule, on the cream stage below the prop rather than on it. */}
         <ScrollReveal delay={0.2}>
-          <p className="mt-6 max-w-sm font-sans text-xs font-light leading-relaxed text-foreground/50">
+          <p className="mt-6 max-w-sm font-sans text-eyebrow font-light leading-relaxed text-foreground/50">
             Practice here as much as you like. Only the clock at the restaurant
             counts, one press per table, per visit.
           </p>
         </ScrollReveal>
+        </div>
       </div>
     </section>
   );

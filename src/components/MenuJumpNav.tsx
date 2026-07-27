@@ -49,13 +49,13 @@ export function MenuJumpNav({ targets }: { targets: JumpTarget[] }) {
   return (
     <nav
       aria-label="Menu categories"
-      className="sticky z-40 border-b border-paper-line bg-cream/95 px-6 backdrop-blur-sm"
+      className="sticky z-40 border-b border-cream-line bg-cream/95 backdrop-blur-sm"
       style={{ top: NAV_H }}
     >
       <ul
         ref={listRef}
         role="list"
-        className="mx-auto flex max-w-7xl gap-2 overflow-x-auto py-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="track flex gap-2 overflow-x-auto py-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {targets.map(({ label, id }) => {
           const isActive = active === id;
@@ -66,10 +66,10 @@ export function MenuJumpNav({ targets }: { targets: JumpTarget[] }) {
                 data-target={id}
                 onClick={(e) => jump(e, id)}
                 aria-current={isActive ? "true" : undefined}
-                className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-full border px-4 py-1.5 font-sans text-xs font-medium uppercase tracking-[0.12em] transition-colors ${
+                className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-control border px-4 py-1.5 font-sans text-eyebrow font-medium uppercase tracking-[0.12em] transition-colors duration-[var(--dur-base)] ease-house ${
                   isActive
-                    ? "border-ember-deep bg-ember-deep text-white"
-                    : "border-paper-line bg-white/60 text-foreground/60 hover:border-ember-deep/50 hover:text-ember-deep"
+                    ? "border-ember bg-ember text-ink"
+                    : "border-cream-line bg-white/60 text-foreground/60 hover:border-ember hover:text-ember-deep"
                 }`}
               >
                 {label}

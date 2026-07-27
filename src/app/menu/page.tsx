@@ -5,6 +5,8 @@ import { Footer } from "@/components/Footer";
 import { MenuJumpNav, type JumpTarget } from "@/components/MenuJumpNav";
 import { SeamMotion } from "@/components/SeamMotion";
 import { BreadcrumbSchema } from "@/components/RestaurantSchema";
+import { MuralMark } from "@/components/MuralMark";
+import { Dot } from "@/components/Dot";
 import { HOURS, ADDRESS, PHONE } from "@/lib/restaurant";
 import { pageMeta } from "@/lib/seo";
 import { publicFileExists } from "@/lib/imageManifest.generated";
@@ -371,7 +373,11 @@ const imageExists = publicFileExists;
 function ItemMedia({ item }: { item: Item }) {
   if (item.image && imageExists(item.image)) {
     return (
-      <div className="relative mb-4 aspect-[16/9] w-full overflow-hidden rounded-lg bg-paper">
+      // photo-grade: the one photography treatment, shared with the gallery and
+      // the house favourites — warm grade, shadows lifted toward cream, the one
+      // photo corner radius, and the page's grain. It owns the radius and the
+      // clipping.
+      <div className="photo-grade relative mb-4 aspect-[16/9] w-full bg-cream-deep">
         <Image
           src={item.image}
           alt={item.name}
@@ -388,9 +394,11 @@ function ItemMedia({ item }: { item: Item }) {
   return (
     <div
       aria-hidden="true"
-      className="mb-4 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-paper to-paper-line"
+      // Same corner radius as a real photo, so a card without a shot yet keeps
+      // the row's shape.
+      className="mb-4 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-photo bg-gradient-to-br from-cream-deep to-cream-line"
     >
-      <span className="font-serif text-5xl font-light text-ember-deep/35 select-none">
+      <span className="font-serif text-h2 font-light text-ember-deep/35 select-none">
         {item.name.charAt(0)}
       </span>
     </div>
@@ -408,7 +416,8 @@ function ItemCard({
 
   return (
     <div className="group h-full">
-      <div className="relative flex h-full flex-col overflow-hidden rounded-xl bg-white p-5 shadow-warm transition-shadow duration-300 hover:shadow-warm-lg">
+      {/* A card that frames a photograph takes the photo radius. */}
+      <div className="relative flex h-full flex-col overflow-hidden rounded-photo bg-white p-5 shadow-warm transition-shadow duration-[var(--dur-base)] ease-house hover:shadow-warm-lg">
         {topBar && (
           <span
             aria-hidden="true"
@@ -416,19 +425,19 @@ function ItemCard({
           />
         )}
         <ItemMedia item={item} />
-        <h3 className="font-serif text-xl font-light text-foreground">
+        <h3 className="font-serif text-lead font-light text-foreground">
           {item.name}
         </h3>
         {item.korean && (
-          <p className="font-sans text-sm font-light text-foreground/40">
+          <p className="font-sans text-eyebrow font-light text-foreground/40">
             {item.korean}
           </p>
         )}
-        <p className="mt-2 font-sans text-sm font-light leading-relaxed text-foreground/60">
+        <p className="copy mt-2">
           {item.desc}
         </p>
         {item.note && (
-          <p className="mt-3 font-sans text-xs font-medium uppercase tracking-[0.12em] text-red">
+          <p className="mt-3 font-sans text-eyebrow font-medium uppercase tracking-[0.12em] text-ember-red">
             {item.note}
           </p>
         )}
@@ -440,17 +449,17 @@ function ItemCard({
 function CategorySection({ category }: { category: Category }) {
   return (
     <section id={slugify(category.name)} className="mt-16 scroll-mt-32 first:mt-0">
-      <div className="mb-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-paper-line pb-4">
-        <h2 className="font-serif text-2xl font-light text-foreground md:text-3xl">
+      <div className="mb-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-cream-line pb-4">
+        <h2 className="font-serif text-title font-light text-foreground">
           {category.name}
         </h2>
         {category.korean && (
-          <span className="font-sans text-base font-light text-foreground/40">
+          <span className="font-sans text-copy font-light text-foreground/40">
             {category.korean}
           </span>
         )}
         {category.tag && (
-          <span className="ml-auto font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
+          <span className="eyebrow ml-auto">
             {category.tag}
           </span>
         )}
@@ -479,31 +488,27 @@ function TierSection({
   items: Item[];
   variant: "premium";
 }) {
-  const shell = "border-ember/25 bg-paper";
-  const labelColor = "text-ember-deep";
+  // cream-deep is a FILL here, not a ground — this is a card sitting on the
+  // page's cream, the same way the item cards are. The page still has exactly
+  // two grounds.
+  const shell = "border-ember/25 bg-cream-deep";
 
   return (
     <section
       id={variant}
-      className={`mt-12 scroll-mt-32 rounded-xl border ${shell} p-6 sm:p-10`}
+      className={`mt-12 scroll-mt-32 rounded-surface border ${shell} p-6 sm:p-10`}
     >
-      <div className="mb-8 text-center">
-        <p
-          className={`mb-3 font-sans text-xs font-medium uppercase tracking-[0.3em] ${labelColor}`}
-        >
-          {label}
-        </p>
-        <h2 className="font-serif text-2xl font-light text-foreground md:text-3xl">
+      <div className="mb-8">
+        <p className="eyebrow mb-4">{label}</p>
+        <h2 className="font-serif text-title font-light text-foreground">
           {title}
           {korean && (
-            <span className="ml-3 align-middle font-sans text-base font-light text-foreground/40">
+            <span className="ml-3 align-middle font-sans text-copy font-light text-foreground/40">
               {korean}
             </span>
           )}
         </h2>
-        <p className="mx-auto mt-3 max-w-xl font-sans text-sm font-light text-foreground/60">
-          {blurb}
-        </p>
+        <p className="copy measure mt-3">{blurb}</p>
       </div>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => (
@@ -536,94 +541,105 @@ export default function MenuPage() {
         ]}
       />
       <Navbar />
-      <main id="main-content" tabIndex={-1} className="bg-cream focus:outline-none">
-        {/* Header */}
-        <section className="px-6 pt-32 pb-12 sm:pt-36 lg:pt-40">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="mb-5 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-              All-You-Can-Eat · Self-Serve · Grill Your Own
-            </p>
-            <h1 className="font-serif text-5xl font-light leading-tight text-foreground sm:text-6xl">
-              The Full <em className="italic text-ember">Spread</em>
-            </h1>
-            <p className="mx-auto mt-6 max-w-xl font-sans text-base font-light leading-relaxed text-foreground/60">
-              Pick whatever you like, grill it your way at your table, and
-              eat all you want. One price, everything included.
-            </p>
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="grain bg-cream focus:outline-none"
+      >
+        {/* Header. Same track, same column edge, same left alignment as every
+            section on the home page. */}
+        <section className="pt-32 pb-12 sm:pt-36 lg:pt-40">
+          <div className="grid-page">
+            <div className="col-text">
+              {/* This page's one voice from the mural — the tiger, the motif
+                  that carries the brand's face. Full colour, like the mural. */}
+              <MuralMark mark="tiger" size={92} className="mb-6" />
+              <p className="eyebrow mb-5">
+                All-You-Can-Eat <Dot char="·" /> Self-Serve <Dot char="·" />{" "}
+                Grill Your Own
+              </p>
+              {/* The page title does the same job as a section h2, so it takes
+                  the same size. There is one oversized moment on this site and
+                  it is the hero. */}
+              <h1 className="h2-scale">
+                The Full <em className="italic text-pink">Spread</em>
+              </h1>
+              <p className="copy measure mt-6">
+                Pick whatever you like, grill it your way at your table, and eat
+                all you want. One price, everything included.
+              </p>
+            </div>
 
-            {/* Price band */}
-            <div className="mx-auto mt-9 inline-flex items-stretch overflow-hidden rounded-xl bg-white shadow-warm">
-              <div className="px-6 py-5 text-center sm:px-10">
-                <p className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-                  Lunch
-                </p>
-                <p className="mt-1 font-serif text-3xl font-light text-red sm:text-4xl">
+            {/* Price band. SQUARE: it is a structural surface holding type, not
+                a frame around a picture. It sits on the full track and starts
+                at column 1 rather than being centred.
+                `flex` not `inline-flex`, so the three cells share the width
+                instead of overflowing a phone. */}
+            <div className="col-full mt-9 flex max-w-xl items-stretch overflow-hidden rounded-surface bg-white shadow-warm">
+              <div className="flex-1 px-4 py-5 text-center sm:px-8">
+                <p className="eyebrow">Lunch</p>
+                <p className="mt-1 font-serif text-title font-light text-ember-red">
                   $21.99
                 </p>
-                <p className="mt-1 font-sans text-xs font-light text-foreground/40">
+                <p className="mt-1 font-sans text-eyebrow font-light text-foreground/40">
                   per person
                 </p>
               </div>
-              <div aria-hidden="true" className="w-px bg-paper-line" />
-              <div className="px-6 py-5 text-center sm:px-10">
-                <p className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-                  Dinner
-                </p>
-                <p className="mt-1 font-serif text-3xl font-light text-red sm:text-4xl">
+              <div aria-hidden="true" className="w-px bg-cream-line" />
+              <div className="flex-1 px-4 py-5 text-center sm:px-8">
+                <p className="eyebrow">Dinner</p>
+                <p className="mt-1 font-serif text-title font-light text-ember-red">
                   $30.99
                 </p>
-                <p className="mt-1 font-sans text-xs font-light text-foreground/40">
+                <p className="mt-1 font-sans text-eyebrow font-light text-foreground/40">
                   per person
                 </p>
               </div>
-              <div aria-hidden="true" className="w-px bg-paper-line" />
-              <div className="px-6 py-5 text-center sm:px-10">
-                <p className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-                  Seating
-                </p>
-                <p className="mt-1 font-serif text-3xl font-light text-ember-deep sm:text-4xl">
+              <div aria-hidden="true" className="w-px bg-cream-line" />
+              <div className="flex-1 px-4 py-5 text-center sm:px-8">
+                <p className="eyebrow">Seating</p>
+                <p className="mt-1 font-serif text-title font-light text-ember-deep">
                   90 min
                 </p>
-                <p className="mt-1 font-sans text-xs font-light text-foreground/40">
+                <p className="mt-1 font-sans text-eyebrow font-light text-foreground/40">
                   per table
                 </p>
               </div>
             </div>
 
-            <p className="mt-6 font-sans text-sm font-light text-foreground/50">
-              Walk-in only · No reservations needed
-            </p>
-            <p className="mt-2 font-sans text-sm font-light text-foreground/50">
-              Stop our clock at exactly{" "}
-              <span className="font-medium text-red">10.00 seconds</span>{" "}
-              and your next barbecue is free.
-            </p>
+            <div className="col-text mt-6">
+              <p className="font-sans text-eyebrow font-light text-foreground/50">
+                Walk-in only <Dot char="·" /> No reservations needed
+              </p>
+              <p className="mt-2 font-sans text-eyebrow font-light text-foreground/50">
+                Stop our clock at exactly{" "}
+                <span className="font-medium text-ember-red">10.00 seconds</span>{" "}
+                and your next barbecue is free.
+              </p>
+            </div>
           </div>
         </section>
 
         {/* Included strip — hairline dividers, no box */}
-        <section className="px-6 pb-4">
-          <div className="mx-auto max-w-4xl text-center">
-            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-              Included with every meal
-            </p>
-            <ul
-              className="flex flex-wrap items-center justify-center"
-              role="list"
-            >
-              {INCLUDED.map((label, i) => (
-                <li
-                  key={label}
-                  className={`px-5 py-1 font-sans text-sm font-light text-body ${
-                    i < INCLUDED.length - 1
-                      ? "border-r border-paper-line"
-                      : ""
-                  }`}
-                >
-                  {label}
-                </li>
-              ))}
-            </ul>
+        <section className="pb-4">
+          <div className="grid-page">
+            <div className="col-full">
+              <p className="eyebrow mb-4">Included with every meal</p>
+              <ul className="flex flex-wrap items-center" role="list">
+                {INCLUDED.map((label, i) => (
+                  <li
+                    key={label}
+                    className={`py-1 pr-5 font-sans text-copy font-light text-body ${
+                      i < INCLUDED.length - 1
+                        ? "mr-5 border-r border-cream-line"
+                        : ""
+                    }`}
+                  >
+                    {label}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </section>
 
@@ -631,44 +647,46 @@ export default function MenuPage() {
         <MenuJumpNav targets={JUMP_TARGETS} />
 
         {/* Categories */}
-        <div className="mx-auto max-w-7xl px-6 pt-12 pb-20">
-          <p className="mb-10 text-center font-sans text-base font-light text-foreground/55">
-            Everything is included in the all-you-can-eat price. No per-item
-            charges.
-          </p>
+        <div className="grid-page pt-12 pb-20">
+          <div className="col-full">
+            <p className="copy measure mb-10">
+              Everything is included in the all-you-can-eat price. No per-item
+              charges.
+            </p>
 
-          {CATEGORIES.map((category) => (
-            <CategorySection key={category.name} category={category} />
-          ))}
+            {CATEGORIES.map((category) => (
+              <CategorySection key={category.name} category={category} />
+            ))}
 
-          {/* Upgraded tiers */}
-          <TierSection
-            label="Premium"
-            title="Premium Selection"
-            blurb="The good stuff. Included for everyone at the table, same as the rest of the menu."
-            items={PREMIUM}
-            variant="premium"
-          />
+            {/* Upgraded tiers */}
+            <TierSection
+              label="Premium"
+              title="Premium Selection"
+              blurb="The good stuff. Included for everyone at the table, same as the rest of the menu."
+              items={PREMIUM}
+              variant="premium"
+            />
+          </div>
         </div>
 
-        {/* Info band. The one seam on this page: it arrives carrying the cream
-            of the category list above and settles onto its own paper tone. */}
-        <section
-          className="relative bg-paper px-6 py-20"
-          data-seam-morph
-          data-from="#FAF4EC"
-          data-to="#F3EBDD"
-        >
-          <div className="mx-auto max-w-5xl text-center">
-            <h2 className="font-serif text-4xl font-light text-foreground md:text-5xl">
-              Come Hungry
-            </h2>
-            <div className="mt-12 grid gap-10 sm:grid-cols-3">
+        {/* Info band. It used to sit on its own paper tone with a seam-morph
+            into it, which made a third ground; the site has exactly two, so it
+            shares the page's cream and is held by its own composition and the
+            padding scale instead. */}
+        <section className="relative py-section md:py-section-lg">
+          <div className="grid-page">
+            <div className="col-text">
+              {/* The band's one voice from the mural — the hahoe mask. Full
+                  colour, like the mural itself. */}
+              <MuralMark mark="mask" size={78} className="mb-6" />
+              <h2 className="h2-scale">
+                Come <em className="italic text-pink">Hungry</em>
+              </h2>
+            </div>
+            <div className="col-full mt-12 grid gap-10 sm:grid-cols-3">
               <div>
-                <h3 className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-                  Hours
-                </h3>
-                <p className="mt-4 font-sans text-sm font-light leading-relaxed text-foreground/70">
+                <h3 className="eyebrow">Hours</h3>
+                <p className="copy mt-4">
                   {HOURS.map(({ short, time }, i) => (
                     <span key={short}>
                       {short} {time}
@@ -678,25 +696,21 @@ export default function MenuPage() {
                 </p>
               </div>
               <div>
-                <h3 className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-                  Location
-                </h3>
-                <p className="mt-4 font-sans text-sm font-light leading-relaxed text-foreground/70">
+                <h3 className="eyebrow">Location</h3>
+                <p className="copy mt-4">
                   {ADDRESS.street}
                   <br />
                   {ADDRESS.region}
                 </p>
               </div>
               <div>
-                <h3 className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-                  Walk-In
-                </h3>
-                <p className="mt-4 font-sans text-sm font-light leading-relaxed text-foreground/70">
+                <h3 className="eyebrow">Walk-In</h3>
+                <p className="copy mt-4">
                   No reservations
                   <br />
                   <a
                     href={PHONE.href}
-                    className="inline-flex min-h-11 items-center font-semibold text-ember-deep transition-colors hover:text-ember"
+                    className="inline-flex min-h-11 items-center font-semibold text-ember-deep transition-colors duration-[var(--dur-base)] ease-house hover:text-ember"
                   >
                     {PHONE.display}
                   </a>

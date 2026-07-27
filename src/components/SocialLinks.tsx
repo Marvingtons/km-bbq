@@ -1,6 +1,10 @@
 import { SOCIALS, type SocialKey } from "@/lib/restaurant";
 
-// One social-links component, used by both the footer (on charcoal) and the
+// INTERACTIVE, so they take the control radius: every one of these is a link
+// to a profile, not an ornament. Round rather than pill only because the target
+// is square — same token, same rule.
+//
+// One social-links component, used by both the footer (on plum-ink) and the
 // contact section (on cream). Same chip shape, size, and lift+ember-glow hover
 // everywhere — only the resting surface colors switch by `tone` so the chip
 // reads on either background. Instagram, TikTok, and Yelp appear in both.
@@ -52,8 +56,10 @@ const ICONS: Record<SocialKey, React.ReactNode> = {
 
 const TONE = {
   dark: "border-white/10 bg-white/[0.03] text-white/60 hover:border-ember/60 hover:bg-ember/10 hover:text-ember",
+  // ember-deep on the light tone, not ember: these are 1.5px-stroke glyphs, and
+  // ember on white is 2.5:1. ember-deep is the same colour's AA-safe form.
   light:
-    "border-paper-line bg-white text-body hover:border-ember/60 hover:bg-ember/10 hover:text-ember",
+    "border-cream-line bg-white text-body hover:border-ember/60 hover:bg-ember/10 hover:text-ember-deep",
 } as const;
 
 export function SocialLinks({
@@ -72,7 +78,7 @@ export function SocialLinks({
           aria-label={label}
           target="_blank"
           rel="noopener noreferrer"
-          className={`flex h-11 w-11 items-center justify-center rounded-full border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_-8px] hover:shadow-ember/40 ${TONE[tone]}`}
+          className={`flex h-11 w-11 items-center justify-center rounded-control border transition-all duration-[var(--dur-base)] ease-house hover:-translate-y-1 hover:shadow-[0_8px_24px_-8px] hover:shadow-ember/40 ${TONE[tone]}`}
         >
           {ICONS[key]}
         </a>

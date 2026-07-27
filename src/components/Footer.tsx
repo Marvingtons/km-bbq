@@ -1,5 +1,7 @@
 import { Logo } from "./Logo";
 import { SocialLinks } from "./SocialLinks";
+import { SectionSeam } from "./SectionSeam";
+import { Dot } from "./Dot";
 import { PHONE, ADDRESS, HOURS, DIRECTIONS_URL } from "@/lib/restaurant";
 
 // Absolute hrefs so the footer works from any route: section links return to the
@@ -12,7 +14,12 @@ const NAV_LINKS = [
   { label: "Contact", href: "/#contact" },
 ];
 
-const label = "font-sans text-xs font-medium uppercase tracking-[0.3em] text-white/60";
+// The shared eyebrow metrics, with the colour overridden for this ground.
+// ember-deep (the eyebrow colour on cream) lands at 3.4:1 on plum-ink and fails
+// AA at 12px; ember passes at 7.4:1 but ember's job is interaction, and a
+// column label is not an affordance. So the footer keeps white/60 — 7.1:1,
+// measured — and matches every other eyebrow in size, weight and tracking.
+const label = "eyebrow text-white/60";
 
 // Every column opens with a fixed-height row so the eyebrow labels and the logo
 // share one top baseline and all following content starts on the same line.
@@ -46,46 +53,55 @@ export function Footer() {
     <footer
       // -mt-6 pulls the dark footer up under the cream by a hair so the two
       // surfaces overlap rather than abut; SeamMotion lags the content inside
-      // as it enters. The footer's own ember hairline is the seam itself.
-      className="relative -mt-6 overflow-hidden bg-charcoal px-6 pb-10 pt-14 text-white/70"
+      // as it enters. The ember hairline on the seam is the divider.
+      //
+      // plum-ink, not the old neutral near-black. This is one of the two places
+      // the pink logo and the ember accent have to share a dark ground, and a
+      // neutral black rejects both — on a warm plum-ink they belong to the same
+      // world, and it echoes the purple already in the mural.
+      className="relative -mt-6 overflow-hidden bg-plum-ink pb-10 pt-14 text-white/70"
       role="contentinfo"
     >
-      {/* Top accent line: the one designed seam (Contact -> Footer). */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ember/60 to-transparent"
-      />
+      {/* The ground changes here (cream -> plum-ink), so the seam gets the
+          site's one transition device. */}
+      <SectionSeam />
       {/* Ambient warm glow for depth. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-ember/10 blur-[120px]"
       />
 
-      <div className="relative mx-auto max-w-7xl">
-        <div className="grid gap-12 md:grid-cols-12 md:gap-8">
+      <div className="grid-page relative gap-y-12">
           {/* Brand. The socials used to be pushed to the column's foot with
               md:mt-auto, which only worked while this was the tallest column;
               once Explore went back to a single column it stretched a 100px
               hole between the tagline and the icons. They sit directly under
               the tagline now and the column simply ends where it ends. */}
-          <div className="flex flex-col md:col-span-4">
+          <div className="col-span-full flex flex-col md:col-span-4">
             <div className={topRow}>
               <Logo size={148} className="opacity-90" />
             </div>
-            <p className="mt-5 max-w-xs font-sans text-sm font-light leading-relaxed text-white/60">
+            <p className="copy mt-5 max-w-xs text-white/60">
               All-you-can-eat Korean BBQ in Oceanside, California. You pick the
               cuts and grill them yourself right at your table.
             </p>
             <SocialLinks tone="dark" className="mt-6" />
+            {/* NO mural spot mark here, deliberately. The mural's white is
+                keyed out of the artwork itself — the tiger's teeth, the eye
+                highlights — so on cream those gaps read as the page showing
+                through and on this plum-ink ground they read as holes punched
+                in the animal. The marks live on the cream sections; the footer
+                carries the logo, which is the brand mark that does work on a
+                dark surface. See tools/extract-mural-marks.mjs. */}
           </div>
 
           {/* Visit — NAP block + actions */}
-          <div className="md:col-span-3">
+          <div className="col-span-full md:col-span-3">
             <div className={topRow}>
               <h2 className={label}>Visit</h2>
             </div>
-            <address className="mt-5 not-italic font-sans text-sm font-light leading-relaxed text-white/70">
-              KM.BBQ
+            <address className="copy mt-5 not-italic text-white/70">
+              KM<Dot />BBQ
               <br />
               {ADDRESS.street}
               <br />
@@ -94,9 +110,9 @@ export function Footer() {
             <div className="mt-5 flex flex-col gap-3">
               <a
                 href={PHONE.href}
-                className="group inline-flex min-h-11 items-center gap-2 font-sans text-base font-semibold text-white/90 transition-colors hover:text-ember"
+                className="group inline-flex min-h-11 items-center gap-2 font-sans text-copy font-semibold text-white/90 transition-colors duration-[var(--dur-base)] ease-house hover:text-ember"
               >
-                <span className="text-ember transition-transform duration-300 group-hover:scale-110">
+                <span className="text-ember transition-transform duration-[var(--dur-base)] ease-house group-hover:scale-110">
                   <PhoneIcon />
                 </span>
                 {PHONE.display}
@@ -105,12 +121,12 @@ export function Footer() {
                 href={DIRECTIONS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex min-h-11 w-fit items-center gap-1.5 font-sans text-sm font-medium text-ember transition-colors hover:text-white"
+                className="group inline-flex min-h-11 w-fit items-center gap-1.5 font-sans text-copy font-medium text-ember transition-colors duration-[var(--dur-base)] ease-house hover:text-white"
               >
                 Get directions
                 <span
                   aria-hidden="true"
-                  className="transition-transform duration-300 group-hover:translate-x-1"
+                  className="transition-transform duration-[var(--dur-base)] ease-house group-hover:translate-x-1"
                 >
                   →
                 </span>
@@ -119,11 +135,11 @@ export function Footer() {
           </div>
 
           {/* Hours */}
-          <div className="md:col-span-3">
+          <div className="col-span-full md:col-span-3">
             <div className={topRow}>
               <h2 className={label}>Hours</h2>
             </div>
-            <dl className="mt-5 space-y-2 font-sans text-sm">
+            <dl className="mt-5 space-y-2 font-sans text-copy">
               {HOURS.map(({ days, time }) => (
                 <div key={days} className="flex flex-col">
                   <dt className="font-medium text-white/80">{days}</dt>
@@ -131,13 +147,13 @@ export function Footer() {
                 </div>
               ))}
             </dl>
-            <p className="mt-4 font-sans text-xs font-light text-white/50">
+            <p className="mt-4 font-sans text-eyebrow font-light text-white/50">
               Walk-in only. No reservations needed.
             </p>
           </div>
 
           {/* Explore */}
-          <nav aria-label="Footer navigation" className="md:col-span-2">
+          <nav aria-label="Footer navigation" className="col-span-full md:col-span-2">
             <div className={topRow}>
               <h2 className={label}>Explore</h2>
             </div>
@@ -150,11 +166,11 @@ export function Footer() {
                 <li key={navLabel}>
                   <a
                     href={href}
-                    className="group inline-flex min-h-11 items-center font-sans text-sm text-white/70 transition-colors hover:text-white"
+                    className="group inline-flex min-h-11 items-center font-sans text-copy text-white/70 transition-colors duration-[var(--dur-base)] ease-house hover:text-white"
                   >
                     <span
                       aria-hidden="true"
-                      className="mr-0 h-px w-0 bg-ember transition-all duration-300 group-hover:mr-2 group-hover:w-4"
+                      className="mr-0 h-px w-0 bg-ember transition-all duration-[var(--dur-base)] ease-house group-hover:mr-2 group-hover:w-4"
                     />
                     {navLabel}
                   </a>
@@ -162,36 +178,38 @@ export function Footer() {
               ))}
             </ul>
           </nav>
-        </div>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-white/55 sm:flex-row">
-          <p className="font-sans text-xs">
-            &copy; {year} KM.BBQ. All rights reserved.
+        {/* The legal row is a grid child too, so it lines up with the brand
+            column above it rather than with a container of its own. */}
+        <div className="col-span-full mt-10 flex flex-col justify-between gap-3 border-t border-white/10 pt-6 text-white/55 sm:flex-row sm:items-center">
+          <p className="font-sans text-eyebrow">
+            &copy; {year} KM<Dot />BBQ. All rights reserved.
           </p>
-          {/* flex-wrap + centred so the legal links wrap as whole phrases at
-              375 instead of breaking mid-label. */}
-          <div className="flex flex-wrap items-center justify-center gap-x-5 font-sans text-xs">
+          {/* flex-wrap so the legal links wrap as whole phrases at 375 instead
+              of breaking mid-label. */}
+          <div className="flex flex-wrap items-center gap-x-5 font-sans text-eyebrow">
             <a
               href="/privacy"
-              className="inline-flex min-h-11 items-center transition-colors hover:text-white"
+              className="inline-flex min-h-11 items-center transition-colors duration-[var(--dur-base)] ease-house hover:text-white"
             >
               Privacy Policy
             </a>
             <a
               href="/terms"
-              className="inline-flex min-h-11 items-center transition-colors hover:text-white"
+              className="inline-flex min-h-11 items-center transition-colors duration-[var(--dur-base)] ease-house hover:text-white"
             >
               Terms of Service
             </a>
-            {/* Decorative divider only when the row sits on one line. */}
-            <span aria-hidden="true" className="hidden text-white/25 sm:inline">
+            {/* Decorative divider only when the row sits on one line. Pink:
+                separators are punctuation, which is pink's second job. */}
+            <span aria-hidden="true" className="hidden text-pink sm:inline">
               |
             </span>
             <a
               href="https://norvix.ai/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-11 items-center transition-colors hover:text-ember"
+              className="inline-flex min-h-11 items-center transition-colors duration-[var(--dur-base)] ease-house hover:text-ember"
             >
               Site by Norvix
             </a>

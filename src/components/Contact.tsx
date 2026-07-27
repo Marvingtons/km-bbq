@@ -1,58 +1,76 @@
 import { ScrollReveal } from "./ScrollReveal";
 import { SocialLinks } from "./SocialLinks";
-import { ContactMap } from "./ContactMap";
+import { ContactMap, DirectionsLink } from "./ContactMap";
+import { MuralMark } from "./MuralMark";
 import { HOURS, ADDRESS, PHONE, DIRECTIONS_URL } from "@/lib/restaurant";
 
 // The two things a visitor is here for — when you are open, and where you are —
 // sit side by side as a pair of cards rather than as two stacked runs of text in
-// a narrow column. The card treatment is the site's own: paper-line hairline,
-// warm shadow, same radius as the map below.
+// a narrow column.
+//
+// SQUARE, per the radius rule: these hold only type, which makes them
+// structural surfaces rather than frames around an image. The photo radius is
+// reserved for things that ARE a picture or hold one.
+//
 // p-5 at 375: at p-7 the card walls left the hours rows ~270px of usable width
 // and both the day range and the time wrapped mid-phrase.
 const card =
-  "h-full rounded-2xl border border-paper-line bg-white/70 p-5 shadow-warm sm:p-8";
+  "h-full rounded-surface border border-cream-line bg-white/70 p-5 shadow-warm sm:p-8";
 
 export function Contact() {
   return (
     <section
       id="contact"
-      className="relative bg-cream px-6 py-24"
+      className="grain relative bg-cream py-section md:py-section-lg"
       aria-labelledby="contact-heading"
     >
-      {/* max-w-5xl, not 7xl: wide enough for the card pair and the map to feel
-          like one composition, narrow enough that neither is adrift in cream. */}
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-12 text-center">
+      <div className="grid-page gap-y-6">
+        {/* Eyebrow, heading and body all start at column 1, like every other
+            section. The mark sits above them in the same column. */}
+        <div className="col-text mb-6">
+          {/* This section's one voice from the mural — the pine, the motif that
+              reads as a place rather than a dish. Full colour, like the mural
+              itself. */}
           <ScrollReveal>
-            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-              Find us
-            </p>
+            <MuralMark mark="pine" size={84} className="mb-5" />
+          </ScrollReveal>
+          <ScrollReveal delay={0.03}>
+            <p className="eyebrow mb-4">Find us</p>
           </ScrollReveal>
           <ScrollReveal delay={0.05}>
-            <h2
-              id="contact-heading"
-              className="font-serif text-4xl font-light text-foreground md:text-5xl"
-            >
+            {/* NOTE: the only h2 on the site with no italic accent word. "Stop
+                by" is two function words; emphasising either reads as a typo
+                rather than as emphasis, and inventing a third word to italicise
+                would be worse than the gap. Left deliberately plain. */}
+            <h2 id="contact-heading" className="h2-scale">
               Stop by
             </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.08}>
+            {/* One sentence. The first half of this line used to name the
+                street, which the address block directly beneath it already
+                does. */}
+            <p className="copy measure mt-4">
+              Walk in whenever we are open.
+            </p>
           </ScrollReveal>
         </div>
 
         {/* items-stretch + h-full on the cards so the pair shares one height
             whatever the hours table does. */}
-        <div className="grid items-stretch gap-6 md:grid-cols-2">
+        <div className="col-full grid items-stretch gap-6 md:grid-cols-2">
           <ScrollReveal className="h-full">
             <div className={card}>
-              <h3 className="mb-5 font-serif text-2xl font-light text-foreground">
+              <h3 className="mb-5 font-serif text-lead font-light text-foreground">
                 Hours
               </h3>
               <dl className="space-y-3">
                 {HOURS.map(({ days, time }) => (
                   <div
                     key={days}
-                    className="flex items-start justify-between gap-3 border-b border-paper-line pb-3 font-sans text-sm last:border-b-0 last:pb-0"
+                    className="flex items-start justify-between gap-3 border-b border-cream-line pb-3 font-sans text-copy last:border-b-0 last:pb-0"
                   >
-                    <dt className="text-foreground/70">{days}</dt>
+                    <dt className="font-light text-foreground/70">{days}</dt>
                     {/* The time is the answer; never let it break across
                         lines even when the day range does. */}
                     <dd className="whitespace-nowrap font-medium text-foreground">
@@ -61,7 +79,7 @@ export function Contact() {
                   </div>
                 ))}
               </dl>
-              <p className="mt-5 font-sans text-xs font-light text-foreground/50">
+              <p className="mt-5 font-sans text-eyebrow font-light text-foreground/50">
                 Walk-in only. No reservations needed.
               </p>
             </div>
@@ -69,13 +87,13 @@ export function Contact() {
 
           <ScrollReveal delay={0.05} className="h-full">
             <div className={card}>
-              <h3 className="mb-4 font-serif text-2xl font-light text-foreground">
+              <h3 className="mb-4 font-serif text-lead font-light text-foreground">
                 Location
               </h3>
               {/* Both lines are live: the address opens maps, the number dials.
                   On a phone these are the two things anyone is here for, so
                   neither should be plain text. */}
-              <address className="font-sans text-sm font-light not-italic leading-relaxed text-foreground/70">
+              <address className="copy not-italic text-foreground/70">
                 <a
                   href={DIRECTIONS_URL}
                   target="_blank"
@@ -99,13 +117,17 @@ export function Contact() {
           </ScrollReveal>
         </div>
 
-        {/* Map runs the full width of the section container, under both cards.
-            An interactive Google embed, lazy-loaded so it stays out of the LCP
-            path. The card radius is clipped by the wrapper's overflow-hidden,
-            so the iframe inherits the system shape. */}
-        <ScrollReveal delay={0.08}>
-          <div className="mt-6 aspect-[16/10] w-full overflow-hidden rounded-2xl border border-paper-line shadow-warm md:aspect-[21/9]">
+        {/* Map runs the full track, under both cards. An interactive Google
+            embed, lazy-loaded so it stays out of the LCP path. SQUARE: it is a
+            structural surface, not a photograph. */}
+        <ScrollReveal delay={0.08} className="col-full">
+          <div className="aspect-[16/10] w-full overflow-hidden rounded-surface border border-cream-line shadow-warm md:aspect-[21/9]">
             <ContactMap />
+          </div>
+          {/* Under the map, not floating on it — see DirectionsLink. Aligned to
+              the same column edge as the heading, not centred. */}
+          <div className="mt-4 flex">
+            <DirectionsLink />
           </div>
         </ScrollReveal>
       </div>

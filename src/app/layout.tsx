@@ -132,7 +132,7 @@ export default function RootLayout({
             at the top-left. Jumps past the nav to the page's main content. */}
         <a
           href="#main-content"
-          className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-[300] focus-visible:rounded-full focus-visible:bg-ember-deep focus-visible:px-5 focus-visible:py-2 focus-visible:font-sans focus-visible:text-sm focus-visible:font-medium focus-visible:text-white focus-visible:shadow-warm-lg"
+          className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-[300] focus-visible:rounded-control focus-visible:bg-ember focus-visible:px-5 focus-visible:py-2 focus-visible:font-sans focus-visible:text-copy focus-visible:font-medium focus-visible:text-ink focus-visible:shadow-warm-lg"
         >
           Skip to content
         </a>

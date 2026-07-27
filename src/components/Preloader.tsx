@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { Logo } from "./Logo";
-import { PRELOADER } from "@/lib/motion";
+import { MOTION, PRELOADER } from "@/lib/motion";
 
 // The overlay's markup is ALWAYS server-rendered, so it is present and painted
 // in the very first frame. Whether it is actually shown is decided by the
@@ -115,14 +115,14 @@ export function Preloader() {
       {
         autoAlpha: 0,
         scale: PRELOADER.exitLockupScale,
-        duration: 0.5,
-        ease: "power2.out",
+        duration: MOTION.dur.slow,
+        ease: MOTION.gsapEase,
       },
       "exit"
     );
     tl.to(
       q(".pre-eyebrow"),
-      { autoAlpha: 0, duration: 0.4, ease: "power2.out" },
+      { autoAlpha: 0, duration: MOTION.dur.base, ease: MOTION.gsapEase },
       "exit"
     );
     tl.to(
@@ -174,7 +174,10 @@ export function Preloader() {
         aria-hidden="true"
         className="pre-line mt-7 h-0.5 w-[120px] rounded-full bg-ember opacity-0"
       />
-      <p className="pre-eyebrow mr-[-0.34em] mt-6 font-sans text-xs font-medium uppercase tracking-[0.34em] text-ember-deep opacity-0">
+      {/* The shared eyebrow, so the loading screen and the page speak the same
+          language. The negative right margin cancels the trailing letter-space
+          so the word stays optically centred. */}
+      <p className="pre-eyebrow eyebrow mr-[-0.3em] mt-6 opacity-0">
         Korean Barbecue
       </p>
     </div>

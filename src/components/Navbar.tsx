@@ -63,9 +63,21 @@ export function Navbar() {
   const close = useCallback(() => setMenuOpen(false), []);
 
   // Close on route change, so tapping a link navigates and leaves the overlay.
-  useEffect(() => {
+  //
+  // Adjusted DURING RENDER rather than in an effect. `setMenuOpen(false)` in a
+  // useEffect keyed on the pathname is the pattern React now flags
+  // (react-hooks/set-state-in-effect): it commits the new route with the
+  // overlay still open, then immediately re-renders to close it, so there is a
+  // real frame where the old menu sits on top of the new page — and on the
+  // server/client boundary that is a hydration mismatch waiting to happen.
+  // Comparing the rendered path to the current one and resetting inline lets
+  // React discard the in-progress render before it ever commits, which is the
+  // documented replacement for this exact case.
+  const [renderedPath, setRenderedPath] = useState(pathname);
+  if (renderedPath !== pathname) {
+    setRenderedPath(pathname);
     setMenuOpen(false);
-  }, [pathname]);
+  }
 
   // Overlay behaviour while open: lock scroll, trap focus, Escape closes, and
   // focus returns to the trigger on close.
@@ -160,7 +172,7 @@ export function Navbar() {
             the whole video. */}
         <div
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-0 bg-gradient-to-b from-black/45 via-black/20 to-transparent transition-opacity duration-500 ${
+          className={`pointer-events-none absolute inset-0 bg-gradient-to-b from-black/45 via-black/20 to-transparent transition-opacity duration-[var(--dur-slow)] ease-house ${
             onLight ? "opacity-0" : "opacity-100"
           } motion-reduce:transition-none`}
         />
@@ -168,23 +180,23 @@ export function Navbar() {
             since the overlay is already a full cream field. */}
         <div
           aria-hidden="true"
-          className={`absolute inset-0 border-b border-black/[0.06] bg-cream/90 shadow-warm backdrop-blur-md transition-opacity duration-500 ${
+          className={`absolute inset-0 border-b border-black/[0.06] bg-cream/90 shadow-warm backdrop-blur-md transition-opacity duration-[var(--dur-slow)] ease-house ${
             solid && !menuOpen ? "opacity-100" : "opacity-0"
           } motion-reduce:transition-none`}
         />
 
         <nav
-          className="relative mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-12"
+          className="track relative flex items-center justify-between py-4"
           aria-label="Main navigation"
         >
           <Link
             href="/"
             aria-label="KM.BBQ, back to top"
-            className="flex min-h-11 items-center transition-opacity duration-300 hover:opacity-80"
+            className="flex min-h-11 items-center transition-opacity duration-[var(--dur-base)] ease-house hover:opacity-80"
           >
             <Logo
               size={onLight ? 104 : 116}
-              className="transition-all duration-500 ease-out"
+              className="transition-all duration-[var(--dur-slow)] ease-house"
             />
           </Link>
 
@@ -201,17 +213,21 @@ export function Navbar() {
                   <Link
                     href={hrefFor(link)}
                     aria-current={isActive ? "page" : undefined}
-                    className={`group relative inline-block py-1 text-[11.5px] font-medium uppercase tracking-[0.16em] transition-colors duration-300 ${linkColor(
+                    className={`group relative inline-block py-1 text-eyebrow font-medium uppercase tracking-[0.16em] transition-colors duration-[var(--dur-base)] ease-house ${linkColor(
                       isActive
                     )}`}
                   >
                     {link.label}
-                    {/* The one active/hover indicator: an ember hairline that
-                        grows from the left. Same treatment in both scroll
-                        states and in the mobile overlay. */}
+                    {/* The one indicator, in two colours doing two jobs.
+                        ACTIVE is pink: it reports identity and position, which
+                        is the one nav element that is not an affordance, so it
+                        is the correct exception. HOVER is ember, like every
+                        other interaction on the site. The two never overlap —
+                        the hover rule is only ever drawn on an inactive link,
+                        so pink never becomes a hover state. */}
                     <span
-                      className={`pointer-events-none absolute -bottom-0.5 left-0 h-px w-full origin-left bg-ember transition-transform duration-[250ms] ease-out group-hover:scale-x-100 motion-reduce:transition-none ${
-                        isActive ? "scale-x-100" : "scale-x-0"
+                      className={`pointer-events-none absolute -bottom-0.5 left-0 h-px w-full origin-left transition-transform duration-[var(--dur-quick)] ease-house group-hover:scale-x-100 motion-reduce:transition-none ${
+                        isActive ? "scale-x-100 bg-pink" : "scale-x-0 bg-ember"
                       }`}
                     />
                   </Link>
@@ -222,15 +238,22 @@ export function Navbar() {
             {/* CTA. The phone number rather than a "Find us" link: Contact is
                 already in the bar above, so a second route link would be
                 redundant, while calling is the one action the bar cannot
-                otherwise offer. Outline pill in both states, ember on cream and
-                white over the video. */}
+                otherwise offer.
+
+                Ember border, ink label. It used to be an ember-DEEP outline
+                with an ember-deep label, which reads as gold/tan and matches
+                nothing else on the page — and it is on every screen, so it did
+                disproportionate damage. Ember is the interaction colour, so the
+                border is ember; the label is ink because ember on cream is
+                2.3:1 and this is an 11.5px letter-spaced cap. Ink on cream is
+                15.9:1 at rest and ink on ember is 7:1 filled. */}
             <li className="ms-3 xl:ms-5">
               <a
                 href={PHONE.href}
-                className={`inline-flex min-h-11 items-center rounded-full border px-5 py-2 text-[11.5px] font-semibold uppercase tracking-[0.14em] transition-colors duration-300 ${
+                className={`inline-flex min-h-11 items-center rounded-control border px-5 py-2 text-eyebrow font-semibold uppercase tracking-[0.14em] transition-colors duration-[var(--dur-base)] ease-house ${
                   solid
-                    ? "border-ember-deep text-ember-deep hover:bg-ember-deep hover:text-white"
-                    : "border-white/70 text-white hover:bg-white hover:text-foreground"
+                    ? "border-ember text-ink hover:bg-ember hover:text-ink"
+                    : "border-white/70 text-white hover:bg-white hover:text-ink"
                 }`}
               >
                 {PHONE.display}
@@ -257,7 +280,7 @@ export function Navbar() {
               ].map((bar, i) => (
                 <span
                   key={i}
-                  className={`absolute left-0 h-0.5 w-6 rounded-full transition-all duration-300 ease-out motion-reduce:transition-none ${
+                  className={`absolute left-0 h-0.5 w-6 rounded-control transition-all duration-[var(--dur-base)] ease-house motion-reduce:transition-none ${
                     bar.top
                   } ${menuOpen ? `bg-foreground ${bar.open}` : onLight ? "bg-foreground" : "bg-white"}`}
                 />
@@ -277,7 +300,7 @@ export function Navbar() {
           <motion.div
             id="mobile-menu"
             ref={overlayRef}
-            className="fixed inset-0 z-[55] flex flex-col overflow-y-auto bg-cream px-6 pb-8 pt-24 lg:hidden"
+            className="fixed inset-0 z-[55] flex flex-col overflow-y-auto bg-cream pb-8 pt-24 lg:hidden"
             initial={reduce ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={reduce ? { opacity: 1 } : { opacity: 0 }}
@@ -288,7 +311,7 @@ export function Navbar() {
           >
             {/* 1 — the links, as large display type. This is where the serif
                 gets to be big. */}
-            <ul className="flex flex-col" role="list">
+            <ul className="track flex flex-col" role="list">
               {NAV_LINKS.map((link, i) => {
                 const isActive = active === link.id;
                 return (
@@ -306,13 +329,16 @@ export function Navbar() {
                       href={hrefFor(link)}
                       onClick={close}
                       aria-current={isActive ? "page" : undefined}
-                      className="group relative inline-flex min-h-12 items-center py-1.5 font-serif text-[2.5rem] font-light leading-tight text-foreground transition-colors duration-300 sm:text-5xl"
+                      className="group relative inline-flex min-h-12 items-center py-1.5 font-serif text-h2 font-light leading-tight text-foreground transition-colors duration-[var(--dur-base)] ease-house"
                     >
                       {link.label}
+                      {/* Same job as the desktop underline — position, not
+                          affordance — and it is literally a dot glyph, so it
+                          is pink. */}
                       {isActive && (
                         <span
                           aria-hidden="true"
-                          className="ml-3 inline-block h-1.5 w-1.5 rounded-full bg-ember align-middle"
+                          className="ml-3 inline-block h-1.5 w-1.5 rounded-control bg-pink align-middle"
                         />
                       )}
                     </Link>
@@ -323,7 +349,7 @@ export function Navbar() {
 
             {/* 2 — the two things a phone visitor actually needs. */}
             <motion.div
-              className="mt-8 flex flex-col gap-3"
+              className="track mt-8 flex flex-col gap-3"
               initial={reduce ? false : { opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={
@@ -334,7 +360,7 @@ export function Navbar() {
             >
               <a
                 href={PHONE.href}
-                className="inline-flex min-h-12 items-center justify-center rounded-full bg-ember-deep px-6 py-3 font-sans text-sm font-semibold text-white transition-colors duration-300 hover:bg-foreground"
+                className="inline-flex min-h-12 items-center justify-center rounded-control bg-ember px-6 py-3 font-sans text-copy font-semibold text-ink transition-colors duration-[var(--dur-base)] ease-house hover:bg-ink hover:text-cream"
               >
                 Call {PHONE.display}
               </a>
@@ -342,7 +368,7 @@ export function Navbar() {
                 href={DIRECTIONS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-12 items-center justify-center rounded-full border border-ember-deep px-6 py-3 font-sans text-sm font-semibold text-ember-deep transition-colors duration-300 hover:bg-ember-deep hover:text-white"
+                className="inline-flex min-h-12 items-center justify-center rounded-control border border-ember px-6 py-3 font-sans text-copy font-semibold text-ink transition-colors duration-[var(--dur-base)] ease-house hover:bg-ember"
               >
                 Get directions
               </a>
@@ -350,7 +376,7 @@ export function Navbar() {
 
             {/* 3 — small footer strip: hours summary + the shared socials. */}
             <motion.div
-              className="mt-auto pt-10"
+              className="track mt-auto pt-10"
               initial={reduce ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={
@@ -359,9 +385,9 @@ export function Navbar() {
                   : { delay: 0.2 + NAV_LINKS.length * 0.055, duration: 0.4 }
               }
             >
-              <dl className="font-sans text-sm text-body">
+              <dl className="font-sans text-copy text-body">
                 {HOURS.map(({ short, time }) => (
-                  <div key={short} className="flex justify-between border-t border-paper-line py-2">
+                  <div key={short} className="flex justify-between border-t border-cream-line py-2">
                     <dt>{short}</dt>
                     <dd className="font-medium text-foreground">{time}</dd>
                   </div>

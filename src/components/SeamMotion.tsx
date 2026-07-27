@@ -18,8 +18,15 @@ gsap.registerPlugin(ScrollTrigger);
    sections (static backgrounds, no parallax) — the timelines are never built
    at all.
 
-   `calm` (used on /menu) keeps only the seam-safe effect, background
-   continuity, and skips parallax and handoffs in the dense list content.
+   `calm` (used on /menu) skips parallax and the handoffs, which belong to the
+   home page's composed sections rather than to a dense list.
+
+   NOTE: the background-continuity pass that used to live here (scrubbing each
+   flagged section from the previous section's tone to its own) is gone. It
+   existed to soften a cream -> paper -> cream sequence of section grounds; the
+   page now has exactly two grounds, cream and plum-ink, and each of the two
+   changes between them is marked by the ember hairline instead. There is
+   nothing left to morph.
 
    NOTE ON STRUCTURE: the original version of this ran across six boundaries,
    including one between the About mural and House Favorites. Those are one
@@ -34,35 +41,12 @@ export function SeamMotion({ calm = false }: { calm?: boolean }) {
 
     mm.add(MOTION_OK, () => {
       const sel = (s: string) => document.querySelector<HTMLElement>(s);
-      // Boundary zones are short and sit in the upper viewport, so a seam
-      // resolves as it arrives rather than trailing the whole section.
-      const boundaryZone = {
-        start: "top bottom",
-        end: "top 70%",
-        scrub: true,
-      } as const;
-
-      // 1 — BACKGROUND CONTINUITY. Each flagged section scrubs its background
-      // from the previous section's tone (matched at the seam) to its own base
-      // tone over the first ~30vh, so the cream family breathes instead of
-      // switching panels. background-color only.
-      gsap.utils.toArray<HTMLElement>("[data-seam-morph]").forEach((el) => {
-        gsap.fromTo(
-          el,
-          { backgroundColor: el.dataset.from },
-          {
-            backgroundColor: el.dataset.to,
-            ease: "none",
-            immediateRender: true,
-            scrollTrigger: { trigger: el, ...boundaryZone },
-          }
-        );
-      });
 
       if (calm) return; // /menu stays calm past this point.
 
-      // 3 — DEPTH. Decorative background textures drift at ~0.85x scroll so the
-      // boundary zones feel layered. Body copy never moves. transform only.
+      // 3 — DEPTH. The mural spot marks drift at slightly off-scroll pace so
+      // they sit behind the copy rather than on the same plane. Body copy never
+      // moves. transform only.
       gsap.utils.toArray<HTMLElement>("[data-seam-parallax]").forEach((el) => {
         const amt = Number(el.dataset.parallax ?? 6);
         gsap.fromTo(

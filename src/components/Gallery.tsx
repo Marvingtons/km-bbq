@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef } from "react";
 import Image from "next/image";
+import { MuralMark } from "./MuralMark";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { MOTION } from "@/lib/motion";
@@ -188,63 +189,53 @@ export function Gallery() {
   );
 
   // overflow-hidden keeps the horizontal motion inside the section — the page
-  // itself never scrolls sideways at any width. Plain cream surface: the
-  // ink-wash / gold-squiggle backdrop (a residual third visual language whose
-  // gold line also ran into the next section's seam) has been removed so the
-  // section reads as one cream field with the rest of the site.
+  // itself never scrolls sideways at any width.
+  //
+  // GROUND: cream. This section used to sit on the warmer paper tone and
+  // seam-morph into it, which made it a third ground; the page now has exactly
+  // two (cream and plum-ink) and this boundary is carried by rhythm instead of
+  // by a change of panel. The gallery-bg-warm ink wash went with it — a texture
+  // that exists in exactly one section is a stray voice, and the site-wide
+  // paper grain is the texture now.
   return (
     <section
       ref={sectionRef}
       id="gallery"
       aria-labelledby="gallery-heading"
-      className="relative overflow-hidden bg-paper py-20 motion-safe:md:py-0"
-      // Background continuity: arrives carrying About's cream and settles onto
-      // its own paper tone across the first ~30vh, so the boundary is a change
-      // of light rather than a change of panel.
-      data-seam-morph
-      data-from="#FAF4EC"
-      data-to="#F3EBDD"
+      className="grain relative overflow-hidden bg-cream py-section md:py-section-lg motion-safe:md:py-0"
     >
-
-      {/* Ink-wash atmosphere — a faint, warm supporting texture behind the
-          photos. The warmth and the white-drop are BAKED into the asset
-          (gallery-bg-warm.jpg), so this layer carries no filter and no
-          mix-blend and is therefore safe to parallax. Oversized (top -8%,
-          h 116%) so the drift never reveals a gap at either edge. */}
-      <div
-        aria-hidden="true"
-        data-seam-parallax
-        data-parallax="5"
-        className="pointer-events-none absolute inset-x-0 top-[-8%] z-0 h-[116%] bg-contain bg-center bg-no-repeat opacity-[0.16] md:bg-cover"
-        style={{ backgroundImage: "url(/images/gallery-bg-warm.jpg)" }}
-      />
-
-      <div className="relative z-10 flex flex-col gap-10 motion-safe:md:h-screen motion-safe:md:flex-row motion-safe:md:items-center motion-safe:md:gap-0">
-        {/* Heading — the fixed anchor. Sits centered on the left while the
-            photos stream past on desktop; flows on top on mobile. */}
-        <div className="shrink-0 px-6 text-center motion-safe:md:w-[32%] motion-safe:md:px-12 motion-safe:md:text-left">
-          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-            Gallery
-          </p>
-          <h2
-            id="gallery-heading"
-            className="font-serif text-4xl font-light text-foreground md:text-5xl"
-          >
-            A look inside
+      {/* The grid runs the section: heading in columns 1-4, photo row from
+          column 5 out to the right edge of the viewport. That right-edge break
+          is the ONE way media is allowed to leave the track, and it is the same
+          break here as anywhere else on the site. */}
+      <div className="grid-page relative z-10 gap-y-10 motion-safe:md:h-screen motion-safe:md:items-center motion-safe:md:gap-y-0">
+        {/* Heading — the fixed anchor. Sits on the left while the photos stream
+            past on desktop; flows on top on mobile. Left-aligned at both. */}
+        <div className="col-span-full motion-safe:md:col-span-4 motion-safe:md:pr-8">
+          <p className="eyebrow mb-4">Gallery</p>
+          <h2 id="gallery-heading" className="h2-scale">
+            A look <em className="italic text-pink">inside</em>
           </h2>
+          <p className="copy measure mt-4">
+            The room, the grills, and what comes off them.
+          </p>
           <a
             href="https://www.instagram.com/kmkoreanbbq/"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-8 inline-flex min-h-11 items-center font-sans text-sm font-medium text-ember-deep underline-offset-4 hover:underline"
+            className="mt-6 inline-flex min-h-11 items-center font-sans text-copy font-medium text-ember-deep underline-offset-4 hover:underline"
           >
             Follow us on Instagram →
           </a>
+          {/* This section's one voice from the mural: the table grill, which is
+              what the photographs in the row are of. Full colour, like the
+              mural — never graded, tinted or faded. */}
+          <MuralMark mark="grill" size={92} className="mt-6" />
         </div>
 
         {/* Photo row. On desktop the GSAP timeline translates this track; on
             mobile / reduced motion the wrapper is a native snap carousel. */}
-        <div className="overflow-x-auto px-6 [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory motion-safe:md:flex-1 motion-safe:md:overflow-hidden motion-safe:md:px-0 [&::-webkit-scrollbar]:hidden">
+        <div className="bleed-right col-span-full overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory motion-safe:md:col-span-8 motion-safe:md:overflow-hidden [&::-webkit-scrollbar]:hidden">
           {/* No permanent will-change here: it promotes the whole 8-tile row to
               its own layer for the life of the page, which costs more memory
               than it saves. GSAP promotes during the tween itself. */}
@@ -252,7 +243,9 @@ export function Gallery() {
             {GALLERY_ITEMS.map((item, i) => (
               <figure
                 key={item.id}
-                className="gallery-tile group relative h-[52vh] shrink-0 snap-start overflow-hidden rounded-xl bg-paper shadow-warm motion-safe:md:h-[60vh]"
+                // photo-grade carries the shared photography treatment and the
+                // one photo corner radius, so it also owns the clipping.
+                className="gallery-tile photo-grade group relative h-[52vh] shrink-0 snap-start bg-cream-deep shadow-warm motion-safe:md:h-[60vh]"
                 // Fixed height + aspect-ratio means every tile's box exists at
                 // its final size before its image arrives, so a load can never
                 // shift the row. This is what keeps CLS at 0 here.
@@ -275,10 +268,10 @@ export function Gallery() {
                 {/* Caption: dark bottom gradient + small letter-spaced label.
                     Visible per-tile on mobile; on desktop it starts hidden and
                     the timeline fades in only the centered tile's caption. */}
-                <figcaption className="gallery-caption pointer-events-none absolute inset-x-0 bottom-0 flex items-end bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 pt-12 opacity-100 motion-safe:md:opacity-0">
-                  <span className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-white">
-                    {item.caption}
-                  </span>
+                {/* z-[4]: above the photo-grade's lift (z-2) and grain (z-3)
+                    overlays, so the label is never washed by either. */}
+                <figcaption className="gallery-caption pointer-events-none absolute inset-x-0 bottom-0 z-[4] flex items-end bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 pt-12 opacity-100 motion-safe:md:opacity-0">
+                  <span className="eyebrow text-white">{item.caption}</span>
                 </figcaption>
               </figure>
             ))}
@@ -288,10 +281,8 @@ export function Gallery() {
         {/* Mobile-only scroll indicator. The desktop gallery is a pinned,
             scroll-driven track that needs no hint; on phones the photo row is a
             native horizontal swipe carousel, so cue the sideways gesture. */}
-        <div className="flex items-center justify-center gap-2 px-6 md:hidden">
-          <span className="font-sans text-xs font-medium uppercase tracking-[0.3em] text-foreground/60">
-            Swipe to explore
-          </span>
+        <div className="col-span-full flex items-center gap-2 md:hidden">
+          <span className="eyebrow text-foreground/60">Swipe to explore</span>
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"

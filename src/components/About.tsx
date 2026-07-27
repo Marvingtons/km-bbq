@@ -6,6 +6,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PillLink } from "./PillLink";
 import { ScrollReveal } from "./ScrollReveal";
+import { SectionSeam } from "./SectionSeam";
 import { MOTION, NAV_H } from "@/lib/motion";
 import { useScrollRefresh } from "@/lib/useScrollRefresh";
 
@@ -164,8 +165,8 @@ export function About() {
           // `power2.out` on the position, linear on the scale: the drift
           // decelerates into place (the "settle") while the scale keeps
           // resolving underneath it.
-          tl.to(leftHalf, { xPercent: -36, duration: 0.4, ease: "power2.out" }, 0);
-          tl.to(rightHalf, { xPercent: 36, duration: 0.4, ease: "power2.out" }, 0);
+          tl.to(leftHalf, { xPercent: -36, duration: 0.4, ease: MOTION.gsapEase }, 0);
+          tl.to(rightHalf, { xPercent: 36, duration: 0.4, ease: MOTION.gsapEase }, 0);
           tl.to([leftHalf, rightHalf], { scale: 1, duration: 0.4 }, 0);
 
           // DEPTH. The halves also drift vertically across the whole pin at
@@ -239,7 +240,7 @@ export function About() {
           gsap.from(textCol, {
             opacity: 0,
             y: MOTION.rise,
-            duration: MOTION.duration,
+            duration: MOTION.dur.reveal,
             ease: MOTION.gsapEase,
             scrollTrigger: {
               trigger: textCol[0],
@@ -255,7 +256,7 @@ export function About() {
           gsap.from(grillHead, {
             opacity: 0,
             y: MOTION.rise,
-            duration: MOTION.duration,
+            duration: MOTION.dur.reveal,
             ease: MOTION.gsapEase,
             scrollTrigger: {
               trigger: grillHead[0],
@@ -266,7 +267,7 @@ export function About() {
           gsap.from(grillDishes, {
             opacity: 0,
             y: MOTION.rise,
-            duration: MOTION.duration,
+            duration: MOTION.dur.reveal,
             stagger: MOTION.stagger,
             ease: MOTION.gsapEase,
             scrollTrigger: {
@@ -292,9 +293,12 @@ export function About() {
       ref={sectionRef}
       id="about"
       aria-labelledby="about-heading"
-      className="relative overflow-hidden bg-cream"
+      className="grain relative overflow-hidden bg-cream"
       style={{ ["--nav-h" as string]: `${NAV_H}px` } as React.CSSProperties}
     >
+      {/* Hero -> About is a ground change (plum-ink/video -> cream), so it gets
+          the site's one transition device. */}
+      <SectionSeam />
       {/* Mural stage (>= md only — hidden on mobile, where a simplified band
           renders instead, see below). The halves are `object-contain` so the
           whole illustration is always shown — nothing is cropped. The mural art
@@ -350,8 +354,9 @@ export function About() {
           horizontal band of the same transparent mural art (both halves meeting
           at center, on cream) sits above the story and enters with the shared
           reveal. Hidden at md+, where the pinned stage takes over. */}
-      <ScrollReveal className="md:hidden px-6 pt-10">
-        <div className="relative mx-auto flex aspect-[2/1] w-full max-w-md">
+      <ScrollReveal className="md:hidden pt-section">
+        <div className="grid-page">
+        <div className="col-full relative flex aspect-[2/1] w-full">
           <div className="relative h-full w-1/2">
             <Image
               src="/images/mural-left.webp"
@@ -373,56 +378,57 @@ export function About() {
             />
           </div>
         </div>
+        </div>
       </ScrollReveal>
 
       {/* Text — revealed in the gap on desktop with motion; flows below the
           mural band on mobile and for prefers-reduced-motion (where the mural
-          stays whole), so the copy is always visible. */}
-      <div className="relative z-10 px-6 pb-20 pt-6 md:pt-0 motion-safe:md:absolute motion-safe:md:inset-x-0 motion-safe:md:top-0 motion-safe:md:h-screen motion-safe:md:flex motion-safe:md:items-center motion-safe:md:justify-center motion-safe:md:px-6 motion-safe:md:pb-0">
-        <div
-          className="about-text mx-auto w-full text-center"
-          style={{
-            maxWidth: "min(90%, 34rem)",
-            background: "transparent",
-            padding: "2.5rem 1.5rem",
-          }}
-        >
-          <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-            Our story
-          </p>
-          <h2
-            id="about-heading"
-            className="font-serif text-4xl font-light leading-snug text-foreground md:text-5xl"
-          >
-            It started with a{" "}
-            <em className="italic text-ember">grill</em>
-          </h2>
-          {/* The section's one rule, replacing the full-height seam that used
-              to split the mural. It draws in from the left after the copy has
-              risen. Defaults to fully drawn, so the no-JS and reduced-motion
-              states show a static hairline rather than nothing. */}
-          <span
-            aria-hidden="true"
-            className="about-rule mx-auto mt-5 block h-px w-16 bg-ember"
-          />
-          <div className="mt-8 space-y-5 font-sans text-sm font-light leading-relaxed text-foreground/80">
-            <p>
-              KM.BBQ started with one idea: really good Korean BBQ that you cook
-              yourself. Every table gets its own grill, gas or charcoal.
-            </p>
-            <p>
-              We pick our meat carefully and marinate it in house, using recipes
-              we have leaned on for years. You grill it fresh, right where you
-              sit, cooked exactly how you like it.
-            </p>
-            <p>
-              Pull up a chair and take your time. Order more whenever you want.
-              Good food, a hot grill, and no reason to rush.
-            </p>
+          stays whole), so the copy is always visible.
+
+          The block is now a real column on the page grid rather than a centred
+          float: `.col-story` puts it at column 1 wherever the pin does not run
+          and at columns 5-8 (the measured width of the mural's gap) where it
+          does. Its type is left-aligned in both cases, like every other
+          section. */}
+      <div className="relative z-10 pb-section pt-6 md:pt-0 motion-safe:md:absolute motion-safe:md:inset-x-0 motion-safe:md:top-0 motion-safe:md:h-screen motion-safe:md:pb-0">
+        <div className="grid-page motion-safe:md:h-full motion-safe:md:items-center">
+          <div className="about-text col-story py-10">
+            <p className="eyebrow mb-4">Our story</p>
+            {/* The italic accent word, in the logo pink. This is pink's first
+                and most important job: it puts the mark's colour at the most
+                typographically premium point of every section, at small scale,
+                where it can never compete with ember. */}
+            <h2 id="about-heading" className="h2-scale">
+              It started with a <em className="italic text-pink">grill</em>
+            </h2>
+            {/* The section's one rule, replacing the full-height seam that used
+                to split the mural. It draws in from the left after the copy has
+                risen. Defaults to fully drawn, so the no-JS and reduced-motion
+                states show a static hairline rather than nothing. */}
+            <span
+              aria-hidden="true"
+              className="about-rule mt-5 block h-px w-16 bg-ember"
+            />
+            <div className="copy measure mt-8 space-y-5">
+              <p>
+                KM.BBQ started with one idea: really good Korean BBQ that you
+                cook yourself. Every table gets its own grill, gas or charcoal.
+              </p>
+              <p>
+                We pick our meat carefully and marinate it in house, using
+                recipes we have leaned on for years. You grill it fresh, right
+                where you sit, cooked exactly how you like it.
+              </p>
+              <p>
+                Pull up a chair and take your time. Order more whenever you
+                want. Good food, a hot grill, and no reason to rush.
+              </p>
+            </div>
+            {/* The action starts on the same line as the heading above it. */}
+            <PillLink href="/menu" arrow className="mt-10">
+              See the menu
+            </PillLink>
           </div>
-          <PillLink href="/menu" arrow className="mt-10">
-            See the menu
-          </PillLink>
         </div>
       </div>
 
@@ -432,23 +438,19 @@ export function About() {
           the viewport. Below lg (and for reduced motion) it flows statically
           after the stage — the feature-card grid is too tall to share a
           single pinned tablet viewport. */}
-      <div className="grill-layer relative z-10 px-6 pb-24 motion-safe:lg:absolute motion-safe:lg:inset-x-0 motion-safe:lg:top-0 motion-safe:lg:h-screen motion-safe:lg:flex motion-safe:lg:items-center motion-safe:lg:justify-center motion-safe:lg:pb-0 motion-safe:lg:pt-[var(--nav-h)]">
-        <div className="mx-auto w-full max-w-4xl text-center lg:max-w-7xl">
+      <div className="grill-layer relative z-10 pb-section motion-safe:lg:absolute motion-safe:lg:inset-x-0 motion-safe:lg:top-0 motion-safe:lg:h-screen motion-safe:lg:pb-0 motion-safe:lg:pt-[var(--nav-h)]">
+        <div className="grid-page motion-safe:lg:h-full motion-safe:lg:items-center">
+          <div className="col-full">
           <div className="grill-head">
-            <p className="mb-4 font-sans text-xs font-medium uppercase tracking-[0.3em] text-ember-deep">
-              House favorites
-            </p>
-            <h2
-              id="menu-heading"
-              className="font-serif text-4xl font-light text-foreground md:text-5xl"
-            >
-              What to grill first
+            <p className="eyebrow mb-4">House favorites</p>
+            <h2 id="menu-heading" className="h2-scale">
+              What to <em className="italic text-pink">grill</em> first
             </h2>
             {/* transform-gpu: this light gray text picks up blue subpixel-AA
                 fringing on some words when rasterized in the main layer —
                 looks like link styling. Its own compositing layer rasterizes
                 with uniform grayscale AA. */}
-            <p className="mx-auto mt-3 max-w-xl transform-gpu font-sans text-base font-light text-foreground/60">
+            <p className="copy measure mt-3 transform-gpu">
               A few of the ones people order again and again. The full lineup is
               on the menu.
             </p>
@@ -471,12 +473,18 @@ export function About() {
                   key={dish.name}
                   className={`grill-dish group h-full will-change-transform ${span}`}
                 >
-                  <div className="flex h-full flex-col overflow-hidden rounded-xl bg-white p-5 text-left shadow-warm transition-shadow duration-300 hover:shadow-warm-lg">
+                  {/* A card that holds a photograph takes the PHOTO radius, so
+                      the frame and the image it frames are one object. */}
+                  <div className="flex h-full flex-col overflow-hidden rounded-photo bg-white p-5 text-left shadow-warm transition-shadow duration-[var(--dur-base)] ease-house hover:shadow-warm-lg">
                     {/* Feature photo stretches to fill the two-row card; the
                         others crop slightly wider at lg so both grid rows plus
                         the header and CTA share one pinned viewport. */}
+                    {/* photo-grade: the one photography treatment — warm grade,
+                        shadows lifted toward cream, shared corner radius, and
+                        the page's grain — so photographs and painted mural read
+                        as one family. It carries its own radius and clipping. */}
                     <div
-                      className={`relative w-full overflow-hidden rounded-lg bg-paper ${
+                      className={`photo-grade relative w-full bg-cream-deep ${
                         isFeature
                           ? "aspect-[16/9] lg:aspect-auto lg:min-h-0 lg:flex-1"
                           : "aspect-[16/9] lg:aspect-[2/1]"
@@ -486,7 +494,7 @@ export function About() {
                         src={dish.image}
                         alt={dish.name}
                         fill
-                        className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                        className="object-cover transition-transform duration-[var(--dur-slow)] ease-house group-hover:scale-[1.04]"
                         sizes={
                           isFeature
                             ? "(max-width: 1023px) 100vw, 50vw"
@@ -494,18 +502,17 @@ export function About() {
                         }
                       />
                       {dish.tag && (
-                        <span className="absolute left-2 top-2 z-10 bg-ember-deep px-2 py-1 font-sans text-[11px] font-medium uppercase tracking-widest text-white">
+                        <span className="absolute left-2 top-2 z-[4] bg-ember px-2 py-1 font-sans text-eyebrow font-medium uppercase tracking-widest text-ink">
                           {dish.tag}
                         </span>
                       )}
                     </div>
-                    <h3
-                      className={`mt-3 font-serif font-light text-foreground ${
-                        isFeature ? "text-lg lg:text-2xl" : "text-lg"
-                      }`}
-                    >
+                    {/* One card-title size, on the scale's `lead` step. It used
+                        to be 18px here and 24px on the feature card, which was
+                        two of the five sizes that made the mid-range flat. */}
+                    <h3 className="mt-3 font-serif text-lead font-light text-foreground">
                       {dish.name}{" "}
-                      <span className="font-sans text-sm font-light text-foreground/40">
+                      <span className="font-sans text-eyebrow font-light text-foreground/40">
                         {dish.korean}
                       </span>
                     </h3>
@@ -521,7 +528,7 @@ export function About() {
                         850 it hung 19px over). 900 still gets the full layout
                         with its descriptions. */}
                     <p
-                      className={`mt-1 font-sans text-sm font-light leading-snug text-foreground/60 ${
+                      className={`copy mt-1 ${
                         isFeature
                           ? ""
                           : "motion-safe:lg:[@media(max-height:895px)]:hidden"
@@ -534,13 +541,17 @@ export function About() {
               );
             })}
           </div>
-          {/* Centred below the ENTIRE grid, at twice the grid's own gutter, so
-              it reads as the section's action rather than an appendage of the
-              feature card it happens to sit under. The old mt-6 (24px) put it
-              inside both that card's shadow (~30px reach) and the travel of
-              the seam handoff above. */}
-          <div className="grill-cta mt-10 flex justify-center lg:mt-12">
+          {/* Below the ENTIRE grid, at twice the grid's own gutter, so it reads
+              as the section's action rather than an appendage of the feature
+              card it happens to sit under. The old mt-6 (24px) put it inside
+              both that card's shadow (~30px reach) and the travel of the seam
+              handoff above.
+
+              Left, not centred: it aligns to the same column edge as the
+              heading it belongs to. */}
+          <div className="grill-cta mt-10 flex lg:mt-12">
             <PillLink href="/menu">See the full menu</PillLink>
+          </div>
           </div>
         </div>
       </div>

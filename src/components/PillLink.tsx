@@ -1,14 +1,17 @@
 import Link from "next/link";
 
-// The one call-to-action button. An ember-deep outline pill that wipes to a
-// filled ember-deep on hover/focus (white text). ember-deep — not ember — so
-// the resting label clears AA on cream and the filled state clears AA in white.
-// Was duplicated as a ~60-class string in two places in About; this is the
-// single source. (The hero's CTA is its own cream-filled variant, since ember
-// sits inside the video's hue range and stops reading as a control over it;
-// the red game dome is a prop, not a button.)
+// The one call-to-action button. An EMBER outline pill that wipes to a filled
+// ember on hover/focus. The label is ink in both states: ember is the site's
+// interaction colour, but ember text on cream is 2.3:1, so the border carries
+// the colour and the type carries the contrast (ink on cream 15.9:1, ink on
+// ember 7:1). This is the same shape and the same two colours as the navbar's
+// phone CTA, so every button on the site is one object.
+//
+// (The hero's CTA is its own cream-filled variant, since ember sits inside the
+// video's hue range and stops reading as a control over it; the red game dome
+// is a prop, not a button.)
 const PILL =
-  "relative isolate inline-flex items-center gap-2 overflow-hidden rounded-full border border-ember-deep px-8 py-3 font-sans text-sm font-medium text-ember-deep transition-colors duration-300 ease-out before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember-deep before:transition-transform before:duration-300 before:ease-out hover:text-white hover:before:scale-x-100 focus-visible:text-white focus-visible:before:scale-x-100";
+  "relative isolate inline-flex items-center gap-2 overflow-hidden rounded-control border border-ember px-8 py-3 font-sans text-copy font-medium text-ink transition-colors duration-[var(--dur-base)] ease-house before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember before:transition-transform before:duration-[var(--dur-base)] before:ease-house hover:before:scale-x-100 focus-visible:before:scale-x-100";
 
 export function PillLink({
   href,

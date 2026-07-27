@@ -34,7 +34,7 @@ export function ScrollReveal({
   delay = 0,
   direction = "up",
   once = true,
-  duration = MOTION.duration,
+  duration = MOTION.dur.reveal,
   margin = "0px 0px -20% 0px",
 }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null);

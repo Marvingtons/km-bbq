@@ -1,33 +1,438 @@
 @import "tailwindcss";
 
+/* The two values Tailwind's own `background`/`foreground` names resolve to.
+   They are not separate colours — they are cream and ink, repeated here
+   because @theme cannot reference itself before it is declared. */
 :root {
-  --background: #FAF4EC;
-  --foreground: #1a1a1a;
+  --background: #FAF4EC; /* = --color-cream */
+  --foreground: #1A1A1A; /* = --color-ink */
 }
 
 /* ---------------------------------------------------------------------------
-   The one reduced token set. Every section is derived from these — there is a
-   single page surface (cream), a single accent (ember), and one warm shadow.
-   Blue and pink live ONLY inside the logo artwork (raw hex in Logo/Preloader
-   SVGs); they are intentionally absent here so no section can reach for them.
+   THE TOKEN SET — one source of truth for colour.
+   ---------------------------------------------------------------------------
+   Every colour gets exactly ONE job and is never allowed to do a different one.
+   That separation is what makes both the ember and the logo pink read as
+   decisions rather than accidents.
+
+     cream / cream-deep  ground and paper     light section backgrounds, fills
+     ink / plum-ink      structure and type   body copy, headings, dark grounds
+     ember (+ deep/red)  INTERACTION          links, hovers, buttons, focus,
+                                              CTA borders, the LED display
+     pink                IDENTITY + PUNCTUATION
+                                              the logo, the italic accent word
+                                              in headings, dot glyphs, the
+                                              active nav underline
+     pine / plum         the mural's world    mural spot marks only
+
+   ember-deep is not a separate colour: it is ember's AA-safe form for small
+   text on cream (ember itself lands at 2.3:1 there). Same job, same family.
+
+   Pink NEVER touches a button, a link, a hover state, a border, a focus ring
+   or a background. Ember NEVER touches a wordmark or a punctuation glyph.
+
+   NOT IN THE PALETTE, and deliberately so: pure white and pure black. They are
+   structural, not colours with a job — white is the card surface and the type
+   colour on dark grounds, black is the alpha used for shadows, scrims and
+   hairline rings. Neither ever appears as a section ground or as an accent.
+
+   ALSO OUTSIDE IT: the two rasters. The mural (and the spot marks cut from it)
+   and the photographs carry their own colour and are never recoloured — the
+   mural is never graded at all, and the photographs get the one grade defined
+   at the bottom of this file.
    --------------------------------------------------------------------------- */
 @theme inline {
-  --color-cream: #FAF4EC; /* the ONE page surface */
-  --color-paper: #F3EBDD; /* the one warmer band/fill (info band, placeholders) */
-  --color-paper-line: #E4D9C4; /* the one hairline/border tint */
-  --color-foreground: var(--foreground); /* headings + strong text */
-  --color-body: #5A5550; /* solid body copy on cream (≈ foreground/70) */
+  /* --- GROUNDS ------------------------------------------------------- */
+  /* Ground 1. The page surface, and the theme-color meta value. */
+  --color-cream: #FAF4EC;
+  /* Warmer cream. A FILL, not a ground: cards, placeholders, photo boxes.
+     No section may use it as its background — there are only two grounds. */
+  --color-cream-deep: #F3EBDD;
+  /* The one hairline/border tint on cream. */
+  --color-cream-line: #E4D9C4;
+  /* Ground 2. Warm dark, replacing the old neutral near-black. Pink on
+     neutral black reads as a sticker; on a warm plum-ink it belongs to the
+     same world, and the purple is already authorized by the mural. */
+  --color-plum-ink: #1B1215;
+
+  /* --- STRUCTURE AND TYPE -------------------------------------------- */
+  --color-ink: #1A1A1A; /* headings + strong text */
+  --color-foreground: var(--color-ink); /* alias: the name the utilities use */
+  --color-body: #5A5550; /* solid body copy on cream (≈ ink/70) */
+
+  /* --- INTERACTION (ember, and only ember) ---------------------------- */
   --color-ember: #F18B23; /* the ONE accent */
-  /* Deep ember for small text/labels on cream — ember itself fails AA there. */
-  --color-ember-deep: #9A5A1A;
-  --color-red: #EC2229; /* SANCTIONED ONLY: menu prices + the house game */
-  --color-charcoal: #1A1A1A; /* footer surface */
+  --color-ember-deep: #9A5A1A; /* ember, AA-safe for small text on cream */
+  /* The hotter red shared by the mural flames, the logo flame and the LED
+     panel. Sampled from the mural (densest hue-0 bucket) and identical to the
+     flame in the canonical logo SVG. */
+  --color-ember-red: #EC2229;
+
+  /* --- IDENTITY AND PUNCTUATION (pink, and only pink) ----------------- */
+  --color-pink: #ED397D; /* the logo pink, unified across every copy */
+
+  /* --- THE MURAL'S OWN COLOURS ---------------------------------------- */
+  /* Sampled from public/images/mural-*.png. Reserved for mural spot marks;
+     no UI element may reach for these. */
+  --color-pine: #2C3710;
+  --color-plum: #784E9B;
+
   --color-background: var(--background);
   --font-serif: var(--font-cormorant), Georgia, serif;
   --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  /* --- THE SECTION SPACING SCALE -------------------------------------- */
+  /* One token, top and bottom, every section: `py-section md:py-section-lg`. */
+  --spacing-section: 5rem;
+  --spacing-section-lg: 7rem;
+
+  /* --- THE GRID -------------------------------------------------------
+     One 12-column track, one pair of outer margins, every section on both
+     routes. Content starts at a column edge; it does not float in the middle.
+
+     Centre-stacking is what a page looks like when no grid decision was made,
+     and it was why six well-built sections read as six unrelated blocks: there
+     was no line the eye could follow from one into the next. Left alignment on
+     a shared track IS that line. Centring is now spent exactly once, on the
+     game, where the subject is a physical object and centring reads as
+     deliberate. See `.grid-page` below. */
+  --grid-max: 80rem; /* 1280px content track */
+  --grid-gutter: 1.5rem; /* outer margin, phones */
+  --grid-gutter-lg: 3rem; /* outer margin, lg and up */
+  --grid-gap: 1.5rem; /* column gap */
+  /* Readable measure for body copy. Roughly 62 characters at the body size —
+     body never runs the full width of the track. */
+  --measure: 62ch;
+
+  /* --- THE RADIUS SCALE ------------------------------------------------
+     Three categories, one rule each. Anything that fits none of them is a
+     documented exception, not a fourth guess.
+
+       photo    things that ARE an image, and the frames that hold one
+       control  things you click
+       surface  structural ground: sections, bands, the map, text-only cards
+
+     The logic: shape follows what the element IS, not where it sits. A card
+     with a photograph in it takes the photo radius so the frame and the image
+     are one object; a card with only type in it is a surface and is square. */
+  --radius-photo: 0.75rem;
+  --radius-control: 9999px;
+  --radius-surface: 0px;
+  /* EXCEPTION, stated rather than guessed: the game housing is not a card, a
+     control or a ground — it is a picture of a machine bolted to the wall by
+     the door, and a real machine has a moulded corner. One value, one object,
+     one place. */
+  --radius-prop: 1.4rem;
+
+  /* NOT AN EXCEPTION, and deliberately left as `rounded-full`: the discs.
+     The seam dots, the ember sparks, the four mount screws on the housing,
+     the footer's glow, the preloader's hairline cap. Every one of them is
+     square in its box, so `border-radius: 9999px` is drawing a CIRCLE, not
+     choosing a corner treatment — there is no corner to standardise. A shape,
+     not a radius. The LED's decimal point (rounded-[0.03em]) is the same case
+     one level down: it is a lit segment on a panel, sized in em so it tracks
+     the digits, and it belongs to the prop rather than to the page. */
+
+  /* --- THE TYPE SCALE --------------------------------------------------
+     One ratio, 4:3, so the step between eyebrow, body and heading is the same
+     proportion in every section and is obvious at a glance. Before this the
+     page had one enormous element and then five sizes crammed between 14 and
+     24px, which is why the hierarchy read as flat.
+
+       eyebrow  0.75rem   12.0   base / 1.333
+       copy     1rem      16.0   base
+       lead     1.333rem  21.3   base * 1.333
+       title    1.777rem  28.4   base * 1.333^2
+       h2       2.369rem  37.9   base * 1.333^3
+       h2-lg    3.157rem  50.5   base * 1.333^4
+
+     The hero's display lockup is the SOLE exception: it is viewport-sized on
+     purpose and is the one oversized moment on the site. Nothing else may
+     become a second one. The LED digits are the other exception — they are
+     sized to the panel they sit in, not to the page. Both are noted where
+     they are written.
+
+     Named `copy` rather than `body` on purpose: `--color-body` already exists,
+     and Tailwind resolves `text-body` against both namespaces. */
+  --text-eyebrow: 0.75rem;
+  --text-eyebrow--line-height: 1rem;
+  --text-copy: 1rem;
+  --text-copy--line-height: 1.65;
+  --text-lead: 1.333rem;
+  --text-lead--line-height: 1.4;
+  --text-title: 1.777rem;
+  --text-title--line-height: 1.25;
+  --text-h2: 2.369rem;
+  --text-h2--line-height: 1.1;
+  --text-h2-lg: 3.157rem;
+  --text-h2-lg--line-height: 1.05;
+
+  /* --- THE MOTION CURVES ----------------------------------------------
+     Two house curves plus one stated exception. Every transition and every
+     GSAP timeline borrows from these — nothing invents its own any more.
+     The numeric durations live in :root below and in src/lib/motion.ts; the
+     two lists are the same table written for CSS and for JS.
+
+       house         everything that arrives and settles
+       house-in-out  everything that reverses or wipes (the preloader exit)
+       press         EXCEPTION: the game button's overshoot. A dome you push
+                     physically springs back; that is the mechanic, and the
+                     mechanic is settled. One curve, one element. */
+  --ease-house: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-house-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-press: cubic-bezier(0.34, 1.7, 0.64, 1);
+
   /* The one warm elevation shadow, formalizing rgba(120,60,20,…). */
   --shadow-warm: 0 2px 16px rgb(120 60 20 / 0.08);
   --shadow-warm-lg: 0 6px 24px rgb(120 60 20 / 0.14);
+}
+
+/* Durations. Mirrored from MOTION.dur in src/lib/motion.ts — CSS and JS cannot
+   share a literal, so they share a documented table instead. */
+:root {
+  --dur-press: 90ms; /* the dome going down: faster than it comes up */
+  --dur-quick: 180ms; /* underlines, small state flips */
+  --dur-base: 300ms; /* the default: hovers, colour changes, controls */
+  --dur-slow: 500ms; /* surfaces cross-fading (the nav bar) */
+  --dur-reveal: 600ms; /* content arriving on scroll */
+}
+
+/* ---------------------------------------------------------------------------
+   PAPER GRAIN. The mural is hand-painted and carries its own texture; left
+   alone, that texture is a property of one image and the mural looks imported.
+   This makes it a property of the whole site.
+
+   feTurbulence rather than a raster tile: ~300 bytes inline, no extra request,
+   and the browser rasterizes it once at the 180px tile size. Applied via
+   `.grain`, which paints it BETWEEN the section's background and its content
+   (z-index -1 inside an isolated stacking context) so nothing sits on top of
+   the artwork — the mural is never overlaid, tinted or graded.
+   --------------------------------------------------------------------------- */
+:root {
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+.grain {
+  position: relative;
+  /* Establishes the stacking context the z-index:-1 layer needs, so the grain
+     lands above this section's own background rather than behind it. */
+  isolation: isolate;
+}
+
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--grain);
+  background-size: 180px 180px;
+  /* 2.8% — material, not noise. */
+  opacity: 0.028;
+}
+
+/* ---------------------------------------------------------------------------
+   PHOTO GRADE. The gallery photographs sit next to painted illustration, so
+   they get one consistent treatment: a light warm grade, the shadows lifted a
+   touch toward the cream base, the shared corner radius, and the same grain.
+   Photography and illustration then read as one family.
+
+   This grades PHOTOGRAPHY ONLY. The mural and its spot marks are never graded,
+   tinted or desaturated.
+   --------------------------------------------------------------------------- */
+.photo-grade {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--radius-photo);
+}
+
+.photo-grade img {
+  filter: saturate(1.05) contrast(0.96);
+}
+
+/* Shadow lift: cream screened over the frame raises the blacks toward the page
+   surface, so photos stop punching a hole in the cream. */
+.photo-grade::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: var(--color-cream);
+  opacity: 0.09;
+  mix-blend-mode: screen;
+}
+
+/* The same grain as the page, at photo strength. */
+.photo-grade::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background-image: var(--grain);
+  background-size: 180px 180px;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+}
+
+@layer components {
+  /* -------------------------------------------------------------------------
+     THE GRID
+     -------------------------------------------------------------------------
+     `.grid-page` is the only container that sets an outer margin or a maximum
+     width. Every section on both routes puts its content inside one, so the
+     left edge of a heading in Contact is the same pixel as the left edge of a
+     heading in Gallery.
+
+     Three column spans cover everything on the site:
+
+       .col-text   the reading column. Full width on phones, 7 of 12 from md.
+                   Eyebrow, h2, body and the action beneath them all live in
+                   it, so all four start on the same line.
+       .col-wide   9 of 12 from md. For grids of cards, which need more room
+                   than prose but must still start at column 1.
+       .col-full   all 12. For media and anything full-track.
+
+     MEDIA BREAKS THE GRID EXACTLY ONE WAY: from a column edge out to the
+     right viewport edge (`.bleed-right`). Nothing is centre-inset, nothing
+     bleeds left, nothing bleeds both ways. Full-bleed BACKDROPS — the hero
+     video, the About mural stage — are section grounds rather than media in
+     the flow, and grounds have always run edge to edge.
+     ------------------------------------------------------------------------- */
+  /* `.track` is the outer margin and the maximum width on their own, for the
+     few strips that are not a 12-column layout but must still line up with one
+     (the /menu category jump bar). `.grid-page` is the track plus the columns.
+     Nothing else on the site may set a page margin or a max width. */
+  .track,
+  .grid-page {
+    width: 100%;
+    max-width: var(--grid-max);
+    margin-inline: auto;
+    padding-inline: var(--grid-gutter);
+  }
+
+  .grid-page {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--grid-gap);
+  }
+
+  .col-text,
+  .col-wide,
+  .col-full {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  /* Body copy never runs the full width of its column. */
+  .measure {
+    max-width: var(--measure);
+  }
+
+  /* THE ONE COLUMN THAT MOVES, and the only place a heading does not start at
+     column 1. On the pinned About stage the mural opens to a centred gap and
+     the story is revealed inside it; the gap is columns 5-8 at every width
+     from 768 up (measured), so the story starts at a real column edge rather
+     than floating. Everywhere the pin does not run — phones, and anyone on
+     reduced motion, where the mural stays whole and the story flows beneath
+     it — it starts at column 1 like every other section.
+
+     Written as CSS rather than as stacked Tailwind variants because
+     `grid-column` is a shorthand and `col-start-*` is not: mixing them lets
+     the cascade decide the end line, which is exactly the kind of quiet
+     override this codebase has been bitten by before. */
+  .col-story {
+    grid-column: 1 / -1;
+  }
+
+  @media (min-width: 768px) {
+    .col-story {
+      grid-column: 1 / span 7;
+    }
+  }
+
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .col-story {
+      grid-column: 5 / span 4;
+    }
+  }
+
+  /* Media running from its column edge to the right edge of the VIEWPORT.
+     The negative margin is the distance from the track's right edge to the
+     viewport's, which is the outer gutter plus whatever centring slack the
+     max-width leaves. */
+  .bleed-right {
+    margin-right: calc(
+      (var(--grid-gutter) + max(0px, (100vw - var(--grid-max)) / 2)) * -1
+    );
+  }
+
+  @media (min-width: 768px) {
+    .col-text {
+      grid-column: 1 / span 7;
+    }
+    .col-wide {
+      grid-column: 1 / span 9;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .track,
+    .grid-page {
+      padding-inline: var(--grid-gutter-lg);
+    }
+    .bleed-right {
+      margin-right: calc(
+        (var(--grid-gutter-lg) + max(0px, (100vw - var(--grid-max)) / 2)) * -1
+      );
+    }
+  }
+
+  /* -------------------------------------------------------------------------
+     TYPE
+     ------------------------------------------------------------------------- */
+
+  /* The one eyebrow. Identical size, weight, tracking and colour in every
+     section, on both routes. Sits in the components layer so a utility on the
+     element can still override it (the hero's, which must be white over
+     video, is the only one that does). */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: var(--text-eyebrow);
+    line-height: var(--text-eyebrow--line-height);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: var(--color-ember-deep);
+  }
+
+  /* The one section heading. One size per breakpoint, every section, both
+     routes — including the /menu page's h1, which does the same job. */
+  .h2-scale {
+    font-family: var(--font-serif);
+    font-weight: 300;
+    font-size: var(--text-h2);
+    line-height: var(--text-h2--line-height);
+    color: var(--color-ink);
+  }
+
+  @media (min-width: 768px) {
+    .h2-scale {
+      font-size: var(--text-h2-lg);
+      line-height: var(--text-h2-lg--line-height);
+    }
+  }
+
+  /* The one body size, line height and colour. */
+  .copy {
+    font-family: var(--font-sans);
+    font-size: var(--text-copy);
+    line-height: var(--text-copy--line-height);
+    font-weight: 300;
+    color: var(--color-body);
+  }
 }
 
 html {
@@ -74,7 +479,7 @@ body {
 ::-webkit-scrollbar-thumb {
   background: rgb(120 60 20 / 0.35);
   border-radius: 10px;
-  transition: background 0.2s ease;
+  transition: background var(--dur-quick) var(--ease-house);
 }
 
 ::-webkit-scrollbar-thumb:hover {

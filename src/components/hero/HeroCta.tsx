@@ -22,13 +22,15 @@ export function HeroCta({ className = "" }: { className?: string }) {
   return (
     <Link
       href={CTA_HREF}
-      className={`group inline-flex min-h-12 items-center gap-2 rounded-full bg-cream px-7 py-3.5 font-sans text-sm font-semibold text-foreground shadow-warm-lg transition-colors duration-300 hover:bg-ember hover:text-white focus-visible:bg-ember focus-visible:text-white ${className}`}
+      // The label stays ink through the hover: white on ember is 2.5:1, ink on
+      // ember is 7:1, and this is the primary action above the fold.
+      className={`group inline-flex min-h-12 items-center gap-2 rounded-control bg-cream px-7 py-3.5 font-sans text-copy font-semibold text-ink shadow-warm-lg transition-colors duration-[var(--dur-base)] ease-house hover:bg-ember focus-visible:bg-ember ${className}`}
     >
       {CTA_LABEL}
       <svg
         aria-hidden="true"
         viewBox="0 0 24 24"
-        className="h-3.5 w-3.5 transition-transform duration-300 ease-out group-hover:translate-x-1 motion-reduce:transition-none"
+        className="h-3.5 w-3.5 transition-transform duration-[var(--dur-base)] ease-house group-hover:translate-x-1 motion-reduce:transition-none"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.8"

@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { HeroVideo } from "./HeroVideo";
 import { HeroCta } from "./hero/HeroCta";
 import { EYEBROW, HEADLINE, SUBHEAD } from "./hero/copy";
+import { MOTION } from "@/lib/motion";
 
 /**
  * The hero: big-type lockup over the grill clip.
@@ -22,12 +23,14 @@ export function Hero() {
     reduce
       ? { initial: false as const, animate: { opacity: 1, y: 0 } }
       : {
-          initial: { opacity: 0, y: 24 },
+          initial: { opacity: 0, y: MOTION.rise },
           animate: { opacity: 1, y: 0 },
+          // Duration and curve from the shared table. This used to carry its
+          // own 0.7s and its own inline bezier.
           transition: {
-            duration: 0.7,
+            duration: MOTION.dur.reveal,
             delay: 0.2 + i * 0.12,
-            ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
+            ease: MOTION.ease,
           },
         };
 
@@ -36,7 +39,7 @@ export function Hero() {
   return (
     <section
       id="home"
-      className="relative min-h-screen overflow-hidden bg-charcoal"
+      className="relative min-h-screen overflow-hidden bg-plum-ink"
       aria-label="Hero"
     >
       {/* Background video — holds its first frame while the preloader is up
@@ -46,7 +49,14 @@ export function Hero() {
           there's never a cream flash. */}
       <HeroVideo className="absolute inset-0 h-full w-full object-cover" />
 
-      {/* Scrim, in two forms, and lighter than it was. The previous curves were
+      {/* Scrim, in two forms, and lighter than it was. Both are plum-ink at a
+          scrubbed alpha rather than their own near-black: the section's base is
+          plum-ink, so the scrim is the same surface fading in, not a second
+          dark colour laid over it. The alphas are unchanged from the measured
+          curves below — plum-ink is within 0.3% luminance of the value they
+          were solved against, which is far inside the margin they carry.
+
+          The previous curves were
           tuned for a lockup that stood ~430px tall and pushed the eyebrow up
           near mid-frame; at the reduced type size the whole copy block sits
           lower, so the density can come down with it and hand a good part of
@@ -57,7 +67,7 @@ export function Hero() {
         className="absolute inset-0 lg:hidden"
         style={{
           background:
-            "linear-gradient(to top, rgba(16,10,6,0.9) 0%, rgba(16,10,6,0.78) 30%, rgba(16,10,6,0.44) 55%, rgba(16,10,6,0.08) 78%, transparent 100%)",
+            "linear-gradient(to top, color-mix(in srgb, var(--color-plum-ink) 90%, transparent) 0%, color-mix(in srgb, var(--color-plum-ink) 78%, transparent) 30%, color-mix(in srgb, var(--color-plum-ink) 44%, transparent) 55%, color-mix(in srgb, var(--color-plum-ink) 8%, transparent) 78%, transparent 100%)",
         }}
       />
       {/* The desktop curve's mid-band is set by the eyebrow, not the display
@@ -72,18 +82,26 @@ export function Hero() {
         className="absolute inset-0 hidden lg:block"
         style={{
           background:
-            "linear-gradient(to top, rgba(16,10,6,0.92) 0%, rgba(16,10,6,0.84) 30%, rgba(16,10,6,0.72) 50%, rgba(16,10,6,0.58) 65%, rgba(16,10,6,0.3) 80%, rgba(16,10,6,0.08) 92%, transparent 100%)",
+            "linear-gradient(to top, color-mix(in srgb, var(--color-plum-ink) 92%, transparent) 0%, color-mix(in srgb, var(--color-plum-ink) 84%, transparent) 30%, color-mix(in srgb, var(--color-plum-ink) 72%, transparent) 50%, color-mix(in srgb, var(--color-plum-ink) 58%, transparent) 65%, color-mix(in srgb, var(--color-plum-ink) 30%, transparent) 80%, color-mix(in srgb, var(--color-plum-ink) 8%, transparent) 92%, transparent 100%)",
         }}
       />
 
       <div className="relative z-10 flex min-h-screen w-full items-end">
-        <div className="w-full pb-16 text-left text-white sm:pb-20 lg:pb-24">
-          {/* The eyebrow is WHITE, not ember. Measured against real frames of
-              the clip, ember text over this footage lands at ~1.1-2.0:1 — it
-              sits inside the video's own orange hue range, so it stops
-              separating from the background no matter how the scrim is tuned. */}
+        {/* The hero copy sits on the SAME track as every other section, so
+            the eyebrow, the display lockup and the CTA all begin on the page
+            grid rather than at the viewport edge. Variant B is untouched: the
+            split scale, the indent on the second word and the clipping are
+            exactly as they were, they just start from the track. */}
+        <div className="track w-full pb-16 text-left text-white sm:pb-20 lg:pb-24">
+          {/* Same eyebrow metrics as every other section (the shared `.eyebrow`
+              class), with two documented overrides: it is WHITE, not ember, and
+              semibold rather than medium. Measured against real frames of the
+              clip, ember text over this footage lands at ~1.1-2.0:1 — it sits
+              inside the video's own orange hue range, so it stops separating
+              from the background no matter how the scrim is tuned. This is the
+              only eyebrow on the site that does not sit on a ground. */}
           <motion.p
-            className="mb-3 px-6 font-sans text-xs font-semibold uppercase tracking-[0.28em] text-white lg:px-16"
+            className="eyebrow mb-3 font-semibold text-white"
             {...rise(0)}
           >
             {EYEBROW}
@@ -103,7 +121,7 @@ export function Hero() {
             className="font-serif font-light uppercase leading-[0.8] tracking-[-0.03em]"
             {...rise(1)}
           >
-            <span className="block px-6 text-[21vw] lg:px-16 lg:text-[10.5vw]">
+            <span className="block text-[21vw] lg:text-[10.5vw]">
               {first}
             </span>
             <span className="block whitespace-nowrap pl-8 text-[21vw] lg:pl-[18vw] lg:text-[11.5vw]">
@@ -111,15 +129,15 @@ export function Hero() {
             </span>
           </motion.h1>
 
-          <div className="px-6 lg:px-16">
+          <div>
             <motion.p
-              className="mt-4 font-sans text-sm font-semibold uppercase tracking-[0.2em] text-white"
+              className="mt-4 font-sans text-copy font-semibold uppercase tracking-[0.2em] text-white"
               {...rise(2)}
             >
               {HEADLINE.tail}
             </motion.p>
             <motion.p
-              className="mt-3 max-w-md font-sans text-base font-light leading-relaxed text-white"
+              className="copy measure mt-3 text-white"
               {...rise(3)}
             >
               {SUBHEAD}
