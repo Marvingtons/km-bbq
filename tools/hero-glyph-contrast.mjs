@@ -90,6 +90,17 @@ const page = await ctx.newPage();
 await skipPreloader(page);
 await page.goto(URL);
 await page.waitForLoadState("load");
+
+// --css="<rules>" injects a stylesheet before measuring, so treatment variants
+// can be compared without a rebuild between each one. The mask render below
+// strips text-shadow itself, so an override here only affects the "as
+// rendered" pass, which is exactly the pass a glow changes.
+const cssArg = process.argv.find((a) => a.startsWith("--css="));
+if (cssArg) {
+  await page.addStyleTag({ content: cssArg.slice("--css=".length) });
+  await page.waitForTimeout(200);
+}
+
 await page.waitForTimeout(2200);
 
 const frames = JSON.parse(readFileSync("contrast-check/frames.json", "utf8"));

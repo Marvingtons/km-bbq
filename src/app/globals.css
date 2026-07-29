@@ -282,11 +282,42 @@
 
    14px of outer falloff against a ~150px cap height is roughly 9% of the
    glyph — a few pixels at the stroke, which is the brief's "tight". */
+/* THE EDGE — 2px, and that is the whole of it.
+
+   This was a 22px falloff, which is not a glow at anything under a 150px cap
+   height: it reads as a blurry drop shadow sitting behind the lockup. Measured
+   variants of the tight edge ALONE, per glyph, worst 1st percentile:
+
+     none        1.95 / 1.89 / 1.08   (brightest / busiest / darkest frame)
+     2px         2.91 / 2.61 / 1.06
+     2px + 4px   3.94 / 3.31 / 1.77
+     1px + 3px   3.27 / 2.63 / 1.29
+
+   Nothing tight enough to stop reading as an edge clears 3:1 on the darkest
+   frame. So the edge is not asked to carry the contrast — it is 2px, barely
+   visible, and the plate below does the work. Together they measure 4.33:1 on
+   the darkest frame, better than the 22px halo managed, with a fraction of its
+   visual weight. */
 .hero-display-glow {
-  text-shadow:
-    0 0 4px rgb(250 244 236 / 0.9),
-    0 0 10px rgb(250 244 236 / 0.72),
-    0 0 22px rgb(250 244 236 / 0.45);
+  text-shadow: 0 0 2px rgb(250 244 236 / 0.9);
+}
+
+/* The display line's plate. Same device as the copy plate below — a blurred
+   cream shape with no edge anywhere — sized to the lockup. It exits with the
+   type in phase A, so it is only ever on screen while the hero is. */
+.hero-display-glow {
+  position: relative;
+}
+
+.hero-display-glow::before {
+  content: "";
+  position: absolute;
+  inset: -14px -40px -10px -36px;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 999px;
+  background: rgb(250 244 236 / 0.5);
+  filter: blur(34px);
 }
 
 /* DEVICE 2 — the same halo, scaled for body-size type.
@@ -306,14 +337,10 @@
    which is what the contrast is actually measured against, while the outer
    layers only soften the join to the picture. Widening the tight ring instead of
    repeating it would blur the letterform; this keeps it sharp. */
+/* The same 2px edge at body size. Six stacked layers used to live here; with
+   the plate carrying the contrast they were just fog. */
 .hero-copy-glow {
-  text-shadow:
-    0 0 1px rgb(250 244 236 / 0.95),
-    0 0 1px rgb(250 244 236 / 0.95),
-    0 0 2px rgb(250 244 236 / 0.92),
-    0 0 4px rgb(250 244 236 / 0.8),
-    0 0 8px rgb(250 244 236 / 0.55),
-    0 0 14px rgb(250 244 236 / 0.32);
+  text-shadow: 0 0 2px rgb(250 244 236 / 0.9);
 }
 
 /* DEVICE 3 — the copy pool. The one gradient left anywhere near the footage,
@@ -346,7 +373,7 @@
   z-index: -1;
   pointer-events: none;
   border-radius: 999px;
-  background: rgb(250 244 236 / 0.58);
+  background: rgb(250 244 236 / 0.66);
   /* A BLURRED PLATE, not a gradient, and the difference is the point.
 
      A radial has one centre, so its alpha is always falling off across the
@@ -489,6 +516,86 @@
   @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
     .col-story {
       grid-column: 5 / span 4;
+    }
+  }
+
+  /* ------------------------------------------------------------------------
+     ABOUT'S MEDIA COLUMN — and the slot the hero's window docks into.
+
+     Columns 9-12 running out to the right viewport edge (`.bleed-right`, the
+     site's one sanctioned media break). This span is chosen because it is the
+     ONE span `.col-story` never occupies in any of its three states: 5-8 at
+     md+ with motion, 1-7 at md+ under reduce, 1/-1 below md. The distance from
+     column 8's right edge to column 9's left edge is exactly `--grid-gap` at
+     every width, so the clearance between the copy and the panel is a fact
+     about the grid rather than a number someone chose.
+
+     It is a REAL, permanently declared grid item, and SeamMotion reads its
+     rect rather than recomputing the grid in JS. A grid cell cannot be wrong
+     about the grid, and the version that did the arithmetic WAS wrong:
+     `.track` is border-box and carries `padding-inline`, so its
+     getBoundingClientRect() is the padding box. That made a column 84.667px
+     wide where the real one is 76.667px and put column 1's left edge a whole
+     gutter out. The panel had never actually been on the grid.
+
+     `aspect-ratio` on a definite column means the box exists before anything
+     decodes, so the measurement is load-independent and CLS stays 0.
+
+     DO NOT DELETE IT BECAUSE IT LOOKS EMPTY IN DEVTOOLS at md+. Its box is the
+     entire geometry of the window transition.
+     ------------------------------------------------------------------------ */
+  .col-media {
+    grid-column: 1 / -1;
+    position: relative; /* next/image `fill` resolves against this */
+    overflow: hidden; /* and the radius has something to clip */
+    min-width: 0;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-photo) 0 0 var(--radius-photo);
+    pointer-events: none;
+  }
+
+  /* The ember hairline at the seam, for every state that renders the docked
+     still. Markup, not motion — present under reduced motion and with no JS,
+     the same principle as `.about-rule` and `SectionSeam`. The scrubbed path
+     draws its own on the hero's side and switches this one off, because a rule
+     that lived in About would strand a vertical line down the section after
+     the panel has gone. */
+  .col-media::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    z-index: 2;
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      var(--color-ember) 50%,
+      transparent
+    );
+    opacity: 0.6;
+  }
+
+  /* DOCKED, beside the copy. `grid-row: 1` is not decoration: with only a
+     definite column start, grid's sparse auto-placement would push whichever
+     item comes second into row 2 and open a blank row. */
+  @media (min-width: 768px) {
+    .col-media {
+      grid-column: 9 / -1;
+      grid-row: 1;
+      align-self: center;
+      aspect-ratio: 3 / 4;
+      max-height: calc(100vh - 2 * var(--nav-h, 68px));
+    }
+  }
+
+  /* WITH MOTION the cell is the panel's destination, so it holds nothing of
+     its own: the poster inside it is `motion-safe:md:hidden` and its hairline
+     is drawn by the scrub instead. A still of its own would show through
+     beneath the panel while the two are out of register during the shrink. */
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    .col-media::before {
+      content: none;
     }
   }
 

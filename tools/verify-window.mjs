@@ -81,12 +81,15 @@ const browser = await chromium.launch();
   check("starts full-bleed", first && first.right === 0 && first.bottom === 0, seen[0].clip.slice(0, 40));
   check(
     "ends as an inset rounded panel",
-    last && last.right > 15 && last.top > 5 && /round/.test(seen[seen.length - 1].clip),
+    // The dock BLEEDS RIGHT, so its right inset is 0 by design — asserting on
+    // it would be permanently false. The left inset is the meaningful one now:
+    // the panel's left edge is column 9's left edge.
+    last && last.left > 55 && last.top > 5 && /round/.test(seen[seen.length - 1].clip),
     seen[seen.length - 1].clip.slice(0, 60)
   );
 
-  const rights = seen.map((s) => parseInset(s.clip).right);
-  check("clip progresses monotonically with scroll", rights.every((v, i) => i === 0 || v >= rights[i - 1] - 0.01), rights.map((r) => r.toFixed(1)).join(" -> "));
+  const rights = seen.map((s) => parseInset(s.clip).left);
+  check("clip progresses monotonically with scroll (left edge)", rights.every((v, i) => i === 0 || v >= rights[i - 1] - 0.01), rights.map((r) => r.toFixed(1)).join(" -> "));
 
   // Reversible mid-gesture: go forward, come back, land on the same shape.
   await scrollTo(page, Math.round(0.5 * vh));
@@ -96,8 +99,8 @@ const browser = await chromium.launch();
   const midAgain = parseInset((await readClip(page)).clip);
   check(
     "scrub is reversible mid-gesture",
-    Math.abs(mid.right - midAgain.right) < 0.6,
-    `right ${mid.right.toFixed(2)}% -> away -> ${midAgain.right.toFixed(2)}%`
+    Math.abs(mid.left - midAgain.left) < 0.6,
+    `left ${mid.left.toFixed(2)}% -> away -> ${midAgain.left.toFixed(2)}%`
   );
 
   // Layout box must never change: clip-path only, no width/height animation.

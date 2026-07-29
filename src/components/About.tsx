@@ -452,6 +452,38 @@ export function About() {
               See the menu
             </PillLink>
           </div>
+
+          {/* ABOUT'S MEDIA COLUMN. Columns 9-12 out to the right edge — the
+              one span `.col-story` never occupies in any of its three states,
+              which is what makes "the panel is clear of the copy" a fact about
+              the grid rather than a fact about the timing. The clearance is
+              `--grid-gap`, by construction, at every width.
+
+              Declared in every state and FILLED only where no panel will ever
+              arrive: below 768px, and under reduced motion, where it holds the
+              hero's own poster statically docked — the transition's end state
+              with nothing animated. At md+ with motion it is deliberately
+              EMPTY, because it is the rect SeamMotion measures and clips the
+              hero's window down into.
+
+              Second in DOM order on purpose: below 768px the cell stacks UNDER
+              the copy rather than above it.
+
+              quality/sizes are HeroVideo's exactly, so this resolves to the
+              same optimized URL the hero already fetched with `priority` — a
+              cache hit, no extra bytes. No `priority` here: a second preload
+              would put the LCP candidate in doubt. */}
+          <figure className="col-media bleed-right" aria-hidden="true">
+            <Image
+              src="/images/hero-poster.webp"
+              alt=""
+              fill
+              quality={60}
+              sizes="100vw"
+              draggable={false}
+              className="select-none object-cover motion-safe:md:hidden"
+            />
+          </figure>
         </div>
       </div>
 

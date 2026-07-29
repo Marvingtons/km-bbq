@@ -78,87 +78,186 @@ export function SeamMotion({ calm = false }: { calm?: boolean }) {
       // stacked page with the ember hairline as the whole transition.
       const heroWindow = sel(".hero-window");
       const heroMedia = sel(".hero-media");
+      const dockCell = sel("#about .col-media");
+      const about = document.getElementById("about");
+      const seam = sel(".hero-dock-seam");
+      const exitSupport = gsap.utils.toArray<HTMLElement>("#home .hero-exit-support");
+      const exitDisplay = sel(".hero-exit-display");
 
       if (heroWindow) {
-        // THE PANEL'S RESTING SHAPE IS READ OFF THE GRID, not hard-coded.
+        // THE DOCK IS READ OFF ABOUT'S REAL MEDIA CELL.
         //
-        // Fixed percentages cannot sit on this grid: `.track` is a centred
-        // max-width column, so its left edge is 5.21% of the viewport at 1440px
-        // and 0% at 1280px. A constant inset lands on the column at one width
-        // and floats 11px inside it at another. So the left edge is measured
-        // from the live track, and the right edge is placed on a real column
-        // boundary (end of column 9 of 12, gutters accounted for), which is
-        // what opens the reveal band down the right.
+        // The version this replaces measured `#home .track` and did column
+        // arithmetic on the result. `.track` is border-box and carries
+        // `padding-inline`, so its rect is the PADDING box: at 1440 that made a
+        // column 84.667px wide where the real one is 76.667px, and put column
+        // 1's left edge a whole gutter out. The panel had never been on the
+        // grid. A grid cell cannot be wrong about the grid, so measure one.
         //
-        // Function-based so `invalidateOnRefresh` re-reads it on resize.
+        // HORIZONTAL is scroll-invariant and read live. VERTICAL is taken
+        // ABOUT-RELATIVE, which is exact rather than merely tidy: on the one
+        // frame the panel docks, About's top IS the window's top (see the
+        // arithmetic block in Hero.tsx). Taking the difference also survives
+        // About being pinned by transform, because both rects translate
+        // together.
         //
-        // TOP AND BOTTOM stay proportional, and the bottom one is the tight
-        // constraint: the hero's copy runs from the eyebrow at 41% of the frame
-        // to the CTA's bottom edge at 89%, and the whole block has to stay
-        // INSIDE the panel. A deeper inset (20% was the first attempt) puts the
-        // panel edge through the middle of the subhead — half the line over
-        // video, half over mural — and strands type on painted mural where the
-        // measured contrast does not apply.
-        const restingInset = () => {
-          const track = document.querySelector<HTMLElement>("#home .track");
-          const vw = window.innerWidth;
-          let leftPct = 6;
-          let rightPct = 25;
-          if (track) {
-            const r = track.getBoundingClientRect();
-            const GAP = 24;
-            const COLS = 12;
-            const colW = (r.width - GAP * (COLS - 1)) / COLS;
-            // Right edge of column 9: nine columns plus the eight gutters
-            // between them, measured from the track's left edge.
-            const panelRight = r.left + colW * 9 + GAP * 8;
-            leftPct = (r.left / vw) * 100;
-            rightPct = ((vw - panelRight) / vw) * 100;
-          }
-          return { top: 10, right: rightPct, bottom: 7, left: leftPct };
+        // Percentages are of `.hero-window`'s OWN rect, never innerWidth:
+        // `inset()` resolves against the clip's reference box, and
+        // `scrollbar-gutter: stable` guarantees innerWidth is a scrollbar
+        // wider than that box at all times — a permanent error, not an edge
+        // case.
+        const dock = () => {
+          if (!dockCell || !about) return null;
+          const w = heroWindow.getBoundingClientRect();
+          const c = dockCell.getBoundingClientRect();
+          const a = about.getBoundingClientRect();
+          if (!w.width || !w.height || !c.width || !c.height) return null;
+          const top = ((c.top - a.top) / w.height) * 100;
+          const height = (c.height / w.height) * 100;
+          const left = ((c.left - w.left) / w.width) * 100;
+          // `.bleed-right` is 100vw-based, so a bleeding cell reads a few px
+          // past the clip's box. Clamping is what makes it flush, not negative.
+          const right = Math.max(0, ((w.right - c.right) / w.width) * 100);
+          const bottom = 100 - top - height;
+          if (top < 0 || bottom < 0 || left + right >= 100) return null;
+          return { top, right, bottom, left };
         };
 
-        gsap.fromTo(
-          heroWindow,
-          { clipPath: "inset(0% 0% 0% 0% round 0px)" },
-          {
-            clipPath: () => {
-              const i = restingInset();
-              return `inset(${i.top}% ${i.right}% ${i.bottom}% ${i.left}% round var(--radius-photo))`;
-            },
-            ease: MOTION.gsapEase,
-            scrollTrigger: {
-              trigger: "#home",
-              // Start a beat in, not at scroll 0: the hero should read as a
-              // full-bleed hero for a moment before it admits it is a window.
-              start: "top top-=12%",
-              end: "bottom bottom",
-              scrub: MOTION.scrub,
-              invalidateOnRefresh: true,
-            },
-          }
-        );
+        // The corner radius comes from the CELL's resolved radius, so the
+        // docked panel and the column it docks into agree by construction
+        // rather than by two numbers being kept in sync. It is also why this is
+        // a resolved px number: GSAP cannot interpolate
+        // `round var(--radius-photo)`, which is what shipped before.
+        const radiusPx = () =>
+          dockCell ? parseFloat(getComputedStyle(dockCell).borderTopLeftRadius) || 0 : 0;
 
-        // The footage inside the panel drifts against the clip, so the window
-        // reads as moving over a world that carries on behind it rather than
-        // as a shrinking picture. Transform only.
-        if (heroMedia) {
-          gsap.fromTo(
-            heroMedia,
-            { yPercent: 0 },
+        let D = dock();
+        const P = { t: 0, r: 0 };
+
+        // Written as a string once per tick rather than tweened as a property,
+        // because clip-path is one property carrying four numbers and a radius
+        // that move on different schedules.
+        const paint = () => {
+          const k = D ? P.t : 0;
+          const t = D ? D.top * k : 0;
+          const r = D ? D.right * k : 0;
+          const b = D ? D.bottom * k : 0;
+          const l = D ? D.left * k : 0;
+          heroWindow.style.clipPath =
+            `inset(${t}% ${r}% ${b}% ${l}% round ${P.r}px 0px 0px ${P.r}px)`;
+        };
+
+        // Layout of an out-of-flow element, once per refresh — not animation.
+        // Only scaleY scrubs.
+        const placeSeam = () => {
+          if (!seam || !D) return;
+          const w = heroWindow.getBoundingClientRect();
+          gsap.set(seam, {
+            left: (D.left / 100) * w.width - 1,
+            top: (D.top / 100) * w.height,
+            height: ((100 - D.top - D.bottom) / 100) * w.height,
+            transformOrigin: "top center",
+          });
+        };
+
+        paint();
+        placeSeam();
+
+        // ONE PLAYHEAD FOR THE WHOLE GESTURE, and that is the load-bearing
+        // decision. `start: "top top"` / `end: "bottom bottom"` maps timeline
+        // progress 1:1 onto scrollY 0 -> 100vh, so the phase positions below
+        // are literally the brief's percentages. Because the copy's exit and
+        // the clip share one playhead, no amount of scrub catch-up, dropped
+        // frame or fast flick can reorder them: the type is gone before a clip
+        // edge exists, at EVERY scroll position, by construction rather than by
+        // clearance.
+        const tl = gsap.timeline({
+          defaults: { ease: "none" },
+          onUpdate: paint,
+          scrollTrigger: {
+            trigger: "#home",
+            start: "top top",
+            end: "bottom bottom",
+            scrub: MOTION.scrub,
+            invalidateOnRefresh: true,
+            onRefresh: () => {
+              D = dock();
+              placeSeam();
+              paint();
+            },
+          },
+        });
+
+        // PHASE A (0.04 -> 0.24). The copy leaves before the panel moves.
+        // Every tween is a `fromTo` with an explicit from-state:
+        // `invalidateOnRefresh` re-reads the start value of a `.to()` off the
+        // live element, so a mid-scroll refresh would record "opacity 0.4" as
+        // the start and scrolling back would never restore the copy. A `fromTo`
+        // declares its start and survives invalidation. `immediateRender:
+        // false` leaves framer's entrance alone until the scrub actually moves.
+        // gsapEaseInOut because this reverses.
+        if (exitSupport.length)
+          tl.fromTo(
+            exitSupport,
+            { y: 0, autoAlpha: 1 },
             {
-              yPercent: 4,
-              ease: "none",
-              scrollTrigger: {
-                trigger: "#home",
-                start: "top top",
-                end: "bottom bottom",
-                scrub: MOTION.scrub,
-                invalidateOnRefresh: true,
-              },
-            }
+              y: -MOTION.rise,
+              autoAlpha: 0,
+              duration: 0.12,
+              stagger: 0.04,
+              ease: MOTION.gsapEaseInOut,
+              immediateRender: false,
+            },
+            0.04
           );
-        }
+        if (exitDisplay)
+          tl.fromTo(
+            exitDisplay,
+            { y: 0, autoAlpha: 1 },
+            {
+              y: -MOTION.rise,
+              autoAlpha: 0,
+              duration: 0.12,
+              ease: MOTION.gsapEaseInOut,
+              immediateRender: false,
+            },
+            0.12
+          );
+
+        // The corner radius resolves in the first tenth, while the frame is
+        // still full-bleed and its corners are the viewport's own — so it is a
+        // CONSTANT for the entire geometric travel and the hero's rest frame
+        // stays square. Rounding the rest frame would put two notches on the
+        // LCP paint; ramping it during the dock would fail the "radius constant
+        // across the scrub" assertion.
+        tl.fromTo(P, { r: 0 }, { r: () => radiusPx(), duration: 0.1 }, 0);
+
+        // PHASE B (0.30 -> 0.80). The empty frame shrinks into the cell.
+        tl.fromTo(P, { t: 0 }, { t: 1, duration: 0.5, ease: MOTION.gsapEase }, 0.3);
+
+        // PHASE C (0.82 -> 0.96). The hairline draws at the seam.
+        if (seam)
+          tl.fromTo(
+            seam,
+            { scaleY: 0 },
+            {
+              scaleY: 1,
+              duration: 0.14,
+              ease: MOTION.gsapEase,
+              immediateRender: false,
+            },
+            0.82
+          );
+
+        // The footage drifts against the clip, on the SAME playhead, so it can
+        // never desync from the shape it drifts inside. The 8% vertical bleed
+        // on `.hero-media` is the travel room.
+        if (heroMedia)
+          tl.fromTo(heroMedia, { yPercent: 0 }, { yPercent: 4, duration: 1 }, 0);
+
+        // If `.col-media` is ever missing, hidden or zero-sized, `dock()`
+        // returns null, `paint()` writes full-bleed, and the hero simply never
+        // clips. It cannot blank.
       }
       }
     );

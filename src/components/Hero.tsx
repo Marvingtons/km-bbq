@@ -128,7 +128,7 @@ export function Hero() {
       className="pointer-events-none relative z-20 h-[200vh]"
       aria-label="Hero"
     >
-      <div className="hero-stage pointer-events-auto sticky top-0 flex h-screen flex-col overflow-hidden">
+      <div className="hero-stage sticky top-0 flex h-screen flex-col overflow-hidden">
         {/* THE WINDOW. This is the element the transition clips, and it is
             exactly viewport-sized so `inset()` percentages mean what they say.
             It is a separate box from the media inside it precisely because the
@@ -165,7 +165,24 @@ export function Hero() {
               Legibility is now bought entirely at the glyphs. See globals.css. */}
         </div>
 
-        <div className="relative z-10 flex w-full flex-1 items-end">
+        {/* The ember hairline at the panel's seam — the one edge where the
+            ground changes once the window has docked (footage to paint on the
+            left; the panel bleeds right, so it has no other free edge).
+
+            On the STAGE, not inside the window: the window is the clip target,
+            and a rule drawn on the clip boundary is half clipped away. In the
+            hero, not in About: it leaves with the panel.
+
+            No height and scaleY(0) by default, so it cannot paint until the
+            scrub measures and positions it. With JS off, below 768px and under
+            reduced motion it is never measured — those states get their
+            hairline from the media column's own ::before instead. */}
+        <span
+          aria-hidden="true"
+          className="hero-dock-seam pointer-events-none absolute left-0 top-0 z-[11] w-px origin-top scale-y-0 bg-gradient-to-b from-transparent via-ember/60 to-transparent"
+        />
+
+        <div className="pointer-events-auto relative z-10 flex w-full flex-1 items-end">
         {/* The hero copy sits on the SAME track as every other section, so the
             eyebrow, the display lockup and the CTA all begin on the page grid
             rather than at the viewport edge. */}
@@ -176,9 +193,11 @@ export function Hero() {
               reason. Ember-deep (#9A5A1A) measures 1.57:1 against the darkest
               scrimmed block; it is a warm mid-brown and the footage is full of
               warm mid-brown. Ink takes it to 5.00:1. */}
-          <motion.p className="hero-copy-glow eyebrow mb-3 text-ink" {...rise(0)}>
-            {EYEBROW}
-          </motion.p>
+          <div className="hero-exit-support">
+            <motion.p className="hero-copy-glow eyebrow mb-3 text-ink" {...rise(0)}>
+              {EYEBROW}
+            </motion.p>
+          </div>
 
           {/* The display lockup. Tracking is pulled tight and leading is sub-1
               so the two words read as one mass. The sizes and the indent are
@@ -189,17 +208,19 @@ export function Hero() {
               the midpoint the column scrim is not allowed to cross — so the
               scrim cannot reach its tail and the halo is what carries it
               there. Over cream it is cream on cream, and disappears. */}
-          <motion.h1
-            className="hero-display-glow font-serif font-light uppercase leading-[0.8] tracking-[-0.03em] text-ink"
-            {...rise(1, false)}
-          >
-            <span className="block text-[21vw] lg:text-[10.5vw]">{first}</span>
-            <span className="block whitespace-nowrap pl-8 text-[21vw] lg:pl-[18vw] lg:text-[11.5vw]">
-              {second}
-            </span>
-          </motion.h1>
+          <div className="hero-exit-display">
+            <motion.h1
+              className="hero-display-glow font-serif font-light uppercase leading-[0.8] tracking-[-0.03em] text-ink"
+              {...rise(1, false)}
+            >
+              <span className="block text-[21vw] lg:text-[10.5vw]">{first}</span>
+              <span className="block whitespace-nowrap pl-8 text-[21vw] lg:pl-[18vw] lg:text-[11.5vw]">
+                {second}
+              </span>
+            </motion.h1>
+          </div>
 
-          <div>
+          <div className="hero-exit-support">
             {/* THE SUPPORTING LINES, and the one place a gradient survives.
                 These two are 16px, and 16px is where the halo runs out: a
                 blurred shadow spreads its own alpha, so at a 1-2px stroke it
