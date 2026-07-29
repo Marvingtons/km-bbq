@@ -16,6 +16,14 @@ const nextConfig: NextConfig = {
     // honours these formats, so the delivered bytes are the same either way.
     // See DEPLOY.md ("Images") before switching this to `unoptimized`.
     formats: ["image/avif", "image/webp"],
+
+    // Next 16 changed this default from "any quality" to exactly [75], and a
+    // `quality` prop outside the list is silently coerced to the nearest
+    // allowed value rather than warning. 60 is here for one image: the hero
+    // poster, which is the page's LCP element and spends its entire life under
+    // a 55% cream scrim, so compression artefacts at that level are not
+    // visible. Everything else stays on 75.
+    qualities: [60, 75],
   },
 };
 

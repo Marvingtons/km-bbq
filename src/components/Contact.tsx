@@ -1,7 +1,6 @@
 import { ScrollReveal } from "./ScrollReveal";
 import { SocialLinks } from "./SocialLinks";
 import { ContactMap, DirectionsLink } from "./ContactMap";
-import { MuralMark } from "./MuralMark";
 import { HOURS, ADDRESS, PHONE, DIRECTIONS_URL } from "@/lib/restaurant";
 
 // The two things a visitor is here for — when you are open, and where you are —
@@ -28,13 +27,7 @@ export function Contact() {
         {/* Eyebrow, heading and body all start at column 1, like every other
             section. The mark sits above them in the same column. */}
         <div className="col-text mb-6">
-          {/* This section's one voice from the mural — the pine, the motif that
-              reads as a place rather than a dish. Full colour, like the mural
-              itself. */}
           <ScrollReveal>
-            <MuralMark mark="pine" size={84} className="mb-5" />
-          </ScrollReveal>
-          <ScrollReveal delay={0.03}>
             <p className="eyebrow mb-4">Find us</p>
           </ScrollReveal>
           <ScrollReveal delay={0.05}>

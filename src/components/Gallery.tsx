@@ -2,7 +2,6 @@
 
 import { useEffect, useLayoutEffect, useRef } from "react";
 import Image from "next/image";
-import { MuralMark } from "./MuralMark";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { MOTION } from "@/lib/motion";
@@ -227,10 +226,6 @@ export function Gallery() {
           >
             Follow us on Instagram →
           </a>
-          {/* This section's one voice from the mural: the table grill, which is
-              what the photographs in the row are of. Full colour, like the
-              mural — never graded, tinted or faded. */}
-          <MuralMark mark="grill" size={92} className="mt-6" />
         </div>
 
         {/* Photo row. On desktop the GSAP timeline translates this track; on

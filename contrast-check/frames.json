@@ -1,0 +1,25 @@
+{
+  "source": "C:/Users/ADMINI~1/AppData/Local/Temp/claude/C--Users-Administrator-Desktop-Website-Projects-km-bbq-website/0d74ceab-0650-4019-9d32-f3e5ce25d053/scratchpad/r2-hero.mp4",
+  "frames": 305,
+  "analysedRegion": "lower 62% of frame (where hero type lands)",
+  "brightest": {
+    "frame": 119,
+    "timeSec": 3.967,
+    "meanRelLuminance": 0.3334,
+    "file": "contrast-check/frame-brightest.png"
+  },
+  "busiest": {
+    "frame": 17,
+    "timeSec": 0.567,
+    "laplacianEnergy": 25.57,
+    "meanRelLuminance": 0.2256,
+    "file": "contrast-check/frame-busiest.png"
+  },
+  "darkest": {
+    "frame": 304,
+    "timeSec": 10.133,
+    "meanRelLuminance": 0.1285,
+    "file": "contrast-check/frame-darkest.png",
+    "note": "Not requested, but this is the binding case for INK type. Kept so the wrong worst case does not get re-derived later."
+  }
+}

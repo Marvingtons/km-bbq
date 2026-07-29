@@ -232,6 +232,105 @@
 }
 
 /* ---------------------------------------------------------------------------
+   HERO LEGIBILITY — bought at the glyphs, and ONLY at the glyphs.
+
+   NOTHING IS LAYERED OVER THE FOOTAGE. No veil, no shaped scrim, no gradient,
+   no wash. The stack over the video is video, poster, type, full stop. If you
+   are about to add a rectangle here, don't.
+
+   Two earlier attempts are worth knowing about so they don't come back:
+
+     1. A uniform 55% cream veil over the whole frame. Bought contrast
+        everywhere, made the clip chalky, and read as a failed load.
+     2. A SHAPED cream scrim, 55% down the left and gone by 62%. Warm and local
+        in the abstract; in practice cream at 55% over the near-black grill
+        vents composites to rgb(171,162,152) — grey — and because it fell off
+        horizontally while masked vertically, its edge read as a diagonal grey
+        wash across the lower right. Measured on the same frame with it hidden,
+        it was lifting rgb(76,64,51) to rgb(171,162,152). Local milking is still
+        milking.
+
+   Both are gone. What remains is a HALO on the type itself, so every pixel of
+   footage that is not directly behind a letterform is untouched, at full
+   saturation, forever.
+
+   Measured per glyph against the actual pixels behind each letterform, bare ink
+   fails badly on this clip (SELF SERVE 14-29% of glyph pixels under 3:1; the
+   Korean BBQ line 86-100% under 4.5:1; the subhead 51-99% under 4.5:1), so the
+   halo is load-bearing, not decorative. The CTA needs none of it: its label
+   rides an opaque cream pill and measures a constant ~8.6:1.
+
+   ONE RULE FOR BOTH HALOS: cream, never grey and never black. Grey reads as a
+   bevel and drags the warm frame cold; cream means the halo VANISHES the moment
+   the type crosses onto the cream ground at the end of the window transition,
+   costing nothing where it is not needed.
+   --------------------------------------------------------------------------- */
+
+/* DEVICE 1 — the display halo, for the SELF SERVE lockup only.
+
+   A halo, not a drop shadow: every layer is blur-only with zero offset, so it
+   is concentric and the letterform keeps its own weight instead of acquiring a
+   direction. The tight layer is repeated rather than widened, which compounds
+   its alpha at the same radius — that is what makes the edge read crisp rather
+   than foggy, and it is why this looks like the letter holding its own edge
+   rather than like an effect.
+
+   Cream, derived from --color-cream, never grey. Two reasons: grey would read
+   as a bevel and drag the warm frame cold, and cream means the halo VANISHES
+   the moment the type crosses onto the cream ground during the window
+   transition. It costs nothing where it is not needed.
+
+   14px of outer falloff against a ~150px cap height is roughly 9% of the
+   glyph — a few pixels at the stroke, which is the brief's "tight". */
+.hero-display-glow {
+  text-shadow:
+    /* Same construction as the copy halo, one step larger for a ~150px cap
+       height: a solid 2px contour, then a longer falloff. A pure blur was
+       tried first and measured 1.08:1 at its worst on the darkest frame —
+       blur spreads its own alpha, so it never puts opaque cream against the
+       stroke, which is exactly where the contrast has to come from. */
+    2px 0 0 rgb(250 244 236), -2px 0 0 rgb(250 244 236),
+    0 2px 0 rgb(250 244 236), 0 -2px 0 rgb(250 244 236),
+    2px 2px 0 rgb(250 244 236), -2px -2px 0 rgb(250 244 236),
+    2px -2px 0 rgb(250 244 236), -2px 2px 0 rgb(250 244 236),
+    0 0 8px rgb(250 244 236 / 0.7),
+    0 0 16px rgb(250 244 236 / 0.42);
+}
+
+/* DEVICE 2 — the same halo, scaled for body-size type.
+
+   This replaced a shaped scrim (see the note above). The scrim was a rectangle
+   over the picture; this is a few pixels around each letter, which is the only
+   honest way to leave the footage alone.
+
+   THE RADII ARE NOT THE DISPLAY LINE'S. A 14px falloff is 9% of a 150px cap
+   height and reads as a crisp edge; the same 14px around 12-16px type is
+   roughly the size of the glyph itself and reads as fog. Scaled to the same
+   PROPORTION instead — about 1/12th of cap height for the tight ring and half
+   the cap height at the outer limit — the halo stays a hairline at the stroke.
+
+   The tight ring is doubled at high alpha and the falloff is short. That ordering
+   matters: it is what puts nearly-opaque cream immediately against the stroke,
+   which is what the contrast is actually measured against, while the outer
+   layers only soften the join to the picture. Widening the tight ring instead of
+   repeating it would blur the letterform; this keeps it sharp. */
+.hero-copy-glow {
+  text-shadow:
+    /* The ring: eight offsets at radius 1, zero blur, fully opaque. Together
+       they lay a continuous 1px cream contour around the letterform. This is
+       what the contrast actually rests on — ink against solid cream is 15.9:1
+       regardless of what the footage does behind it. */
+    1px 0 0 rgb(250 244 236), -1px 0 0 rgb(250 244 236),
+    0 1px 0 rgb(250 244 236), 0 -1px 0 rgb(250 244 236),
+    1px 1px 0 rgb(250 244 236), -1px -1px 0 rgb(250 244 236),
+    1px -1px 0 rgb(250 244 236), -1px 1px 0 rgb(250 244 236),
+    /* The join: a short blurred falloff so the ring does not end on a hard
+       edge and read as a sticker. Purely cosmetic — it carries no contrast. */
+    0 0 3px rgb(250 244 236 / 0.7),
+    0 0 6px rgb(250 244 236 / 0.4);
+}
+
+/* ---------------------------------------------------------------------------
    PHOTO GRADE. The gallery photographs sit next to painted illustration, so
    they get one consistent treatment: a light warm grade, the shadows lifted a
    touch toward the cream base, the shared corner radius, and the same grain.

@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import localFont from "next/font/local";
 import { gsap } from "gsap";
 import { ScrollReveal } from "./ScrollReveal";
-import { MuralMark } from "./MuralMark";
 import { MOTION, prefersReducedMotion } from "@/lib/motion";
 
 // Seven-segment face for the LED clock — bundled locally (SIL OFL, see
@@ -282,12 +281,7 @@ export function Challenge() {
           margins as every other section — only its alignment differs. */}
       <div className="grid-page">
         <div className="col-full mx-auto flex max-w-md flex-col items-center text-center">
-        {/* This section's one voice from the mural — the flame, which is what
-            the game is about. Full colour, like the mural itself. */}
         <ScrollReveal>
-          <MuralMark mark="flame" size={80} className="mb-5" />
-        </ScrollReveal>
-        <ScrollReveal delay={0.03}>
           <p className="eyebrow mb-4">House game</p>
         </ScrollReveal>
         <ScrollReveal delay={0.05}>

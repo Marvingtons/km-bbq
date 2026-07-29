@@ -5,7 +5,6 @@ import { Footer } from "@/components/Footer";
 import { MenuJumpNav, type JumpTarget } from "@/components/MenuJumpNav";
 import { SeamMotion } from "@/components/SeamMotion";
 import { BreadcrumbSchema } from "@/components/RestaurantSchema";
-import { MuralMark } from "@/components/MuralMark";
 import { Dot } from "@/components/Dot";
 import { HOURS, ADDRESS, PHONE } from "@/lib/restaurant";
 import { pageMeta } from "@/lib/seo";
@@ -551,9 +550,6 @@ export default function MenuPage() {
         <section className="pt-32 pb-12 sm:pt-36 lg:pt-40">
           <div className="grid-page">
             <div className="col-text">
-              {/* This page's one voice from the mural — the tiger, the motif
-                  that carries the brand's face. Full colour, like the mural. */}
-              <MuralMark mark="tiger" size={92} className="mb-6" />
               <p className="eyebrow mb-5">
                 All-You-Can-Eat <Dot char="·" /> Self-Serve <Dot char="·" />{" "}
                 Grill Your Own
@@ -676,9 +672,6 @@ export default function MenuPage() {
         <section className="relative py-section md:py-section-lg">
           <div className="grid-page">
             <div className="col-text">
-              {/* The band's one voice from the mural — the hahoe mask. Full
-                  colour, like the mural itself. */}
-              <MuralMark mark="mask" size={78} className="mb-6" />
               <h2 className="h2-scale">
                 Come <em className="italic text-pink">Hungry</em>
               </h2>

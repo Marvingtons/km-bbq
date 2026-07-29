@@ -293,12 +293,22 @@ export function About() {
       ref={sectionRef}
       id="about"
       aria-labelledby="about-heading"
-      className="grain relative overflow-hidden bg-cream"
+      // `-mt-[100vh]` pulls this section up under the hero's sticky stage so
+      // that the mural is what the hero's window reveals as it clips down. The
+      // hero is 200vh with a 100vh sticky stage; this cancels the extra
+      // viewport, so net page height is unchanged and this section's own pin
+      // still starts on `top top` — the stage releases on the same pixel.
+      // z-10 under the hero's z-20 is what puts the mural BEHIND the window.
+      // See the arithmetic block in Hero.tsx before changing either number.
+      className="grain relative z-10 -mt-[100vh] overflow-hidden bg-cream"
       style={{ ["--nav-h" as string]: `${NAV_H}px` } as React.CSSProperties}
     >
-      {/* Hero -> About is a ground change (plum-ink/video -> cream), so it gets
-          the site's one transition device. */}
+      {/* THE SEAM. Hero -> About is a ground change now — footage to cream —
+          so it takes the site's one transition device, the same ember hairline
+          the footer gets. Markup, not motion: it is present for reduced motion
+          and for no-JS, where it is the whole transition. */}
       <SectionSeam />
+
       {/* Mural stage (>= md only — hidden on mobile, where a simplified band
           renders instead, see below). The halves are `object-contain` so the
           whole illustration is always shown — nothing is cropped. The mural art
@@ -310,7 +320,20 @@ export function About() {
       {/* pointer-events-none: this stage overlays the story/grill layers
           (z-20 over z-10) and is purely decorative — without it, it swallows
           every click meant for the buttons revealed in the gap beneath. */}
-      <div className="pointer-events-none hidden md:block relative z-20 px-6 md:px-0 motion-safe:md:min-h-screen">
+      {/* `mural-arrive` is SeamMotion's handle for the hero handoff: the stage
+          rises and resolves as the hero scrolls out, and lands on exactly the
+          state the pinned timeline below starts from, so the arrival and the
+          opening are one continuous move rather than two. It is a separate
+          element from `.mural-parallax` on purpose — that layer already owns a
+          yPercent drift across the pin, and two timelines writing the same
+          transform on the same node fight each other. */}
+      {/* No `will-change` here. Nothing animates this element any more — the
+          old drift-and-fade arrival was replaced by the hero's window clipping
+          down to reveal it, so the mural is simply present and the reveal
+          happens in front of it. Measured at 4x CPU throttling the clip scrub
+          holds every frame at 16.8ms or under, so the hint would buy nothing
+          and cost a permanently promoted full-viewport layer. */}
+      <div className="mural-arrive pointer-events-none hidden md:block relative z-20 px-6 md:px-0 motion-safe:md:min-h-screen">
         <div className="relative mx-auto aspect-[2535/1240] w-full max-w-7xl overflow-hidden md:mx-0 md:aspect-auto md:h-screen md:max-w-none">
           {/* Depth layer: carries BOTH halves on a slow vertical drift (~0.9x
               the story column's rate) across the pin, so the mural reads as
@@ -328,7 +351,7 @@ export function About() {
               sizes="50vw"
               draggable={false}
               onLoad={refresh}
-              className="select-none object-contain object-right"
+              className="select-none object-contain object-right-top"
             />
           </div>
 
@@ -342,7 +365,7 @@ export function About() {
               sizes="50vw"
               draggable={false}
               onLoad={refresh}
-              className="select-none object-contain object-left"
+              className="select-none object-contain object-left-top"
             />
           </div>
           </div>
@@ -364,7 +387,7 @@ export function About() {
               aria-hidden="true"
               fill
               sizes="50vw"
-              className="select-none object-contain object-right"
+              className="select-none object-contain object-right-top"
             />
           </div>
           <div className="relative h-full w-1/2">
@@ -374,7 +397,7 @@ export function About() {
               aria-hidden="true"
               fill
               sizes="50vw"
-              className="select-none object-contain object-left"
+              className="select-none object-contain object-left-top"
             />
           </div>
         </div>

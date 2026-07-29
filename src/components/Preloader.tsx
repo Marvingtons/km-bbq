@@ -110,6 +110,10 @@ export function Preloader() {
       [],
       "exit"
     );
+    // NOTE: this used to dispatch a `km:handoff` event partway through the wipe
+    // for the hero's mural entrance to start on. The hero is a cream ground now
+    // and this overlay is already cream, so the wipe hands straight onto the
+    // same surface — the seam IS the surface, and nothing needs a cue.
     tl.to(
       q(".pre-lockup"),
       {

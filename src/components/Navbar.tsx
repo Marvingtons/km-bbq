@@ -135,24 +135,30 @@ export function Navbar() {
     };
   }, [menuOpen, close]);
 
-  // On routes other than the home page there is no video behind the bar, so it
-  // always reads as the solid cream treatment rather than transparent-over-hero.
-  const solid = scrolled || !isHome;
-  // While the overlay is up it supplies the cream field itself, so the bar
-  // drops both of its own layers — but the logo and trigger still need the
-  // dark-on-cream treatment.
-  const onLight = solid || menuOpen;
+  // THE BAR IS ALWAYS ON A LIGHT GROUND NOW.
+  //
+  // This used to carry two full treatments: white links over the hero's video,
+  // and ink links once the cream bar had faded in on scroll. The hero is cream
+  // from the first pixel, so the white treatment had nothing left to sit on —
+  // white links on cream are invisible, which is a hard failure at scroll 0
+  // rather than a style regression.
+  //
+  // What survives is the SURFACE cross-fade: the bar itself is transparent over
+  // the top of the hero and fades its cream panel in once you scroll, so the
+  // mural band still reads edge to edge at rest. Only the type is unconditional.
+  const barVisible = scrolled || !isHome;
 
-  // Link colour by state. Over the hero the links are white on video; once the
-  // cream bar has faded in they are foreground on cream.
-  const linkColor = (isActive: boolean) =>
-    solid
-      ? isActive
-        ? "text-ember-deep"
-        : "text-foreground hover:text-ember-deep"
-      : isActive
-        ? "text-white"
-        : "text-white/85 hover:text-white";
+  // EMBER-DEEP NEEDS THE CREAM PANEL UNDER IT. While the bar is transparent it
+  // is the hero's video the type sits on, and ember-deep (#9A5A1A) is a warm
+  // mid-brown against footage that is full of warm mid-brown: measured 1.83:1
+  // at its worst frame, against 6.1:1 for ink in the same place. So over the
+  // video every link is ink, and the active one is identified by its pink
+  // underline — which is the real active signal anyway. The moment the cream
+  // panel fades in, ember-deep has a surface to hold on and comes back.
+  const linkColor = (isActive: boolean) => {
+    if (!barVisible) return "text-foreground";
+    return isActive ? "text-ember-deep" : "text-foreground hover:text-ember-deep";
+  };
 
   return (
     <>
@@ -162,26 +168,19 @@ export function Navbar() {
       <header
         className={`fixed inset-x-0 top-0 ${menuOpen ? "z-[60]" : "z-50"}`}
       >
-        {/* Two stacked layers, cross-faded by opacity rather than animating
-            background-color: only opacity and transform are animated, which
-            keeps the bar off the paint path while the hero video plays.
+        {/* ONE layer now. There used to be a dark scrim strip underneath this
+            one, so that white nav type could hold over the bright top of the
+            hero video; with a cream hero there is nothing to scrim and nothing
+            white to protect, so it is gone.
 
-            Layer 1 — scrim strip. The new hero video is bright and warm, so
-            white links and the logo need a little help at the top of frame.
-            This is a short gradient confined to the nav zone, not a wash over
-            the whole video. */}
-        <div
-          aria-hidden="true"
-          className={`pointer-events-none absolute inset-0 bg-gradient-to-b from-black/45 via-black/20 to-transparent transition-opacity duration-[var(--dur-slow)] ease-house ${
-            onLight ? "opacity-0" : "opacity-100"
-          } motion-reduce:transition-none`}
-        />
-        {/* Layer 2 — the solid cream bar. Hidden while the overlay is open,
-            since the overlay is already a full cream field. */}
+            The cream panel still cross-fades on scroll rather than being
+            painted from the start — at rest the bar is transparent and the
+            mural band runs under it edge to edge. Opacity only, so the bar
+            stays off the paint path. */}
         <div
           aria-hidden="true"
           className={`absolute inset-0 border-b border-black/[0.06] bg-cream/90 shadow-warm backdrop-blur-md transition-opacity duration-[var(--dur-slow)] ease-house ${
-            solid && !menuOpen ? "opacity-100" : "opacity-0"
+            barVisible && !menuOpen ? "opacity-100" : "opacity-0"
           } motion-reduce:transition-none`}
         />
 
@@ -195,7 +194,10 @@ export function Navbar() {
             className="flex min-h-11 items-center transition-opacity duration-[var(--dur-base)] ease-house hover:opacity-80"
           >
             <Logo
-              size={onLight ? 104 : 116}
+              // One size now. The mark used to grow to 116 over the video and
+              // shrink to 104 once the cream bar arrived; on a cream hero there
+              // is no second state to distinguish.
+              size={104}
               className="transition-all duration-[var(--dur-slow)] ease-house"
             />
           </Link>
@@ -250,11 +252,7 @@ export function Navbar() {
             <li className="ms-3 xl:ms-5">
               <a
                 href={PHONE.href}
-                className={`inline-flex min-h-11 items-center rounded-control border px-5 py-2 text-eyebrow font-semibold uppercase tracking-[0.14em] transition-colors duration-[var(--dur-base)] ease-house ${
-                  solid
-                    ? "border-ember text-ink hover:bg-ember hover:text-ink"
-                    : "border-white/70 text-white hover:bg-white hover:text-ink"
-                }`}
+                className="inline-flex min-h-11 items-center rounded-control border border-ember px-5 py-2 text-eyebrow font-semibold uppercase tracking-[0.14em] text-ink transition-colors duration-[var(--dur-base)] ease-house hover:bg-ember"
               >
                 {PHONE.display}
               </a>
@@ -282,7 +280,7 @@ export function Navbar() {
                   key={i}
                   className={`absolute left-0 h-0.5 w-6 rounded-control transition-all duration-[var(--dur-base)] ease-house motion-reduce:transition-none ${
                     bar.top
-                  } ${menuOpen ? `bg-foreground ${bar.open}` : onLight ? "bg-foreground" : "bg-white"}`}
+                  } ${menuOpen ? `bg-foreground ${bar.open}` : "bg-foreground"}`}
                 />
               ))}
             </span>
