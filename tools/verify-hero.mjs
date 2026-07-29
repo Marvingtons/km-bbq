@@ -173,11 +173,40 @@ for (const [w, wantVideo] of [[390, false], [767, false], [768, true]]) {
   });
   check("cream sits under the media", layers.base === "rgb(250, 244, 236)", layers.base);
   check(
-    "NO overlay layer of any kind over the footage",
+    "NO overlay ELEMENT over the footage",
     layers.overlays.length === 0,
     layers.overlays.length
       ? layers.overlays.map((o) => `${o.cls} ${o.bgImage || o.bgColor}`).join(" | ")
       : "video + poster + type only"
+  );
+
+  // The copy plate is a ::before, so the element sweep above cannot see it.
+  // Assert it explicitly rather than let it pass by being invisible to the
+  // test: it must exist, and it must be scoped to the copy — a plate that has
+  // grown to the width of the track is the frame-wide wash coming back.
+  const plate = await page.evaluate(() => {
+    const el = document.querySelector(".hero-copy-pool");
+    if (!el) return null;
+    const cs = getComputedStyle(el, "::before");
+    const r = el.getBoundingClientRect();
+    const track = document.querySelector("#home .track").getBoundingClientRect();
+    return {
+      bg: cs.backgroundColor,
+      filter: cs.filter,
+      widthPctOfTrack: +((r.width / track.width) * 100).toFixed(1),
+      widthPctOfViewport: +((r.width / window.innerWidth) * 100).toFixed(1),
+      heightPctOfViewport: +((r.height / window.innerHeight) * 100).toFixed(1),
+    };
+  });
+  check(
+    "copy plate is cream and soft-edged",
+    !!plate && /250, 244, 236/.test(plate.bg) && /blur/.test(plate.filter),
+    plate ? `${plate.bg}, ${plate.filter}` : "missing"
+  );
+  check(
+    "copy plate stays scoped to the copy, not the frame",
+    !!plate && plate.widthPctOfTrack < 45 && plate.heightPctOfViewport < 20,
+    plate ? `${plate.widthPctOfTrack}% of track, ${plate.widthPctOfViewport}% of viewport, ${plate.heightPctOfViewport}% tall` : "missing"
   );
 
   // Every shadow colour must be cream. A grey or black one is the forbidden

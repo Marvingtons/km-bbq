@@ -92,7 +92,9 @@ export const PRELOADER = {
   exitEase: MOTION.gsapEaseInOut,
 } as const;
 
-export const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+/** Module-private: only `prefersReducedMotion()` below reads it. Components
+ *  that need the query as a string should use `MOTION_OK` or the hook. */
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 /**
  * The positive form, for gsap.matchMedia(). Everything scroll-driven registers

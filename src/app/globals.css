@@ -284,17 +284,9 @@
    glyph — a few pixels at the stroke, which is the brief's "tight". */
 .hero-display-glow {
   text-shadow:
-    /* Same construction as the copy halo, one step larger for a ~150px cap
-       height: a solid 2px contour, then a longer falloff. A pure blur was
-       tried first and measured 1.08:1 at its worst on the darkest frame —
-       blur spreads its own alpha, so it never puts opaque cream against the
-       stroke, which is exactly where the contrast has to come from. */
-    2px 0 0 rgb(250 244 236), -2px 0 0 rgb(250 244 236),
-    0 2px 0 rgb(250 244 236), 0 -2px 0 rgb(250 244 236),
-    2px 2px 0 rgb(250 244 236), -2px -2px 0 rgb(250 244 236),
-    2px -2px 0 rgb(250 244 236), -2px 2px 0 rgb(250 244 236),
-    0 0 8px rgb(250 244 236 / 0.7),
-    0 0 16px rgb(250 244 236 / 0.42);
+    0 0 4px rgb(250 244 236 / 0.9),
+    0 0 10px rgb(250 244 236 / 0.72),
+    0 0 22px rgb(250 244 236 / 0.45);
 }
 
 /* DEVICE 2 — the same halo, scaled for body-size type.
@@ -316,18 +308,60 @@
    repeating it would blur the letterform; this keeps it sharp. */
 .hero-copy-glow {
   text-shadow:
-    /* The ring: eight offsets at radius 1, zero blur, fully opaque. Together
-       they lay a continuous 1px cream contour around the letterform. This is
-       what the contrast actually rests on — ink against solid cream is 15.9:1
-       regardless of what the footage does behind it. */
-    1px 0 0 rgb(250 244 236), -1px 0 0 rgb(250 244 236),
-    0 1px 0 rgb(250 244 236), 0 -1px 0 rgb(250 244 236),
-    1px 1px 0 rgb(250 244 236), -1px -1px 0 rgb(250 244 236),
-    1px -1px 0 rgb(250 244 236), -1px 1px 0 rgb(250 244 236),
-    /* The join: a short blurred falloff so the ring does not end on a hard
-       edge and read as a sticker. Purely cosmetic — it carries no contrast. */
-    0 0 3px rgb(250 244 236 / 0.7),
-    0 0 6px rgb(250 244 236 / 0.4);
+    0 0 1px rgb(250 244 236 / 0.95),
+    0 0 1px rgb(250 244 236 / 0.95),
+    0 0 2px rgb(250 244 236 / 0.92),
+    0 0 4px rgb(250 244 236 / 0.8),
+    0 0 8px rgb(250 244 236 / 0.55),
+    0 0 14px rgb(250 244 236 / 0.32);
+}
+
+/* DEVICE 3 — the copy pool. The one gradient left anywhere near the footage,
+   and it exists because 16px type is past what a halo can do (see Hero.tsx).
+
+   It is drawn as a ::before so it can bleed well past the text on every side
+   and fade to nothing before it gets anywhere near an edge — an ellipse, no
+   straight lines, no cutoff. That is the whole difference between this and the
+   scrim it replaces: that one was a frame-wide linear gradient with a hard
+   horizontal falloff and a vertical mask, and the corner where those two met
+   read as a diagonal grey wash. A radial with no hard stop has no such corner.
+
+   0.62 at the centre is the measured floor for ink at 4.5:1 over the darkest
+   footage this clip reaches, and it decays to nothing by the ellipse's edge, so
+   the average opacity over the area it covers is far lower than the number
+   suggests. It covers roughly 200px of the bottom-left; the frame keeps every
+   other pixel at full saturation. */
+.hero-copy-pool {
+  /* Shrink to the copy, not to the track. As a plain block this element is the
+     full 1280px column, and a radial drawn across that box is a full-width
+     band with a visible top and bottom edge — the same wash, rebuilt. Sized to
+     content it is ~440px, which is the width of the two lines it serves. */
+  width: fit-content;
+}
+
+.hero-copy-pool::before {
+  content: "";
+  position: absolute;
+  inset: -24px -34px -20px -30px;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 999px;
+  background: rgb(250 244 236 / 0.58);
+  /* A BLURRED PLATE, not a gradient, and the difference is the point.
+
+     A radial has one centre, so its alpha is always falling off across the
+     text: tuned wide enough to reach the subhead's last word it spills past its
+     own box and gets cut off square (the straight edge is exactly what made the
+     old scrim read as a wash), and tuned tight enough to fade cleanly inside
+     the box it leaves the end of the line at 3.0:1. There is no setting that
+     does both across a 440px block.
+
+     Blurring a solid rounded plate separates the two jobs: the fill holds one
+     even alpha everywhere the words are, and the blur alone makes the edge —
+     soft in every direction, with no centre, no axis and no boundary to notice.
+     26px of blur against a ~24px inset means it is already fading where the
+     text ends and is gone entirely about 50px out. */
+  filter: blur(26px);
 }
 
 /* ---------------------------------------------------------------------------

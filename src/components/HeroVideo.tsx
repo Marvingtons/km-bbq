@@ -124,10 +124,13 @@ export function HeroVideo({ className = "" }: { className?: string }) {
   return (
     <div className={`${className} bg-cream`}>
       {/* THE POSTER — and the LCP element. `fill` + `sizes="100vw"` because the
-          hero is full-bleed; `priority` emits the preload link. Quality is
-          pulled down because this still spends its whole life under a 55% cream
-          scrim (see Hero.tsx) — detail that the scrim eats is detail nobody
-          ever sees, and this is the largest paint on the page. */}
+          hero is full-bleed; `priority` emits the preload link.
+
+          quality={60} because this is the largest paint on the page and it is a
+          full-bleed background behind big type, not something anyone inspects.
+          (It used to be justified by a cream scrim eating the detail. That scrim
+          is gone — nothing is layered over the footage now — so the reason is
+          simply LCP weight.) */}
       <Image
         src={POSTER}
         alt=""

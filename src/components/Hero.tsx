@@ -200,20 +200,38 @@ export function Hero() {
           </motion.h1>
 
           <div>
-            <motion.p
-              className="hero-copy-glow mt-4 font-sans text-copy font-semibold uppercase tracking-[0.2em] text-ink"
-              {...rise(2)}
-            >
-              {HEADLINE.tail}
-            </motion.p>
-            {/* Body copy, overridden to INK for the same reason as the
-                eyebrow: --color-body (#5A5550) is defined as "solid body copy
-                on cream" and measures 2.12:1 on the darkest scrimmed block.
-                Ink takes it to 5.00:1. The softer grey goes back the moment
-                this copy is not over footage. */}
-            <motion.p className="hero-copy-glow copy measure mt-3 text-ink" {...rise(3)}>
-              {SUBHEAD}
-            </motion.p>
+            {/* THE SUPPORTING LINES, and the one place a gradient survives.
+                These two are 16px, and 16px is where the halo runs out: a
+                blurred shadow spreads its own alpha, so at a 1-2px stroke it
+                never puts opaque cream against the letterform. Measured, the
+                soft halo carries the display line (3.26:1 worst, against a 3:1
+                bar) and the eyebrow (7.45:1), but leaves these two at 1.6-3.7:1
+                against a 4.5 bar. That is a property of blur, not a tuning
+                failure — the only way to fix it with a halo is to make it a
+                hard ring, which is exactly the outline this pass removed.
+
+                So these two get a POOL: a soft radial wash of cream that lives
+                on the copy column and nowhere else. It is deliberately not the
+                old rung-3 scrim, which was a frame-wide left-anchored gradient
+                that fell off horizontally while being masked vertically, and
+                read as a diagonal grey wash across the lower right. This one is
+                an ellipse anchored to this block, it has no straight edges and
+                no cutoff to notice, and it is ~200px tall in the bottom-left
+                instead of two thirds of the frame. */}
+            <div className="hero-copy-pool relative">
+              <motion.p
+                className="hero-copy-glow relative mt-4 font-sans text-copy font-semibold uppercase tracking-[0.2em] text-ink"
+                {...rise(2)}
+              >
+                {HEADLINE.tail}
+              </motion.p>
+              {/* Body copy, overridden to INK: --color-body (#5A5550) is
+                  defined as "solid body copy on cream" and cannot hold on
+                  footage at any treatment short of an opaque plate. */}
+              <motion.p className="hero-copy-glow copy measure relative mt-3 text-ink" {...rise(3)}>
+                {SUBHEAD}
+              </motion.p>
+            </div>
             {/* The system pill, with its cream fill restored. This exception
                 exists because of the video and only because of the video:
                 ember (#F18B23) sits inside the grill footage's own hue range,
