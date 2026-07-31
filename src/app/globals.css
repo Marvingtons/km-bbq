@@ -473,6 +473,28 @@
     padding-inline: var(--grid-gutter);
   }
 
+  /* THE ONE EXEMPTION from "nothing else sets a page margin", and it is the
+     nav bar. `.track-edge` is `.track` with the max-width taken off: the same
+     outer margin, at the same two breakpoints, but measured from the VIEWPORT
+     rather than from a centred 1280 track.
+
+     The bar is furniture, not content. It spans the window, so its two ends
+     belong to the window — the mark at the left margin, the links and the call
+     button at the right — rather than tucked into a column of content that
+     happens to be centred underneath it.
+
+     WHAT THIS COSTS, stated rather than discovered later: above 1280 the mark
+     no longer starts on the same vertical line as the headings below it. At
+     1920 the track's content begins at 368px and this begins at 48px. Below
+     1280 there is no difference at all — the track is already full width, so
+     the two are the same pixel and the bar is unchanged.
+
+     Only the nav may use this. Anything that is content stays on `.track`. */
+  .track-edge {
+    width: 100%;
+    padding-inline: var(--grid-gutter);
+  }
+
   .grid-page {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -491,44 +513,23 @@
     max-width: var(--measure);
   }
 
-  /* THE ONE COLUMN THAT MOVES, and the only place a heading does not start at
-     column 1. On the pinned About stage the mural opens to a centred gap and
-     the story is revealed inside it; the gap is columns 5-8 at every width
-     from 768 up (measured), so the story starts at a real column edge rather
-     than floating. Everywhere the pin does not run — phones, and anyone on
-     reduced motion, where the mural stays whole and the story flows beneath
-     it — it starts at column 1 like every other section.
-
-     Written as CSS rather than as stacked Tailwind variants because
-     `grid-column` is a shorthand and `col-start-*` is not: mixing them lets
-     the cascade decide the end line, which is exactly the kind of quiet
-     override this codebase has been bitten by before. */
-  .col-story {
-    grid-column: 1 / -1;
-  }
-
-  @media (min-width: 768px) {
-    .col-story {
-      grid-column: 1 / span 7;
-    }
-  }
-
-  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
-    .col-story {
-      grid-column: 5 / span 4;
-    }
-  }
+  /* NOTE: `.col-story` is gone. It was a FOURTH span that moved to columns 5-8
+     at md+ with motion, because the pinned About stage opened the mural to a
+     centred gap and the story was revealed inside it. The mural is a bounded
+     band below the story now and there is no gap to sit in, so the story is an
+     ordinary reading column at column 1 like every other heading on the site —
+     which is to say it is `.col-text`, and having two names for one span was
+     the only thing keeping them apart. */
 
   /* ------------------------------------------------------------------------
      ABOUT'S MEDIA COLUMN — and the slot the hero's window docks into.
 
      Columns 9-12 running out to the right viewport edge (`.bleed-right`, the
      site's one sanctioned media break). This span is chosen because it is the
-     ONE span `.col-story` never occupies in any of its three states: 5-8 at
-     md+ with motion, 1-7 at md+ under reduce, 1/-1 below md. The distance from
-     column 8's right edge to column 9's left edge is exactly `--grid-gap` at
-     every width, so the clearance between the copy and the panel is a fact
-     about the grid rather than a number someone chose.
+     ONE span `.col-text` never occupies: 1-7 at md+, 1/-1 below md. That
+     leaves column 8 empty between the copy and the panel at every width from
+     768 up, so the clearance is a fact about the grid rather than a number
+     someone chose, and no scroll position can put them in contact.
 
      It is a REAL, permanently declared grid item, and SeamMotion reads its
      rect rather than recomputing the grid in JS. A grid cell cannot be wrong
@@ -620,7 +621,8 @@
 
   @media (min-width: 1024px) {
     .track,
-    .grid-page {
+    .grid-page,
+    .track-edge {
       padding-inline: var(--grid-gutter-lg);
     }
     .bleed-right {

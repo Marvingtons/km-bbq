@@ -94,7 +94,7 @@ export function Hero() {
   const [first, second] = HEADLINE.big.split(" ");
 
   return (
-    /* TWO VIEWPORTS TALL, and the second one is the window transition.
+    /* TWO VIEWPORTS TALL WHERE THE WINDOW RUNS, one viewport everywhere else.
        ------------------------------------------------------------------
        The hero used to be a single `min-h-screen` section. It is now a 200vh
        scroll container holding a `sticky` stage, and About is pulled up by
@@ -115,17 +115,29 @@ export function Hero() {
          100 -> 200vh    the shrunken panel scrolls off over pinned About.
 
        Net document height is unchanged (200vh section - 100vh pull = the 100vh
-       the hero used to occupy), and About's pinned timeline is untouched — it
-       still starts on `top top` and needed no offset, because the sticky stage
-       releases on the same pixel. Do not "simplify" the -100vh away without
+       the hero used to occupy). Do not "simplify" the -100vh away without
        redoing this arithmetic; it is load-bearing.
+
+       BOTH HALVES OF IT ARE GATED ON `motion-safe:md:`, and they must stay in
+       step with each other and with SeamMotion's `{ motion, wide }` condition —
+       the three are one decision written in three places. Under reduced motion
+       and below 768px there is no clip, so the extra viewport would be 100vh of
+       hero sitting still and then sliding up over About's story, which reaches
+       the top of the page before the hero has finished leaving: the story is
+       revealed and scrolled past behind an opaque departing video. (That was
+       survivable while the first screen of About was a decorative mural stage
+       and nobody noticed it was never seen. It is not survivable now that the
+       first screen of About IS the story.) Without the extra viewport the hero
+       is one screen, About follows it in normal flow, and the sequence is the
+       static one the brief asks for: hero poster, then the story, then the
+       band.
 
        pointer-events-none on the container, auto on the stage: the container's
        lower viewport overlaps pinned About, and a transparent box still eats
        clicks meant for About's buttons. */
     <section
       id="home"
-      className="pointer-events-none relative z-20 h-[200vh]"
+      className="pointer-events-none relative z-20 h-screen motion-safe:md:h-[200vh]"
       aria-label="Hero"
     >
       <div className="hero-stage sticky top-0 flex h-screen flex-col overflow-hidden">

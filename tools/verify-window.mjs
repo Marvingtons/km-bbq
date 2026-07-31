@@ -11,8 +11,10 @@
  *   2. the scrub is monotonic AND reversible mid-gesture (not fire-and-play)
  *   3. clip-path/transform only — the panel's layout box never changes, and
  *      CLS across the whole transition stays 0
- *   4. About's mural is behind the window, full-bleed, at full opacity, and
- *      is the section's own element rather than a second copy of the asset
+ *   4. the window opens onto About's CREAM ground with the story composed on
+ *      it, and the mural is a bounded band below that — one instance of each
+ *      sheet, never tiled, never a CSS background, ungraded, full opacity,
+ *      hairlined top and bottom
  *   5. the ember hairline is present at the ground change
  *   6. the video pauses once fully off-screen and resumes on return
  *   7. prefers-reduced-motion: nothing clips, nothing moves, hairline intact
@@ -48,6 +50,46 @@ const readClip = (page) =>
     const r = w.getBoundingClientRect();
     return { clip: getComputedStyle(w).clipPath, box: { w: Math.round(r.width), h: Math.round(r.height) } };
   });
+
+/**
+ * Is About's story ever visible with nothing painted over it?
+ *
+ * This exists because of a specific bug. The hero runs 200vh with a sticky
+ * stage and About is pulled up -100vh to sit behind it — which is free WHILE
+ * THE WINDOW CLIPS, because by the time the stage releases it is a small docked
+ * panel. Where the clip never runs (reduced motion, under 768px) the stage stays
+ * full-bleed and opaque for that whole extra viewport and then slides up over
+ * About: the story is revealed from behind a departing video and has scrolled
+ * past the top of the page before the video has finished leaving. Nothing
+ * throws, nothing overflows, and the section simply cannot be read.
+ *
+ * So both halves of that arithmetic are `motion-safe:md:`, and this asserts the
+ * consequence rather than the class name: at SOME scroll position the heading is
+ * on screen and the hero stage is not on top of it.
+ */
+async function storyReadable(page) {
+  const h = await page.evaluate(() => window.innerHeight);
+  let bestClear = false, sawIt = false;
+  for (let y = 0; y <= 3 * h; y += h / 6) {
+    await scrollTo(page, Math.round(y));
+    const s = await page.evaluate(() => {
+      const stage = document.querySelector(".hero-stage");
+      const head = document.getElementById("about-heading");
+      if (!stage || !head) return null;
+      const sb = stage.getBoundingClientRect(), hb = head.getBoundingClientRect();
+      const onScreen = hb.bottom > 0 && hb.top < innerHeight;
+      const under = hb.top < sb.bottom && sb.top < hb.bottom;
+      return { onScreen, under };
+    });
+    if (!s) continue;
+    if (s.onScreen) {
+      sawIt = true;
+      if (!s.under) bestClear = true;
+    }
+    if (bestClear) break;
+  }
+  return [bestClear, sawIt ? (bestClear ? "heading visible and clear of the hero" : "heading is only ever behind the hero stage") : "heading never on screen"];
+}
 
 const browser = await chromium.launch();
 
@@ -110,24 +152,81 @@ const browser = await chromium.launch();
   const cls = await page.evaluate(() => window.__cls);
   check("CLS through the transition is 0", cls < 0.005, `CLS ${cls.toFixed(4)}`);
 
-  // The mural behind: About's own element, untouched.
-  const mural = await page.evaluate(() => {
-    const img = document.querySelector("#about img[src*='mural-left']");
-    if (!img) return null;
-    const stage = img.closest(".mural-arrive") || img.parentElement;
-    const cs = getComputedStyle(img);
-    const sc = getComputedStyle(stage);
+  // WHAT THE WINDOW OPENS ONTO. This used to assert the mural was behind the
+  // panel. It is not any more, and that is the point of the reveal-retarget
+  // pass: the reveal target is About's CREAM GROUND with the story composed on
+  // it, and the mural is a bounded band further down the section.
+  const behind = await page.evaluate(() => {
+    const about = document.getElementById("about");
+    const stage = document.querySelector("#about .about-stage");
+    const band = document.querySelector("#about .mural-band");
+    const heading = document.getElementById("about-heading");
+    const copy = document.querySelector("#about .about-text p");
+    const cta = document.querySelector("#about .about-text a");
+    const vis = (e) => {
+      if (!e) return false;
+      const r = e.getBoundingClientRect();
+      const cs = getComputedStyle(e);
+      return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && +cs.opacity > 0.5;
+    };
     return {
-      count: document.querySelectorAll("img[src*='mural']").length,
-      inHero: document.querySelectorAll("#home img[src*='mural']").length,
-      opacity: cs.opacity, filter: cs.filter, stageOpacity: sc.opacity,
-      aboutZ: getComputedStyle(document.getElementById("about")).zIndex,
-      heroZ: getComputedStyle(document.getElementById("home")).zIndex,
+      ground: getComputedStyle(about).backgroundColor,
+      stageBeforeBand: stage && band ? stage.getBoundingClientRect().bottom <= band.getBoundingClientRect().top + 1 : null,
+      composed: [heading, copy, cta].every(vis),
+      muralInStage: stage ? stage.querySelectorAll("img[src*='mural']").length : -1,
     };
   });
-  check("mural is About's own, none in the hero", mural && mural.inHero === 0, `${mural?.inHero} in hero, ${mural?.count} total`);
-  check("mural is full-opacity and ungraded", mural && mural.opacity === "1" && mural.filter === "none" && mural.stageOpacity === "1", `opacity ${mural?.opacity}, filter ${mural?.filter}`);
-  check("mural sits behind the hero's window", mural && Number(mural.aboutZ) < Number(mural.heroZ), `about z${mural?.aboutZ} < hero z${mural?.heroZ}`);
+  // #FAF4EC
+  check(
+    "the window opens onto About's cream ground, not the mural",
+    behind && behind.ground === "rgb(250, 244, 236)" && behind.muralInStage === 0,
+    `ground ${behind?.ground}, ${behind?.muralInStage} mural img in the story stage`
+  );
+  check(
+    "settled state is composed: heading, copy and action are all visible",
+    behind && behind.composed,
+    `composed ${behind?.composed}`
+  );
+  check("the mural band sits BELOW the story", behind && behind.stageBeforeBand === true);
+
+  // The mural itself: one instance of each sheet, nowhere else, untouched.
+  const mural = await page.evaluate(() => {
+    const imgs = [...document.querySelectorAll("img[src*='mural']")];
+    const band = document.querySelector(".mural-band");
+    const art = document.querySelector(".mural-parallax");
+    const srcOf = (i) => decodeURIComponent(i.getAttribute("src")).replace(/^.*url=/, "").replace(/&.*$/, "");
+    const bg = [...document.querySelectorAll("*")].filter((e) => /mural/.test(getComputedStyle(e).backgroundImage)).length;
+    const br = band?.getBoundingClientRect(), ar = art?.getBoundingClientRect();
+    return {
+      count: imgs.length,
+      unique: new Set(imgs.map(srcOf)).size,
+      inHero: document.querySelectorAll("#home img[src*='mural']").length,
+      outsideBand: imgs.filter((i) => !band || !band.contains(i)).length,
+      muralBackgrounds: bg,
+      opacity: imgs.map((i) => getComputedStyle(i).opacity),
+      filter: imgs.map((i) => getComputedStyle(i).filter),
+      objectFit: imgs.map((i) => getComputedStyle(i).objectFit),
+      bandClips: band ? getComputedStyle(band).overflow : null,
+      bandRatio: br ? +(br.width / br.height).toFixed(3) : null,
+      artRatio: ar ? +(ar.width / ar.height).toFixed(3) : null,
+      seamCount: band ? [...band.children].filter((e) => e.getAttribute("aria-hidden") === "true" && getComputedStyle(e).height === "1px").length : 0,
+    };
+  });
+  check("mural is one instance of each sheet, and no more", mural && mural.count === 2 && mural.unique === 2, `${mural?.count} img, ${mural?.unique} unique`);
+  check("no mural in the hero, none outside the band", mural && mural.inHero === 0 && mural.outsideBand === 0, `${mural?.inHero} in hero, ${mural?.outsideBand} outside the band`);
+  check("no mural used as a CSS background anywhere (nothing can tile)", mural && mural.muralBackgrounds === 0, `${mural?.muralBackgrounds} elements`);
+  check(
+    "mural is full-opacity, ungraded, and never cropped to fill",
+    mural && mural.opacity.every((o) => o === "1") && mural.filter.every((f) => f === "none") && mural.objectFit.every((f) => f === "contain"),
+    `opacity ${mural?.opacity}, filter ${mural?.filter}, fit ${mural?.objectFit}`
+  );
+  // 1779:884 art inside a band 1.6%-per-edge shorter — see the MURAL block in About.tsx.
+  check(
+    "band is a bounded strip at the art's natural ratio",
+    mural && mural.bandClips === "hidden" && Math.abs(mural.artRatio - 2.012) < 0.01 && mural.bandRatio > mural.artRatio,
+    `band ${mural?.bandRatio}, art ${mural?.artRatio}, overflow ${mural?.bandClips}`
+  );
+  check("ember hairline on the band's top AND bottom edge", mural && mural.seamCount === 2, `${mural?.seamCount} hairlines`);
 
   const seam = await page.evaluate(() => {
     const el = document.querySelector("#about > div[aria-hidden='true']");
@@ -181,6 +280,7 @@ const browser = await chromium.launch();
     return el ? getComputedStyle(el).height : null;
   });
   check("reduced motion: hairline intact", seam === "1px", String(seam));
+  check("reduced motion: the story is actually readable", ...(await storyReadable(page)));
   await ctx.close();
 }
 
@@ -203,6 +303,14 @@ for (const w of [375, 767]) {
     win: window.innerWidth,
   }));
   check(`${w}px: no horizontal overflow`, overflow.doc <= overflow.win + 1, `scrollWidth ${overflow.doc} vs ${overflow.win}`);
+  check(`${w}px: the story is actually readable`, ...(await storyReadable(page)));
+
+  // The band, at mobile width: still exactly one instance of each sheet.
+  const m = await page.evaluate(() => {
+    const imgs = [...document.querySelectorAll("img[src*='mural']")];
+    return { count: imgs.length, unique: new Set(imgs.map((i) => i.getAttribute("src"))).size };
+  });
+  check(`${w}px: mural is one instance of each sheet`, m.count === 2 && m.unique === 2, `${m.count} img, ${m.unique} unique`);
   await ctx.close();
 }
 

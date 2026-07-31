@@ -5,20 +5,85 @@ import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PillLink } from "./PillLink";
-import { ScrollReveal } from "./ScrollReveal";
 import { SectionSeam } from "./SectionSeam";
-import { MOTION, NAV_H } from "@/lib/motion";
+import { MOTION, MOTION_OK, NAV_H } from "@/lib/motion";
 import { useScrollRefresh } from "@/lib/useScrollRefresh";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// NOTE: the full-height seam line (a brushed-steel bar with a fire overlay
-// that ignited top-to-bottom, then rode each half's inner edge outward) has
-// been removed. It read as a hard mechanical wipe — the mural looked sliced
-// rather than opened. The reveal is now dimensional: the halves start slightly
-// overscaled and pushed toward centre, then drift apart and settle with a
-// parallax offset against the story column. The only rule left in this section
-// is a short ember hairline under the story heading.
+/* ===========================================================================
+   ABOUT — three beats, in order: the story on cream, the mural band, the cuts.
+   ---------------------------------------------------------------------------
+   WHAT THIS REPLACED, AND WHY. The mural used to be this section's GROUND: a
+   full-viewport backdrop that the hero's window revealed, pinned for 260% of
+   scroll while two halves slid apart and the story, then the featured cuts,
+   were revealed in the gap between them.
+
+   Two things were wrong with that, and they were the same thing.
+
+   1. An unbounded mural stops reading as a painting. Run edge to edge with no
+      top and no bottom, the eye reads it as a surface rather than a picture,
+      and the moment it reads as a surface it starts looking for the repeat —
+      which this art obliges, because the two sheets share a motif vocabulary
+      (see the asset note below). Wallpaper is cheap. A painting is expensive.
+      Same asset; the framing is the whole difference.
+   2. The docked video panel had nothing to sit in. At the settled state the
+      story was still hidden (the pinned timeline did not reveal it until 0.16)
+      so the viewport was a video rectangle floating on pattern — the panel got
+      its reserved slot but the section around it never materialised.
+
+   So the mural gets its edges back. It is a discrete full-bleed BAND below the
+   story: one instance, natural aspect, a defined top and bottom, its own
+   drift-and-settle, its own moment. The story sits on cream where it belongs,
+   composed on the grid beside the panel, and THAT is what the hero's window
+   now opens onto.
+
+   The pin is gone with it. It existed to hold the mural still while it opened;
+   nothing opens any more. Everything below flows.
+   ---------------------------------------------------------------------------
+   THE ASSETS ARE NOT TWO HALVES OF ONE PAINTING, whatever the old comments in
+   here said. `mural-left.webp` is 889x884 and `mural-right.webp` is 890x884 —
+   two roughly SQUARE sheets, each a scatter of motifs on a baked-out white
+   field, drawn from a shared vocabulary. Side by side they make 1779x884
+   (~2.01:1), which is where the band's ratio comes from and is the only sane
+   band geometry available: a single sheet is 1:1, and a full-bleed square band
+   is 1430px tall at a 1440 viewport.
+
+   The old comments claimed a "natural ~2535:1240 combined ratio" and that the
+   halves "meet flush at the center seam". Neither was true of the files on
+   disk. Re-measure before trusting any number in here.
+   =========================================================================== */
+
+/**
+ * THE BAND'S ARITHMETIC, in one place, because the three numbers are coupled
+ * and getting them out of step is silent — it does not throw, it just pulls a
+ * strip of bare cream into the bottom of the painting at one scroll position.
+ *
+ *   w / h    the two sheets side by side, in native pixels. Measured off the
+ *            files, not inherited from a comment. mural-left.webp is 889x884,
+ *            mural-right.webp is 890x884. Re-measure if the art is ever
+ *            redrawn; do not trust this block either.
+ *   drift    the parallax amplitude, % of the art's height, each way.
+ *   settle   the entry overscale, resolving to 1.
+ *
+ * THE BAND IS SHORTER THAN THE ART BY `bleed` AT EACH EDGE, and that overhang
+ * is the drift's travel room — the same device as the hero media's `-inset-y`.
+ * `bleed > drift` is the invariant: the margin below is what guarantees the art
+ * still covers the trailing edge at the extreme of the drift.
+ *
+ * This is also the one place the brief's two asks pull against each other. A
+ * vertical parallax inside a bounded band cannot exist without vertical bleed,
+ * and bleed means the band shows slightly less than the art's full height (the
+ * sheets have ~3% of dead margin at the top but run to the last pixel row at
+ * the bottom, so the visible cost lands there). It is a frame, not a
+ * crop-to-fill: the band's height derives from the ART, the art is never
+ * resized to fit the band, and both edges carry the ember hairline that
+ * declares them as frame edges. Set `drift` to 0 and the band becomes the
+ * art's exact natural ratio with nothing cropped at all.
+ */
+const MURAL = { w: 1779, h: 884, drift: 1.6, settle: 1.03 } as const;
+const BAND_BLEED = MURAL.drift + 0.4; // % of art height, per edge
+const BAND_H = MURAL.h * (1 - (2 * BAND_BLEED) / 100);
 
 interface Dish {
   name: string;
@@ -75,209 +140,124 @@ export function About() {
     const mm = gsap.matchMedia();
     const q = gsap.utils.selector(sectionRef);
 
-    // One conditions-based block because the breakpoints differ per concern:
-    // the mural pin + story reveal runs from md up, but the grill grid only
-    // joins the pinned overlay at lg — its feature-card layout is too tall
-    // for a single pinned tablet viewport, so tablets flow it statically
-    // below the stage instead. prefers-reduced-motion falls through to the
-    // default CSS state (full seamless mural, all copy visible, no pin).
-    mm.add(
-      {
-        md: "(min-width: 768px)",
-        lg: "(min-width: 1024px)",
-        motion: "(prefers-reduced-motion: no-preference)",
-      },
-      (context) => {
-        const { md, lg, motion } = context.conditions as {
-          md: boolean;
-          lg: boolean;
-          motion: boolean;
-        };
-        if (!motion) return;
+    // The pin and its two breakpoints are gone; every beat in here is a plain
+    // scroll-triggered entrance or a scrubbed parallax. Only ONE of them cares
+    // about width, and `wide` matches SeamMotion's own condition exactly,
+    // because it is a question about the same transition. Reduced motion never
+    // enters — the timelines are not built at all, and the CSS default state is
+    // the finished layout.
+    mm.add({ motion: MOTION_OK, wide: "(min-width: 768px)" }, (context) => {
+      const { motion, wide } = context.conditions as { motion: boolean; wide: boolean };
+      if (!motion) return;
 
-        const grillHead = q(".grill-head");
-        const grillDishes = q(".grill-dish");
+      const textCol = q(".about-text");
+      const grillHead = q(".grill-head");
+      const grillDishes = q(".grill-dish");
+      const band = q(".mural-band")[0];
+      const bandArt = q(".mural-parallax");
 
-        if (md) {
-          const leftHalf = q(".mural-half-left");
-          const rightHalf = q(".mural-half-right");
-          const muralInner = q(".mural-parallax");
-          const textCol = q(".about-text");
-          const textRule = q(".about-rule");
-          const grillLayer = q(".grill-layer");
-          const grillCta = q(".grill-cta");
-
-          // Animated start state: the mural sits slightly overscaled and pushed
-          // toward centre, as though the world is still closed in on itself.
-          // It opens from there rather than being cut down the middle.
-          // autoAlpha (opacity + visibility) so a hidden layer never intercepts
-          // clicks meant for the visible one — on lg the two layers overlap
-          // absolutely in the stage.
-          gsap.set([leftHalf, rightHalf], { scale: 1.04 });
-          gsap.set(leftHalf, { xPercent: 3 });
-          gsap.set(rightHalf, { xPercent: -3 });
-          gsap.set(textCol, { autoAlpha: 0, y: MOTION.rise });
-          gsap.set(textRule, { scaleX: 0, transformOrigin: "left center" });
-          if (lg) gsap.set(grillLayer, { autoAlpha: 0 });
-
-          const tl = gsap.timeline({
-            defaults: { ease: "none" },
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top top",
-              // Longer pin than the single-open version: the timeline now
-              // plays ignite -> open to the story -> open fully while the
-              // featured cuts build in, so each phase keeps roughly the same
-              // scroll distance per move as before.
-              end: "+=260%",
-              pin: true,
-              pinSpacing: true,
-              // Pin by transform rather than position:fixed. Functionally the
-              // same pin, but the fixed swap is reported by the browser as a
-              // layout shift of roughly a full viewport (~0.98 CLS each time
-              // this engages and releases) even though nothing visibly jumps,
-              // because pinSpacing already compensates the flow. Transforms are
-              // not layout shifts, so this removes the CLS without changing
-              // what the user sees. It is also the setting GSAP recommends when
-              // a smooth-scroll library owns the scroll position, which Lenis
-              // does here.
-              pinType: "transform",
-              // Switch to position:fixed one tick early so the browser
-              // doesn't show a one-frame compositing jump (the mural
-              // appearing to nudge sideways) at the instant the pin engages.
-              anticipatePin: 1,
-              // Numeric scrub adds a ~0.8s catch-up so the timeline eases
-              // toward the scroll position instead of snapping to it
-              // frame-for-frame. This is what makes the mural open/ignite
-              // feel smooth rather than stepping in hard chunks with each
-              // wheel/trackpad notch.
-              scrub: MOTION.scrub,
+      // THE STORY, and the one entrance on the site that is NOT triggered off
+      // its own position.
+      //
+      // Where the window runs, the copy is revealed by the panel shrinking off
+      // it, so "the copy has arrived" and "the panel has passed" are the same
+      // event and must not be able to disagree. Triggered the ordinary way
+      // (`top 88%`) they did: the copy's position is a function of the viewport
+      // HEIGHT and the panel's edge is a function of the viewport WIDTH, so the
+      // two drift apart with the aspect ratio. Measured glyph-by-glyph, the
+      // panel's left edge was cutting through the heading from 25% to 50% of
+      // the transition at 768x800 and 1024x768, and from 30% to 40% at
+      // 1440x900 — the pink accent word sliced in half by the edge of a video.
+      //
+      // So it fires off the hero's own scroll instead, on the same 100vh the
+      // clip is scrubbed across. 58% is past the last measured contact (55%) at
+      // every viewport, and the 0.6s rise lands inside Phase B (30-80%), so the
+      // copy still rises into place behind a shrinking panel exactly as the
+      // brief describes — it just cannot be underneath it while it does.
+      // A function start re-resolves on every refresh, so this survives resize.
+      //
+      // Below 768 there is no clip and nothing to clear: the copy takes the
+      // ordinary entrance off its own position, like every other section.
+      gsap.from(textCol, {
+        opacity: 0,
+        y: MOTION.rise,
+        duration: MOTION.dur.reveal,
+        ease: MOTION.gsapEase,
+        scrollTrigger: wide
+          ? {
+              trigger: "#home",
+              start: () => window.innerHeight * 0.58,
               invalidateOnRefresh: true,
-            },
-          });
+              // AND IT REVERSES, which the site's other entrances do not.
+              // The clip is fully reversible mid-gesture by design, so a
+              // one-shot entrance here would let the two disagree: scroll down
+              // past 58%, scroll back up, and the copy stays lit while the
+              // window re-opens to full-bleed straight over the top of it —
+              // the same edge-through-the-heading this trigger exists to
+              // prevent, just on the way back. Reversing also reads correctly:
+              // the hero is coming back, so the story it revealed goes away.
+              toggleActions: "play none none reverse",
+            }
+          : { trigger: textCol[0], start: "top 88%" },
+      });
 
-          // PHASE 1 (progress 0 -> 0.40): the world eases open. The halves
-          // drift apart to 36% open while their overscale settles back to 1,
-          // so the movement reads as depth resolving rather than two panels
-          // being pulled aside. xPercent is relative to the half's own width
-          // (50% of the stage), so -36% / +36% opens a centred gap of ~36% of
-          // the stage while leaving mural bands framing each side.
-          // `power2.out` on the position, linear on the scale: the drift
-          // decelerates into place (the "settle") while the scale keeps
-          // resolving underneath it.
-          tl.to(leftHalf, { xPercent: -36, duration: 0.4, ease: MOTION.gsapEase }, 0);
-          tl.to(rightHalf, { xPercent: 36, duration: 0.4, ease: MOTION.gsapEase }, 0);
-          tl.to([leftHalf, rightHalf], { scale: 1, duration: 0.4 }, 0);
-
-          // DEPTH. The halves also drift vertically across the whole pin at
-          // roughly 0.9x the copy's rate, so the mural sits behind the story
-          // rather than on the same plane. Body copy never moves.
-          tl.fromTo(
-            muralInner,
-            { yPercent: -1.6 },
-            { yPercent: 1.6, duration: 1 },
-            0
-          );
-
-          // PHASE 2 (0.16 -> 0.36): the story arrives AFTER the halves have
-          // begun settling, on the shared rise/duration, then gets a beat of
-          // stillness (to 0.52) to read. Its ember rule draws in underneath
-          // the heading once the copy is up — the only rule in the section now.
-          tl.to(
-            textCol,
-            { autoAlpha: 1, y: 0, duration: 0.2, ease: MOTION.gsapEase },
-            0.16
-          );
-          tl.to(textRule, { scaleX: 1, duration: 0.14 }, 0.3);
-
-          // PHASE 3 (0.52 -> 1.0): the mural keeps opening out — each half
-          // moves past its own width so the art has fully left the viewport by
-          // the end of the pin. No close, one continuous motion.
-          // ±104 rather than ±100 leaves a little margin against the vertical
-          // parallax drift, so neither half can leave a sliver at the edge.
-          // (This used to be ±110 to clear the seam line's 30px glow; with the
-          // line gone, the art itself is all that has to clear.)
-          tl.to(leftHalf, { xPercent: -104, duration: 0.48 }, 0.52);
-          tl.to(rightHalf, { xPercent: 104, duration: 0.48 }, 0.52);
-          tl.to(textCol, { autoAlpha: 0, y: -MOTION.rise / 2, duration: 0.1 }, 0.52);
-
-          if (lg) {
-            // The story hands the stage to the featured cuts: the Grill
-            // Awaits layer builds in the widening gap — heading first, then
-            // the feature card leads the photo stagger, CTA last.
-            tl.to(grillLayer, { autoAlpha: 1, duration: 0.04 }, 0.6);
-            tl.fromTo(
-              grillHead,
-              { y: 40, autoAlpha: 0 },
-              { y: 0, autoAlpha: 1, duration: 0.16 },
-              0.6
-            );
-            tl.fromTo(
-              grillDishes,
-              { y: 70, autoAlpha: 0, scale: 0.92 },
-              { y: 0, autoAlpha: 1, scale: 1, duration: 0.16, stagger: 0.035 },
-              0.66
-            );
-            // Starts at 0.90, not 0.86: the cards are still settling out of
-            // their y:70 entrance until ~0.90 once the scrub's catch-up is
-            // accounted for, and the pill sits directly beneath them. Fading
-            // it in after they land means it is never visible at less than its
-            // full clearance from the card above it.
-            tl.fromTo(
-              grillCta,
-              { autoAlpha: 0 },
-              { autoAlpha: 1, duration: 0.1 },
-              0.9
-            );
-          }
-
-          // Recompute pin spacing once the half images have laid out.
-          ScrollTrigger.refresh();
-        } else {
-          // Mobile (no pin/split): the full mural is omitted and the story
-          // gets a gentle, non-pinned fade/slide-up as it scrolls into view.
-          const textCol = q(".about-text");
-          gsap.from(textCol, {
-            opacity: 0,
-            y: MOTION.rise,
-            duration: MOTION.dur.reveal,
-            ease: MOTION.gsapEase,
-            scrollTrigger: {
-              trigger: textCol[0],
-              start: "top 88%",
-            },
-          });
-        }
-
-        if (!lg) {
-          // Below lg the grill grid flows statically (below the pinned stage
-          // on tablets, below the story on phones) — give it the same gentle
-          // entrance the story gets, feature card first.
-          gsap.from(grillHead, {
-            opacity: 0,
-            y: MOTION.rise,
-            duration: MOTION.dur.reveal,
-            ease: MOTION.gsapEase,
-            scrollTrigger: {
-              trigger: grillHead[0],
-              start: "top 88%",
-            },
-          });
-
-          gsap.from(grillDishes, {
-            opacity: 0,
-            y: MOTION.rise,
-            duration: MOTION.dur.reveal,
-            stagger: MOTION.stagger,
-            ease: MOTION.gsapEase,
-            scrollTrigger: {
-              trigger: grillDishes[0],
-              start: "top 90%",
-            },
-          });
-        }
+      // THE BAND'S DRIFT AND SETTLE — the parallax that used to belong to the
+      // mural-as-ground, now living with the band as its own moment.
+      //
+      // DRIFT: the art moves at ~0.97x the page's rate across the band's whole
+      // pass, so the painting sits behind the page rather than travelling with
+      // it. The band is 2% shorter than the art at each edge (see the aspect
+      // arithmetic on `.mural-band` below) and that overhang is exactly the
+      // travel room — the same device as the hero media's `-inset-y` bleed.
+      // Worst case the drift leaves ~0.4% of the art's height still covering
+      // the trailing edge, so no scroll position can pull cream into the band.
+      //
+      // SETTLE: a 3% overscale resolving to 1 across the entry, so the band
+      // reads as depth coming to rest rather than a picture sliding past.
+      // Both tweens share one playhead, so they are one move on one transform.
+      if (band && bandArt.length) {
+        const tl = gsap.timeline({
+          defaults: { ease: "none" },
+          scrollTrigger: {
+            trigger: band,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: MOTION.scrub,
+            invalidateOnRefresh: true,
+          },
+        });
+        tl.fromTo(
+          bandArt,
+          { yPercent: -MURAL.drift },
+          { yPercent: MURAL.drift, duration: 1 },
+          0
+        );
+        tl.fromTo(
+          bandArt,
+          { scale: MURAL.settle },
+          { scale: 1, duration: 0.5, ease: MOTION.gsapEase },
+          0
+        );
       }
-    );
+
+      // THE FEATURED CUTS, on the shared entrance, feature card first.
+      gsap.from(grillHead, {
+        opacity: 0,
+        y: MOTION.rise,
+        duration: MOTION.dur.reveal,
+        ease: MOTION.gsapEase,
+        scrollTrigger: { trigger: grillHead[0], start: "top 88%" },
+      });
+
+      gsap.from(grillDishes, {
+        opacity: 0,
+        y: MOTION.rise,
+        duration: MOTION.dur.reveal,
+        stagger: MOTION.stagger,
+        ease: MOTION.gsapEase,
+        scrollTrigger: { trigger: grillDishes[0], start: "top 90%" },
+      });
+    });
 
     return () => {
       mm.revert();
@@ -294,128 +274,54 @@ export function About() {
       id="about"
       aria-labelledby="about-heading"
       // `-mt-[100vh]` pulls this section up under the hero's sticky stage so
-      // that the mural is what the hero's window reveals as it clips down. The
-      // hero is 200vh with a 100vh sticky stage; this cancels the extra
-      // viewport, so net page height is unchanged and this section's own pin
-      // still starts on `top top` — the stage releases on the same pixel.
-      // z-10 under the hero's z-20 is what puts the mural BEHIND the window.
-      // See the arithmetic block in Hero.tsx before changing either number.
-      className="grain relative z-10 -mt-[100vh] overflow-hidden bg-cream"
+      // that ITS FIRST SCREEN is what the hero's window reveals as it clips
+      // down. The hero is 200vh with a 100vh sticky stage; this cancels the
+      // extra viewport, so net page height is unchanged and About's top lands
+      // exactly on the pixel where the stage releases.
+      //
+      // What is behind the window is now this section's CREAM GROUND with the
+      // story composed on it — not the mural. That is the only thing this pass
+      // changed about the transition: the layer stack behind the panel. The
+      // clip's phases, timing and easing in SeamMotion are untouched.
+      //
+      // `motion-safe:md:` on BOTH the pull and the hero's extra viewport, in
+      // step with SeamMotion's `{ motion, wide }`: where no clip runs there is
+      // no window to sit behind, and a section pulled under an opaque hero that
+      // then slides off is a section nobody reads. See Hero.tsx.
+      //
+      // z-10 under the hero's z-20 is what puts About behind the window.
+      className="grain relative z-10 overflow-hidden bg-cream motion-safe:md:-mt-[100vh]"
       style={{ ["--nav-h" as string]: `${NAV_H}px` } as React.CSSProperties}
     >
-      {/* THE SEAM. Hero -> About is a ground change now — footage to cream —
-          so it takes the site's one transition device, the same ember hairline
-          the footer gets. Markup, not motion: it is present for reduced motion
-          and for no-JS, where it is the whole transition. */}
+      {/* THE SEAM. Hero -> About is a ground change — footage to cream — so it
+          takes the site's one transition device. Markup, not motion: it is
+          present for reduced motion and for no-JS, where it is the whole
+          transition. */}
       <SectionSeam />
 
-      {/* Mural stage (>= md only — hidden on mobile, where a simplified band
-          renders instead, see below). The halves are `object-contain` so the
-          whole illustration is always shown — nothing is cropped. The mural art
-          is transparent (white field baked out to WebP), so it sits directly on
-          this section's cream surface with no field to blend and the two halves
-          meet flush at the center seam. On desktop the stage is full height
-          (vertically centered art); on reduced motion it keeps the mural's
-          natural ~2535:1240 combined ratio inside the content column. */}
-      {/* pointer-events-none: this stage overlays the story/grill layers
-          (z-20 over z-10) and is purely decorative — without it, it swallows
-          every click meant for the buttons revealed in the gap beneath. */}
-      {/* `mural-arrive` is SeamMotion's handle for the hero handoff: the stage
-          rises and resolves as the hero scrolls out, and lands on exactly the
-          state the pinned timeline below starts from, so the arrival and the
-          opening are one continuous move rather than two. It is a separate
-          element from `.mural-parallax` on purpose — that layer already owns a
-          yPercent drift across the pin, and two timelines writing the same
-          transform on the same node fight each other. */}
-      {/* No `will-change` here. Nothing animates this element any more — the
-          old drift-and-fade arrival was replaced by the hero's window clipping
-          down to reveal it, so the mural is simply present and the reveal
-          happens in front of it. Measured at 4x CPU throttling the clip scrub
-          holds every frame at 16.8ms or under, so the hint would buy nothing
-          and cost a permanently promoted full-viewport layer. */}
-      <div className="mural-arrive pointer-events-none hidden md:block relative z-20 px-6 md:px-0 motion-safe:md:min-h-screen">
-        <div className="relative mx-auto aspect-[2535/1240] w-full max-w-7xl overflow-hidden md:mx-0 md:aspect-auto md:h-screen md:max-w-none">
-          {/* Depth layer: carries BOTH halves on a slow vertical drift (~0.9x
-              the story column's rate) across the pin, so the mural reads as
-              sitting behind the copy rather than on the same plane. Separate
-              from the halves themselves so their own open/settle transform is
-              never fighting the parallax on the same element. */}
-          <div className="mural-parallax absolute inset-0 will-change-transform">
-          {/* Left half */}
-          <div className="mural-half-left absolute left-0 top-0 h-full w-1/2 will-change-transform">
-            <Image
-              src="/images/mural-left.webp"
-              alt=""
-              aria-hidden="true"
-              fill
-              sizes="50vw"
-              draggable={false}
-              onLoad={refresh}
-              className="select-none object-contain object-right-top"
-            />
-          </div>
+      {/* =====================================================================
+          BEAT 2 — THE STORY, ON CREAM.
 
-          {/* Right half */}
-          <div className="mural-half-right absolute right-0 top-0 h-full w-1/2 will-change-transform">
-            <Image
-              src="/images/mural-right.webp"
-              alt=""
-              aria-hidden="true"
-              fill
-              sizes="50vw"
-              draggable={false}
-              onLoad={refresh}
-              className="select-none object-contain object-left-top"
-            />
-          </div>
-          </div>
-        </div>
-      </div>
+          This is what the window opens onto, and it is a whole composed
+          section from the first frame it is visible: eyebrow, heading, rule,
+          copy and the action in the reading column, the video panel docked in
+          the media column beside it, cream and whitespace around both.
 
-      {/* Mobile mural band — the brand signature can't be absent on phones,
-          where there's no room for the full-height desktop stage. A compact
-          horizontal band of the same transparent mural art (both halves meeting
-          at center, on cream) sits above the story and enters with the shared
-          reveal. Hidden at md+, where the pinned stage takes over. */}
-      <ScrollReveal className="md:hidden pt-section">
-        <div className="grid-page">
-        <div className="col-full relative flex aspect-[2/1] w-full">
-          <div className="relative h-full w-1/2">
-            <Image
-              src="/images/mural-left.webp"
-              alt=""
-              aria-hidden="true"
-              fill
-              sizes="50vw"
-              className="select-none object-contain object-right-top"
-            />
-          </div>
-          <div className="relative h-full w-1/2">
-            <Image
-              src="/images/mural-right.webp"
-              alt=""
-              aria-hidden="true"
-              fill
-              sizes="50vw"
-              className="select-none object-contain object-left-top"
-            />
-          </div>
-        </div>
-        </div>
-      </ScrollReveal>
-
-      {/* Text — revealed in the gap on desktop with motion; flows below the
-          mural band on mobile and for prefers-reduced-motion (where the mural
-          stays whole), so the copy is always visible.
-
-          The block is now a real column on the page grid rather than a centred
-          float: `.col-story` puts it at column 1 wherever the pin does not run
-          and at columns 5-8 (the measured width of the mural's gap) where it
-          does. Its type is left-aligned in both cases, like every other
-          section. */}
-      <div className="relative z-10 pb-section pt-6 md:pt-0 motion-safe:md:absolute motion-safe:md:inset-x-0 motion-safe:md:top-0 motion-safe:md:h-screen motion-safe:md:pb-0">
+          `h-screen` at md+ with motion, not `min-h-screen`, and that is
+          load-bearing rather than tidy: SeamMotion's `dock()` measures
+          `.col-media` ABOUT-RELATIVE and returns null if the cell does not fit
+          inside About's first viewport, which would leave the hero unable to
+          clip at all. An exact viewport keeps the cell centred inside it at
+          every width by construction.
+          ===================================================================== */}
+      <div className="about-stage relative z-10 py-section md:py-section-lg motion-safe:md:h-screen motion-safe:md:py-0">
         <div className="grid-page motion-safe:md:h-full motion-safe:md:items-center">
-          <div className="about-text col-story py-10">
+          {/* The reading column, at column 1 like every other heading on the
+              site. It used to move to columns 5-8 under motion, because that
+              was the measured width of the gap the mural opened to and the
+              copy was revealed inside it. There is no gap any more; the story
+              is not a thing revealed in a hole in the art, it is the section. */}
+          <div className="about-text col-text">
             <p className="eyebrow mb-4">Our story</p>
             {/* The italic accent word, in the logo pink. This is pink's first
                 and most important job: it puts the mark's colour at the most
@@ -424,10 +330,9 @@ export function About() {
             <h2 id="about-heading" className="h2-scale">
               It started with a <em className="italic text-pink">grill</em>
             </h2>
-            {/* The section's one rule, replacing the full-height seam that used
-                to split the mural. It draws in from the left after the copy has
-                risen. Defaults to fully drawn, so the no-JS and reduced-motion
-                states show a static hairline rather than nothing. */}
+            {/* The section's one rule. Static: it used to draw in on the pinned
+                timeline, and with the pin gone there is nothing to draw it
+                against. A hairline that animates for its own sake is a tell. */}
             <span
               aria-hidden="true"
               className="about-rule mt-5 block h-px w-16 bg-ember"
@@ -453,11 +358,11 @@ export function About() {
             </PillLink>
           </div>
 
-          {/* ABOUT'S MEDIA COLUMN. Columns 9-12 out to the right edge — the
-              one span `.col-story` never occupies in any of its three states,
-              which is what makes "the panel is clear of the copy" a fact about
-              the grid rather than a fact about the timing. The clearance is
-              `--grid-gap`, by construction, at every width.
+          {/* ABOUT'S MEDIA COLUMN. Columns 9-12 out to the right edge — the one
+              span `.col-text` never occupies, which is what makes "the panel is
+              clear of the copy" a fact about the grid rather than a fact about
+              the timing. The clearance is a full empty column plus two gaps, at
+              every width, by construction.
 
               Declared in every state and FILLED only where no panel will ever
               arrive: below 768px, and under reduced motion, where it holds the
@@ -467,7 +372,8 @@ export function About() {
               hero's window down into.
 
               Second in DOM order on purpose: below 768px the cell stacks UNDER
-              the copy rather than above it.
+              the copy rather than above it, so the section still opens on its
+              heading at 375px.
 
               quality/sizes are HeroVideo's exactly, so this resolves to the
               same optimized URL the hero already fetched with `priority` — a
@@ -487,14 +393,83 @@ export function About() {
         </div>
       </div>
 
-      {/* The Grill Awaits — house favorites. At lg with motion this layer
-          shares the pinned stage with the story text: the story fades out and
-          this builds in while the mural halves keep opening until they leave
-          the viewport. Below lg (and for reduced motion) it flows statically
-          after the stage — the feature-card grid is too tall to share a
-          single pinned tablet viewport. */}
-      <div className="grill-layer relative z-10 pb-section motion-safe:lg:absolute motion-safe:lg:inset-x-0 motion-safe:lg:top-0 motion-safe:lg:h-screen motion-safe:lg:pb-0 motion-safe:lg:pt-[var(--nav-h)]">
-        <div className="grid-page motion-safe:lg:h-full motion-safe:lg:items-center">
+      {/* =====================================================================
+          BEAT 3 — THE MURAL BAND.
+
+          A discrete full-bleed band with a defined top and bottom edge, an
+          ember hairline on each, and exactly ONE instance of each sheet. It is
+          never tiled, never repeated, never mirrored to fill; there is no
+          `background-repeat` anywhere near it and no second copy of either
+          asset on the page.
+
+          WHY IT FITS EXACTLY. Each half box is (1779/2):884 = 1.0063:1 and the
+          sheets are 1.0057:1 and 1.0068:1, so `object-contain` fills each half
+          edge to edge with sub-pixel slack — nothing is stretched and nothing
+          is cropped horizontally. The slack is anchored OUTWARD (`object-right`
+          / `object-left`) so the two meet flush at the centre and the rounding
+          error lands at the viewport edges, where the sheets are transparent
+          and it is cream on cream either way.
+
+          The band's own ratio, and the bleed it carries, are derived from the
+          MURAL block at the top of this file. Do not hardcode either here.
+
+          Full width at every viewport: at 1440 this is a 682px band, at 375 a
+          174px one, at 2560 a 1217px one. The art is 1779px native, so
+          everything up to 1779 is a downscale; 2560 is a 1.43x upscale, which
+          this soft hand-painted illustration carries without visible mush (a
+          photograph would not), so the band needs no max-width cap.
+          ===================================================================== */}
+      <div
+        className="mural-band relative z-10 w-full overflow-hidden"
+        style={{ aspectRatio: `${MURAL.w} / ${BAND_H}` }}
+      >
+        {/* The art layer sits centred in the band and keeps its OWN natural
+            ratio, so the overhang resolves from the two aspect ratios rather
+            than from a magic offset. `.mural-parallax` is what drifts. */}
+        <div className="pointer-events-none absolute inset-0 flex items-center">
+          <div
+            className="mural-parallax relative flex w-full will-change-transform"
+            style={{ aspectRatio: `${MURAL.w} / ${MURAL.h}` }}
+          >
+            <div className="relative h-full w-1/2">
+              <Image
+                src="/images/mural-left.webp"
+                alt=""
+                aria-hidden="true"
+                fill
+                sizes="50vw"
+                draggable={false}
+                onLoad={refresh}
+                className="select-none object-contain object-right"
+              />
+            </div>
+            <div className="relative h-full w-1/2">
+              <Image
+                src="/images/mural-right.webp"
+                alt=""
+                aria-hidden="true"
+                fill
+                sizes="50vw"
+                draggable={false}
+                onLoad={refresh}
+                className="select-none object-contain object-left"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Both ground changes get the site's one seam device: cream into paint
+            at the top, paint back into cream at the bottom. */}
+        <SectionSeam />
+        <SectionSeam className="bottom-0" />
+      </div>
+
+      {/* The Grill Awaits — house favorites. Plain flow now. It used to share
+          the pinned stage with the story at lg, building into the gap as the
+          mural halves kept opening; with the pin gone it is simply the section
+          that follows the band. */}
+      <div className="grill-layer relative z-10 py-section md:py-section-lg">
+        <div className="grid-page">
           <div className="col-full">
           <div className="grill-head">
             <p className="eyebrow mb-4">House favorites</p>
@@ -516,10 +491,7 @@ export function About() {
               feature flush with the second row's bottom edge. Tablets collapse
               to two columns with Galbi full-width on top; phones stack
               single-file, Galbi first. */}
-          {/* Tighter head-to-grid gap at lg than elsewhere: the whole layer has
-              to fit one pinned viewport, and that reclaimed space is what pays
-              for the CTA's clearance below the grid. */}
-          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:mt-4 lg:grid-cols-4 lg:gap-7">
+          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:mt-8 lg:grid-cols-4 lg:gap-7">
             {FEATURED_DISHES.map((dish, i) => {
               const isFeature = i === 0;
               const span = isFeature ? "sm:col-span-2 lg:row-span-2" : "";
@@ -532,8 +504,8 @@ export function About() {
                       the frame and the image it frames are one object. */}
                   <div className="flex h-full flex-col overflow-hidden rounded-photo bg-white p-5 text-left shadow-warm transition-shadow duration-[var(--dur-base)] ease-house hover:shadow-warm-lg">
                     {/* Feature photo stretches to fill the two-row card; the
-                        others crop slightly wider at lg so both grid rows plus
-                        the header and CTA share one pinned viewport. */}
+                        others crop slightly wider so the two grid rows stay
+                        level. */}
                     {/* photo-grade: the one photography treatment — warm grade,
                         shadows lifted toward cream, shared corner radius, and
                         the page's grain — so photographs and painted mural read
@@ -562,35 +534,17 @@ export function About() {
                         </span>
                       )}
                     </div>
-                    {/* One card-title size, on the scale's `lead` step. It used
-                        to be 18px here and 24px on the feature card, which was
-                        two of the five sizes that made the mid-range flat. */}
+                    {/* One card-title size, on the scale's `lead` step. */}
                     <h3 className="mt-3 font-serif text-lead font-light text-foreground">
                       {dish.name}{" "}
                       <span className="font-sans text-eyebrow font-light text-foreground/40">
                         {dish.korean}
                       </span>
                     </h3>
-                    {/* The pinned stage is exactly one viewport tall, so on
-                        short desktop screens the description is the line that
-                        gets cut — drop it there rather than clipping the CTA
-                        below the fold. The feature card keeps its description:
-                        its flexible photo absorbs the height instead.
-
-                        Threshold raised 840 -> 895. Measured, the full-height
-                        layout needs ~894px of viewport; between 841 and 893 it
-                        was overflowing and pushing the CTA past the fold (at
-                        850 it hung 19px over). 900 still gets the full layout
-                        with its descriptions. */}
-                    <p
-                      className={`copy mt-1 ${
-                        isFeature
-                          ? ""
-                          : "motion-safe:lg:[@media(max-height:895px)]:hidden"
-                      }`}
-                    >
-                      {dish.description}
-                    </p>
+                    {/* Every card keeps its description now. The rule that hid
+                        them on short screens existed because the whole layer
+                        had to fit ONE pinned viewport; it flows, so it doesn't. */}
+                    <p className="copy mt-1">{dish.description}</p>
                   </div>
                 </div>
               );
@@ -598,9 +552,7 @@ export function About() {
           </div>
           {/* Below the ENTIRE grid, at twice the grid's own gutter, so it reads
               as the section's action rather than an appendage of the feature
-              card it happens to sit under. The old mt-6 (24px) put it inside
-              both that card's shadow (~30px reach) and the travel of the seam
-              handoff above.
+              card it happens to sit under.
 
               Left, not centred: it aligns to the same column edge as the
               heading it belongs to. */}
@@ -611,17 +563,16 @@ export function About() {
         </div>
       </div>
 
-      {/* Seam: About -> Gallery. A couple of mural accents drift down past the
+      {/* Seam: About -> Gallery. A couple of drawn accents drift down past the
           boundary and fade, so the illustrated world trails off into the
-          photography instead of stopping at a border. In the original this sat
-          at the mural/favorites seam, which no longer exists as a boundary. */}
+          photography instead of stopping at a border. These are drawn marks —
+          a disc, a squiggle — not cut-outs of the mural asset. */}
       <div
         // z-[9], below the content layer (z-10): these are decorative accents
         // drifting toward the Gallery seam, and at z-[13] they painted across
-        // the "See the full menu" pill during the pin.
+        // the "See the full menu" pill.
         // opacity-0 by default: SeamMotion fades these in only as the About ->
-        // Gallery boundary arrives (its tween is immediateRender:false). z-[9]
-        // keeps them below the content layer as well.
+        // Gallery boundary arrives (its tween is immediateRender:false).
         className="mural-trail pointer-events-none absolute inset-x-0 bottom-6 z-[9] flex items-center justify-center gap-16 motion-reduce:hidden [&>*]:opacity-0"
         aria-hidden="true"
       >

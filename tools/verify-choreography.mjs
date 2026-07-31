@@ -71,20 +71,38 @@ const TYPE_RECTS = `(() => {
   return out;
 })()`;
 
-/** About's own content rects (heading + body + CTA), when visible. */
+/** About's own content rects (heading + body + CTA), when visible.
+ *
+ *  GLYPH RUNS, via Range — the same technique TYPE_RECTS uses for the hero, and
+ *  for the same reason. An element's own getBoundingClientRect() is its BLOCK
+ *  box, which spans the full width of its grid column (804px at 1440) however
+ *  short the line inside it actually is. Measured that way this reported the
+ *  panel "overlapping the heading" by 13,000px² at a scroll position where the
+ *  panel's edge was 200px clear of the last glyph — contact with the column's
+ *  trailing whitespace, which nobody can see. The hero side was already
+ *  measured properly; About was not, because under the old design About's copy
+ *  was never visible during the sweep and the difference could not show up. */
 const ABOUT_RECTS = `(() => {
   const out = [];
   for (const s of ["#about h2", "#about .about-text .copy", "#about .about-text a", "#about .grill-head", "#about .grill-dish"]) {
     for (const el of document.querySelectorAll(s)) {
+      // Effective opacity: the entrance fades the COLUMN, so every child still
+      // computes to 1 while the whole block is invisible.
       let op = 1, n = el;
       while (n && n !== document.body) { op *= parseFloat(getComputedStyle(n).opacity || "1"); n = n.parentElement; }
       if (op < 0.02) continue;
       const cs = getComputedStyle(el);
       if (cs.visibility === "hidden" || cs.display === "none") continue;
-      const r = el.getBoundingClientRect();
-      if (r.width < 2 || r.height < 2) continue;
-      if (r.bottom < 0 || r.top > window.innerHeight) continue;   // off-screen
-      out.push({ sel: s, op: +op.toFixed(3), top: r.top, right: r.right, bottom: r.bottom, left: r.left });
+      const rg = document.createRange();
+      rg.selectNodeContents(el);
+      const tight = [...rg.getClientRects()].filter((r) => r.width > 2 && r.height > 2);
+      // A card or a rule has no text of its own; its box IS its ink.
+      const rects = tight.length ? tight : [el.getBoundingClientRect()];
+      for (const r of rects) {
+        if (r.width < 2 || r.height < 2) continue;
+        if (r.bottom < 0 || r.top > window.innerHeight) continue;   // off-screen
+        out.push({ sel: s, op: +op.toFixed(3), top: r.top, right: r.right, bottom: r.bottom, left: r.left });
+      }
     }
   }
   return out;
@@ -121,7 +139,7 @@ const browser = await chromium.launch();
   const overlaps = [];
   const samples = [];
   const edgeExists = [];
-  const aboutVisibleEarly = [];
+  const storyOpacity = [];
 
   // A clip whose four insets are all 0 has no edge inside the viewport.
   //
@@ -160,10 +178,17 @@ const browser = await chromium.launch();
     if (type.length > 0 && !fullBleed(panel.clip))
       edgeExists.push({ pct, n: type.length, clip: panel.clip.slice(0, 34) });
 
-    // The panel's left edge sweeps across columns 5-8 during Phase B. That is
-    // only safe because About's copy has not been revealed yet — its own pin
-    // reveals it later. If anyone retimes that reveal earlier, the grid
-    // guarantee silently becomes a lie, and this is what catches it.
+    // WHAT THE WINDOW OPENS ONTO. This used to assert the opposite — that
+    // About's copy stayed at opacity 0 for the whole sweep, because the old
+    // design revealed the mural and the copy did not arrive until About's own
+    // pin ran. The reveal target is the cream story now, so the copy MUST be up
+    // by the time the panel docks; what must never happen is the panel's edge
+    // sitting on top of it, which `overlaps` above tests glyph by glyph.
+    //
+    // The copy's entrance therefore fires off the hero's own scroll rather than
+    // off its own position — see the note in About.tsx. Triggered the ordinary
+    // way it arrived at ~29% of the transition at 1440x900 and ~25% at 768x800,
+    // straight under the sweeping edge.
     const story = await page.evaluate(`(() => {
       const el = document.querySelector("#about .about-text");
       if (!el) return 1;
@@ -171,7 +196,7 @@ const browser = await chromium.launch();
       while (n && n !== document.body) { op *= parseFloat(getComputedStyle(n).opacity || "1"); n = n.parentElement; }
       return op;
     })()`);
-    if (story > 0.02) aboutVisibleEarly.push({ pct, op: +story.toFixed(3) });
+    storyOpacity.push({ pct, op: +story.toFixed(3) });
 
     samples.push({ pct, visibleType: type.length, visibleAbout: about.length, panelW: Math.round(panel.right - panel.left) });
   }
@@ -188,11 +213,15 @@ const browser = await chromium.launch();
       ? edgeExists.slice(0, 6).map((e) => `${e.pct}% ${e.n} rects, ${e.clip}`).join("; ")
       : "21 positions: type visible only while inset() is 0 on all four edges"
   );
-  check(
-    "About's copy stays unrevealed while the panel sweeps its columns",
-    aboutVisibleEarly.length === 0,
-    aboutVisibleEarly.length ? aboutVisibleEarly.slice(0, 5).map((a) => `${a.pct}% op ${a.op}`).join("; ") : "opacity < 0.02 at all 21 positions"
-  );
+  {
+    const up = storyOpacity.filter((s) => s.op > 0.98).map((s) => s.pct);
+    const settled = up.length ? Math.min(...up) : null;
+    check(
+      "About's copy is fully up by the time the panel docks",
+      settled !== null && settled <= 80,
+      settled === null ? "never reaches opacity 1" : `opacity 1 from ${settled}% (dock completes at 80%)`
+    );
+  }
   check(
     "panel never overlaps About's content",
     overlaps.length === 0,
@@ -200,7 +229,6 @@ const browser = await chromium.launch();
   );
 
   // Phase A: by 30% the panel must be empty of type.
-  const at30 = samples.find((s) => s.pct === 30);
   const typeAt30 = await (async () => {
     await page.evaluate((y) => window.scrollTo(0, y), Math.round(0.3 * vh));
     await page.waitForTimeout(700);

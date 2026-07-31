@@ -184,8 +184,17 @@ export function Navbar() {
           } motion-reduce:transition-none`}
         />
 
+        {/* THE BAR RUNS EDGE TO EDGE. `.track-edge` rather than `.track`: same
+            outer margin token, same two breakpoints, but measured from the
+            viewport instead of from the centred 1280 content track. So the mark
+            sits at the left page margin and the links + call button group at the
+            right one, at every width.
+
+            `justify-between` is what does the grouping, and it needs no change
+            for either state: at lg+ the row is [mark][links + CTA], below lg it
+            is [mark][trigger]. Both end up hard left and hard right. */}
         <nav
-          className="track relative flex items-center justify-between py-4"
+          className="track-edge relative flex items-center justify-between py-4"
           aria-label="Main navigation"
         >
           <Link
