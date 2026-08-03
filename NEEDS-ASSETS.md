@@ -82,5 +82,3 @@ reshoot, not deleted.
 copy calls "the good stuff". Shoot Premium first.
 
 - **Aspect:** 16:9, on the plate or on the grill, consistent lighting
-- **Note:** `MISSING_IMAGES.md` is stale — 5 of the 12 files it lists are filed
-  under a `Signature` section that no longer exists in the code.
