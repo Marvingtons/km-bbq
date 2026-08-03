@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { SITE_URL } from "@/lib/restaurant";
+import { SITE_URL } from "@/data/info";
 
 /**
  * The XML sitemap, emitted at /sitemap.xml by the App Router file convention.

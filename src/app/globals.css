@@ -1,470 +1,155 @@
 @import "tailwindcss";
 
-/* The two values Tailwind's own `background`/`foreground` names resolve to.
-   They are not separate colours — they are cream and ink, repeated here
-   because @theme cannot reference itself before it is declared. */
+/* ===========================================================================
+   KM.BBQ TOKEN SHEET
+   One value per job. Components reference tokens; nothing declares a raw
+   font-size, colour, shadow or z-index of its own.
+   =========================================================================== */
+
 :root {
-  --background: #FAF4EC; /* = --color-cream */
-  --foreground: #1A1A1A; /* = --color-ink */
+  --background: #121110; /* = --color-char */
+  --foreground: #ede6dc; /* = --color-bone */
 }
 
-/* ---------------------------------------------------------------------------
-   THE TOKEN SET — one source of truth for colour.
-   ---------------------------------------------------------------------------
-   Every colour gets exactly ONE job and is never allowed to do a different one.
-   That separation is what makes both the ember and the logo pink read as
-   decisions rather than accidents.
+@theme {
+  /* Clear Tailwind's defaults so a stray `text-lg` or `shadow-md` cannot
+     resolve to something outside this sheet. */
+  --text-*: initial;
+  --font-*: initial;
+  --shadow-*: initial;
+  --radius-*: initial;
+  --ease-*: initial;
 
-     cream / cream-deep  ground and paper     light section backgrounds, fills
-     ink / plum-ink      structure and type   body copy, headings, dark grounds
-     ember (+ deep/red)  INTERACTION          links, hovers, buttons, focus,
-                                              CTA borders, the LED display
-     pink                IDENTITY + PUNCTUATION
-                                              the logo, the italic accent word
-                                              in headings, dot glyphs, the
-                                              active nav underline
-     pine / plum         the mural's world    mural spot marks only
+  /* --- GROUND ---------------------------------------------------------- */
+  --color-char: #121110; /* page ground — grill-room dark */
+  --color-char-2: #1b1917; /* raised surfaces, cards */
+  --color-char-3: #26221f; /* borders, dividers, hover surfaces */
 
-   ember-deep is not a separate colour: it is ember's AA-safe form for small
-   text on cream (ember itself lands at 2.3:1 there). Same job, same family.
+  /* --- TYPE ------------------------------------------------------------ */
+  --color-bone: #ede6dc; /* primary text on dark */
+  --color-smoke: #8a837c; /* muted text, captions */
 
-   Pink NEVER touches a button, a link, a hover state, a border, a focus ring
-   or a background. Ember NEVER touches a wordmark or a punctuation glyph.
+  /* --- HEAT ------------------------------------------------------------ */
+  --color-flame: #e63b2e; /* primary — CTAs, price */
+  --color-ember: #f27b21; /* secondary — hovers, gradients, the logo's K */
 
-   NOT IN THE PALETTE, and deliberately so: pure white and pure black. They are
-   structural, not colours with a job — white is the card surface and the type
-   colour on dark grounds, black is the alpha used for shadows, scrims and
-   hairline rings. Neither ever appears as a section ground or as an accent.
-
-   ALSO OUTSIDE IT: the two rasters. The mural (and the spot marks cut from it)
-   and the photographs carry their own colour and are never recoloured — the
-   mural is never graded at all, and the photographs get the one grade defined
-   at the bottom of this file.
-   --------------------------------------------------------------------------- */
-@theme inline {
-  /* --- GROUNDS ------------------------------------------------------- */
-  /* Ground 1. The page surface, and the theme-color meta value. */
-  --color-cream: #FAF4EC;
-  /* Warmer cream. A FILL, not a ground: cards, placeholders, photo boxes.
-     No section may use it as its background — there are only two grounds. */
-  --color-cream-deep: #F3EBDD;
-  /* The one hairline/border tint on cream. */
-  --color-cream-line: #E4D9C4;
-  /* Ground 2. Warm dark, replacing the old neutral near-black. Pink on
-     neutral black reads as a sticker; on a warm plum-ink it belongs to the
-     same world, and the purple is already authorized by the mural. */
-  --color-plum-ink: #1B1215;
-
-  /* --- STRUCTURE AND TYPE -------------------------------------------- */
-  --color-ink: #1A1A1A; /* headings + strong text */
-  --color-foreground: var(--color-ink); /* alias: the name the utilities use */
-  --color-body: #5A5550; /* solid body copy on cream (≈ ink/70) */
-
-  /* --- INTERACTION (ember, and only ember) ---------------------------- */
-  --color-ember: #F18B23; /* the ONE accent */
-  --color-ember-deep: #9A5A1A; /* ember, AA-safe for small text on cream */
-  /* The hotter red shared by the mural flames, the logo flame and the LED
-     panel. Sampled from the mural (densest hue-0 bucket) and identical to the
-     flame in the canonical logo SVG. */
-  --color-ember-red: #EC2229;
-
-  /* --- IDENTITY AND PUNCTUATION (pink, and only pink) ----------------- */
-  --color-pink: #ED397D; /* the logo pink, unified across every copy */
-
-  /* --- THE MURAL'S OWN COLOURS ---------------------------------------- */
-  /* Sampled from public/images/mural-*.png. Reserved for mural spot marks;
-     no UI element may reach for these. */
-  --color-pine: #2C3710;
-  --color-plum: #784E9B;
+  /* --- SIGNAGE / IDENTITY ---------------------------------------------- */
+  /* The logo pink, recast brighter so it reads as neon rather than as print. */
+  --color-neon-pink: #ff4fa0;
+  /* The mark's actual badge blue (Logo.tsx). UTILITY ONLY: focus rings and
+     footer links. Never a surface. */
+  --color-km-blue: #1a36af;
 
   --color-background: var(--background);
-  --font-serif: var(--font-cormorant), Georgia, serif;
+  --color-foreground: var(--foreground);
+
+  /* --- TYPE FACES ------------------------------------------------------
+     Display: variable Archivo, condensed and heavy — a price-board grotesk.
+     "Archivo Expanded" is not a Google family (Expanded is the wdth axis);
+     Anton and Archivo Black ship a single 400 face and so cannot hold to
+     weights 700-900. Variable Archivo does both, and condensed is what lets
+     ALL-YOU-CAN-EAT and the price line set on one line at 375px.
+     Body/UI: Inter, 400/500/600. */
+  --font-display: var(--font-archivo), "Arial Narrow", system-ui, sans-serif;
   --font-sans: var(--font-inter), system-ui, sans-serif;
 
-  /* --- THE SECTION SPACING SCALE -------------------------------------- */
-  /* One token, top and bottom, every section: `py-section md:py-section-lg`. */
+  /* --- TYPE SCALE — 7 steps, 1.25 ratio --------------------------------
+     xs eyebrow/caption/legal · sm BODY · md lead + card title ·
+     lg small heading · xl section heading · 2xl section heading (lg+) ·
+     display the one viewport-scaled step. */
+  --text-xs: 0.8rem;
+  --text-xs--line-height: 1.35;
+  --text-sm: 1rem;
+  --text-sm--line-height: 1.6;
+  --text-md: 1.25rem;
+  --text-md--line-height: 1.4;
+  --text-lg: 1.5625rem;
+  --text-lg--line-height: 1.25;
+  --text-xl: 1.9531rem;
+  --text-xl--line-height: 1.1;
+  --text-2xl: 2.4414rem;
+  --text-2xl--line-height: 1.05;
+  --text-display: clamp(2.75rem, 10vw, 7rem);
+  --text-display--line-height: 0.88;
+
+  /* --- SPACING — 4px base. Tailwind's dynamic scale covers 1..40 (4..160px).
+     These are the named section rhythms built on it. */
+  --spacing: 0.25rem;
   --spacing-section: 5rem;
-  --spacing-section-lg: 7rem;
+  --spacing-section-lg: 7.5rem;
 
-  /* --- THE GRID -------------------------------------------------------
-     One 12-column track, one pair of outer margins, every section on both
-     routes. Content starts at a column edge; it does not float in the middle.
-
-     Centre-stacking is what a page looks like when no grid decision was made,
-     and it was why six well-built sections read as six unrelated blocks: there
-     was no line the eye could follow from one into the next. Left alignment on
-     a shared track IS that line. Centring is now spent exactly once, on the
-     game, where the subject is a physical object and centring reads as
-     deliberate. See `.grid-page` below. */
-  --grid-max: 80rem; /* 1280px content track */
-  --grid-gutter: 1.5rem; /* outer margin, phones */
-  --grid-gutter-lg: 3rem; /* outer margin, lg and up */
-  --grid-gap: 1.5rem; /* column gap */
-  /* Readable measure for body copy. Roughly 62 characters at the body size —
-     body never runs the full width of the track. */
+  /* --- LAYOUT ---------------------------------------------------------- */
+  --grid-max: 80rem;
+  --grid-gutter: 1.5rem;
+  --grid-gutter-lg: 3rem;
+  --grid-gap: 1.5rem;
   --measure: 62ch;
 
-  /* --- THE RADIUS SCALE ------------------------------------------------
-     Three categories, one rule each. Anything that fits none of them is a
-     documented exception, not a fourth guess.
+  /* --- RADIUS ---------------------------------------------------------- */
+  --radius-card: 0.625rem; /* cards, photos, media frames */
+  --radius-pill: 9999px; /* controls */
+  --radius-hair: 2px; /* focus ring only */
 
-       photo    things that ARE an image, and the frames that hold one
-       control  things you click
-       surface  structural ground: sections, bands, the map, text-only cards
+  /* --- SHADOW — two, and only two. */
+  --shadow-card: 0 2px 14px rgb(0 0 0 / 0.35);
+  --shadow-pop: 0 10px 34px rgb(0 0 0 / 0.5);
 
-     The logic: shape follows what the element IS, not where it sits. A card
-     with a photograph in it takes the photo radius so the frame and the image
-     are one object; a card with only type in it is a surface and is square. */
-  --radius-photo: 0.75rem;
-  --radius-control: 9999px;
-  --radius-surface: 0px;
-  /* EXCEPTION, stated rather than guessed: the game housing is not a card, a
-     control or a ground — it is a picture of a machine bolted to the wall by
-     the door, and a real machine has a moulded corner. One value, one object,
-     one place. */
-  --radius-prop: 1.4rem;
+  /* --- Z-INDEX — four values. Tailwind's namespace is --z-index-*, so the
+     utilities are z-base / z-nav / z-overlay / z-preloader. */
+  --z-index-base: 0;
+  --z-index-nav: 100;
+  --z-index-overlay: 500;
+  --z-index-preloader: 900;
 
-  /* NOT AN EXCEPTION, and deliberately left as `rounded-full`: the discs.
-     The seam dots, the ember sparks, the four mount screws on the housing,
-     the footer's glow, the preloader's hairline cap. Every one of them is
-     square in its box, so `border-radius: 9999px` is drawing a CIRCLE, not
-     choosing a corner treatment — there is no corner to standardise. A shape,
-     not a radius. The LED's decimal point (rounded-[0.03em]) is the same case
-     one level down: it is a lit segment on a panel, sized in em so it tracks
-     the digits, and it belongs to the prop rather than to the page. */
-
-  /* --- THE TYPE SCALE --------------------------------------------------
-     One ratio, 4:3, so the step between eyebrow, body and heading is the same
-     proportion in every section and is obvious at a glance. Before this the
-     page had one enormous element and then five sizes crammed between 14 and
-     24px, which is why the hierarchy read as flat.
-
-       eyebrow  0.75rem   12.0   base / 1.333
-       copy     1rem      16.0   base
-       lead     1.333rem  21.3   base * 1.333
-       title    1.777rem  28.4   base * 1.333^2
-       h2       2.369rem  37.9   base * 1.333^3
-       h2-lg    3.157rem  50.5   base * 1.333^4
-
-     The hero's display lockup is the SOLE exception: it is viewport-sized on
-     purpose and is the one oversized moment on the site. Nothing else may
-     become a second one. The LED digits are the other exception — they are
-     sized to the panel they sit in, not to the page. Both are noted where
-     they are written.
-
-     Named `copy` rather than `body` on purpose: `--color-body` already exists,
-     and Tailwind resolves `text-body` against both namespaces. */
-  --text-eyebrow: 0.75rem;
-  --text-eyebrow--line-height: 1rem;
-  --text-copy: 1rem;
-  --text-copy--line-height: 1.65;
-  --text-lead: 1.333rem;
-  --text-lead--line-height: 1.4;
-  --text-title: 1.777rem;
-  --text-title--line-height: 1.25;
-  --text-h2: 2.369rem;
-  --text-h2--line-height: 1.1;
-  --text-h2-lg: 3.157rem;
-  --text-h2-lg--line-height: 1.05;
-
-  /* --- THE MOTION CURVES ----------------------------------------------
-     Two house curves plus one stated exception. Every transition and every
-     GSAP timeline borrows from these — nothing invents its own any more.
-     The numeric durations live in :root below and in src/lib/motion.ts; the
-     two lists are the same table written for CSS and for JS.
-
-       house         everything that arrives and settles
-       house-in-out  everything that reverses or wipes (the preloader exit)
-       press         EXCEPTION: the game button's overshoot. A dome you push
-                     physically springs back; that is the mechanic, and the
-                     mechanic is settled. One curve, one element. */
+  /* --- MOTION ---------------------------------------------------------- */
   --ease-house: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --ease-house-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --ease-press: cubic-bezier(0.34, 1.7, 0.64, 1);
-
-  /* The one warm elevation shadow, formalizing rgba(120,60,20,…). */
-  --shadow-warm: 0 2px 16px rgb(120 60 20 / 0.08);
-  --shadow-warm-lg: 0 6px 24px rgb(120 60 20 / 0.14);
 }
 
-/* Durations. Mirrored from MOTION.dur in src/lib/motion.ts — CSS and JS cannot
-   share a literal, so they share a documented table instead. */
+/* Durations. Mirrored from MOTION.dur in src/lib/motion.ts. */
 :root {
-  --dur-press: 90ms; /* the dome going down: faster than it comes up */
-  --dur-quick: 180ms; /* underlines, small state flips */
-  --dur-base: 300ms; /* the default: hovers, colour changes, controls */
-  --dur-slow: 500ms; /* surfaces cross-fading (the nav bar) */
-  --dur-reveal: 600ms; /* content arriving on scroll */
-}
-
-/* ---------------------------------------------------------------------------
-   PAPER GRAIN. The mural is hand-painted and carries its own texture; left
-   alone, that texture is a property of one image and the mural looks imported.
-   This makes it a property of the whole site.
-
-   feTurbulence rather than a raster tile: ~300 bytes inline, no extra request,
-   and the browser rasterizes it once at the 180px tile size. Applied via
-   `.grain`, which paints it BETWEEN the section's background and its content
-   (z-index -1 inside an isolated stacking context) so nothing sits on top of
-   the artwork — the mural is never overlaid, tinted or graded.
-   --------------------------------------------------------------------------- */
-:root {
+  --dur-quick: 180ms;
+  --dur-base: 300ms;
+  --dur-slow: 500ms;
+  --dur-reveal: 600ms;
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 
-.grain {
-  position: relative;
-  /* Establishes the stacking context the z-index:-1 layer needs, so the grain
-     lands above this section's own background rather than behind it. */
-  isolation: isolate;
+html {
+  background: var(--color-char);
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-char-3) var(--color-char);
 }
 
-.grain::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image: var(--grain);
-  background-size: 180px 180px;
-  /* 2.8% — material, not noise. */
-  opacity: 0.028;
+body {
+  background: var(--color-char);
+  color: var(--color-bone);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ---------------------------------------------------------------------------
-   HERO LEGIBILITY — bought at the glyphs, and ONLY at the glyphs.
-
-   NOTHING IS LAYERED OVER THE FOOTAGE. No veil, no shaped scrim, no gradient,
-   no wash. The stack over the video is video, poster, type, full stop. If you
-   are about to add a rectangle here, don't.
-
-   Two earlier attempts are worth knowing about so they don't come back:
-
-     1. A uniform 55% cream veil over the whole frame. Bought contrast
-        everywhere, made the clip chalky, and read as a failed load.
-     2. A SHAPED cream scrim, 55% down the left and gone by 62%. Warm and local
-        in the abstract; in practice cream at 55% over the near-black grill
-        vents composites to rgb(171,162,152) — grey — and because it fell off
-        horizontally while masked vertically, its edge read as a diagonal grey
-        wash across the lower right. Measured on the same frame with it hidden,
-        it was lifting rgb(76,64,51) to rgb(171,162,152). Local milking is still
-        milking.
-
-   Both are gone. What remains is a HALO on the type itself, so every pixel of
-   footage that is not directly behind a letterform is untouched, at full
-   saturation, forever.
-
-   Measured per glyph against the actual pixels behind each letterform, bare ink
-   fails badly on this clip (SELF SERVE 14-29% of glyph pixels under 3:1; the
-   Korean BBQ line 86-100% under 4.5:1; the subhead 51-99% under 4.5:1), so the
-   halo is load-bearing, not decorative. The CTA needs none of it: its label
-   rides an opaque cream pill and measures a constant ~8.6:1.
-
-   ONE RULE FOR BOTH HALOS: cream, never grey and never black. Grey reads as a
-   bevel and drags the warm frame cold; cream means the halo VANISHES the moment
-   the type crosses onto the cream ground at the end of the window transition,
-   costing nothing where it is not needed.
-   --------------------------------------------------------------------------- */
-
-/* DEVICE 1 — the display halo, for the SELF SERVE lockup only.
-
-   A halo, not a drop shadow: every layer is blur-only with zero offset, so it
-   is concentric and the letterform keeps its own weight instead of acquiring a
-   direction. The tight layer is repeated rather than widened, which compounds
-   its alpha at the same radius — that is what makes the edge read crisp rather
-   than foggy, and it is why this looks like the letter holding its own edge
-   rather than like an effect.
-
-   Cream, derived from --color-cream, never grey. Two reasons: grey would read
-   as a bevel and drag the warm frame cold, and cream means the halo VANISHES
-   the moment the type crosses onto the cream ground during the window
-   transition. It costs nothing where it is not needed.
-
-   14px of outer falloff against a ~150px cap height is roughly 9% of the
-   glyph — a few pixels at the stroke, which is the brief's "tight". */
-/* THE EDGE — 2px, and that is the whole of it.
-
-   This was a 22px falloff, which is not a glow at anything under a 150px cap
-   height: it reads as a blurry drop shadow sitting behind the lockup. Measured
-   variants of the tight edge ALONE, per glyph, worst 1st percentile:
-
-     none        1.95 / 1.89 / 1.08   (brightest / busiest / darkest frame)
-     2px         2.91 / 2.61 / 1.06
-     2px + 4px   3.94 / 3.31 / 1.77
-     1px + 3px   3.27 / 2.63 / 1.29
-
-   Nothing tight enough to stop reading as an edge clears 3:1 on the darkest
-   frame. So the edge is not asked to carry the contrast — it is 2px, barely
-   visible, and the plate below does the work. Together they measure 4.33:1 on
-   the darkest frame, better than the 22px halo managed, with a fraction of its
-   visual weight. */
-.hero-display-glow {
-  text-shadow: 0 0 2px rgb(250 244 236 / 0.9);
+:focus-visible {
+  outline: 2px solid var(--color-ember);
+  outline-offset: 3px;
+  border-radius: var(--radius-hair);
 }
 
-/* The display line's plate. Same device as the copy plate below — a blurred
-   cream shape with no edge anywhere — sized to the lockup. It exits with the
-   type in phase A, so it is only ever on screen while the hero is. */
-.hero-display-glow {
-  position: relative;
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
 }
-
-.hero-display-glow::before {
-  content: "";
-  position: absolute;
-  inset: -14px -40px -10px -36px;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: 999px;
-  background: rgb(250 244 236 / 0.5);
-  filter: blur(34px);
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: var(--color-char);
 }
-
-/* DEVICE 2 — the same halo, scaled for body-size type.
-
-   This replaced a shaped scrim (see the note above). The scrim was a rectangle
-   over the picture; this is a few pixels around each letter, which is the only
-   honest way to leave the footage alone.
-
-   THE RADII ARE NOT THE DISPLAY LINE'S. A 14px falloff is 9% of a 150px cap
-   height and reads as a crisp edge; the same 14px around 12-16px type is
-   roughly the size of the glyph itself and reads as fog. Scaled to the same
-   PROPORTION instead — about 1/12th of cap height for the tight ring and half
-   the cap height at the outer limit — the halo stays a hairline at the stroke.
-
-   The tight ring is doubled at high alpha and the falloff is short. That ordering
-   matters: it is what puts nearly-opaque cream immediately against the stroke,
-   which is what the contrast is actually measured against, while the outer
-   layers only soften the join to the picture. Widening the tight ring instead of
-   repeating it would blur the letterform; this keeps it sharp. */
-/* The same 2px edge at body size. Six stacked layers used to live here; with
-   the plate carrying the contrast they were just fog. */
-.hero-copy-glow {
-  text-shadow: 0 0 2px rgb(250 244 236 / 0.9);
-}
-
-/* DEVICE 3 — the copy pool. The one gradient left anywhere near the footage,
-   and it exists because 16px type is past what a halo can do (see Hero.tsx).
-
-   It is drawn as a ::before so it can bleed well past the text on every side
-   and fade to nothing before it gets anywhere near an edge — an ellipse, no
-   straight lines, no cutoff. That is the whole difference between this and the
-   scrim it replaces: that one was a frame-wide linear gradient with a hard
-   horizontal falloff and a vertical mask, and the corner where those two met
-   read as a diagonal grey wash. A radial with no hard stop has no such corner.
-
-   0.62 at the centre is the measured floor for ink at 4.5:1 over the darkest
-   footage this clip reaches, and it decays to nothing by the ellipse's edge, so
-   the average opacity over the area it covers is far lower than the number
-   suggests. It covers roughly 200px of the bottom-left; the frame keeps every
-   other pixel at full saturation. */
-.hero-copy-pool {
-  /* Shrink to the copy, not to the track. As a plain block this element is the
-     full 1280px column, and a radial drawn across that box is a full-width
-     band with a visible top and bottom edge — the same wash, rebuilt. Sized to
-     content it is ~440px, which is the width of the two lines it serves. */
-  width: fit-content;
-}
-
-.hero-copy-pool::before {
-  content: "";
-  position: absolute;
-  inset: -24px -34px -20px -30px;
-  z-index: -1;
-  pointer-events: none;
-  border-radius: 999px;
-  background: rgb(250 244 236 / 0.66);
-  /* A BLURRED PLATE, not a gradient, and the difference is the point.
-
-     A radial has one centre, so its alpha is always falling off across the
-     text: tuned wide enough to reach the subhead's last word it spills past its
-     own box and gets cut off square (the straight edge is exactly what made the
-     old scrim read as a wash), and tuned tight enough to fade cleanly inside
-     the box it leaves the end of the line at 3.0:1. There is no setting that
-     does both across a 440px block.
-
-     Blurring a solid rounded plate separates the two jobs: the fill holds one
-     even alpha everywhere the words are, and the blur alone makes the edge —
-     soft in every direction, with no centre, no axis and no boundary to notice.
-     26px of blur against a ~24px inset means it is already fading where the
-     text ends and is gone entirely about 50px out. */
-  filter: blur(26px);
-}
-
-/* ---------------------------------------------------------------------------
-   PHOTO GRADE. The gallery photographs sit next to painted illustration, so
-   they get one consistent treatment: a light warm grade, the shadows lifted a
-   touch toward the cream base, the shared corner radius, and the same grain.
-   Photography and illustration then read as one family.
-
-   This grades PHOTOGRAPHY ONLY. The mural and its spot marks are never graded,
-   tinted or desaturated.
-   --------------------------------------------------------------------------- */
-.photo-grade {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  border-radius: var(--radius-photo);
-}
-
-.photo-grade img {
-  filter: saturate(1.05) contrast(0.96);
-}
-
-/* Shadow lift: cream screened over the frame raises the blacks toward the page
-   surface, so photos stop punching a hole in the cream. */
-.photo-grade::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  background: var(--color-cream);
-  opacity: 0.09;
-  mix-blend-mode: screen;
-}
-
-/* The same grain as the page, at photo strength. */
-.photo-grade::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  background-image: var(--grain);
-  background-size: 180px 180px;
-  opacity: 0.05;
-  mix-blend-mode: multiply;
+::-webkit-scrollbar-thumb {
+  background: var(--color-char-3);
+  border-radius: var(--radius-pill);
 }
 
 @layer components {
-  /* -------------------------------------------------------------------------
-     THE GRID
-     -------------------------------------------------------------------------
-     `.grid-page` is the only container that sets an outer margin or a maximum
-     width. Every section on both routes puts its content inside one, so the
-     left edge of a heading in Contact is the same pixel as the left edge of a
-     heading in Gallery.
-
-     Three column spans cover everything on the site:
-
-       .col-text   the reading column. Full width on phones, 7 of 12 from md.
-                   Eyebrow, h2, body and the action beneath them all live in
-                   it, so all four start on the same line.
-       .col-wide   9 of 12 from md. For grids of cards, which need more room
-                   than prose but must still start at column 1.
-       .col-full   all 12. For media and anything full-track.
-
-     MEDIA BREAKS THE GRID EXACTLY ONE WAY: from a column edge out to the
-     right viewport edge (`.bleed-right`). Nothing is centre-inset, nothing
-     bleeds left, nothing bleeds both ways. Full-bleed BACKDROPS — the hero
-     video, the About mural stage — are section grounds rather than media in
-     the flow, and grounds have always run edge to edge.
-     ------------------------------------------------------------------------- */
-  /* `.track` is the outer margin and the maximum width on their own, for the
-     few strips that are not a 12-column layout but must still line up with one
-     (the /menu category jump bar). `.grid-page` is the track plus the columns.
-     Nothing else on the site may set a page margin or a max width. */
+  /* --- GRID — the only container that sets a margin or a max width. ----- */
   .track,
   .grid-page {
     width: 100%;
@@ -473,23 +158,7 @@
     padding-inline: var(--grid-gutter);
   }
 
-  /* THE ONE EXEMPTION from "nothing else sets a page margin", and it is the
-     nav bar. `.track-edge` is `.track` with the max-width taken off: the same
-     outer margin, at the same two breakpoints, but measured from the VIEWPORT
-     rather than from a centred 1280 track.
-
-     The bar is furniture, not content. It spans the window, so its two ends
-     belong to the window — the mark at the left margin, the links and the call
-     button at the right — rather than tucked into a column of content that
-     happens to be centred underneath it.
-
-     WHAT THIS COSTS, stated rather than discovered later: above 1280 the mark
-     no longer starts on the same vertical line as the headings below it. At
-     1920 the track's content begins at 368px and this begins at 48px. Below
-     1280 there is no difference at all — the track is already full width, so
-     the two are the same pixel and the bar is unchanged.
-
-     Only the nav may use this. Anything that is content stays on `.track`. */
+  /* `.track` measured from the viewport, for the nav bar only. */
   .track-edge {
     width: 100%;
     padding-inline: var(--grid-gutter);
@@ -508,106 +177,28 @@
     min-width: 0;
   }
 
-  /* Body copy never runs the full width of its column. */
   .measure {
     max-width: var(--measure);
   }
 
-  /* NOTE: `.col-story` is gone. It was a FOURTH span that moved to columns 5-8
-     at md+ with motion, because the pinned About stage opened the mural to a
-     centred gap and the story was revealed inside it. The mural is a bounded
-     band below the story now and there is no gap to sit in, so the story is an
-     ordinary reading column at column 1 like every other heading on the site —
-     which is to say it is `.col-text`, and having two names for one span was
-     the only thing keeping them apart. */
-
-  /* ------------------------------------------------------------------------
-     ABOUT'S MEDIA COLUMN — and the slot the hero's window docks into.
-
-     Columns 9-12 running out to the right viewport edge (`.bleed-right`, the
-     site's one sanctioned media break). This span is chosen because it is the
-     ONE span `.col-text` never occupies: 1-7 at md+, 1/-1 below md. That
-     leaves column 8 empty between the copy and the panel at every width from
-     768 up, so the clearance is a fact about the grid rather than a number
-     someone chose, and no scroll position can put them in contact.
-
-     It is a REAL, permanently declared grid item, and SeamMotion reads its
-     rect rather than recomputing the grid in JS. A grid cell cannot be wrong
-     about the grid, and the version that did the arithmetic WAS wrong:
-     `.track` is border-box and carries `padding-inline`, so its
-     getBoundingClientRect() is the padding box. That made a column 84.667px
-     wide where the real one is 76.667px and put column 1's left edge a whole
-     gutter out. The panel had never actually been on the grid.
-
-     `aspect-ratio` on a definite column means the box exists before anything
-     decodes, so the measurement is load-independent and CLS stays 0.
-
-     DO NOT DELETE IT BECAUSE IT LOOKS EMPTY IN DEVTOOLS at md+. Its box is the
-     entire geometry of the window transition.
-     ------------------------------------------------------------------------ */
-  .col-media {
-    grid-column: 1 / -1;
-    position: relative; /* next/image `fill` resolves against this */
-    overflow: hidden; /* and the radius has something to clip */
-    min-width: 0;
-    aspect-ratio: 16 / 9;
-    border-radius: var(--radius-photo) 0 0 var(--radius-photo);
-    pointer-events: none;
-  }
-
-  /* The ember hairline at the seam, for every state that renders the docked
-     still. Markup, not motion — present under reduced motion and with no JS,
-     the same principle as `.about-rule` and `SectionSeam`. The scrubbed path
-     draws its own on the hero's side and switches this one off, because a rule
-     that lived in About would strand a vertical line down the section after
-     the panel has gone. */
-  .col-media::before {
-    content: "";
-    position: absolute;
-    inset-block: 0;
-    left: 0;
-    z-index: 2;
-    width: 1px;
-    background: linear-gradient(
-      to bottom,
-      transparent,
-      var(--color-ember) 50%,
-      transparent
-    );
-    opacity: 0.6;
-  }
-
-  /* DOCKED, beside the copy. `grid-row: 1` is not decoration: with only a
-     definite column start, grid's sparse auto-placement would push whichever
-     item comes second into row 2 and open a blank row. */
-  @media (min-width: 768px) {
-    .col-media {
-      grid-column: 9 / -1;
-      grid-row: 1;
-      align-self: center;
-      aspect-ratio: 3 / 4;
-      max-height: calc(100vh - 2 * var(--nav-h, 68px));
-    }
-  }
-
-  /* WITH MOTION the cell is the panel's destination, so it holds nothing of
-     its own: the poster inside it is `motion-safe:md:hidden` and its hairline
-     is drawn by the scrub instead. A still of its own would show through
-     beneath the panel while the two are out of register during the shrink. */
-  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
-    .col-media::before {
-      content: none;
-    }
-  }
-
-  /* Media running from its column edge to the right edge of the VIEWPORT.
-     The negative margin is the distance from the track's right edge to the
-     viewport's, which is the outer gutter plus whatever centring slack the
-     max-width leaves. */
+  /* Media running from a column edge to the right edge of the viewport — the
+     one sanctioned way media leaves the track. */
   .bleed-right {
     margin-right: calc(
       (var(--grid-gutter) + max(0px, (100vw - var(--grid-max)) / 2)) * -1
     );
+  }
+
+  /* The hero window's dock target. A real grid cell, so the scrub measures the
+     grid rather than recomputing it. */
+  .col-media {
+    grid-column: 1 / -1;
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-card) 0 0 var(--radius-card);
+    pointer-events: none;
   }
 
   @media (min-width: 768px) {
@@ -616,6 +207,13 @@
     }
     .col-wide {
       grid-column: 1 / span 9;
+    }
+    .col-media {
+      grid-column: 9 / -1;
+      grid-row: 1;
+      align-self: center;
+      aspect-ratio: 3 / 4;
+      max-height: calc(100vh - 2 * var(--nav-h, 68px));
     }
   }
 
@@ -632,129 +230,127 @@
     }
   }
 
-  /* -------------------------------------------------------------------------
-     TYPE
-     ------------------------------------------------------------------------- */
+  /* --- TYPE RECIPES — one each. ---------------------------------------- */
 
-  /* The one eyebrow. Identical size, weight, tracking and colour in every
-     section, on both routes. Sits in the components layer so a utility on the
-     element can still override it (the hero's, which must be white over
-     video, is the only one that does). */
+  /* The one eyebrow. */
   .eyebrow {
     font-family: var(--font-sans);
-    font-size: var(--text-eyebrow);
-    line-height: var(--text-eyebrow--line-height);
-    font-weight: 500;
+    font-size: var(--text-xs);
+    line-height: var(--text-xs--line-height);
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.3em;
-    color: var(--color-ember-deep);
+    letter-spacing: 0.18em;
+    color: var(--color-smoke);
   }
 
-  /* The one section heading. One size per breakpoint, every section, both
-     routes — including the /menu page's h1, which does the same job. */
+  /* The one body run. */
+  .copy {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm--line-height);
+    font-weight: 400;
+    color: var(--color-smoke);
+  }
+
+  /* The one section heading. */
   .h2-scale {
-    font-family: var(--font-serif);
-    font-weight: 300;
-    font-size: var(--text-h2);
-    line-height: var(--text-h2--line-height);
-    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 87.5%;
+    font-size: var(--text-xl);
+    line-height: var(--text-xl--line-height);
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--color-bone);
   }
 
   @media (min-width: 768px) {
     .h2-scale {
-      font-size: var(--text-h2-lg);
-      line-height: var(--text-h2-lg--line-height);
+      font-size: var(--text-2xl);
+      line-height: var(--text-2xl--line-height);
     }
   }
 
-  /* The one body size, line height and colour. */
-  .copy {
-    font-family: var(--font-sans);
-    font-size: var(--text-copy);
-    line-height: var(--text-copy--line-height);
-    font-weight: 300;
-    color: var(--color-body);
+  /* The one card title. */
+  .card-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-stretch: 87.5%;
+    font-size: var(--text-md);
+    line-height: var(--text-md--line-height);
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    color: var(--color-bone);
+  }
+
+  /* The one display lockup. */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-stretch: 87.5%;
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+
+  /* --- PHOTO — the one photography treatment. -------------------------- */
+  .photo {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: var(--radius-card);
+    background: var(--color-char-2);
+  }
+
+  .photo img {
+    filter: saturate(1.08) contrast(1.06) brightness(0.94);
+  }
+
+  /* Bottom scrim, so a photo sits into the ground instead of on it. */
+  .photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      var(--color-char) 0%,
+      rgb(18 17 16 / 0.35) 32%,
+      transparent 65%
+    );
   }
 }
 
-html {
-  background: var(--background);
-  /* Reserve the scrollbar's space at all times so the layout width never
-     changes when the scrollbar toggles (e.g. when the full-bleed About
-     mural pins at progress 0, or when the preloader's overflow:hidden is
-     removed). Without this the full-width mural reflows by the scrollbar
-     width and visibly jumps to the right at pin start. */
-  scrollbar-gutter: stable;
+/* Material, not noise — keeps a large dark ground from banding. */
+.grain {
+  position: relative;
+  isolation: isolate;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--grain);
+  background-size: 180px 180px;
+  opacity: 0.035;
 }
 
-/* Visible keyboard focus everywhere. Ember reads on both the cream pages and
-   the charcoal footer; the offset keeps it clear of tight pills and underlined
-   nav links. */
-:focus-visible {
-  outline: 2px solid var(--color-ember);
-  outline-offset: 3px;
-  border-radius: 2px;
-}
-
-/* Custom global scrollbar — ultra-slim, cream track with a translucent warm
-   thumb so it reads as an intentional thin rail on the cream page (the site is
-   one surface now, so a warm rail sits quietly against it). Purely visual;
-   works alongside Lenis smooth scrolling. */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px; /* covers horizontal scroll areas */
-}
-
-::-webkit-scrollbar-track,
-::-webkit-scrollbar-track-piece,
-::-webkit-scrollbar-corner {
-  background: var(--color-cream);
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgb(120 60 20 / 0.35);
-  border-radius: 10px;
-  transition: background var(--dur-quick) var(--ease-house);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgb(120 60 20 / 0.5);
-}
-
-/* Firefox fallback (no webkit pseudo-elements). */
-html {
-  scrollbar-width: thin;
-  scrollbar-color: rgb(120 60 20 / 0.4) var(--color-cream);
-}
-
-/* Hide scrollbar during preloader */
-html.preloading {
-  overflow: hidden;
-}
-
-/* ---------------------------------------------------------------------------
-   Preloader visibility. The overlay is server-rendered and therefore painted
-   in the first frame; the inline script in the layout sets data-preloader on
-   <html> before paint, and these rules decide from that. A returning visitor
-   or anyone on reduced motion gets "skip" and never sees it at all.
-   --------------------------------------------------------------------------- */
+/* Preloader. Server-rendered so it paints in frame one; the inline script in
+   the layout sets data-preloader before paint. */
 html[data-preloader="skip"] .preloader-overlay {
   display: none;
 }
 
-/* Failsafe. The overlay now ships in the HTML rather than being mounted by JS,
-   which means a JS failure would otherwise strand a visitor on a blank cream
-   field. If the timeline has not dismissed it within 10s (it normally finishes
-   in ~4s, and waits on window load only when the page is still streaming),
-   clear it so the site is always reachable. Purely a safety net: under normal
-   operation the element is long gone before this fires. */
+html.preloading {
+  overflow: hidden;
+}
+
+/* Failsafe: if JS never dismisses the overlay, clear it anyway. */
 @keyframes preloader-failsafe {
   to {
     opacity: 0;
@@ -763,64 +359,19 @@ html[data-preloader="skip"] .preloader-overlay {
 }
 
 .preloader-overlay {
-  animation: preloader-failsafe 0.4s linear 10s forwards;
-}
-
-/* Gallery mobile swipe hint — a small horizontal nudge that loops to signal
-   the photo row scrolls sideways. Respect reduced-motion by holding still. */
-@keyframes swipe-nudge {
-  0%,
-  100% {
-    transform: translateX(0);
-    opacity: 0.6;
-  }
-  50% {
-    transform: translateX(8px);
-    opacity: 1;
-  }
-}
-
-.gallery-swipe-hint {
-  animation: swipe-nudge 1.6s ease-in-out infinite;
+  animation: preloader-failsafe 0.4s linear 4s forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gallery-swipe-hint {
-    animation: none;
-  }
-
-  /* ScrollReveal's entrance is a fade + rise driven by inline styles. Pin the
-     revealed state here so the content is readable at first paint, before any
-     JS runs and regardless of what the server rendered — this is what keeps
-     the reduced-motion site from coming up blank. */
+  /* ScrollReveal's entrance is inline-styled; pin the revealed state so the
+     page is readable at first paint regardless of JS. */
   .scroll-reveal {
     opacity: 1 !important;
     transform: none !important;
   }
 }
 
-/* House Game LED clock — the colon blinks at 1Hz while the clock idles at
-   10:00, like the physical prop by the door. The unlit state drops to
-   opacity 0 so the ghost segment layer beneath shows through (a real LED
-   separator never disappears, it just goes dark). Reduced motion is handled
-   where the class is applied (motion-safe: variant), not here. */
-@keyframes led-blink {
-  0%,
-  49.9% {
-    opacity: 1;
-  }
-  50%,
-  100% {
-    opacity: 0;
-  }
-}
-
-/* Lenis smooth-scroll integration. Lenis adds these classes to <html>; the
-   rules let it own the scroll position cleanly. height:auto overrides the
-   `h-full` on <html> so Lenis measures the full document height (correct
-   scroll limit = correct ScrollTrigger pin measurements), and disabling
-   native smooth scroll-behavior stops the browser from fighting Lenis's
-   per-frame scrollTop writes (the cause of stutter/snapping). */
+/* Lenis owns the scroll position. */
 html.lenis,
 html.lenis body {
   height: auto;

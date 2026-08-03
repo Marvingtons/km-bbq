@@ -1,22 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Archivo, Inter } from "next/font/google";
 import "./globals.css";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { Preloader } from "@/components/Preloader";
-import { SITE_URL, BUSINESS } from "@/lib/restaurant";
+import { SITE_URL, BUSINESS } from "@/data/info";
 
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
+// The display face. Variable Archivo with the width axis loaded, so the type
+// recipes in globals.css can sit at wght 900 / wdth 87.5% — a heavy condensed
+// price-board grotesk. See REDESIGN-CONFLICTS.md #3 for why not Anton or
+// Archivo Black (both ship a single 400 face) and why "Archivo Expanded" is not
+// a family you can import.
+const archivo = Archivo({
+  variable: "--font-archivo",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  style: ["normal", "italic"],
+  axes: ["wdth"],
   display: "swap",
 });
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
@@ -78,10 +82,10 @@ export const metadata: Metadata = {
   },
 };
 
-// theme-color matches the site's cream surface (browser chrome / address bar),
-// not a leftover dark value.
+// theme-color matches the page ground (--color-char). Literal because the
+// browser chrome cannot read a CSS custom property.
 export const viewport: Viewport = {
-  themeColor: "#FAF4EC",
+  themeColor: "#121110",
 };
 
 /**
@@ -117,7 +121,7 @@ export default function RootLayout({
       // The inline script mutates <html> before React hydrates, so the DOM and
       // the server payload legitimately disagree here.
       suppressHydrationWarning
-      className={`${cormorant.variable} ${inter.variable} h-full antialiased`}
+      className={`${archivo.variable} ${inter.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: PRELOADER_INIT }} />
@@ -127,12 +131,12 @@ export default function RootLayout({
           <style>{`.preloader-overlay{display:none!important}`}</style>
         </noscript>
       </head>
-      <body className="min-h-full bg-cream text-foreground">
-        {/* Keyboard skip link — hidden until focused, then a visible ember pill
+      <body className="min-h-full bg-char text-bone">
+        {/* Keyboard skip link — hidden until focused, then a visible flame pill
             at the top-left. Jumps past the nav to the page's main content. */}
         <a
           href="#main-content"
-          className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-[300] focus-visible:rounded-control focus-visible:bg-ember focus-visible:px-5 focus-visible:py-2 focus-visible:font-sans focus-visible:text-copy focus-visible:font-medium focus-visible:text-ink focus-visible:shadow-warm-lg"
+          className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-preloader focus-visible:rounded-pill focus-visible:bg-flame focus-visible:px-5 focus-visible:py-2 focus-visible:font-sans focus-visible:text-sm focus-visible:font-semibold focus-visible:text-bone focus-visible:shadow-pop"
         >
           Skip to content
         </a>

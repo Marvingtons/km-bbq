@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { MAP_STYLE, MAP_PIN_PATH } from "@/lib/mapStyle";
-import { BUSINESS, GEO } from "@/lib/restaurant";
+import { BUSINESS, GEO } from "@/data/info";
 
 /**
  * The custom-styled map.
@@ -96,7 +96,7 @@ export function StyledMap({ apiKey }: { apiKey: string }) {
             path: MAP_PIN_PATH,
             fillColor: "#F18B23", // --color-ember
             fillOpacity: 1,
-            strokeColor: "#1A1A1A", // --color-ink
+            strokeColor: "#1A1A1A", // --color-bone
             strokeWeight: 1.5,
             scale: 1.1,
             // The pin's point, not its box: the path is 24x32 with the tip at
@@ -132,11 +132,11 @@ export function StyledMap({ apiKey }: { apiKey: string }) {
   // a real link that sits on top of this box either way.
   if (failed) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-cream-deep px-6 text-center font-sans text-copy font-light text-body">
+      <div className="flex h-full w-full items-center justify-center bg-char-2 px-6 text-center font-sans text-sm font-normal text-smoke">
         Map unavailable right now. The directions link still works.
       </div>
     );
   }
 
-  return <div ref={hostRef} className="h-full w-full bg-cream-deep" />;
+  return <div ref={hostRef} className="h-full w-full bg-char-2" />;
 }

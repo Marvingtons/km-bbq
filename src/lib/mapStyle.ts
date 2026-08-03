@@ -11,8 +11,8 @@
  * values (or a documented tint of one), not new colours:
  *
  *   cream          #FAF4EC   land
- *   cream-deep     #F3EBDD   road fill
- *   cream-line     #E4D9C4   road casing, administrative lines
+ *   char-2     #F3EBDD   road fill
+ *   char-3     #E4D9C4   road casing, administrative lines
  *   body           #5A5550   labels
  *   pine @ 12%     #E2E6DA   parks, on cream
  *   a cool cream   #E3E7E6   water (the one place a cool tone is correct:

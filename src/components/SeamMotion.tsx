@@ -24,7 +24,7 @@ gsap.registerPlugin(ScrollTrigger);
    NOTE: the background-continuity pass that used to live here (scrubbing each
    flagged section from the previous section's tone to its own) is gone. It
    existed to soften a cream -> paper -> cream sequence of section grounds; the
-   page now has exactly two grounds, cream and plum-ink, and each of the two
+   page now has exactly two grounds, cream and char-2, and each of the two
    changes between them is marked by the ember hairline instead. There is
    nothing left to morph.
 

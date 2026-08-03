@@ -11,7 +11,7 @@
  */
 /**
  * CONTRAST, measured:
- *   the "." in KM.BBQ  — only ever set on the plum-ink footer, 4.79:1, passes
+ *   the "." in KM.BBQ  — only ever set on the char-2 footer, 4.79:1, passes
  *                        AA at body size, and is never inside a link. It stays
  *                        in the accessibility tree because it is part of the
  *                        restaurant's name, not decoration.

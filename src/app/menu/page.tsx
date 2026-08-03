@@ -6,7 +6,7 @@ import { MenuJumpNav, type JumpTarget } from "@/components/MenuJumpNav";
 import { SeamMotion } from "@/components/SeamMotion";
 import { BreadcrumbSchema } from "@/components/RestaurantSchema";
 import { Dot } from "@/components/Dot";
-import { HOURS, ADDRESS, PHONE } from "@/lib/restaurant";
+import { HOURS, ADDRESS, PHONE } from "@/data/info";
 import { pageMeta } from "@/lib/seo";
 import { publicFileExists } from "@/lib/imageManifest.generated";
 
@@ -284,7 +284,7 @@ const CATEGORIES: Category[] = [
       {
         name: "Ice Cream",
         desc: "A cold, sweet finish. Self-serve and unlimited.",
-        image: "/images/ice-cream.png",
+        image: "/images/ice-char.png",
       },
     ],
   },
@@ -372,11 +372,11 @@ const imageExists = publicFileExists;
 function ItemMedia({ item }: { item: Item }) {
   if (item.image && imageExists(item.image)) {
     return (
-      // photo-grade: the one photography treatment, shared with the gallery and
+      // photo: the one photography treatment, shared with the gallery and
       // the house favourites — warm grade, shadows lifted toward cream, the one
       // photo corner radius, and the page's grain. It owns the radius and the
       // clipping.
-      <div className="photo-grade relative mb-4 aspect-[16/9] w-full bg-cream-deep">
+      <div className="photo relative mb-4 aspect-[16/9] w-full bg-char-2">
         <Image
           src={item.image}
           alt={item.name}
@@ -395,9 +395,9 @@ function ItemMedia({ item }: { item: Item }) {
       aria-hidden="true"
       // Same corner radius as a real photo, so a card without a shot yet keeps
       // the row's shape.
-      className="mb-4 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-photo bg-gradient-to-br from-cream-deep to-cream-line"
+      className="mb-4 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-card bg-gradient-to-br from-char-2 to-char-3"
     >
-      <span className="font-serif text-h2 font-light text-ember-deep/35 select-none">
+      <span className="font-display text-xl font-normal text-ember/35 select-none">
         {item.name.charAt(0)}
       </span>
     </div>
@@ -416,7 +416,7 @@ function ItemCard({
   return (
     <div className="group h-full">
       {/* A card that frames a photograph takes the photo radius. */}
-      <div className="relative flex h-full flex-col overflow-hidden rounded-photo bg-white p-5 shadow-warm transition-shadow duration-[var(--dur-base)] ease-house hover:shadow-warm-lg">
+      <div className="relative flex h-full flex-col overflow-hidden rounded-card bg-char-2 p-5 shadow-card transition-shadow duration-[var(--dur-base)] ease-house hover:shadow-pop">
         {topBar && (
           <span
             aria-hidden="true"
@@ -424,11 +424,11 @@ function ItemCard({
           />
         )}
         <ItemMedia item={item} />
-        <h3 className="font-serif text-lead font-light text-foreground">
+        <h3 className="font-display text-md font-normal text-bone">
           {item.name}
         </h3>
         {item.korean && (
-          <p className="font-sans text-eyebrow font-light text-foreground/40">
+          <p className="font-sans text-xs font-normal text-bone/40">
             {item.korean}
           </p>
         )}
@@ -436,7 +436,7 @@ function ItemCard({
           {item.desc}
         </p>
         {item.note && (
-          <p className="mt-3 font-sans text-eyebrow font-medium uppercase tracking-[0.12em] text-ember-red">
+          <p className="mt-3 font-sans text-xs font-medium uppercase tracking-[0.12em] text-flame">
             {item.note}
           </p>
         )}
@@ -448,12 +448,12 @@ function ItemCard({
 function CategorySection({ category }: { category: Category }) {
   return (
     <section id={slugify(category.name)} className="mt-16 scroll-mt-32 first:mt-0">
-      <div className="mb-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-cream-line pb-4">
-        <h2 className="font-serif text-title font-light text-foreground">
+      <div className="mb-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-char-3 pb-4">
+        <h2 className="font-display text-lg font-normal text-bone">
           {category.name}
         </h2>
         {category.korean && (
-          <span className="font-sans text-copy font-light text-foreground/40">
+          <span className="font-sans text-sm font-normal text-bone/40">
             {category.korean}
           </span>
         )}
@@ -487,22 +487,22 @@ function TierSection({
   items: Item[];
   variant: "premium";
 }) {
-  // cream-deep is a FILL here, not a ground — this is a card sitting on the
+  // char-2 is a FILL here, not a ground — this is a card sitting on the
   // page's cream, the same way the item cards are. The page still has exactly
   // two grounds.
-  const shell = "border-ember/25 bg-cream-deep";
+  const shell = "border-ember/25 bg-char-2";
 
   return (
     <section
       id={variant}
-      className={`mt-12 scroll-mt-32 rounded-surface border ${shell} p-6 sm:p-10`}
+      className={`mt-12 scroll-mt-32 rounded-none border ${shell} p-6 sm:p-10`}
     >
       <div className="mb-8">
         <p className="eyebrow mb-4">{label}</p>
-        <h2 className="font-serif text-title font-light text-foreground">
+        <h2 className="font-display text-lg font-normal text-bone">
           {title}
           {korean && (
-            <span className="ml-3 align-middle font-sans text-copy font-light text-foreground/40">
+            <span className="ml-3 align-middle font-sans text-sm font-normal text-bone/40">
               {korean}
             </span>
           )}
@@ -543,7 +543,7 @@ export default function MenuPage() {
       <main
         id="main-content"
         tabIndex={-1}
-        className="grain bg-cream focus:outline-none"
+        className="grain bg-char focus:outline-none"
       >
         {/* Header. Same track, same column edge, same left alignment as every
             section on the home page. */}
@@ -571,45 +571,45 @@ export default function MenuPage() {
                 at column 1 rather than being centred.
                 `flex` not `inline-flex`, so the three cells share the width
                 instead of overflowing a phone. */}
-            <div className="col-full mt-9 flex max-w-xl items-stretch overflow-hidden rounded-surface bg-white shadow-warm">
+            <div className="col-full mt-9 flex max-w-xl items-stretch overflow-hidden rounded-none bg-char-2 shadow-card">
               <div className="flex-1 px-4 py-5 text-center sm:px-8">
                 <p className="eyebrow">Lunch</p>
-                <p className="mt-1 font-serif text-title font-light text-ember-red">
+                <p className="mt-1 font-display text-lg font-normal text-flame">
                   $21.99
                 </p>
-                <p className="mt-1 font-sans text-eyebrow font-light text-foreground/40">
+                <p className="mt-1 font-sans text-xs font-normal text-bone/40">
                   per person
                 </p>
               </div>
-              <div aria-hidden="true" className="w-px bg-cream-line" />
+              <div aria-hidden="true" className="w-px bg-char-3" />
               <div className="flex-1 px-4 py-5 text-center sm:px-8">
                 <p className="eyebrow">Dinner</p>
-                <p className="mt-1 font-serif text-title font-light text-ember-red">
+                <p className="mt-1 font-display text-lg font-normal text-flame">
                   $30.99
                 </p>
-                <p className="mt-1 font-sans text-eyebrow font-light text-foreground/40">
+                <p className="mt-1 font-sans text-xs font-normal text-bone/40">
                   per person
                 </p>
               </div>
-              <div aria-hidden="true" className="w-px bg-cream-line" />
+              <div aria-hidden="true" className="w-px bg-char-3" />
               <div className="flex-1 px-4 py-5 text-center sm:px-8">
                 <p className="eyebrow">Seating</p>
-                <p className="mt-1 font-serif text-title font-light text-ember-deep">
+                <p className="mt-1 font-display text-lg font-normal text-ember">
                   90 min
                 </p>
-                <p className="mt-1 font-sans text-eyebrow font-light text-foreground/40">
+                <p className="mt-1 font-sans text-xs font-normal text-bone/40">
                   per table
                 </p>
               </div>
             </div>
 
             <div className="col-text mt-6">
-              <p className="font-sans text-eyebrow font-light text-foreground/50">
+              <p className="font-sans text-xs font-normal text-bone/50">
                 Walk-in only <Dot char="·" /> No reservations needed
               </p>
-              <p className="mt-2 font-sans text-eyebrow font-light text-foreground/50">
+              <p className="mt-2 font-sans text-xs font-normal text-bone/50">
                 Stop our clock at exactly{" "}
-                <span className="font-medium text-ember-red">10.00 seconds</span>{" "}
+                <span className="font-medium text-flame">10.00 seconds</span>{" "}
                 and your next barbecue is free.
               </p>
             </div>
@@ -625,9 +625,9 @@ export default function MenuPage() {
                 {INCLUDED.map((label, i) => (
                   <li
                     key={label}
-                    className={`py-1 pr-5 font-sans text-copy font-light text-body ${
+                    className={`py-1 pr-5 font-sans text-sm font-normal text-smoke ${
                       i < INCLUDED.length - 1
-                        ? "mr-5 border-r border-cream-line"
+                        ? "mr-5 border-r border-char-3"
                         : ""
                     }`}
                   >
@@ -703,7 +703,7 @@ export default function MenuPage() {
                   <br />
                   <a
                     href={PHONE.href}
-                    className="inline-flex min-h-11 items-center font-semibold text-ember-deep transition-colors duration-[var(--dur-base)] ease-house hover:text-ember"
+                    className="inline-flex min-h-11 items-center font-semibold text-ember transition-colors duration-[var(--dur-base)] ease-house hover:text-ember"
                   >
                     {PHONE.display}
                   </a>

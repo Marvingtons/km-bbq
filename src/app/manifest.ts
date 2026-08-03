@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-// theme_color / background_color use the site's cream surface (--color-cream,
+// theme_color / background_color use the site's cream surface (--color-char,
 // #FAF4EC), not a leftover dark value, so the browser chrome and the PWA splash
 // match the page. Ember is the accent and belongs in the mark, not the chrome.
 export default function manifest(): MetadataRoute.Manifest {

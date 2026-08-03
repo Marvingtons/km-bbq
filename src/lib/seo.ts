@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SITE_URL, BUSINESS } from "./restaurant";
+import { SITE_URL, BUSINESS } from "@/data/info";
 
 const OG_IMAGE = {
   url: "/og.png",

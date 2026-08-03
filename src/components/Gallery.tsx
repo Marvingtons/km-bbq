@@ -192,7 +192,7 @@ export function Gallery() {
   //
   // GROUND: cream. This section used to sit on the warmer paper tone and
   // seam-morph into it, which made it a third ground; the page now has exactly
-  // two (cream and plum-ink) and this boundary is carried by rhythm instead of
+  // two (cream and char-2) and this boundary is carried by rhythm instead of
   // by a change of panel. The gallery-bg-warm ink wash went with it — a texture
   // that exists in exactly one section is a stray voice, and the site-wide
   // paper grain is the texture now.
@@ -201,7 +201,7 @@ export function Gallery() {
       ref={sectionRef}
       id="gallery"
       aria-labelledby="gallery-heading"
-      className="grain relative overflow-hidden bg-cream py-section md:py-section-lg motion-safe:md:py-0"
+      className="grain relative overflow-hidden bg-char py-section md:py-section-lg motion-safe:md:py-0"
     >
       {/* The grid runs the section: heading in columns 1-4, photo row from
           column 5 out to the right edge of the viewport. That right-edge break
@@ -222,7 +222,7 @@ export function Gallery() {
             href="https://www.instagram.com/kmkoreanbbq/"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-6 inline-flex min-h-11 items-center font-sans text-copy font-medium text-ember-deep underline-offset-4 hover:underline"
+            className="mt-6 inline-flex min-h-11 items-center font-sans text-sm font-medium text-ember underline-offset-4 hover:underline"
           >
             Follow us on Instagram →
           </a>
@@ -238,9 +238,9 @@ export function Gallery() {
             {GALLERY_ITEMS.map((item, i) => (
               <figure
                 key={item.id}
-                // photo-grade carries the shared photography treatment and the
+                // photo carries the shared photography treatment and the
                 // one photo corner radius, so it also owns the clipping.
-                className="gallery-tile photo-grade group relative h-[52vh] shrink-0 snap-start bg-cream-deep shadow-warm motion-safe:md:h-[60vh]"
+                className="gallery-tile photo group relative h-[52vh] shrink-0 snap-start bg-char-2 shadow-card motion-safe:md:h-[60vh]"
                 // Fixed height + aspect-ratio means every tile's box exists at
                 // its final size before its image arrives, so a load can never
                 // shift the row. This is what keeps CLS at 0 here.
@@ -263,10 +263,10 @@ export function Gallery() {
                 {/* Caption: dark bottom gradient + small letter-spaced label.
                     Visible per-tile on mobile; on desktop it starts hidden and
                     the timeline fades in only the centered tile's caption. */}
-                {/* z-[4]: above the photo-grade's lift (z-2) and grain (z-3)
+                {/* z-[4]: above the photo's lift (z-2) and grain (z-3)
                     overlays, so the label is never washed by either. */}
-                <figcaption className="gallery-caption pointer-events-none absolute inset-x-0 bottom-0 z-[4] flex items-end bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 pt-12 opacity-100 motion-safe:md:opacity-0">
-                  <span className="eyebrow text-white">{item.caption}</span>
+                <figcaption className="gallery-caption pointer-events-none absolute inset-x-0 bottom-0 z-[4] flex items-end bg-gradient-to-t from-char/70 via-char/20 to-transparent p-4 pt-12 opacity-100 motion-safe:md:opacity-0">
+                  <span className="eyebrow text-bone">{item.caption}</span>
                 </figcaption>
               </figure>
             ))}
@@ -277,7 +277,7 @@ export function Gallery() {
             scroll-driven track that needs no hint; on phones the photo row is a
             native horizontal swipe carousel, so cue the sideways gesture. */}
         <div className="col-span-full flex items-center gap-2 md:hidden">
-          <span className="eyebrow text-foreground/60">Swipe to explore</span>
+          <span className="eyebrow text-bone/60">Swipe to explore</span>
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"

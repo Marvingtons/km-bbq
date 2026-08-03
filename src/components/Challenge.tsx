@@ -63,18 +63,18 @@ function readout(cs: number): { win: boolean; line: string } {
   return { win: false, line: `${offSec} ${dir}` };
 }
 
-// The LED is the site's ember-red, not a red of its own. It used to be a
+// The LED is the site's flame, not a red of its own. It used to be a
 // one-off #ff2a1e; that is the same red the mural's flames and the logo's flame
 // are painted in, so it now comes from the token like everything else.
-const LED_RED = "var(--color-ember-red)";
+const LED_RED = "var(--color-flame)";
 // The unlit segments: the same red at 8%, so the ghost layer is literally the
 // live colour turned down rather than a second dark red.
-const LED_UNLIT = "color-mix(in srgb, var(--color-ember-red) 8%, transparent)";
+const LED_UNLIT = "color-mix(in srgb, var(--color-flame) 8%, transparent)";
 
 // Shared LED text treatment: the glow is what sells it as emitted light rather
 // than red paint, and every lit layer uses the same one.
 const ledGlow =
-  "0 0 6px color-mix(in srgb, var(--color-ember-red) 55%, transparent), 0 0 18px color-mix(in srgb, var(--color-ember-red) 28%, transparent)";
+  "0 0 6px color-mix(in srgb, var(--color-flame) 55%, transparent), 0 0 18px color-mix(in srgb, var(--color-flame) 28%, transparent)";
 
 // Fixed burst geometry so the client render matches SSR; each ember flies to
 // its own angle/distance on a win.
@@ -270,7 +270,7 @@ export function Challenge() {
       // Same ground and the same padding scale as every other section. The
       // seam-morph it used to carry (paper -> cream) is gone with the Gallery's
       // paper ground: nothing changes underfoot here any more.
-      className="grain relative bg-cream py-section md:py-section-lg"
+      className="grain relative bg-char py-section md:py-section-lg"
     >
       {/* THE ONE CENTRED SECTION ON THE SITE.
           Everything else left-aligns to the page grid; centring is spent
@@ -310,16 +310,16 @@ export function Challenge() {
             // rounded-prop: the one stated exception to the radius rule. This
             // is not a card, a control or a ground — it is a picture of a
             // machine, and a moulded corner is what a machine has.
-            className="relative mx-auto mt-9 w-full max-w-[380px] rounded-prop p-5 shadow-[0_26px_50px_-24px_rgb(120_60_20/0.55),0_10px_20px_-14px_rgb(26_26_26/0.4)] ring-1 ring-black/40 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ember sm:p-6"
-            // plum-ink, not the old neutral near-black. This and the footer are
+            className="relative mx-auto mt-9 w-full max-w-[380px] rounded-prop p-5 shadow-[0_26px_50px_-24px_rgb(120_60_20/0.55),0_10px_20px_-14px_rgb(26_26_26/0.4)] ring-1 ring-char-3 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ember sm:p-6"
+            // char-2, not the old neutral near-black. This and the footer are
             // the two dark grounds on the site, and both have to hold the pink
-            // mark and the ember accent at once; the ramp is plum-ink lifted
+            // mark and the ember accent at once; the ramp is char-2 lifted
             // toward white at the top and dropped toward black at the bottom,
             // so the housing is one colour lit from above rather than three
             // greys. Same light direction as before, same material.
             style={{
               background:
-                "linear-gradient(158deg, color-mix(in srgb, var(--color-plum-ink) 82%, white) 0%, var(--color-plum-ink) 42%, color-mix(in srgb, var(--color-plum-ink) 78%, black) 100%)",
+                "linear-gradient(158deg, color-mix(in srgb, var(--color-char-2) 82%, white) 0%, var(--color-char-2) 42%, color-mix(in srgb, var(--color-char-2) 78%, black) 100%)",
               boxShadow:
                 "inset 0 1px 0 rgb(255 255 255 / 0.10), inset 0 -1px 0 rgb(0 0 0 / 0.6)",
             }}
@@ -330,7 +330,7 @@ export function Challenge() {
                 <span
                   key={pos}
                   aria-hidden="true"
-                  className={`absolute ${pos} h-1.5 w-1.5 rounded-full bg-[color-mix(in_srgb,var(--color-plum-ink)_55%,black)] shadow-[inset_0_1px_1px_rgb(255_255_255/0.16)]`}
+                  className={`absolute ${pos} h-1.5 w-1.5 rounded-full bg-[color-mix(in_srgb,var(--color-char-2)_55%,black)] shadow-[inset_0_1px_1px_rgb(255_255_255/0.16)]`}
                 />
               )
             )}
@@ -340,7 +340,7 @@ export function Challenge() {
                 dots: the housing is the decoration. */}
             <p
               // white/50, not /35: at 10px on the housing that was 3.2:1.
-              className="mb-4 text-center font-sans text-eyebrow font-semibold uppercase tracking-[0.32em] text-white/50"
+              className="mb-4 text-center font-sans text-xs font-semibold uppercase tracking-[0.32em] text-bone/50"
               style={{ textShadow: "0 1px 0 rgba(255,255,255,0.08)" }}
             >
               Stop the clock
@@ -361,10 +361,10 @@ export function Challenge() {
                 is a picture of a machine, not text. */}
             <div
               aria-hidden="true"
-              className="relative mx-auto flex aspect-[2.9/1] w-full select-none items-center justify-center overflow-hidden rounded-photo"
+              className="relative mx-auto flex aspect-[2.9/1] w-full select-none items-center justify-center overflow-hidden rounded-card"
               style={{
                 background:
-                  "linear-gradient(180deg, color-mix(in srgb, var(--color-plum-ink) 45%, black) 0%, color-mix(in srgb, var(--color-plum-ink) 18%, black) 100%)",
+                  "linear-gradient(180deg, color-mix(in srgb, var(--color-char-2) 45%, black) 0%, color-mix(in srgb, var(--color-char-2) 18%, black) 100%)",
                 boxShadow:
                   "inset 0 2px 10px rgb(0 0 0 / 0.9), inset 0 -1px 0 rgb(255 255 255 / 0.05)",
               }}
@@ -406,7 +406,7 @@ export function Challenge() {
                 the housing never changes size between states. */}
             <p
               aria-live="polite"
-              className="mt-3 flex min-h-5 items-center justify-center text-center font-sans text-eyebrow font-semibold uppercase tracking-[0.22em]"
+              className="mt-3 flex min-h-5 items-center justify-center text-center font-sans text-xs font-semibold uppercase tracking-[0.22em]"
               style={{
                 color: won ? LED_RED : "rgb(255 255 255 / 0.5)",
                 textShadow: won ? ledGlow : undefined,
@@ -418,7 +418,7 @@ export function Challenge() {
             {/* Control deck: the button is seated in the same housing, on a
                 slightly darker recess so it reads as mounted, not stacked. */}
             <div
-              className="relative mt-4 flex items-center justify-center rounded-photo py-5"
+              className="relative mt-4 flex items-center justify-center rounded-card py-5"
               style={{
                 background: "rgba(0,0,0,0.28)",
                 boxShadow:
@@ -455,15 +455,15 @@ export function Challenge() {
                       : "Start the clock"
                 }
                 // outline-none because the ring is drawn on the housing.
-                className="group relative flex h-[74px] w-[74px] cursor-pointer items-center justify-center rounded-control outline-none sm:h-[86px] sm:w-[86px]"
+                className="group relative flex h-[74px] w-[74px] cursor-pointer items-center justify-center rounded-pill outline-none sm:h-[86px] sm:w-[86px]"
               >
                 {/* Bezel the dome sits in, cut into the deck. */}
                 <span
                   aria-hidden="true"
-                  className="absolute inset-0 rounded-control"
+                  className="absolute inset-0 rounded-pill"
                   style={{
                     background:
-                      "linear-gradient(158deg, color-mix(in srgb, var(--color-plum-ink) 88%, white) 0%, color-mix(in srgb, var(--color-plum-ink) 92%, black) 100%)",
+                      "linear-gradient(158deg, color-mix(in srgb, var(--color-char-2) 88%, white) 0%, color-mix(in srgb, var(--color-char-2) 92%, black) 100%)",
                     boxShadow:
                       "inset 0 2px 5px rgb(0 0 0 / 0.8), 0 1px 0 rgb(255 255 255 / 0.06)",
                   }}
@@ -472,7 +472,7 @@ export function Challenge() {
                     down, drops, and its cast shadow tightens to nothing. */}
                 <span
                   aria-hidden="true"
-                  className="relative block h-[76%] w-[76%] rounded-control shadow-[0_9px_16px_-4px_rgba(0,0,0,0.75)] transition-[transform,box-shadow] duration-[var(--dur-quick)] ease-press group-hover:brightness-110 group-active:translate-y-[3px] group-active:scale-[0.93] group-active:shadow-[0_2px_4px_-2px_rgba(0,0,0,0.9)] group-active:duration-[var(--dur-press)] motion-reduce:transition-none"
+                  className="relative block h-[76%] w-[76%] rounded-pill shadow-[0_9px_16px_-4px_rgba(0,0,0,0.75)] transition-[transform,box-shadow] duration-[var(--dur-quick)] ease-press group-hover:brightness-110 group-active:translate-y-[3px] group-active:scale-[0.93] group-active:shadow-[0_2px_4px_-2px_rgba(0,0,0,0.9)] group-active:duration-[var(--dur-press)] motion-reduce:transition-none"
                   style={{
                     background:
                       "radial-gradient(circle at 34% 26%, #ff7a6b 0%, #f24a43 22%, #e02128 55%, #b0141b 82%, #921016 100%)",
@@ -487,7 +487,7 @@ export function Challenge() {
 
         {/* House rule, on the cream stage below the prop rather than on it. */}
         <ScrollReveal delay={0.2}>
-          <p className="mt-6 max-w-sm font-sans text-eyebrow font-light leading-relaxed text-foreground/50">
+          <p className="mt-6 max-w-sm font-sans text-xs font-normal leading-relaxed text-bone/50">
             Practice here as much as you like. Only the clock at the restaurant
             counts, one press per table, per visit.
           </p>

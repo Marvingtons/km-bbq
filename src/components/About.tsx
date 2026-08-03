@@ -290,7 +290,7 @@ export function About() {
       // then slides off is a section nobody reads. See Hero.tsx.
       //
       // z-10 under the hero's z-20 is what puts About behind the window.
-      className="grain relative z-10 overflow-hidden bg-cream motion-safe:md:-mt-[100vh]"
+      className="grain relative z-10 overflow-hidden bg-char motion-safe:md:-mt-[100vh]"
       style={{ ["--nav-h" as string]: `${NAV_H}px` } as React.CSSProperties}
     >
       {/* THE SEAM. Hero -> About is a ground change — footage to cream — so it
@@ -502,16 +502,16 @@ export function About() {
                 >
                   {/* A card that holds a photograph takes the PHOTO radius, so
                       the frame and the image it frames are one object. */}
-                  <div className="flex h-full flex-col overflow-hidden rounded-photo bg-white p-5 text-left shadow-warm transition-shadow duration-[var(--dur-base)] ease-house hover:shadow-warm-lg">
+                  <div className="flex h-full flex-col overflow-hidden rounded-card bg-char-2 p-5 text-left shadow-card transition-shadow duration-[var(--dur-base)] ease-house hover:shadow-pop">
                     {/* Feature photo stretches to fill the two-row card; the
                         others crop slightly wider so the two grid rows stay
                         level. */}
-                    {/* photo-grade: the one photography treatment — warm grade,
+                    {/* photo: the one photography treatment — warm grade,
                         shadows lifted toward cream, shared corner radius, and
                         the page's grain — so photographs and painted mural read
                         as one family. It carries its own radius and clipping. */}
                     <div
-                      className={`photo-grade relative w-full bg-cream-deep ${
+                      className={`photo relative w-full bg-char-2 ${
                         isFeature
                           ? "aspect-[16/9] lg:aspect-auto lg:min-h-0 lg:flex-1"
                           : "aspect-[16/9] lg:aspect-[2/1]"
@@ -529,15 +529,15 @@ export function About() {
                         }
                       />
                       {dish.tag && (
-                        <span className="absolute left-2 top-2 z-[4] bg-ember px-2 py-1 font-sans text-eyebrow font-medium uppercase tracking-widest text-ink">
+                        <span className="absolute left-2 top-2 z-[4] bg-ember px-2 py-1 font-sans text-xs font-medium uppercase tracking-widest text-bone">
                           {dish.tag}
                         </span>
                       )}
                     </div>
                     {/* One card-title size, on the scale's `lead` step. */}
-                    <h3 className="mt-3 font-serif text-lead font-light text-foreground">
+                    <h3 className="mt-3 font-display text-md font-normal text-bone">
                       {dish.name}{" "}
-                      <span className="font-sans text-eyebrow font-light text-foreground/40">
+                      <span className="font-sans text-xs font-normal text-bone/40">
                         {dish.korean}
                       </span>
                     </h3>
@@ -583,7 +583,7 @@ export function About() {
         <svg width="34" height="14" viewBox="0 0 34 14" fill="none">
           <path
             d="M1 9c5-6 10 4 16-1s10-6 16 2"
-            stroke="var(--color-body)"
+            stroke="var(--color-smoke)"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeOpacity="0.6"

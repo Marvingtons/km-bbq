@@ -200,13 +200,13 @@ export function Hero() {
             rather than at the viewport edge. */}
         <div className="track w-full pb-16 pt-10 text-left sm:pb-20 lg:pb-24">
           {/* The shared eyebrow, overridden to INK — the one eyebrow on the
-              site that does not carry ember-deep, and the globals.css note on
+              site that does not carry ember, and the globals.css note on
               `.eyebrow` reserves exactly this exception for exactly this
               reason. Ember-deep (#9A5A1A) measures 1.57:1 against the darkest
               scrimmed block; it is a warm mid-brown and the footage is full of
               warm mid-brown. Ink takes it to 5.00:1. */}
           <div className="hero-exit-support">
-            <motion.p className="hero-copy-glow eyebrow mb-3 text-ink" {...rise(0)}>
+            <motion.p className="hero-copy-glow eyebrow mb-3 text-bone" {...rise(0)}>
               {EYEBROW}
             </motion.p>
           </div>
@@ -222,7 +222,7 @@ export function Hero() {
               there. Over cream it is cream on cream, and disappears. */}
           <div className="hero-exit-display">
             <motion.h1
-              className="hero-display-glow font-serif font-light uppercase leading-[0.8] tracking-[-0.03em] text-ink"
+              className="hero-display-glow font-display font-normal uppercase leading-[0.8] tracking-[-0.03em] text-bone"
               {...rise(1, false)}
             >
               <span className="block text-[21vw] lg:text-[10.5vw]">{first}</span>
@@ -253,15 +253,15 @@ export function Hero() {
                 instead of two thirds of the frame. */}
             <div className="hero-copy-pool relative">
               <motion.p
-                className="hero-copy-glow relative mt-4 font-sans text-copy font-semibold uppercase tracking-[0.2em] text-ink"
+                className="hero-copy-glow relative mt-4 font-sans text-sm font-semibold uppercase tracking-[0.2em] text-bone"
                 {...rise(2)}
               >
                 {HEADLINE.tail}
               </motion.p>
-              {/* Body copy, overridden to INK: --color-body (#5A5550) is
+              {/* Body copy, overridden to INK: --color-smoke (#5A5550) is
                   defined as "solid body copy on cream" and cannot hold on
                   footage at any treatment short of an opaque plate. */}
-              <motion.p className="hero-copy-glow copy measure relative mt-3 text-ink" {...rise(3)}>
+              <motion.p className="hero-copy-glow copy measure relative mt-3 text-bone" {...rise(3)}>
                 {SUBHEAD}
               </motion.p>
             </div>
@@ -271,11 +271,11 @@ export function Hero() {
                 and an unfilled ember outline measures 1.00:1 against #5A3E1E
                 at frame 132 — the control's edge simply dissolves into the
                 picture. An opaque cream fill makes the pill a solid object
-                again, so its label is ink-on-cream at a constant 15.9:1 and
-                its border is ember-on-cream exactly as everywhere else, both
+                again, so its label is ink-on-char at a constant 15.9:1 and
+                its border is ember-on-char exactly as everywhere else, both
                 independent of whatever frame is behind it. */}
             <motion.div className="mt-7" {...rise(4)}>
-              <PillLink href={CTA_HREF} arrow className="bg-cream">
+              <PillLink href={CTA_HREF} arrow className="bg-char">
                 {CTA_LABEL}
               </PillLink>
             </motion.div>

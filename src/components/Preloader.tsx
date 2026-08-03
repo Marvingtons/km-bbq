@@ -165,7 +165,7 @@ export function Preloader() {
       ref={rootRef}
       // `preloader-overlay` carries the visibility rule (globals.css) plus the
       // failsafe that clears it if JS never gets to run the timeline.
-      className="preloader-overlay fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden bg-cream"
+      className="preloader-overlay fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden bg-char"
       role="status"
       aria-label="KM.BBQ is loading"
     >

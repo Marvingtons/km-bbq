@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
-import { PHONE, ADDRESS, DIRECTIONS_URL } from "@/lib/restaurant";
+import { PHONE, ADDRESS, DIRECTIONS_URL } from "@/data/info";
 import { pageMeta } from "@/lib/seo";
 
 export const metadata: Metadata = pageMeta({

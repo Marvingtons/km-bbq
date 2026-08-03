@@ -122,7 +122,7 @@ export function HeroVideo({ className = "" }: { className?: string }) {
   }, [wanted]);
 
   return (
-    <div className={`${className} bg-cream`}>
+    <div className={`${className} bg-char`}>
       {/* THE POSTER — and the LCP element. `fill` + `sizes="100vw"` because the
           hero is full-bleed; `priority` emits the preload link.
 

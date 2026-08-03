@@ -11,7 +11,7 @@ import Link from "next/link";
 // video's hue range and stops reading as a control over it; the red game dome
 // is a prop, not a button.)
 const PILL =
-  "relative isolate inline-flex items-center gap-2 overflow-hidden rounded-control border border-ember px-8 py-3 font-sans text-copy font-medium text-ink transition-colors duration-[var(--dur-base)] ease-house before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember before:transition-transform before:duration-[var(--dur-base)] before:ease-house hover:before:scale-x-100 focus-visible:before:scale-x-100";
+  "relative isolate inline-flex items-center gap-2 overflow-hidden rounded-pill border border-ember px-8 py-3 font-sans text-sm font-medium text-bone transition-colors duration-[var(--dur-base)] ease-house before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember before:transition-transform before:duration-[var(--dur-base)] before:ease-house hover:before:scale-x-100 focus-visible:before:scale-x-100";
 
 export function PillLink({
   href,

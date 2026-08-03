@@ -15,7 +15,7 @@ export default function NotFound() {
       <main
         id="main-content"
         tabIndex={-1}
-        className="grain flex min-h-screen flex-col justify-center bg-cream py-32 focus:outline-none"
+        className="grain flex min-h-screen flex-col justify-center bg-char py-32 focus:outline-none"
       >
         <div className="grid-page">
           <div className="col-text">

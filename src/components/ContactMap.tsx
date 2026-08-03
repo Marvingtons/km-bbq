@@ -1,4 +1,4 @@
-import { ADDRESS_PARTS, BUSINESS, DIRECTIONS_URL } from "@/lib/restaurant";
+import { ADDRESS_PARTS, BUSINESS, DIRECTIONS_URL } from "@/data/info";
 import { StyledMap } from "./StyledMap";
 
 // A real, interactive Google Map again, replacing the baked static render.
@@ -39,7 +39,7 @@ const SRC = KEY
 
 export function ContactMap() {
   return (
-    <div className="relative h-full w-full bg-cream-deep">
+    <div className="relative h-full w-full bg-char-2">
       {KEY ? (
         <StyledMap apiKey={KEY} />
       ) : (
@@ -80,7 +80,7 @@ export function DirectionsLink() {
       href={DIRECTIONS_URL}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex min-h-11 items-center gap-1.5 rounded-control border border-ember bg-cream px-5 py-2 font-sans text-eyebrow font-semibold text-ink shadow-warm transition-colors duration-[var(--dur-base)] ease-house hover:bg-ember focus-visible:bg-ember"
+      className="inline-flex min-h-11 items-center gap-1.5 rounded-pill border border-ember bg-char px-5 py-2 font-sans text-xs font-semibold text-bone shadow-card transition-colors duration-[var(--dur-base)] ease-house hover:bg-ember focus-visible:bg-ember"
     >
       Get directions
       <span aria-hidden="true">→</span>

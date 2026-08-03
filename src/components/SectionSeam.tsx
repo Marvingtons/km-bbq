@@ -14,8 +14,8 @@
  * There are three such changes, and the third is not a colour change:
  *
  *   Hero -> About      grill footage -> cream   (the material changes)
- *   Contact -> Footer  cream -> plum-ink
- *   ...and back to cream wherever plum-ink ends.
+ *   Contact -> Footer  cream -> char-2
+ *   ...and back to cream wherever char-2 ends.
  *
  * The hero one is worth stating explicitly because the rule above reads as if
  * it were about hue. It is not — it is about the page changing what it is made

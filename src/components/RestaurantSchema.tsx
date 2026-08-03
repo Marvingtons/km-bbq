@@ -6,7 +6,7 @@ import {
   GEO,
   HOURS_SPEC,
   SOCIALS,
-} from "@/lib/restaurant";
+} from "@/data/info";
 
 // JSON-LD is built from the same restaurant data the page renders, so the
 // structured data can never disagree with the visible hours/address/phone —

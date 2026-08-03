@@ -8,7 +8,7 @@ import { Logo } from "./Logo";
 import { SocialLinks } from "./SocialLinks";
 import { useActiveSection } from "@/lib/useActiveSection";
 import { getLenis } from "@/lib/lenis";
-import { PHONE, HOURS, DIRECTIONS_URL } from "@/lib/restaurant";
+import { PHONE, HOURS, DIRECTIONS_URL } from "@/data/info";
 
 // `hash` links point at sections on the home page; `route` links point at a
 // dedicated route. From the home page a section link is a same-page hash; from
@@ -149,15 +149,15 @@ export function Navbar() {
   const barVisible = scrolled || !isHome;
 
   // EMBER-DEEP NEEDS THE CREAM PANEL UNDER IT. While the bar is transparent it
-  // is the hero's video the type sits on, and ember-deep (#9A5A1A) is a warm
+  // is the hero's video the type sits on, and ember (#9A5A1A) is a warm
   // mid-brown against footage that is full of warm mid-brown: measured 1.83:1
   // at its worst frame, against 6.1:1 for ink in the same place. So over the
   // video every link is ink, and the active one is identified by its pink
   // underline — which is the real active signal anyway. The moment the cream
-  // panel fades in, ember-deep has a surface to hold on and comes back.
+  // panel fades in, ember has a surface to hold on and comes back.
   const linkColor = (isActive: boolean) => {
-    if (!barVisible) return "text-foreground";
-    return isActive ? "text-ember-deep" : "text-foreground hover:text-ember-deep";
+    if (!barVisible) return "text-bone";
+    return isActive ? "text-ember" : "text-bone hover:text-ember";
   };
 
   return (
@@ -179,7 +179,7 @@ export function Navbar() {
             stays off the paint path. */}
         <div
           aria-hidden="true"
-          className={`absolute inset-0 border-b border-black/[0.06] bg-cream/90 shadow-warm backdrop-blur-md transition-opacity duration-[var(--dur-slow)] ease-house ${
+          className={`absolute inset-0 border-b border-char-3 bg-char/90 shadow-card backdrop-blur-md transition-opacity duration-[var(--dur-slow)] ease-house ${
             barVisible && !menuOpen ? "opacity-100" : "opacity-0"
           } motion-reduce:transition-none`}
         />
@@ -224,7 +224,7 @@ export function Navbar() {
                   <Link
                     href={hrefFor(link)}
                     aria-current={isActive ? "page" : undefined}
-                    className={`group relative inline-block py-1 text-eyebrow font-medium uppercase tracking-[0.16em] transition-colors duration-[var(--dur-base)] ease-house ${linkColor(
+                    className={`group relative inline-block py-1 text-xs font-medium uppercase tracking-[0.16em] transition-colors duration-[var(--dur-base)] ease-house ${linkColor(
                       isActive
                     )}`}
                   >
@@ -252,7 +252,7 @@ export function Navbar() {
                 otherwise offer.
 
                 Ember border, ink label. It used to be an ember-DEEP outline
-                with an ember-deep label, which reads as gold/tan and matches
+                with an ember label, which reads as gold/tan and matches
                 nothing else on the page — and it is on every screen, so it did
                 disproportionate damage. Ember is the interaction colour, so the
                 border is ember; the label is ink because ember on cream is
@@ -261,7 +261,7 @@ export function Navbar() {
             <li className="ms-3 xl:ms-5">
               <a
                 href={PHONE.href}
-                className="inline-flex min-h-11 items-center rounded-control border border-ember px-5 py-2 text-eyebrow font-semibold uppercase tracking-[0.14em] text-ink transition-colors duration-[var(--dur-base)] ease-house hover:bg-ember"
+                className="inline-flex min-h-11 items-center rounded-pill border border-ember px-5 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-bone transition-colors duration-[var(--dur-base)] ease-house hover:bg-ember"
               >
                 {PHONE.display}
               </a>
@@ -287,9 +287,9 @@ export function Navbar() {
               ].map((bar, i) => (
                 <span
                   key={i}
-                  className={`absolute left-0 h-0.5 w-6 rounded-control transition-all duration-[var(--dur-base)] ease-house motion-reduce:transition-none ${
+                  className={`absolute left-0 h-0.5 w-6 rounded-pill transition-all duration-[var(--dur-base)] ease-house motion-reduce:transition-none ${
                     bar.top
-                  } ${menuOpen ? `bg-foreground ${bar.open}` : "bg-foreground"}`}
+                  } ${menuOpen ? `bg-bone ${bar.open}` : "bg-bone"}`}
                 />
               ))}
             </span>
@@ -307,7 +307,7 @@ export function Navbar() {
           <motion.div
             id="mobile-menu"
             ref={overlayRef}
-            className="fixed inset-0 z-[55] flex flex-col overflow-y-auto bg-cream pb-8 pt-24 lg:hidden"
+            className="fixed inset-0 z-[55] flex flex-col overflow-y-auto bg-char pb-8 pt-24 lg:hidden"
             initial={reduce ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={reduce ? { opacity: 1 } : { opacity: 0 }}
@@ -336,7 +336,7 @@ export function Navbar() {
                       href={hrefFor(link)}
                       onClick={close}
                       aria-current={isActive ? "page" : undefined}
-                      className="group relative inline-flex min-h-12 items-center py-1.5 font-serif text-h2 font-light leading-tight text-foreground transition-colors duration-[var(--dur-base)] ease-house"
+                      className="group relative inline-flex min-h-12 items-center py-1.5 font-display text-xl font-normal leading-tight text-bone transition-colors duration-[var(--dur-base)] ease-house"
                     >
                       {link.label}
                       {/* Same job as the desktop underline — position, not
@@ -345,7 +345,7 @@ export function Navbar() {
                       {isActive && (
                         <span
                           aria-hidden="true"
-                          className="ml-3 inline-block h-1.5 w-1.5 rounded-control bg-pink align-middle"
+                          className="ml-3 inline-block h-1.5 w-1.5 rounded-pill bg-pink align-middle"
                         />
                       )}
                     </Link>
@@ -367,7 +367,7 @@ export function Navbar() {
             >
               <a
                 href={PHONE.href}
-                className="inline-flex min-h-12 items-center justify-center rounded-control bg-ember px-6 py-3 font-sans text-copy font-semibold text-ink transition-colors duration-[var(--dur-base)] ease-house hover:bg-ink hover:text-cream"
+                className="inline-flex min-h-12 items-center justify-center rounded-pill bg-ember px-6 py-3 font-sans text-sm font-semibold text-bone transition-colors duration-[var(--dur-base)] ease-house hover:bg-bone hover:text-char"
               >
                 Call {PHONE.display}
               </a>
@@ -375,7 +375,7 @@ export function Navbar() {
                 href={DIRECTIONS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-12 items-center justify-center rounded-control border border-ember px-6 py-3 font-sans text-copy font-semibold text-ink transition-colors duration-[var(--dur-base)] ease-house hover:bg-ember"
+                className="inline-flex min-h-12 items-center justify-center rounded-pill border border-ember px-6 py-3 font-sans text-sm font-semibold text-bone transition-colors duration-[var(--dur-base)] ease-house hover:bg-ember"
               >
                 Get directions
               </a>
@@ -392,11 +392,11 @@ export function Navbar() {
                   : { delay: 0.2 + NAV_LINKS.length * 0.055, duration: 0.4 }
               }
             >
-              <dl className="font-sans text-copy text-body">
+              <dl className="font-sans text-sm text-smoke">
                 {HOURS.map(({ short, time }) => (
-                  <div key={short} className="flex justify-between border-t border-cream-line py-2">
+                  <div key={short} className="flex justify-between border-t border-char-3 py-2">
                     <dt>{short}</dt>
-                    <dd className="font-medium text-foreground">{time}</dd>
+                    <dd className="font-medium text-bone">{time}</dd>
                   </div>
                 ))}
               </dl>

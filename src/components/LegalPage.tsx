@@ -18,17 +18,17 @@ export function LegalPage({
       <main
         id="main-content"
         tabIndex={-1}
-        className="grain bg-cream pt-32 pb-section focus:outline-none sm:pt-36"
+        className="grain bg-char pt-32 pb-section focus:outline-none sm:pt-36"
       >
         <div className="grid-page">
         <article className="col-text">
           <h1 className="h2-scale">
             {title}
           </h1>
-          <p className="eyebrow mt-3 text-foreground/40">
+          <p className="eyebrow mt-3 text-bone/40">
             Last updated {updated}
           </p>
-          <div className="copy measure mt-10 space-y-8 [&_h2]:font-serif [&_h2]:text-lead [&_h2]:font-light [&_h2]:text-foreground [&_p]:mt-3">
+          <div className="copy measure mt-10 space-y-8 [&_h2]:font-display [&_h2]:text-md [&_h2]:font-normal [&_h2]:text-bone [&_p]:mt-3">
             {children}
           </div>
         </article>

@@ -2,7 +2,7 @@ import { Logo } from "./Logo";
 import { SocialLinks } from "./SocialLinks";
 import { SectionSeam } from "./SectionSeam";
 import { Dot } from "./Dot";
-import { PHONE, ADDRESS, HOURS, DIRECTIONS_URL } from "@/lib/restaurant";
+import { PHONE, ADDRESS, HOURS, DIRECTIONS_URL } from "@/data/info";
 
 // Absolute hrefs so the footer works from any route: section links return to the
 // home page (and scroll to the section), and "Menu" goes to the full menu page.
@@ -15,11 +15,11 @@ const NAV_LINKS = [
 ];
 
 // The shared eyebrow metrics, with the colour overridden for this ground.
-// ember-deep (the eyebrow colour on cream) lands at 3.4:1 on plum-ink and fails
+// ember (the eyebrow colour on cream) lands at 3.4:1 on char-2 and fails
 // AA at 12px; ember passes at 7.4:1 but ember's job is interaction, and a
 // column label is not an affordance. So the footer keeps white/60 — 7.1:1,
 // measured — and matches every other eyebrow in size, weight and tracking.
-const label = "eyebrow text-white/60";
+const label = "eyebrow text-bone/60";
 
 // Every column opens with a fixed-height row so the eyebrow labels and the logo
 // share one top baseline and all following content starts on the same line.
@@ -55,14 +55,14 @@ export function Footer() {
       // surfaces overlap rather than abut; SeamMotion lags the content inside
       // as it enters. The ember hairline on the seam is the divider.
       //
-      // plum-ink, not the old neutral near-black. This is one of the two places
+      // char-2, not the old neutral near-black. This is one of the two places
       // the pink logo and the ember accent have to share a dark ground, and a
-      // neutral black rejects both — on a warm plum-ink they belong to the same
+      // neutral black rejects both — on a warm char-2 they belong to the same
       // world, and it echoes the purple already in the mural.
-      className="relative -mt-6 overflow-hidden bg-plum-ink pb-10 pt-14 text-white/70"
+      className="relative -mt-6 overflow-hidden bg-char-2 pb-10 pt-14 text-bone/70"
       role="contentinfo"
     >
-      {/* The ground changes here (cream -> plum-ink), so the seam gets the
+      {/* The ground changes here (cream -> char-2), so the seam gets the
           site's one transition device. */}
       <SectionSeam />
       {/* Ambient warm glow for depth. */}
@@ -81,7 +81,7 @@ export function Footer() {
             <div className={topRow}>
               <Logo size={148} className="opacity-90" />
             </div>
-            <p className="copy mt-5 max-w-xs text-white/60">
+            <p className="copy mt-5 max-w-xs text-bone/60">
               All-you-can-eat Korean BBQ in Oceanside, California. You pick the
               cuts and grill them yourself right at your table.
             </p>
@@ -89,7 +89,7 @@ export function Footer() {
             {/* NO mural spot mark here, deliberately. The mural's white is
                 keyed out of the artwork itself — the tiger's teeth, the eye
                 highlights — so on cream those gaps read as the page showing
-                through and on this plum-ink ground they read as holes punched
+                through and on this char-2 ground they read as holes punched
                 in the animal. The marks live on the cream sections; the footer
                 carries the logo, which is the brand mark that does work on a
                 dark surface. See tools/extract-mural-marks.mjs. */}
@@ -100,7 +100,7 @@ export function Footer() {
             <div className={topRow}>
               <h2 className={label}>Visit</h2>
             </div>
-            <address className="copy mt-5 not-italic text-white/70">
+            <address className="copy mt-5 not-italic text-bone/70">
               KM<Dot />BBQ
               <br />
               {ADDRESS.street}
@@ -110,7 +110,7 @@ export function Footer() {
             <div className="mt-5 flex flex-col gap-3">
               <a
                 href={PHONE.href}
-                className="group inline-flex min-h-11 items-center gap-2 font-sans text-copy font-semibold text-white/90 transition-colors duration-[var(--dur-base)] ease-house hover:text-ember"
+                className="group inline-flex min-h-11 items-center gap-2 font-sans text-sm font-semibold text-bone/90 transition-colors duration-[var(--dur-base)] ease-house hover:text-ember"
               >
                 <span className="text-ember transition-transform duration-[var(--dur-base)] ease-house group-hover:scale-110">
                   <PhoneIcon />
@@ -121,7 +121,7 @@ export function Footer() {
                 href={DIRECTIONS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex min-h-11 w-fit items-center gap-1.5 font-sans text-copy font-medium text-ember transition-colors duration-[var(--dur-base)] ease-house hover:text-white"
+                className="group inline-flex min-h-11 w-fit items-center gap-1.5 font-sans text-sm font-medium text-ember transition-colors duration-[var(--dur-base)] ease-house hover:text-bone"
               >
                 Get directions
                 <span
@@ -139,15 +139,15 @@ export function Footer() {
             <div className={topRow}>
               <h2 className={label}>Hours</h2>
             </div>
-            <dl className="mt-5 space-y-2 font-sans text-copy">
+            <dl className="mt-5 space-y-2 font-sans text-sm">
               {HOURS.map(({ days, time }) => (
                 <div key={days} className="flex flex-col">
-                  <dt className="font-medium text-white/80">{days}</dt>
-                  <dd className="font-light text-white/60">{time}</dd>
+                  <dt className="font-medium text-bone/80">{days}</dt>
+                  <dd className="font-normal text-bone/60">{time}</dd>
                 </div>
               ))}
             </dl>
-            <p className="mt-4 font-sans text-eyebrow font-light text-white/50">
+            <p className="mt-4 font-sans text-xs font-normal text-bone/50">
               Walk-in only. No reservations needed.
             </p>
           </div>
@@ -166,7 +166,7 @@ export function Footer() {
                 <li key={navLabel}>
                   <a
                     href={href}
-                    className="group inline-flex min-h-11 items-center font-sans text-copy text-white/70 transition-colors duration-[var(--dur-base)] ease-house hover:text-white"
+                    className="group inline-flex min-h-11 items-center font-sans text-sm text-bone/70 transition-colors duration-[var(--dur-base)] ease-house hover:text-bone"
                   >
                     <span
                       aria-hidden="true"
@@ -181,22 +181,22 @@ export function Footer() {
 
         {/* The legal row is a grid child too, so it lines up with the brand
             column above it rather than with a container of its own. */}
-        <div className="col-span-full mt-10 flex flex-col justify-between gap-3 border-t border-white/10 pt-6 text-white/55 sm:flex-row sm:items-center">
-          <p className="font-sans text-eyebrow">
+        <div className="col-span-full mt-10 flex flex-col justify-between gap-3 border-t border-bone/10 pt-6 text-bone/55 sm:flex-row sm:items-center">
+          <p className="font-sans text-xs">
             &copy; {year} KM<Dot />BBQ. All rights reserved.
           </p>
           {/* flex-wrap so the legal links wrap as whole phrases at 375 instead
               of breaking mid-label. */}
-          <div className="flex flex-wrap items-center gap-x-5 font-sans text-eyebrow">
+          <div className="flex flex-wrap items-center gap-x-5 font-sans text-xs">
             <a
               href="/privacy"
-              className="inline-flex min-h-11 items-center transition-colors duration-[var(--dur-base)] ease-house hover:text-white"
+              className="inline-flex min-h-11 items-center transition-colors duration-[var(--dur-base)] ease-house hover:text-bone"
             >
               Privacy Policy
             </a>
             <a
               href="/terms"
-              className="inline-flex min-h-11 items-center transition-colors duration-[var(--dur-base)] ease-house hover:text-white"
+              className="inline-flex min-h-11 items-center transition-colors duration-[var(--dur-base)] ease-house hover:text-bone"
             >
               Terms of Service
             </a>
