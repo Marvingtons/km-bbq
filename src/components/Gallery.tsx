@@ -207,7 +207,7 @@ export function Gallery() {
           column 5 out to the right edge of the viewport. That right-edge break
           is the ONE way media is allowed to leave the track, and it is the same
           break here as anywhere else on the site. */}
-      <div className="grid-page relative z-10 gap-y-10 motion-safe:md:h-screen motion-safe:md:items-center motion-safe:md:gap-y-0">
+      <div className="grid-page relative z-base gap-y-10 motion-safe:md:h-screen motion-safe:md:items-center motion-safe:md:gap-y-0">
         {/* Heading — the fixed anchor. Sits on the left while the photos stream
             past on desktop; flows on top on mobile. Left-aligned at both. */}
         <div className="col-span-full motion-safe:md:col-span-4 motion-safe:md:pr-8">
@@ -263,9 +263,9 @@ export function Gallery() {
                 {/* Caption: dark bottom gradient + small letter-spaced label.
                     Visible per-tile on mobile; on desktop it starts hidden and
                     the timeline fades in only the centered tile's caption. */}
-                {/* z-[4]: above the photo's lift (z-2) and grain (z-3)
+                {/* z-nav: above the photo's lift (z-2) and grain (z-3)
                     overlays, so the label is never washed by either. */}
-                <figcaption className="gallery-caption pointer-events-none absolute inset-x-0 bottom-0 z-[4] flex items-end bg-gradient-to-t from-char/70 via-char/20 to-transparent p-4 pt-12 opacity-100 motion-safe:md:opacity-0">
+                <figcaption className="gallery-caption pointer-events-none absolute inset-x-0 bottom-0 z-nav flex items-end bg-gradient-to-t from-char/70 via-char/20 to-transparent p-4 pt-12 opacity-100 motion-safe:md:opacity-0">
                   <span className="eyebrow text-bone">{item.caption}</span>
                 </figcaption>
               </figure>

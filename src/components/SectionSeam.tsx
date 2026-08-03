@@ -29,7 +29,7 @@ export function SectionSeam({ className = "top-0" }: { className?: string }) {
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none absolute inset-x-0 z-30 h-px bg-gradient-to-r from-transparent via-ember/60 to-transparent ${className}`}
+      className={`pointer-events-none absolute inset-x-0 z-nav h-px bg-gradient-to-r from-transparent via-ember/60 to-transparent ${className}`}
     />
   );
 }

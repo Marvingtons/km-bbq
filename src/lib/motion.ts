@@ -57,6 +57,17 @@ export const MOTION = {
 export const NAV_H = 68;
 
 /**
+ * The hero->About window transition's scroll cost, as a fraction of one
+ * viewport. This is the site's only stretch of held scroll.
+ *
+ * Written in THREE places and they must agree: Hero's `md:h-[160vh]` (100vh
+ * sticky stage + 60vh of travel), About's `md:-mt-[60vh]`, and this constant,
+ * which is what About's story reveal measures its trigger against. Change one,
+ * change all three in the same commit.
+ */
+export const HERO_SCRUB = 0.6;
+
+/**
  * Preloader choreography. The mark building is the point, so these beats are
  * deliberately longer than a minimal loader — but the timeline is load-aware
  * (the HOLD is skipped when the page is already ready) so it never feels stuck.

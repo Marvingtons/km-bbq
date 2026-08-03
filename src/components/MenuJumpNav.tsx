@@ -49,7 +49,7 @@ export function MenuJumpNav({ targets }: { targets: JumpTarget[] }) {
   return (
     <nav
       aria-label="Menu categories"
-      className="sticky z-40 border-b border-char-3 bg-char/95 backdrop-blur-sm"
+      className="sticky z-nav border-b border-char-3 bg-char/95 backdrop-blur-sm"
       style={{ top: NAV_H }}
     >
       <ul

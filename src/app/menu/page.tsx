@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { StickyInfoBar } from "@/components/StickyInfoBar";
 import { MenuJumpNav, type JumpTarget } from "@/components/MenuJumpNav";
 import { SeamMotion } from "@/components/SeamMotion";
 import { BreadcrumbSchema } from "@/components/RestaurantSchema";
@@ -543,7 +544,7 @@ export default function MenuPage() {
       <main
         id="main-content"
         tabIndex={-1}
-        className="grain bg-char focus:outline-none"
+        className="grain isolate bg-char focus:outline-none"
       >
         {/* Header. Same track, same column edge, same left alignment as every
             section on the home page. */}
@@ -718,6 +719,7 @@ export default function MenuPage() {
         <SeamMotion calm />
       </main>
       <Footer />
+      <StickyInfoBar />
     </>
   );
 }

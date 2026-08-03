@@ -1,25 +1,23 @@
-// Copy for the hero, kept apart from the layout so wording changes never mean
-// touching the lockup.
+// Hero copy, kept apart from the layout so wording changes never touch the
+// lockup.
 //
-// Positioning: KM.BBQ is one of the few genuinely self-serve Korean BBQ
-// restaurants — you pick your food and grill it yourself at your own table.
-// That differentiator is the hero's message, replacing "Fire, Flavor,
-// Tradition." (the last surviving line of the old cinematic direction).
+// Positioning: KM.BBQ is a walk-in, no-reservations, all-you-can-eat grill
+// house. The price and the clock ARE the offer, so they are the headline —
+// not a differentiator sentence about self-serve, and not a mood word.
+// Everything here is a fact from src/data/info.ts.
 
-/** Factual, unchanged. */
-export const EYEBROW = "All-You-Can-Eat Korean BBQ";
+/** Oceanside, not San Diego. See REDESIGN-CONFLICTS.md #1. */
+export const EYEBROW = "Korean BBQ · Oceanside, CA";
+
+/** The offer, set at display scale. One line, no ornament. */
+export const HEADLINE = "All-You-Can-Eat";
+
+/** The rule of the room, in the order a walk-in needs it. */
+export const SUBHEAD = "90 minutes on the clock. Walk in. No reservations.";
 
 /**
- * One plain sentence. No em dashes, no rule of three, no reverent fragment.
- *
- * Deliberately says nothing about fuel: the tables run gas OR charcoal, so any
- * single-fuel claim here would be false half the time. Self-serve is the
- * message; the fuel is not.
+ * The one CTA label on the site. `See the menu` is the site-wide standard;
+ * `View menu` and `See the full menu` are retired.
  */
-export const SUBHEAD = "You cook your own cuts at your own table.";
-
-export const CTA_LABEL = "View menu";
+export const CTA_LABEL = "See the menu";
 export const CTA_HREF = "/menu";
-
-/** The oversized display word, plus its smaller completion. */
-export const HEADLINE = { big: "SELF SERVE", tail: "Korean BBQ" };

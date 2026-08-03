@@ -6,6 +6,7 @@ import { Gallery } from "@/components/Gallery";
 import { Challenge } from "@/components/Challenge";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
+import { StickyInfoBar } from "@/components/StickyInfoBar";
 import { RestaurantSchema } from "@/components/RestaurantSchema";
 import { SeamMotion } from "@/components/SeamMotion";
 import { pageMeta } from "@/lib/seo";
@@ -23,7 +24,7 @@ export default function Home() {
     <>
       <RestaurantSchema />
       <Navbar />
-      <main id="main-content" tabIndex={-1} className="relative focus:outline-none">
+      <main id="main-content" tabIndex={-1} className="relative isolate focus:outline-none">
         <Hero />
         <About />
         <Gallery />
@@ -33,6 +34,7 @@ export default function Home() {
         <SeamMotion />
       </main>
       <Footer />
+      <StickyInfoBar />
     </>
   );
 }

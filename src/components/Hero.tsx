@@ -2,82 +2,52 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { PillLink } from "./PillLink";
-import { HeroVideo } from "./HeroVideo";
+import { HeroBackdrop } from "./HeroBackdrop";
 import { EYEBROW, HEADLINE, SUBHEAD, CTA_LABEL, CTA_HREF } from "./hero/copy";
+import { PRICING } from "@/data/info";
 import { MOTION } from "@/lib/motion";
 
 /**
- * The hero: big-type lockup over the grill clip. Five things and nothing else —
- * eyebrow, the SELF SERVE lockup, the supporting line, the CTA, and the video
- * they all sit on.
+ * THE HERO. Five things: the eyebrow, the offer, the price, the rule of the
+ * room, and one button.
  *
- * VARIANT B, unchanged: "SELF SERVE" is set enormous and stacked, with SERVE
- * indented so the two words read as one mass with a split scale. Everything
- * else drops to supporting scale beneath it, so the type is the visual event.
+ * The price is the second-largest element on the page and it is above the fold,
+ * because for an all-you-can-eat restaurant the price IS the offer. The
+ * previous hero set "SELF SERVE" at 21vw in a light didone and never put a
+ * number anywhere on the homepage.
  *
- * NO MURAL HERE. A band of the painting used to run across the top of this
- * section. On a cream ground it framed the type; over footage it read as a
- * sticker — a contained rectangle of illustration pasted onto a photograph,
- * with its own hard edges arguing with the frame behind it. The mural is not a
- * decoration to sprinkle, it is a full-bleed surface, and it has one home: the
- * About section, where it runs edge to edge and opens under its own parallax.
- * The hero hands off TO that (see SeamMotion), which is worth more than a
- * preview of it. Do not put a panel of it back here.
+ * NOTHING IS LAYERED OVER THE GROUND. No veil, no scrim, no glyph halo, no
+ * blurred plate, no radial copy pool. All of that existed to hold ink legible
+ * over bright grill footage; on --char, bone measures ~13:1 unaided, so the
+ * entire legibility apparatus is deleted rather than ported.
  *
- * -------------------------------------------------------------------------
- * THE LAYER STACK OVER THE FOOTAGE IS: video, poster, type. Nothing else.
- *
- * No veil, no scrim, no gradient, no wash, at any opacity or any shape. Two
- * versions of a cream scrim have already been built and deleted here — a
- * full-frame one at 55%, and a "shaped" one confined to the copy column. The
- * second failed for a reason worth writing down: cream at 55% over this clip's
- * near-black grill vents composites to rgb(171,162,152), which is GREY, and
- * because it fell off horizontally while being masked vertically its edge read
- * as a diagonal grey wash across the lower right. A local veil is still a veil.
- *
- * Legibility is bought at the glyphs instead — a tight cream halo, sized in
- * proportion to each type size, defined in globals.css. Every pixel of footage
- * not directly behind a letterform is untouched and fully saturated.
- * If you are about to add a rectangle over the video, don't.
- * -------------------------------------------------------------------------
- *
- * THE TYPE COLOUR IS INK, and the ground is still cream. What was actually
- * wrong with the original hero was never the footage — it was a near-black
- * scrim under white type, which read as steakhouse-premium and misrepresented a
- * bright, casual, all-you-can-eat room. Cream is the base layer under the
- * video and the halo colour on the type. Do not swap either to black or white.
- * See the memory note on the warm direction.
- *
- * WHY THE HALO IS LOAD-BEARING. Measured per glyph against the actual pixels
- * behind each letterform, on the clip's brightest / busiest / darkest frames,
- * bare ink fails badly: the display line runs 14-29% of its glyph pixels under
- * 3:1, the Korean BBQ line 86-100% under 4.5:1, the subhead 51-99% under 4.5:1.
- * This footage covers nearly the whole luminance range behind the type,
- * frequently within one frame — a blown-out window at #FFFFFF and near-black
- * vents at #000406 — so there is no type colour, light or dark, that survives
- * it unaided. The current measured numbers live in the report and are
- * reproducible with tools/hero-glyph-contrast.mjs --effective.
- *
- * (If you re-run any of that: downsample with a BOX filter. ImageMagick's
- * default Lanczos has negative lobes, rings past the real pixel range, and
- * under-reports contrast — it invented a phantom 4.58:1 here once already.)
- *
- * Two of the site's standard type colours still cannot be used on this surface,
- * and both are corrected below rather than left quietly failing.
+ * THE PRICE LINE IS NOT AT --text-display, deliberately. The brief asked for
+ * display scale; "$21.99 Lunch · $30.99 Dinner" is 27 characters against the
+ * headline's 15, so at the same step it overruns the track at every width above
+ * a phone. It takes --text-2xl in the display face at 900 instead, which keeps
+ * it the loudest thing after the headline and lets it wrap as two price/label
+ * pairs rather than as broken numbers.
  */
+
+/** One price cell: the figure, then what it buys. */
+function Price({ amount, label }: { amount: string; label: string }) {
+  return (
+    <span className="inline-flex items-baseline gap-2">
+      <span className="font-display text-2xl font-black text-flame [font-stretch:87.5%]">
+        {amount}
+      </span>
+      <span className="eyebrow text-bone/70">{label}</span>
+    </span>
+  );
+}
+
 export function Hero() {
   const reduce = useReducedMotion();
 
-  // Parts arrive in reading order; reduced motion renders every part at its
-  // final state immediately.
-  // `fade = false` for the display lockup, and the reason is measurable.
-  // framer writes the `initial` state as an INLINE STYLE into the SSR HTML, so
-  // `opacity: 0` there means the biggest piece of TYPE on the page is unpainted
-  // until React hydrates, which once cost 5.5s of Largest Contentful Paint.
-  // The poster is the LCP element again now that the video is back, but this
-  // still matters: the lockup is the second-largest paint and the one that
-  // carries the message, so it should not wait on hydration either. Rising
-  // without fading keeps the choreography and paints the text in frame one.
+  // Parts arrive in reading order. The headline rises WITHOUT fading: framer
+  // writes `initial` as an inline style into the SSR HTML, so `opacity: 0`
+  // there leaves the largest piece of type on the page unpainted until React
+  // hydrates — which once cost 5.5s of LCP here.
   const rise = (i: number, fade = true) =>
     reduce
       ? { initial: false as const, animate: { opacity: 1, y: 0 } }
@@ -86,201 +56,83 @@ export function Hero() {
           animate: { opacity: 1, y: 0 },
           transition: {
             duration: MOTION.dur.reveal,
-            delay: 0.2 + i * 0.12,
+            delay: 0.1 + i * 0.08,
             ease: MOTION.ease,
           },
         };
 
-  const [first, second] = HEADLINE.big.split(" ");
-
   return (
-    /* TWO VIEWPORTS TALL WHERE THE WINDOW RUNS, one viewport everywhere else.
+    /* 160vh where the window transition runs, one viewport everywhere else.
        ------------------------------------------------------------------
-       The hero used to be a single `min-h-screen` section. It is now a 200vh
-       scroll container holding a `sticky` stage, and About is pulled up by
-       -100vh to sit BEHIND that stage. The arithmetic is what makes the
-       transition free:
+       The stage is `sticky` inside a 160vh container, so it holds for
+       160 - 100 = 60vh and releases exactly where About's top reaches the
+       viewport top. About is pulled up by the same 60vh, so net document height
+       is unchanged.
 
-         scroll 0        hero full-bleed; About's top sits at 100vh, just off
-                         the bottom of the viewport and behind the stage
-         0 -> 100vh      the stage sticks. The video clips down to an inset
-                         panel, and About rises behind it — so the mural is
-                         revealed by the shrinking window, and About's heading
-                         and copy rise into place at the same time, because
-                         they are genuinely scrolling, not being animated.
-         100vh           the stage stops sticking at exactly the scroll
-                         position where About's top reaches the viewport top,
-                         which is exactly where About's own pin begins. The
-                         two hand over on the same frame.
-         100 -> 200vh    the shrunken panel scrolls off over pinned About.
-
-       Net document height is unchanged (200vh section - 100vh pull = the 100vh
-       the hero used to occupy). Do not "simplify" the -100vh away without
-       redoing this arithmetic; it is load-bearing.
-
-       BOTH HALVES OF IT ARE GATED ON `motion-safe:md:`, and they must stay in
-       step with each other and with SeamMotion's `{ motion, wide }` condition —
-       the three are one decision written in three places. Under reduced motion
-       and below 768px there is no clip, so the extra viewport would be 100vh of
-       hero sitting still and then sliding up over About's story, which reaches
-       the top of the page before the hero has finished leaving: the story is
-       revealed and scrolled past behind an opaque departing video. (That was
-       survivable while the first screen of About was a decorative mural stage
-       and nobody noticed it was never seen. It is not survivable now that the
-       first screen of About IS the story.) Without the extra viewport the hero
-       is one screen, About follows it in normal flow, and the sequence is the
-       static one the brief asks for: hero poster, then the story, then the
-       band.
-
-       pointer-events-none on the container, auto on the stage: the container's
-       lower viewport overlaps pinned About, and a transparent box still eats
-       clicks meant for About's buttons. */
+       60vh, down from 100vh — the brief's cap on the transition's scroll cost,
+       and the site's ONLY remaining stretch of held scroll once the gallery pin
+       is gone. Do not change 160vh without changing About's -mt in the same
+       commit: the two are one number written twice. */
     <section
       id="home"
-      className="pointer-events-none relative z-20 h-screen motion-safe:md:h-[200vh]"
+      className="pointer-events-none relative z-nav h-screen motion-safe:md:h-[160vh]"
       aria-label="Hero"
     >
       <div className="hero-stage sticky top-0 flex h-screen flex-col overflow-hidden">
-        {/* THE WINDOW. This is the element the transition clips, and it is
-            exactly viewport-sized so `inset()` percentages mean what they say.
-            It is a separate box from the media inside it precisely because the
-            media carries an 8% vertical bleed — clipping a box that extends
-            past the frame would put the panel's rounded edges off-screen. */}
-        {/* NOTHING PAINTS ON THE STAGE ITSELF — no background, no grain. Every
-            surface lives inside `.hero-window` below, so that when the window
-            clips down what is exposed around it is About's mural, not a cream
-            plate. A background here would make the reveal impossible. */}
+        {/* THE WINDOW — the box SeamMotion clips. Exactly viewport-sized so
+            inset() percentages mean what they say. The media inside carries an
+            8% vertical bleed, which is the drift's travel room, so it has to be
+            a separate box from the thing being clipped. */}
         <div className="hero-window absolute inset-0 overflow-hidden">
-          {/* THE MEDIA STACK — cream ground, poster, then the clip.
-
-              `-inset-y-[8%]` rather than `inset-0`: SeamMotion drifts this
-              layer as the hero leaves so the footage lags behind the scroll
-              rather than sliding away with it. A layer flush to the frame would
-              drag a bare cream edge in the moment it moved. The bleed is the
-              travel room, larger than the ~5% the drift actually uses. */}
-          <HeroVideo className="hero-media absolute -inset-y-[8%] inset-x-0" />
-
-          {/* NO OVERLAY OF ANY KIND SITS HERE. Not a veil, not a shaped scrim,
-              not a gradient. The layer stack over the footage is exactly:
-              video, poster fallback (both inside HeroVideo), and the type.
-              Nothing else.
-
-              A shaped cream scrim used to live at this spot, 55% down the left
-              of the frame and gone by 62%. On paper it was warm and local. On
-              this footage it was neither: cream at 55% over the near-black
-              grill vents composites to rgb(171,162,152), which is grey, and
-              because it fell off horizontally while being masked vertically its
-              edge read as a diagonal grey wash across the lower right. Measured
-              against the same frame with it hidden, it was lifting rgb(76,64,51)
-              to rgb(171,162,152) — the exact "milking" the whole treatment
-              exists to avoid, just confined to one corner.
-              Legibility is now bought entirely at the glyphs. See globals.css. */}
+          <HeroBackdrop className="hero-media absolute inset-x-0 -inset-y-[8%]" />
         </div>
 
-        {/* The ember hairline at the panel's seam — the one edge where the
-            ground changes once the window has docked (footage to paint on the
-            left; the panel bleeds right, so it has no other free edge).
-
-            On the STAGE, not inside the window: the window is the clip target,
-            and a rule drawn on the clip boundary is half clipped away. In the
-            hero, not in About: it leaves with the panel.
-
-            No height and scaleY(0) by default, so it cannot paint until the
-            scrub measures and positions it. With JS off, below 768px and under
-            reduced motion it is never measured — those states get their
-            hairline from the media column's own ::before instead. */}
+        {/* The flame hairline at the panel's seam, drawn by the scrub once the
+            window has docked. No height until it is measured. */}
         <span
           aria-hidden="true"
-          className="hero-dock-seam pointer-events-none absolute left-0 top-0 z-[11] w-px origin-top scale-y-0 bg-gradient-to-b from-transparent via-ember/60 to-transparent"
+          className="hero-dock-seam pointer-events-none absolute left-0 top-0 z-nav w-px origin-top scale-y-0 bg-gradient-to-b from-transparent via-flame/70 to-transparent"
         />
 
-        <div className="pointer-events-auto relative z-10 flex w-full flex-1 items-end">
-        {/* The hero copy sits on the SAME track as every other section, so the
-            eyebrow, the display lockup and the CTA all begin on the page grid
-            rather than at the viewport edge. */}
-        <div className="track w-full pb-16 pt-10 text-left sm:pb-20 lg:pb-24">
-          {/* The shared eyebrow, overridden to INK — the one eyebrow on the
-              site that does not carry ember, and the globals.css note on
-              `.eyebrow` reserves exactly this exception for exactly this
-              reason. Ember-deep (#9A5A1A) measures 1.57:1 against the darkest
-              scrimmed block; it is a warm mid-brown and the footage is full of
-              warm mid-brown. Ink takes it to 5.00:1. */}
-          <div className="hero-exit-support">
-            <motion.p className="hero-copy-glow eyebrow mb-3 text-bone" {...rise(0)}>
-              {EYEBROW}
-            </motion.p>
-          </div>
-
-          {/* The display lockup. Tracking is pulled tight and leading is sub-1
-              so the two words read as one mass. The sizes and the indent are
-              Variant B's and are unchanged — only the colour moved from white
-              to ink. */}
-          {/* `hero-display-glow` is ladder rung 1, and it is on the display
-              line alone. SERVE runs out to 58.7% of the frame at 1440 — past
-              the midpoint the column scrim is not allowed to cross — so the
-              scrim cannot reach its tail and the halo is what carries it
-              there. Over cream it is cream on cream, and disappears. */}
-          <div className="hero-exit-display">
-            <motion.h1
-              className="hero-display-glow font-display font-normal uppercase leading-[0.8] tracking-[-0.03em] text-bone"
-              {...rise(1, false)}
-            >
-              <span className="block text-[21vw] lg:text-[10.5vw]">{first}</span>
-              <span className="block whitespace-nowrap pl-8 text-[21vw] lg:pl-[18vw] lg:text-[11.5vw]">
-                {second}
-              </span>
-            </motion.h1>
-          </div>
-
-          <div className="hero-exit-support">
-            {/* THE SUPPORTING LINES, and the one place a gradient survives.
-                These two are 16px, and 16px is where the halo runs out: a
-                blurred shadow spreads its own alpha, so at a 1-2px stroke it
-                never puts opaque cream against the letterform. Measured, the
-                soft halo carries the display line (3.26:1 worst, against a 3:1
-                bar) and the eyebrow (7.45:1), but leaves these two at 1.6-3.7:1
-                against a 4.5 bar. That is a property of blur, not a tuning
-                failure — the only way to fix it with a halo is to make it a
-                hard ring, which is exactly the outline this pass removed.
-
-                So these two get a POOL: a soft radial wash of cream that lives
-                on the copy column and nowhere else. It is deliberately not the
-                old rung-3 scrim, which was a frame-wide left-anchored gradient
-                that fell off horizontally while being masked vertically, and
-                read as a diagonal grey wash across the lower right. This one is
-                an ellipse anchored to this block, it has no straight edges and
-                no cutoff to notice, and it is ~200px tall in the bottom-left
-                instead of two thirds of the frame. */}
-            <div className="hero-copy-pool relative">
-              <motion.p
-                className="hero-copy-glow relative mt-4 font-sans text-sm font-semibold uppercase tracking-[0.2em] text-bone"
-                {...rise(2)}
-              >
-                {HEADLINE.tail}
-              </motion.p>
-              {/* Body copy, overridden to INK: --color-smoke (#5A5550) is
-                  defined as "solid body copy on cream" and cannot hold on
-                  footage at any treatment short of an opaque plate. */}
-              <motion.p className="hero-copy-glow copy measure relative mt-3 text-bone" {...rise(3)}>
-                {SUBHEAD}
+        <div className="pointer-events-auto relative z-nav flex w-full flex-1 items-end">
+          <div className="track w-full pb-16 pt-10 text-left sm:pb-20 lg:pb-24">
+            <div className="hero-exit-support">
+              <motion.p className="eyebrow text-ember" {...rise(0)}>
+                {EYEBROW}
               </motion.p>
             </div>
-            {/* The system pill, with its cream fill restored. This exception
-                exists because of the video and only because of the video:
-                ember (#F18B23) sits inside the grill footage's own hue range,
-                and an unfilled ember outline measures 1.00:1 against #5A3E1E
-                at frame 132 — the control's edge simply dissolves into the
-                picture. An opaque cream fill makes the pill a solid object
-                again, so its label is ink-on-char at a constant 15.9:1 and
-                its border is ember-on-char exactly as everywhere else, both
-                independent of whatever frame is behind it. */}
-            <motion.div className="mt-7" {...rise(4)}>
-              <PillLink href={CTA_HREF} arrow className="bg-char">
-                {CTA_LABEL}
-              </PillLink>
-            </motion.div>
+
+            <div className="hero-exit-display">
+              <motion.h1 className="display mt-4 text-bone" {...rise(1, false)}>
+                {HEADLINE}
+              </motion.h1>
+            </div>
+
+            <div className="hero-exit-support">
+              {/* THE PRICE. flex-wrap rather than a fixed line: at 375 the two
+                  cells stack instead of the figures breaking mid-number. */}
+              <motion.p
+                className="mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-1"
+                {...rise(2)}
+              >
+                <Price amount={PRICING.lunch} label="Lunch" />
+                <span aria-hidden="true" className="text-flame/60">
+                  ·
+                </span>
+                <Price amount={PRICING.dinner} label="Dinner" />
+              </motion.p>
+
+              <motion.p className="copy measure mt-4 text-bone/80" {...rise(3)}>
+                {SUBHEAD}
+              </motion.p>
+
+              <motion.div className="mt-7" {...rise(4)}>
+                <PillLink href={CTA_HREF} arrow>
+                  {CTA_LABEL}
+                </PillLink>
+              </motion.div>
+            </div>
           </div>
-        </div>
         </div>
       </div>
     </section>

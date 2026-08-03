@@ -162,11 +162,122 @@ export function Navbar() {
 
   return (
     <>
-      {/* The overlay is a sibling of <header>, so it would paint over the logo
-          and trigger no matter what z-index those children carry — the header
-          raises above it while the menu is open instead. */}
+      {/* Full-screen mobile takeover. Rendered as a sibling of <header>, NOT a
+          child: the header carries backdrop-blur when solid, and an ancestor's
+          backdrop-filter makes `position: fixed` descendants resolve against
+          that ancestor instead of the viewport — which collapsed this overlay
+          to the header's height. */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            id="mobile-menu"
+            ref={overlayRef}
+            className="fixed inset-0 z-overlay flex flex-col overflow-y-auto bg-char pb-8 pt-24 lg:hidden"
+            initial={reduce ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={reduce ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ duration: reduce ? 0 : 0.28, ease: "easeOut" }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Site menu"
+          >
+            {/* 1 — the links, as large display type. This is where the serif
+                gets to be big. */}
+            <ul className="track flex flex-col" role="list">
+              {NAV_LINKS.map((link, i) => {
+                const isActive = active === link.id;
+                return (
+                  <motion.li
+                    key={link.label}
+                    initial={reduce ? false : { opacity: 0, y: 14 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={
+                      reduce
+                        ? { duration: 0 }
+                        : { delay: 0.06 + i * 0.055, duration: 0.38, ease: "easeOut" }
+                    }
+                  >
+                    <Link
+                      href={hrefFor(link)}
+                      onClick={close}
+                      aria-current={isActive ? "page" : undefined}
+                      className="group relative inline-flex min-h-12 items-center py-1.5 font-display text-xl font-normal leading-tight text-bone transition-colors duration-[var(--dur-base)] ease-house"
+                    >
+                      {link.label}
+                      {/* Same job as the desktop underline — position, not
+                          affordance — and it is literally a dot glyph, so it
+                          is pink. */}
+                      {isActive && (
+                        <span
+                          aria-hidden="true"
+                          className="ml-3 inline-block h-1.5 w-1.5 rounded-pill bg-pink align-middle"
+                        />
+                      )}
+                    </Link>
+                  </motion.li>
+                );
+              })}
+            </ul>
+
+            {/* 2 — the two things a phone visitor actually needs. */}
+            <motion.div
+              className="track mt-8 flex flex-col gap-3"
+              initial={reduce ? false : { opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={
+                reduce
+                  ? { duration: 0 }
+                  : { delay: 0.06 + NAV_LINKS.length * 0.055, duration: 0.38, ease: "easeOut" }
+              }
+            >
+              <a
+                href={PHONE.href}
+                className="inline-flex min-h-12 items-center justify-center rounded-pill bg-ember px-6 py-3 font-sans text-sm font-semibold text-bone transition-colors duration-[var(--dur-base)] ease-house hover:bg-bone hover:text-char"
+              >
+                Call {PHONE.display}
+              </a>
+              <a
+                href={DIRECTIONS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-12 items-center justify-center rounded-pill border border-ember px-6 py-3 font-sans text-sm font-semibold text-bone transition-colors duration-[var(--dur-base)] ease-house hover:bg-ember"
+              >
+                Get directions
+              </a>
+            </motion.div>
+
+            {/* 3 — small footer strip: hours summary + the shared socials. */}
+            <motion.div
+              className="track mt-auto pt-10"
+              initial={reduce ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={
+                reduce
+                  ? { duration: 0 }
+                  : { delay: 0.2 + NAV_LINKS.length * 0.055, duration: 0.4 }
+              }
+            >
+              <dl className="font-sans text-sm text-smoke">
+                {HOURS.map(({ short, time }) => (
+                  <div key={short} className="flex justify-between border-t border-char-3 py-2">
+                    <dt>{short}</dt>
+                    <dd className="font-medium text-bone">{time}</dd>
+                  </div>
+                ))}
+              </dl>
+              <SocialLinks tone="light" className="mt-5" />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* RENDERED AFTER THE OVERLAY, deliberately. Both sit on the overlay
+          tier while the menu is open, so DOM order is what keeps the close
+          control hit-testable — and it means the four-value z scale needs no
+          fifth entry to express "above the takeover". Tab order is unaffected:
+          the focus trap walks [trigger, ...overlay] explicitly. */}
       <header
-        className={`fixed inset-x-0 top-0 ${menuOpen ? "z-[60]" : "z-50"}`}
+        className={`fixed inset-x-0 top-0 ${menuOpen ? "z-overlay" : "z-nav"}`}
       >
         {/* ONE layer now. There used to be a dark scrim strip underneath this
             one, so that white nav type could hold over the bright top of the
@@ -273,7 +384,7 @@ export function Navbar() {
           <button
             ref={triggerRef}
             type="button"
-            className="relative z-[60] -mr-2 flex h-12 w-12 items-center justify-center lg:hidden"
+            className="relative -mr-2 flex h-12 w-12 items-center justify-center lg:hidden"
             onClick={() => setMenuOpen((o) => !o)}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
@@ -296,115 +407,6 @@ export function Navbar() {
           </button>
         </nav>
       </header>
-
-      {/* Full-screen mobile takeover. Rendered as a sibling of <header>, NOT a
-          child: the header carries backdrop-blur when solid, and an ancestor's
-          backdrop-filter makes `position: fixed` descendants resolve against
-          that ancestor instead of the viewport — which collapsed this overlay
-          to the header's height. */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            id="mobile-menu"
-            ref={overlayRef}
-            className="fixed inset-0 z-[55] flex flex-col overflow-y-auto bg-char pb-8 pt-24 lg:hidden"
-            initial={reduce ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={reduce ? { opacity: 1 } : { opacity: 0 }}
-            transition={{ duration: reduce ? 0 : 0.28, ease: "easeOut" }}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Site menu"
-          >
-            {/* 1 — the links, as large display type. This is where the serif
-                gets to be big. */}
-            <ul className="track flex flex-col" role="list">
-              {NAV_LINKS.map((link, i) => {
-                const isActive = active === link.id;
-                return (
-                  <motion.li
-                    key={link.label}
-                    initial={reduce ? false : { opacity: 0, y: 14 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={
-                      reduce
-                        ? { duration: 0 }
-                        : { delay: 0.06 + i * 0.055, duration: 0.38, ease: "easeOut" }
-                    }
-                  >
-                    <Link
-                      href={hrefFor(link)}
-                      onClick={close}
-                      aria-current={isActive ? "page" : undefined}
-                      className="group relative inline-flex min-h-12 items-center py-1.5 font-display text-xl font-normal leading-tight text-bone transition-colors duration-[var(--dur-base)] ease-house"
-                    >
-                      {link.label}
-                      {/* Same job as the desktop underline — position, not
-                          affordance — and it is literally a dot glyph, so it
-                          is pink. */}
-                      {isActive && (
-                        <span
-                          aria-hidden="true"
-                          className="ml-3 inline-block h-1.5 w-1.5 rounded-pill bg-pink align-middle"
-                        />
-                      )}
-                    </Link>
-                  </motion.li>
-                );
-              })}
-            </ul>
-
-            {/* 2 — the two things a phone visitor actually needs. */}
-            <motion.div
-              className="track mt-8 flex flex-col gap-3"
-              initial={reduce ? false : { opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={
-                reduce
-                  ? { duration: 0 }
-                  : { delay: 0.06 + NAV_LINKS.length * 0.055, duration: 0.38, ease: "easeOut" }
-              }
-            >
-              <a
-                href={PHONE.href}
-                className="inline-flex min-h-12 items-center justify-center rounded-pill bg-ember px-6 py-3 font-sans text-sm font-semibold text-bone transition-colors duration-[var(--dur-base)] ease-house hover:bg-bone hover:text-char"
-              >
-                Call {PHONE.display}
-              </a>
-              <a
-                href={DIRECTIONS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-12 items-center justify-center rounded-pill border border-ember px-6 py-3 font-sans text-sm font-semibold text-bone transition-colors duration-[var(--dur-base)] ease-house hover:bg-ember"
-              >
-                Get directions
-              </a>
-            </motion.div>
-
-            {/* 3 — small footer strip: hours summary + the shared socials. */}
-            <motion.div
-              className="track mt-auto pt-10"
-              initial={reduce ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={
-                reduce
-                  ? { duration: 0 }
-                  : { delay: 0.2 + NAV_LINKS.length * 0.055, duration: 0.4 }
-              }
-            >
-              <dl className="font-sans text-sm text-smoke">
-                {HOURS.map(({ short, time }) => (
-                  <div key={short} className="flex justify-between border-t border-char-3 py-2">
-                    <dt>{short}</dt>
-                    <dd className="font-medium text-bone">{time}</dd>
-                  </div>
-                ))}
-              </dl>
-              <SocialLinks tone="light" className="mt-5" />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 }

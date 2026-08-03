@@ -429,7 +429,7 @@ export function Challenge() {
               <div
                 ref={sparkRef}
                 aria-hidden="true"
-                className="pointer-events-none absolute left-1/2 top-1/2 z-20"
+                className="pointer-events-none absolute left-1/2 top-1/2 z-base"
               >
                 {SPARKS.map((_, i) => (
                   <span

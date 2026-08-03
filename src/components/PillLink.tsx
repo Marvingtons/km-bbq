@@ -1,33 +1,72 @@
 import Link from "next/link";
 
-// The one call-to-action button. An EMBER outline pill that wipes to a filled
-// ember on hover/focus. The label is ink in both states: ember is the site's
-// interaction colour, but ember text on cream is 2.3:1, so the border carries
-// the colour and the type carries the contrast (ink on cream 15.9:1, ink on
-// ember 7:1). This is the same shape and the same two colours as the navbar's
-// phone CTA, so every button on the site is one object.
-//
-// (The hero's CTA is its own cream-filled variant, since ember sits inside the
-// video's hue range and stops reading as a control over it; the red game dome
-// is a prop, not a button.)
-const PILL =
-  "relative isolate inline-flex items-center gap-2 overflow-hidden rounded-pill border border-ember px-8 py-3 font-sans text-sm font-medium text-bone transition-colors duration-[var(--dur-base)] ease-house before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:bg-ember before:transition-transform before:duration-[var(--dur-base)] before:ease-house hover:before:scale-x-100 focus-visible:before:scale-x-100";
+/**
+ * THE button. Every call to action on the site is this component — the hero,
+ * About, the nav's phone CTA, the mobile takeover, the directions links. One
+ * shape, one label recipe, one pair of colours, so the comment that used to
+ * live here claiming "every button on the site is one object" is now true
+ * rather than aspirational. Six of the seven pills it described were re-typed
+ * inline with six different label recipes and five padding pairs.
+ *
+ * Two tones, and they are the same object at two volumes:
+ *
+ *   solid    the primary action in its region. Flame fill, bone label.
+ *   outline  everything secondary. A char-3 hairline that fills to flame on
+ *            hover, so both states are the same two colours.
+ *
+ * No third tone and no colour surgery through `className`. If a button needs
+ * to look different, the answer is `tone`, not a new recipe.
+ */
+const BASE =
+  "group relative isolate inline-flex min-h-11 items-center justify-center gap-2 rounded-pill px-7 py-3 font-sans text-sm font-semibold transition-colors duration-[var(--dur-base)] ease-house";
+
+const TONES = {
+  solid: "bg-flame text-bone hover:bg-ember hover:text-char",
+  outline:
+    "border border-char-3 bg-char-2/60 text-bone hover:border-flame hover:bg-flame hover:text-bone",
+} as const;
 
 export function PillLink({
   href,
   children,
   arrow = false,
+  tone = "solid",
+  external = false,
   className = "",
 }: {
   href: string;
   children: React.ReactNode;
   arrow?: boolean;
+  tone?: keyof typeof TONES;
+  external?: boolean;
   className?: string;
 }) {
-  return (
-    <Link href={href} className={`${PILL} ${className}`}>
+  const cls = `${BASE} ${TONES[tone]} ${className}`;
+  const content = (
+    <>
       {children}
-      {arrow && <span aria-hidden="true">→</span>}
+      {arrow && (
+        <span
+          aria-hidden="true"
+          className="transition-transform duration-[var(--dur-base)] ease-house group-hover:translate-x-0.5"
+        >
+          →
+        </span>
+      )}
+    </>
+  );
+
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} className={cls}>
+      {content}
     </Link>
   );
 }

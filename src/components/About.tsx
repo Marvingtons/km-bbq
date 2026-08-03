@@ -6,7 +6,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PillLink } from "./PillLink";
 import { SectionSeam } from "./SectionSeam";
-import { MOTION, MOTION_OK, NAV_H } from "@/lib/motion";
+import { MOTION, MOTION_OK, NAV_H, HERO_SCRUB } from "@/lib/motion";
 import { useScrollRefresh } from "@/lib/useScrollRefresh";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -186,7 +186,7 @@ export function About() {
         scrollTrigger: wide
           ? {
               trigger: "#home",
-              start: () => window.innerHeight * 0.58,
+              start: () => window.innerHeight * HERO_SCRUB * 0.58,
               invalidateOnRefresh: true,
               // AND IT REVERSES, which the site's other entrances do not.
               // The clip is fully reversible mid-gesture by design, so a
@@ -289,8 +289,8 @@ export function About() {
       // no window to sit behind, and a section pulled under an opaque hero that
       // then slides off is a section nobody reads. See Hero.tsx.
       //
-      // z-10 under the hero's z-20 is what puts About behind the window.
-      className="grain relative z-10 overflow-hidden bg-char motion-safe:md:-mt-[100vh]"
+      // z-base under the hero's z-nav is what puts About behind the window.
+      className="grain relative z-base overflow-hidden bg-char motion-safe:md:-mt-[60vh]"
       style={{ ["--nav-h" as string]: `${NAV_H}px` } as React.CSSProperties}
     >
       {/* THE SEAM. Hero -> About is a ground change — footage to cream — so it
@@ -314,7 +314,7 @@ export function About() {
           clip at all. An exact viewport keeps the cell centred inside it at
           every width by construction.
           ===================================================================== */}
-      <div className="about-stage relative z-10 py-section md:py-section-lg motion-safe:md:h-screen motion-safe:md:py-0">
+      <div className="about-stage relative z-base py-section md:py-section-lg motion-safe:md:h-screen motion-safe:md:py-0">
         <div className="grid-page motion-safe:md:h-full motion-safe:md:items-center">
           {/* The reading column, at column 1 like every other heading on the
               site. It used to move to columns 5-8 under motion, because that
@@ -420,7 +420,7 @@ export function About() {
           photograph would not), so the band needs no max-width cap.
           ===================================================================== */}
       <div
-        className="mural-band relative z-10 w-full overflow-hidden"
+        className="mural-band relative z-base w-full overflow-hidden"
         style={{ aspectRatio: `${MURAL.w} / ${BAND_H}` }}
       >
         {/* The art layer sits centred in the band and keeps its OWN natural
@@ -468,7 +468,7 @@ export function About() {
           the pinned stage with the story at lg, building into the gap as the
           mural halves kept opening; with the pin gone it is simply the section
           that follows the band. */}
-      <div className="grill-layer relative z-10 py-section md:py-section-lg">
+      <div className="grill-layer relative z-base py-section md:py-section-lg">
         <div className="grid-page">
           <div className="col-full">
           <div className="grill-head">
@@ -529,7 +529,7 @@ export function About() {
                         }
                       />
                       {dish.tag && (
-                        <span className="absolute left-2 top-2 z-[4] bg-ember px-2 py-1 font-sans text-xs font-medium uppercase tracking-widest text-bone">
+                        <span className="absolute left-2 top-2 z-nav bg-ember px-2 py-1 font-sans text-xs font-medium uppercase tracking-widest text-bone">
                           {dish.tag}
                         </span>
                       )}
@@ -568,12 +568,12 @@ export function About() {
           photography instead of stopping at a border. These are drawn marks —
           a disc, a squiggle — not cut-outs of the mural asset. */}
       <div
-        // z-[9], below the content layer (z-10): these are decorative accents
-        // drifting toward the Gallery seam, and at z-[13] they painted across
+        // z-base, below the content layer (z-base): these are decorative accents
+        // drifting toward the Gallery seam, and at z-nav they painted across
         // the "See the full menu" pill.
         // opacity-0 by default: SeamMotion fades these in only as the About ->
         // Gallery boundary arrives (its tween is immediateRender:false).
-        className="mural-trail pointer-events-none absolute inset-x-0 bottom-6 z-[9] flex items-center justify-center gap-16 motion-reduce:hidden [&>*]:opacity-0"
+        className="mural-trail pointer-events-none absolute inset-x-0 bottom-6 z-base flex items-center justify-center gap-16 motion-reduce:hidden [&>*]:opacity-0"
         aria-hidden="true"
       >
         <span
