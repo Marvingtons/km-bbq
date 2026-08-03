@@ -28,8 +28,11 @@ export default function Home() {
         <Hero />
         <About />
         <Gallery />
-        <Challenge />
+        {/* Visit before the game. The address and the hours are the conversion
+            for a walk-in-only restaurant, and they used to sit BEHIND a
+            stopwatch that tells you it does not count. The game is dessert. */}
         <Contact />
+        <Challenge />
         {/* Scroll-driven transitions across every section boundary. */}
         <SeamMotion />
       </main>
