@@ -286,7 +286,7 @@ export function Challenge() {
         </ScrollReveal>
         <ScrollReveal delay={0.05}>
           <h2 id="challenge-heading" className="h2-scale">
-            Beat the <em className="italic text-pink">clock</em>
+            Beat the clock
           </h2>
         </ScrollReveal>
         <ScrollReveal delay={0.1}>

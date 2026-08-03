@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Logo } from "./Logo";
+import { PillLink } from "./PillLink";
 import { SocialLinks } from "./SocialLinks";
 import { useActiveSection } from "@/lib/useActiveSection";
 import { getLenis } from "@/lib/lenis";
@@ -96,14 +97,18 @@ export function Navbar() {
     // and it lives in the header rather than the overlay — so the trap has to
     // span both, with the trigger first. Focus lands on it when the menu opens,
     // which is also where a keyboard user most wants to be.
+    // Copied out of the ref so the cleanup below restores focus to the node
+    // this effect actually opened with, not to whatever the ref points at by
+    // the time the menu closes.
+    const trigger = triggerRef.current;
+
     const focusables = () => {
       const nodes =
         overlayRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? [];
-      const trigger = triggerRef.current;
       return trigger ? [trigger, ...Array.from(nodes)] : Array.from(nodes);
     };
 
-    triggerRef.current?.focus();
+    trigger?.focus();
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -131,7 +136,7 @@ export function Navbar() {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prevOverflow;
       lenis?.start();
-      triggerRef.current?.focus();
+      trigger?.focus();
     };
   }, [menuOpen, close]);
 
@@ -210,7 +215,7 @@ export function Navbar() {
                       {isActive && (
                         <span
                           aria-hidden="true"
-                          className="ml-3 inline-block h-1.5 w-1.5 rounded-pill bg-pink align-middle"
+                          className="ml-3 inline-block h-1.5 w-1.5 rounded-pill bg-neon-pink align-middle"
                         />
                       )}
                     </Link>
@@ -230,20 +235,12 @@ export function Navbar() {
                   : { delay: 0.06 + NAV_LINKS.length * 0.055, duration: 0.38, ease: "easeOut" }
               }
             >
-              <a
-                href={PHONE.href}
-                className="inline-flex min-h-12 items-center justify-center rounded-pill bg-ember px-6 py-3 font-sans text-sm font-semibold text-bone transition-colors duration-[var(--dur-base)] ease-house hover:bg-bone hover:text-char"
-              >
+              <PillLink href={PHONE.href} external className="w-full">
                 Call {PHONE.display}
-              </a>
-              <a
-                href={DIRECTIONS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-12 items-center justify-center rounded-pill border border-ember px-6 py-3 font-sans text-sm font-semibold text-bone transition-colors duration-[var(--dur-base)] ease-house hover:bg-ember"
-              >
+              </PillLink>
+              <PillLink href={DIRECTIONS_URL} external tone="outline" className="w-full">
                 Get directions
-              </a>
+              </PillLink>
             </motion.div>
 
             {/* 3 — small footer strip: hours summary + the shared socials. */}
@@ -349,7 +346,7 @@ export function Navbar() {
                         so pink never becomes a hover state. */}
                     <span
                       className={`pointer-events-none absolute -bottom-0.5 left-0 h-px w-full origin-left transition-transform duration-[var(--dur-quick)] ease-house group-hover:scale-x-100 motion-reduce:transition-none ${
-                        isActive ? "scale-x-100 bg-pink" : "scale-x-0 bg-ember"
+                        isActive ? "scale-x-100 bg-neon-pink" : "scale-x-0 bg-ember"
                       }`}
                     />
                   </Link>
@@ -370,12 +367,9 @@ export function Navbar() {
                 2.3:1 and this is an 11.5px letter-spaced cap. Ink on cream is
                 15.9:1 at rest and ink on ember is 7:1 filled. */}
             <li className="ms-3 xl:ms-5">
-              <a
-                href={PHONE.href}
-                className="inline-flex min-h-11 items-center rounded-pill border border-ember px-5 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-bone transition-colors duration-[var(--dur-base)] ease-house hover:bg-ember"
-              >
+              <PillLink href={PHONE.href} external className="px-5 py-2">
                 {PHONE.display}
-              </a>
+              </PillLink>
             </li>
           </ul>
 

@@ -3,11 +3,20 @@ import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { StickyInfoBar } from "@/components/StickyInfoBar";
-import { MenuJumpNav, type JumpTarget } from "@/components/MenuJumpNav";
+import { MenuJumpNav } from "@/components/MenuJumpNav";
 import { SeamMotion } from "@/components/SeamMotion";
 import { BreadcrumbSchema } from "@/components/RestaurantSchema";
+import { PriceBand } from "@/components/PriceBand";
 import { Dot } from "@/components/Dot";
-import { HOURS, ADDRESS, PHONE } from "@/data/info";
+import { HOURS, ADDRESS, PHONE, CLOCK_PROMO } from "@/data/info";
+import {
+  MENU,
+  INCLUDED,
+  JUMP_TARGETS,
+  displayName,
+  type MenuItem,
+  type MenuCategory,
+} from "@/data/menu";
 import { pageMeta } from "@/lib/seo";
 import { publicFileExists } from "@/lib/imageManifest.generated";
 
@@ -19,368 +28,20 @@ export const metadata: Metadata = pageMeta({
   titleAbsolute: true,
 });
 
-// ---------------------------------------------------------------------------
-// Menu data
-// ---------------------------------------------------------------------------
-
-interface Item {
-  name: string;
-  korean?: string;
-  desc: string;
-  image?: string;
-  note?: string;
-}
-
-interface Category {
-  name: string;
-  korean?: string;
-  tag?: string;
-  items: Item[];
-  /** Short label for the jump nav; defaults to `name`. */
-  navLabel?: string;
-}
-
-const slugify = (name: string) =>
-  name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-
-const CATEGORIES: Category[] = [
-  {
-    name: "Beef",
-    korean: "소고기",
-    items: [
-      {
-        name: "Beef Bulgogi",
-        korean: "불고기",
-        desc: "Thin ribeye in a soy, sesame, and pear marinade. Sweet, savory, and fast on the grill.",
-        image: "/images/bulgogi.png",
-      },
-      {
-        name: "Teriyaki Beef",
-        desc: "Tender beef glazed in a glossy house teriyaki that caramelizes over the coals.",
-        image: "/images/teriyaki-beef.png",
-      },
-      {
-        name: "Beef Brisket",
-        korean: "차돌박이",
-        desc: "Paper-thin brisket that sears in seconds. Dip it in sesame oil and a pinch of salt.",
-        image: "/images/chadolbaegi.png",
-      },
-    ],
-  },
-  {
-    name: "Pork",
-    korean: "돼지고기",
-    items: [
-      {
-        name: "Sliced Pork Belly",
-        korean: "삼겹살",
-        desc: "Thick-cut pork belly, grilled crisp and juicy. Wrap it up your way.",
-        image: "/images/samgyeopsal.png",
-      },
-      {
-        name: "Pork Chop",
-        desc: "Simply seasoned pork, charred on your own grill for a smoky bite.",
-        image: "/images/pork-chop.png",
-      },
-      {
-        name: "Spicy Pork Belly",
-        korean: "제육볶음",
-        desc: "Pork belly in a gochujang chili marinade. Sweet heat with a smoky finish.",
-        image: "/images/spicy-pork-belly.png",
-      },
-    ],
-  },
-  {
-    name: "Chicken",
-    korean: "닭고기",
-    items: [
-      {
-        name: "Spicy Chicken",
-        korean: "매운 닭",
-        desc: "Boneless chicken in a fiery gochujang glaze with a touch of sweetness.",
-        image: "/images/spicy-chicken.png",
-      },
-      {
-        name: "Teriyaki Chicken",
-        korean: "데리야키 치킨",
-        desc: "Sweet-savory teriyaki chicken that grills up golden and tender.",
-        image: "/images/teriyaki-chicken.png",
-      },
-    ],
-  },
-  {
-    name: "Seafood",
-    korean: "해산물",
-    items: [
-      {
-        name: "Shrimp (no head)",
-        korean: "새우",
-        desc: "Peeled shrimp, quick to grill and ready for the dipping sauce.",
-        image: "/images/shrimp-no-head.png",
-      },
-      {
-        name: "Head Shrimp",
-        korean: "대하",
-        desc: "Whole head-on shrimp grilled in the shell for deeper, sweeter flavor.",
-        image: "/images/head-shrimp.png",
-      },
-      {
-        name: "Fresh Fish Fillet",
-        korean: "생선",
-        desc: "Mild white fish fillet, light and flaky straight off the grill.",
-        image: "/images/fresh-fish-fillet.png",
-      },
-      {
-        name: "Spicy Squid",
-        korean: "오징어",
-        desc: "Tender squid tossed in a spicy chili marinade with a smoky char.",
-        image: "/images/spicy-squid.png",
-      },
-    ],
-  },
-  {
-    name: "Rice, Noodles & More",
-    navLabel: "Rice & More",
-    items: [
-      {
-        name: "Hot Dog",
-        desc: "A grill-friendly favorite the whole table reaches for.",
-        image: "/images/hot-dog.png",
-      },
-      {
-        name: "Kimchi Fried Rice",
-        korean: "김치볶음밥",
-        desc: "Rice fried with house kimchi for a savory, tangy kick.",
-        image: "/images/kimchi-fried-rice.png",
-      },
-      {
-        name: "Japchae",
-        korean: "잡채",
-        desc: "Glass noodles stir-fried with vegetables in sweet sesame soy.",
-        image: "/images/japchae.png",
-      },
-      {
-        name: "Fried Pot Stickers",
-        korean: "만두",
-        desc: "Crisp pan-fried dumplings with a savory, juicy filling.",
-        image: "/images/fried-pot-stickers.png",
-      },
-    ],
-  },
-  {
-    name: "Vegetables",
-    korean: "야채",
-    items: [
-      {
-        name: "Pumpkin",
-        korean: "호박",
-        desc: "Sweet slices that caramelize beautifully over the grill.",
-        image: "/images/pumpkin.png",
-      },
-      {
-        name: "Squash",
-        desc: "Tender squash, lightly charred and naturally sweet.",
-        image: "/images/squash.png",
-      },
-      {
-        name: "Mushroom",
-        korean: "버섯",
-        desc: "Assorted mushrooms that soak up the smoke as they grill.",
-        image: "/images/mushroom.png",
-      },
-      {
-        name: "Onion Ring",
-        korean: "양파",
-        desc: "Sweet onions that turn golden and jammy on the grill.",
-        image: "/images/onion.png",
-      },
-      {
-        name: "Garlic Broccoli",
-        desc: "Crisp-tender broccoli tossed with savory garlic.",
-        image: "/images/garlic-broccoli.png",
-      },
-      {
-        name: "Salt Beansprout",
-        korean: "콩나물",
-        desc: "Crisp seasoned bean sprouts. A cool, clean side.",
-        image: "/images/salt-beansprout.png",
-      },
-    ],
-  },
-  {
-    name: "Banchan & Sides",
-    korean: "반찬",
-    tag: "Included",
-    navLabel: "Banchan",
-    items: [
-      {
-        name: "Lettuce Salad",
-        korean: "샐러드",
-        desc: "Fresh greens in a light, tangy dressing.",
-        image: "/images/lettuce-salad.png",
-      },
-      {
-        name: "Kimchi",
-        korean: "김치",
-        desc: "House-fermented napa cabbage. Tangy and a little spicy.",
-        image: "/images/kimchi.png",
-      },
-      {
-        name: "Radish",
-        korean: "단무지",
-        desc: "Crunchy pickled radish, bright and refreshing.",
-        image: "/images/radish.png",
-      },
-      {
-        name: "Spicy Cucumber",
-        korean: "오이무침",
-        desc: "Cucumbers in a cool, spicy sesame dressing.",
-        image: "/images/spicy-cucumber.png",
-      },
-      {
-        name: "Potato Salad",
-        korean: "감자 샐러드",
-        desc: "Creamy Korean-style potato salad.",
-        image: "/images/potato-salad.png",
-      },
-      {
-        name: "Fishcake",
-        korean: "어묵",
-        desc: "Savory stir-fried fish cake in a light sauce.",
-        image: "/images/fishcake.png",
-      },
-      {
-        name: "Steamed Egg",
-        korean: "계란찜",
-        desc: "Silky, fluffy steamed egg custard.",
-        image: "/images/steamed-egg.png",
-      },
-      {
-        name: "Plain Rice",
-        korean: "밥",
-        desc: "Warm steamed white rice. The perfect base.",
-        image: "/images/plain-rice.png",
-      },
-    ],
-  },
-  {
-    name: "Dessert",
-    korean: "디저트",
-    tag: "Free",
-    items: [
-      {
-        name: "Sesame Ball",
-        korean: "참깨볼",
-        desc: "Chewy fried dough rolled in toasted sesame seeds.",
-        image: "/images/sesame-balls.png",
-      },
-      {
-        name: "Fried Doughnuts",
-        desc: "Warm, golden doughnuts dusted with sugar.",
-        image: "/images/fried-doughnuts.png",
-      },
-      {
-        name: "Ice Cream",
-        desc: "A cold, sweet finish. Self-serve and unlimited.",
-        image: "/images/ice-char.png",
-      },
-    ],
-  },
-];
-
-const PREMIUM: Item[] = [
-  {
-    name: "Beef Short Ribs",
-    korean: "갈비",
-    desc: "Marinated bone-in short ribs, rich and caramelized.",
-    image: "/images/galbi.png",
-  },
-  {
-    name: "Beef Finger Meat",
-    desc: "Prized meat from between the ribs. Deeply beefy and tender.",
-    image: "/images/beef-finger-meat.png",
-  },
-  {
-    name: "Freshly Cut Steak",
-    desc: "House-cut steak, fresh and grill-ready.",
-    image: "/images/freshly-cut-steak.png",
-  },
-  {
-    name: "Lamb",
-    desc: "Tender lamb with a savory, aromatic char.",
-    image: "/images/lamb.png",
-  },
-  {
-    name: "Marinated Chef Beef",
-    desc: "The chef's signature beef in a house marinade.",
-    image: "/images/marinated-chef-beef.png",
-  },
-  {
-    name: "Marinated Pork Belly",
-    desc: "Pork belly soaked in a savory house marinade.",
-    image: "/images/marinated-pork-belly.png",
-  },
-  {
-    name: "Beef Skirt Steak",
-    desc: "Richly marbled skirt steak that chars beautifully.",
-    image: "/images/beef-skirt-steak.png",
-  },
-  {
-    name: "Mussels",
-    desc: "Plump mussels grilled in the shell.",
-    image: "/images/mussels.png",
-  },
-  {
-    name: "Popcorn Chicken",
-    desc: "Crispy, bite-size fried chicken.",
-    image: "/images/popcorn-chicken.png",
-  },
-  {
-    name: "Corn Cheese",
-    desc: "Sweet corn baked with melty, bubbling cheese.",
-    image: "/images/corn-cheese.png",
-  },
-];
-
-const INCLUDED = [
-  "Fresh veggies & wraps",
-  "Banchan included",
-  "House dipping sauces",
-  "Free drink refills",
-  "Free ice cream",
-];
-
 const IMAGE_SIZES = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw";
 
-// Every item carries its expected image path (see MISSING_IMAGES.md), but a
-// photo may not have been shot yet, and an absent file should get the lettered
-// placeholder rather than a broken <img>.
-//
-// This used to be fs.existsSync against process.cwd(), which only worked
-// because the page is prerendered on a Node build machine. The Cloudflare
-// Workers runtime has neither a filesystem nor a meaningful cwd, so the answer
-// now comes from a manifest generated at build time. Same behaviour, and
-// node:fs stays out of the Worker bundle.
+// Every item carries its expected image path, but a photo may not have been
+// shot yet. The answer comes from a manifest generated at build time, because
+// the Cloudflare Workers runtime has no filesystem.
 const imageExists = publicFileExists;
 
-// ---------------------------------------------------------------------------
-// Presentational pieces
-// ---------------------------------------------------------------------------
-
-function ItemMedia({ item }: { item: Item }) {
+function ItemMedia({ item }: { item: MenuItem }) {
   if (item.image && imageExists(item.image)) {
     return (
-      // photo: the one photography treatment, shared with the gallery and
-      // the house favourites — warm grade, shadows lifted toward cream, the one
-      // photo corner radius, and the page's grain. It owns the radius and the
-      // clipping.
-      <div className="photo relative mb-4 aspect-[16/9] w-full bg-char-2">
+      <div className="photo relative mb-4 aspect-[16/9] w-full">
         <Image
           src={item.image}
-          alt={item.name}
+          alt={displayName(item)}
           fill
           className="object-cover"
           sizes={IMAGE_SIZES}
@@ -389,147 +50,58 @@ function ItemMedia({ item }: { item: Item }) {
     );
   }
 
-  // Tasteful placeholder: a soft cream gradient with the dish's serif initial,
-  // so cards without a photo still read as intentional rather than broken.
+  /* NEEDS ASSET: this dish has no photograph on disk. See NEEDS-ASSETS.md #5.
+     A lettered plate rather than a broken frame, and deliberately plain — it
+     should read as "not shot yet", not as a design flourish. */
   return (
     <div
       aria-hidden="true"
-      // Same corner radius as a real photo, so a card without a shot yet keeps
-      // the row's shape.
-      className="mb-4 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-card bg-gradient-to-br from-char-2 to-char-3"
+      className="mb-4 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-card border border-char-3 bg-char"
     >
-      <span className="font-display text-xl font-normal text-ember/35 select-none">
+      <span className="select-none font-display text-2xl font-black text-char-3 [font-stretch:87.5%]">
         {item.name.charAt(0)}
       </span>
     </div>
   );
 }
 
-function ItemCard({
-  item,
-  variant = "default",
-}: {
-  item: Item;
-  variant?: "default" | "premium";
-}) {
-  const topBar = variant === "premium" ? "bg-ember" : null;
-
+function ItemCard({ item }: { item: MenuItem }) {
   return (
-    <div className="group h-full">
-      {/* A card that frames a photograph takes the photo radius. */}
-      <div className="relative flex h-full flex-col overflow-hidden rounded-card bg-char-2 p-5 shadow-card transition-shadow duration-[var(--dur-base)] ease-house hover:shadow-pop">
-        {topBar && (
-          <span
-            aria-hidden="true"
-            className={`absolute inset-x-0 top-0 h-0.5 ${topBar}`}
-          />
+    <div className="group flex h-full flex-col rounded-card border border-char-3 bg-char-2 p-5 transition-colors duration-[var(--dur-base)] ease-house hover:border-flame/40">
+      <ItemMedia item={item} />
+      <h3 className="card-title">
+        {item.name}
+        {item.english && (
+          <span className="text-smoke"> — {item.english}</span>
         )}
-        <ItemMedia item={item} />
-        <h3 className="font-display text-md font-normal text-bone">
-          {item.name}
-        </h3>
-        {item.korean && (
-          <p className="font-sans text-xs font-normal text-bone/40">
-            {item.korean}
-          </p>
-        )}
-        <p className="copy mt-2">
-          {item.desc}
-        </p>
-        {item.note && (
-          <p className="mt-3 font-sans text-xs font-medium uppercase tracking-[0.12em] text-flame">
-            {item.note}
-          </p>
-        )}
-      </div>
+      </h3>
+      {item.hangul && (
+        <p className="mt-1 font-sans text-xs text-smoke">{item.hangul}</p>
+      )}
+      <p className="copy mt-2">{item.desc}</p>
     </div>
   );
 }
 
-function CategorySection({ category }: { category: Category }) {
+function CategorySection({ category }: { category: MenuCategory }) {
   return (
-    <section id={slugify(category.name)} className="mt-16 scroll-mt-32 first:mt-0">
+    <section id={category.id} className="mt-16 scroll-mt-32 first:mt-0">
       <div className="mb-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-char-3 pb-4">
-        <h2 className="font-display text-lg font-normal text-bone">
-          {category.name}
-        </h2>
-        {category.korean && (
-          <span className="font-sans text-sm font-normal text-bone/40">
-            {category.korean}
-          </span>
+        <h2 className="h2-scale">{category.name}</h2>
+        {category.hangul && (
+          <span className="font-sans text-sm text-smoke">{category.hangul}</span>
         )}
-        {category.tag && (
-          <span className="eyebrow ml-auto">
-            {category.tag}
-          </span>
-        )}
+        {category.tag && <span className="eyebrow ml-auto text-ember">{category.tag}</span>}
       </div>
+      {category.blurb && <p className="copy measure -mt-3 mb-7">{category.blurb}</p>}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {category.items.map((item) => (
-          <ItemCard key={item.name} item={item} />
+          <ItemCard key={item.id} item={item} />
         ))}
       </div>
     </section>
   );
 }
-
-function TierSection({
-  label,
-  title,
-  korean,
-  blurb,
-  items,
-  variant,
-}: {
-  label: string;
-  title: string;
-  korean?: string;
-  blurb: string;
-  items: Item[];
-  variant: "premium";
-}) {
-  // char-2 is a FILL here, not a ground — this is a card sitting on the
-  // page's cream, the same way the item cards are. The page still has exactly
-  // two grounds.
-  const shell = "border-ember/25 bg-char-2";
-
-  return (
-    <section
-      id={variant}
-      className={`mt-12 scroll-mt-32 rounded-none border ${shell} p-6 sm:p-10`}
-    >
-      <div className="mb-8">
-        <p className="eyebrow mb-4">{label}</p>
-        <h2 className="font-display text-lg font-normal text-bone">
-          {title}
-          {korean && (
-            <span className="ml-3 align-middle font-sans text-sm font-normal text-bone/40">
-              {korean}
-            </span>
-          )}
-        </h2>
-        <p className="copy measure mt-3">{blurb}</p>
-      </div>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((item) => (
-          <ItemCard key={item.name} item={item} variant={variant} />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Page
-// ---------------------------------------------------------------------------
-
-const JUMP_TARGETS: JumpTarget[] = [
-  ...CATEGORIES.map((c) => ({
-    label: c.navLabel ?? c.name,
-    id: slugify(c.name),
-  })),
-  { label: "Premium", id: "premium" },
-];
 
 export default function MenuPage() {
   return (
@@ -546,71 +118,34 @@ export default function MenuPage() {
         tabIndex={-1}
         className="grain isolate bg-char focus:outline-none"
       >
-        {/* Header. Same track, same column edge, same left alignment as every
-            section on the home page. */}
         <section className="pt-32 pb-12 sm:pt-36 lg:pt-40">
           <div className="grid-page">
             <div className="col-text">
-              <p className="eyebrow mb-5">
+              <p className="eyebrow text-ember">
                 All-You-Can-Eat <Dot char="·" /> Self-Serve <Dot char="·" />{" "}
                 Grill Your Own
               </p>
-              {/* The page title does the same job as a section h2, so it takes
-                  the same size. There is one oversized moment on this site and
-                  it is the hero. */}
-              <h1 className="h2-scale">
-                The Full <em className="italic text-pink">Spread</em>
-              </h1>
-              <p className="copy measure mt-6">
+              <h1 className="h2-scale mt-4">The Full Spread</h1>
+              <p className="copy measure mt-5">
                 Pick whatever you like, grill it your way at your table, and eat
                 all you want. One price, everything included.
               </p>
             </div>
 
-            {/* Price band. SQUARE: it is a structural surface holding type, not
-                a frame around a picture. It sits on the full track and starts
-                at column 1 rather than being centred.
-                `flex` not `inline-flex`, so the three cells share the width
-                instead of overflowing a phone. */}
-            <div className="col-full mt-9 flex max-w-xl items-stretch overflow-hidden rounded-none bg-char-2 shadow-card">
-              <div className="flex-1 px-4 py-5 text-center sm:px-8">
-                <p className="eyebrow">Lunch</p>
-                <p className="mt-1 font-display text-lg font-normal text-flame">
-                  $21.99
-                </p>
-                <p className="mt-1 font-sans text-xs font-normal text-bone/40">
-                  per person
-                </p>
-              </div>
-              <div aria-hidden="true" className="w-px bg-char-3" />
-              <div className="flex-1 px-4 py-5 text-center sm:px-8">
-                <p className="eyebrow">Dinner</p>
-                <p className="mt-1 font-display text-lg font-normal text-flame">
-                  $30.99
-                </p>
-                <p className="mt-1 font-sans text-xs font-normal text-bone/40">
-                  per person
-                </p>
-              </div>
-              <div aria-hidden="true" className="w-px bg-char-3" />
-              <div className="flex-1 px-4 py-5 text-center sm:px-8">
-                <p className="eyebrow">Seating</p>
-                <p className="mt-1 font-display text-lg font-normal text-ember">
-                  90 min
-                </p>
-                <p className="mt-1 font-sans text-xs font-normal text-bone/40">
-                  per table
-                </p>
-              </div>
+            {/* The one price band, shared with the homepage. */}
+            <div className="col-full mt-9">
+              <PriceBand />
             </div>
 
-            <div className="col-text mt-6">
-              <p className="font-sans text-xs font-normal text-bone/50">
+            <div className="col-text mt-6 space-y-2">
+              <p className="font-sans text-xs text-smoke">
                 Walk-in only <Dot char="·" /> No reservations needed
               </p>
-              <p className="mt-2 font-sans text-xs font-normal text-bone/50">
+              <p className="font-sans text-xs text-smoke">
                 Stop our clock at exactly{" "}
-                <span className="font-medium text-flame">10.00 seconds</span>{" "}
+                <span className="font-semibold text-flame">
+                  {CLOCK_PROMO.target} seconds
+                </span>{" "}
                 and your next barbecue is free.
               </p>
             </div>
@@ -626,10 +161,8 @@ export default function MenuPage() {
                 {INCLUDED.map((label, i) => (
                   <li
                     key={label}
-                    className={`py-1 pr-5 font-sans text-sm font-normal text-smoke ${
-                      i < INCLUDED.length - 1
-                        ? "mr-5 border-r border-char-3"
-                        : ""
+                    className={`copy py-1 pr-5 ${
+                      i < INCLUDED.length - 1 ? "mr-5 border-r border-char-3" : ""
                     }`}
                   >
                     {label}
@@ -640,10 +173,8 @@ export default function MenuPage() {
           </div>
         </section>
 
-        {/* Category jump nav — sticks just below the fixed site header */}
         <MenuJumpNav targets={JUMP_TARGETS} />
 
-        {/* Categories */}
         <div className="grid-page pt-12 pb-20">
           <div className="col-full">
             <p className="copy measure mb-10">
@@ -651,31 +182,16 @@ export default function MenuPage() {
               charges.
             </p>
 
-            {CATEGORIES.map((category) => (
-              <CategorySection key={category.name} category={category} />
+            {MENU.map((category) => (
+              <CategorySection key={category.id} category={category} />
             ))}
-
-            {/* Upgraded tiers */}
-            <TierSection
-              label="Premium"
-              title="Premium Selection"
-              blurb="The good stuff. Included for everyone at the table, same as the rest of the menu."
-              items={PREMIUM}
-              variant="premium"
-            />
           </div>
         </div>
 
-        {/* Info band. It used to sit on its own paper tone with a seam-morph
-            into it, which made a third ground; the site has exactly two, so it
-            shares the page's cream and is held by its own composition and the
-            padding scale instead. */}
         <section className="relative py-section md:py-section-lg">
           <div className="grid-page">
             <div className="col-text">
-              <h2 className="h2-scale">
-                Come <em className="italic text-pink">Hungry</em>
-              </h2>
+              <h2 className="h2-scale">Come Hungry</h2>
             </div>
             <div className="col-full mt-12 grid gap-10 sm:grid-cols-3">
               <div>
@@ -704,7 +220,7 @@ export default function MenuPage() {
                   <br />
                   <a
                     href={PHONE.href}
-                    className="inline-flex min-h-11 items-center font-semibold text-ember transition-colors duration-[var(--dur-base)] ease-house hover:text-ember"
+                    className="inline-flex min-h-11 items-center font-semibold text-ember transition-colors duration-[var(--dur-base)] ease-house hover:text-flame"
                   >
                     {PHONE.display}
                   </a>
@@ -714,8 +230,8 @@ export default function MenuPage() {
           </div>
         </section>
 
-        {/* Calm mode: background continuity only. The dense list content gets
-            no parallax and no overlap handoffs. */}
+        {/* Calm mode: background continuity only. The dense list gets no
+            parallax and no overlap handoffs. */}
         <SeamMotion calm />
       </main>
       <Footer />

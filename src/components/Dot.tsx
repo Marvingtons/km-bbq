@@ -32,7 +32,7 @@ export function Dot({
 }) {
   const isWordmarkDot = char === ".";
   return (
-    <span aria-hidden={isWordmarkDot ? undefined : "true"} className={`text-pink ${className}`}>
+    <span aria-hidden={isWordmarkDot ? undefined : "true"} className={`text-neon-pink ${className}`}>
       {char}
     </span>
   );

@@ -202,7 +202,7 @@ export function Footer() {
             </a>
             {/* Decorative divider only when the row sits on one line. Pink:
                 separators are punctuation, which is pink's second job. */}
-            <span aria-hidden="true" className="hidden text-pink sm:inline">
+            <span aria-hidden="true" className="hidden text-neon-pink sm:inline">
               |
             </span>
             <a

@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { PillLink } from "./PillLink";
 import { MOTION } from "@/lib/motion";
 import { useScrollRefresh } from "@/lib/useScrollRefresh";
 
@@ -230,19 +231,20 @@ export function Gallery() {
         <div className="col-span-full motion-safe:md:col-span-4 motion-safe:md:pr-8">
           <p className="eyebrow mb-4">Gallery</p>
           <h2 id="gallery-heading" className="h2-scale">
-            A look <em className="italic text-pink">inside</em>
+            A look inside
           </h2>
           <p className="copy measure mt-4">
             The room, the grills, and what comes off them.
           </p>
-          <a
+          <PillLink
             href="https://www.instagram.com/kmkoreanbbq/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 inline-flex min-h-11 items-center font-sans text-sm font-medium text-ember underline-offset-4 hover:underline"
+            external
+            tone="outline"
+            arrow
+            className="mt-6"
           >
-            Follow us on Instagram →
-          </a>
+            More on Instagram
+          </PillLink>
         </div>
 
         {/* Photo row. On desktop the GSAP timeline translates this track; on

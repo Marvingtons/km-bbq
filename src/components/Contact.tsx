@@ -1,21 +1,26 @@
+import Image from "next/image";
 import { ScrollReveal } from "./ScrollReveal";
 import { SocialLinks } from "./SocialLinks";
-import Image from "next/image";
-import { DirectionsLink } from "./ContactMap";
-import { HOURS, ADDRESS, PHONE, DIRECTIONS_URL } from "@/data/info";
+import { PillLink } from "./PillLink";
+import { HOURS, ADDRESS, PHONE, PRICING, DIRECTIONS_URL } from "@/data/info";
 
-// The two things a visitor is here for — when you are open, and where you are —
-// sit side by side as a pair of cards rather than as two stacked runs of text in
-// a narrow column.
-//
-// SQUARE, per the radius rule: these hold only type, which makes them
-// structural surfaces rather than frames around an image. The photo radius is
-// reserved for things that ARE a picture or hold one.
-//
-// p-5 at 375: at p-7 the card walls left the hours rows ~270px of usable width
-// and both the day range and the time wrapped mid-phrase.
-const card =
-  "h-full rounded-none border border-char-3 bg-char-2/70 p-5 shadow-card sm:p-8";
+/**
+ * VISIT. When we are open, where we are, and what to look for from the parking
+ * lot. For a walk-in-only restaurant this is the conversion section, so it now
+ * sits ahead of the game rather than behind it.
+ *
+ * THE GOOGLE MAPS EMBED IS GONE. It shipped Google's own chrome — "Keyboard
+ * shortcuts", "Map data ©2026", "Report a map error" — inside our own page, and
+ * at the zoom the address needs it labelled Texas Roadhouse, Chili's, Krispy
+ * Kreme and a competing Korean BBQ. We were spending a section of the page
+ * advertising the neighbours. What replaces it is what a visitor actually
+ * wants: the storefront, so they can recognise it, and a Directions link that
+ * hands off to the map app they already use.
+ *
+ * A styled dark static map is logged as NEEDS-ASSETS #4 — a nice-to-have, not
+ * a blocker.
+ */
+const card = "h-full rounded-card border border-char-3 bg-char-2 p-5 sm:p-7";
 
 export function Contact() {
   return (
@@ -25,55 +30,46 @@ export function Contact() {
       aria-labelledby="contact-heading"
     >
       <div className="grid-page gap-y-6">
-        {/* Eyebrow, heading and body all start at column 1, like every other
-            section. The mark sits above them in the same column. */}
         <div className="col-text mb-6">
           <ScrollReveal>
-            <p className="eyebrow mb-4">Find us</p>
+            <p className="eyebrow text-ember">Find us</p>
           </ScrollReveal>
           <ScrollReveal delay={0.05}>
-            {/* NOTE: the only h2 on the site with no italic accent word. "Stop
-                by" is two function words; emphasising either reads as a typo
-                rather than as emphasis, and inventing a third word to italicise
-                would be worse than the gap. Left deliberately plain. */}
-            <h2 id="contact-heading" className="h2-scale">
+            <h2 id="contact-heading" className="h2-scale mt-4">
               Stop by
             </h2>
           </ScrollReveal>
           <ScrollReveal delay={0.08}>
-            {/* One sentence. The first half of this line used to name the
-                street, which the address block directly beneath it already
-                does. */}
             <p className="copy measure mt-4">
-              Walk in whenever we are open.
+              Walk in whenever we are open. {PRICING.lunch} at lunch,{" "}
+              {PRICING.dinner} at dinner, {PRICING.seatingMinutes} minutes at
+              the table.
             </p>
           </ScrollReveal>
         </div>
 
-        {/* items-stretch + h-full on the cards so the pair shares one height
-            whatever the hours table does. */}
+        {/* items-stretch + h-full so the pair shares one height whatever the
+            hours table does. */}
         <div className="col-full grid items-stretch gap-6 md:grid-cols-2">
           <ScrollReveal className="h-full">
             <div className={card}>
-              <h3 className="mb-5 font-display text-md font-normal text-bone">
-                Hours
-              </h3>
+              <h3 className="card-title mb-5">Hours</h3>
               <dl className="space-y-3">
                 {HOURS.map(({ days, time }) => (
                   <div
                     key={days}
                     className="flex items-start justify-between gap-3 border-b border-char-3 pb-3 font-sans text-sm last:border-b-0 last:pb-0"
                   >
-                    <dt className="font-normal text-bone/70">{days}</dt>
-                    {/* The time is the answer; never let it break across
-                        lines even when the day range does. */}
-                    <dd className="whitespace-nowrap font-medium text-bone">
+                    <dt className="text-smoke">{days}</dt>
+                    {/* The time is the answer; never let it break across lines
+                        even when the day range does. */}
+                    <dd className="whitespace-nowrap font-semibold text-bone">
                       {time}
                     </dd>
                   </div>
                 ))}
               </dl>
-              <p className="mt-5 font-sans text-xs font-normal text-bone/50">
+              <p className="mt-5 font-sans text-xs text-smoke">
                 Walk-in only. No reservations needed.
               </p>
             </div>
@@ -81,18 +77,15 @@ export function Contact() {
 
           <ScrollReveal delay={0.05} className="h-full">
             <div className={card}>
-              <h3 className="mb-4 font-display text-md font-normal text-bone">
-                Location
-              </h3>
+              <h3 className="card-title mb-4">Location</h3>
               {/* Both lines are live: the address opens maps, the number dials.
-                  On a phone these are the two things anyone is here for, so
-                  neither should be plain text. */}
-              <address className="copy not-italic text-bone/70">
+                  On a phone these are the two things anyone is here for. */}
+              <address className="copy not-italic">
                 <a
                   href={DIRECTIONS_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block underline-offset-4 hover:underline"
+                  className="inline-block underline-offset-4 transition-colors duration-[var(--dur-base)] ease-house hover:text-bone hover:underline"
                 >
                   {ADDRESS.street}
                   <br />
@@ -101,12 +94,12 @@ export function Contact() {
                 <br />
                 <a
                   href={PHONE.href}
-                  className="mt-2 inline-flex min-h-11 items-center font-semibold text-ember underline-offset-4 hover:underline"
+                  className="mt-3 inline-flex min-h-11 items-center font-semibold text-ember underline-offset-4 transition-colors duration-[var(--dur-base)] ease-house hover:text-flame hover:underline"
                 >
                   {PHONE.display}
                 </a>
               </address>
-              <SocialLinks tone="light" className="mt-5" />
+              <SocialLinks tone="dark" className="mt-5" />
             </div>
           </ScrollReveal>
         </div>
@@ -114,13 +107,13 @@ export function Contact() {
         {/* WAYFINDING, and the one place the storefront photo belongs.
 
             It is a daylight phone snapshot of a strip-mall unit, which is why
-            it is not in the gallery. It is also the single most useful image on
-            the site here: the sign is legible, so a walk-in knows exactly what
-            they are looking for from the parking lot. Strip-mall honesty is an
-            asset at the door and a liability in a gallery.
+            it is not in the gallery. It is also the most useful image on the
+            site here: the sign is legible, so a walk-in knows what they are
+            looking for. Strip-mall honesty is an asset at the door and a
+            liability in a gallery.
 
-            No neighbour is named. Nothing in the record establishes which
-            businesses share the plaza, and Law 1 does not bend for a caption. */}
+            No neighbour is named — nothing in the record establishes who shares
+            the plaza, and Law 1 does not bend for a caption. */}
         <ScrollReveal delay={0.08} className="col-full">
           <figure className="photo aspect-[16/10] w-full md:aspect-[21/9]">
             <Image
@@ -135,7 +128,9 @@ export function Contact() {
             </figcaption>
           </figure>
           <div className="mt-5 flex">
-            <DirectionsLink />
+            <PillLink href={DIRECTIONS_URL} external arrow>
+              Get directions
+            </PillLink>
           </div>
         </ScrollReveal>
       </div>
