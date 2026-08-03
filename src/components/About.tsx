@@ -69,7 +69,9 @@ export function About() {
               trigger: "#home",
               start: () => window.innerHeight * HERO_SCRUB * 0.58,
               invalidateOnRefresh: true,
-              toggleActions: "play none none reverse",
+              // Plays once. It used to reverse, so scrolling back up
+              // took the copy you were reading away again.
+              toggleActions: "play none none none",
             }
           : { trigger: textCol[0], start: "top 88%" },
       });

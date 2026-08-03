@@ -36,6 +36,7 @@ const shouldRun = () =>
 export function Preloader() {
   const [dismissed, setDismissed] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const exitAt = useRef<number | null>(null);
 
   useEffect(() => {
     // The inline script already decided this, before paint.
@@ -50,8 +51,6 @@ export function Preloader() {
     sessionStorage.setItem("km-preloader-shown", "1");
 
     const q = gsap.utils.selector(root);
-    const isLoaded = () => document.readyState === "complete";
-    const onWindowLoad = () => tl.play("exit");
 
     const tl = gsap.timeline({ defaults: { ease: PRELOADER.ease } });
 
@@ -90,18 +89,24 @@ export function Preloader() {
 
     // 4 — assembled checkpoint: page already loaded -> skip the HOLD.
     tl.addLabel("assembled", PRELOADER.build);
-    tl.call(() => {
-      if (isLoaded()) tl.play("exit");
-    });
-    tl.to({}, { duration: PRELOADER.hold }); // the deliberate rest beat
-    // Still not loaded after the hold: park on the assembled mark (no spinner,
-    // no pulse) and exit the moment the window load event lands.
-    tl.call(() => {
-      if (!isLoaded()) {
-        tl.pause();
-        window.addEventListener("load", onWindowLoad, { once: true });
-      }
-    });
+
+    // NO HOLD, AND NO WAITING ON `load`.
+    //
+    // There used to be a 0.7s rest beat here with nothing on screen but the
+    // finished mark, and then a `tl.pause()` that parked the overlay until the
+    // window load event fired — unbounded, behind a 10s CSS failsafe, with the
+    // scroll locked the whole time. The page is server-rendered; there is
+    // nothing behind this screen worth a second of someone's evening.
+    //
+    // The exit is also scheduled off a real timer rather than off the sum of
+    // the beats, so PRELOADER.total is a guarantee and not an estimate: if
+    // anything above runs long or a frame is dropped, this still fires.
+    exitAt.current = window.setTimeout(
+      () => {
+        if (tl.isActive() || tl.progress() < 1) tl.play("exit");
+      },
+      (PRELOADER.total - PRELOADER.exit) * 1000
+    );
 
     // 5 — EXIT: the hero video restarts from frame one as the wipe begins.
     tl.addLabel("exit");
@@ -152,7 +157,7 @@ export function Preloader() {
     });
 
     return () => {
-      window.removeEventListener("load", onWindowLoad);
+      if (exitAt.current !== null) window.clearTimeout(exitAt.current);
       tl.kill();
       document.documentElement.classList.remove("preloading");
     };

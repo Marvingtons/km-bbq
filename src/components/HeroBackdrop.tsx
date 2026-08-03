@@ -92,7 +92,10 @@ export function HeroBackdrop({ className = "" }: { className?: string }) {
         quality={72}
         sizes="100vw"
         draggable={false}
-        className="select-none object-cover [filter:saturate(1.08)_contrast(1.06)_brightness(0.62)]"
+        // The house grade, one notch darker. 0.62 was double-dimming: the
+        // scrim below already carries the type, so the filter only has to keep
+        // the picture from competing with it.
+        className="select-none object-cover [filter:saturate(1.08)_contrast(1.06)_brightness(0.8)]"
       />
 
       {/* THE ONE THING LAYERED OVER THE PICTURE, and it is a ground, not a
@@ -104,7 +107,7 @@ export function HeroBackdrop({ className = "" }: { className?: string }) {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "linear-gradient(to top, var(--color-char) 4%, rgb(18 17 16 / 0.72) 38%, rgb(18 17 16 / 0.25) 72%, transparent 100%)",
+            "linear-gradient(to top, var(--color-char) 2%, rgb(18 17 16 / 0.86) 30%, rgb(18 17 16 / 0.45) 58%, rgb(18 17 16 / 0.12) 82%, transparent 100%)",
         }}
       />
       <div

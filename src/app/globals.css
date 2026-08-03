@@ -359,7 +359,7 @@ html.preloading {
 }
 
 .preloader-overlay {
-  animation: preloader-failsafe 0.4s linear 4s forwards;
+  animation: preloader-failsafe 0.3s linear 2.2s forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {

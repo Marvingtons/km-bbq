@@ -1,236 +1,89 @@
-"use client";
-
-import { useEffect, useLayoutEffect, useRef } from "react";
 import Image from "next/image";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PillLink } from "./PillLink";
-import { MOTION } from "@/lib/motion";
-import { useScrollRefresh } from "@/lib/useScrollRefresh";
 
-gsap.registerPlugin(ScrollTrigger);
+/* ===========================================================================
+   GALLERY — a scroll-snap strip. No pin, no scrub, no GSAP.
+
+   WHAT THIS REPLACED. The section pinned for `travel * 0.55` — roughly 2.5
+   viewport-heights at 1440 — while a GSAP timeline translated the row
+   sideways. That is 2.5 screens of scrolling during which the page moves zero
+   pixels, and it was the largest single item in the site's dead-scroll budget
+   (Law 6). Releasing the pin is also what closes the blank screen that used to
+   sit between this section and the next: that gap was `pinSpacing` reserving
+   room for travel nobody could see.
+
+   AND THE CAPTIONS ARE ALL VISIBLE AT ONCE. They used to be overlaid on each
+   tile at opacity 0 and crossfaded in only for whichever tile was nearest
+   screen-centre, which meant that at any given moment you could not read the
+   label of anything you were looking at except one. They sit under their own
+   photograph now, in normal flow, permanently legible.
+
+   The strip is a native overflow-x container with scroll-snap: it drags with a
+   trackpad, a wheel, a touch and the keyboard for free, it needs no library,
+   and it works identically under reduced motion — so there is no second code
+   path to keep in step.
+   =========================================================================== */
 
 interface GalleryItem {
   id: number;
   src: string;
   alt: string;
   caption: string;
-  // width / height ratio — drives the varied "filmstrip" tile shapes. Tiles all
-  // share one height; the ratio sets each tile's width (wide / square / tall).
+  /** width / height. Tiles share one height; this sets each tile's width. */
   ratio: number;
 }
 
-/* THE AUDIT, and what it cost.
-   ---------------------------------------------------------------------------
-   Eight tiles became three. Every image on disk was classified as a styled
-   food shot, a phone snapshot, or wayfinding, and the snapshots are gone
-   rather than graded around:
+/* THE AUDIT, and what it cost. Eight tiles became three — every image was
+   classified as a styled food shot, a phone snapshot, or wayfinding:
 
-     live-grill            -> promoted to the HERO. It is the strongest asset
-                              on disk, and it is the frame that clips down into
-                              About, so it appears once and travels.
-     banchan-spread        KEEP. Overhead, lit, on the menu.
-     marbled-wagyu         KEEP. Raw marbling under tongs, portrait.
+     live-grill            -> promoted to the HERO, and it is the frame that
+                              clips into About, so it appears once and travels.
      samgyeopsal-grilling  KEEP. Pork belly over live coals.
+     marbled-wagyu         KEEP. Raw marbling under tongs, portrait.
+     banchan-spread        KEEP. Overhead, lit, and on the menu.
      interior              CUT. An empty dining room in daylight.
      table                 CUT. An empty table and a cold grill.
      drinks                CUT. Two soju bottles and a Corona on bare white.
-     outside               MOVED to Contact as wayfinding — the sign is legible
-                           and that is genuinely useful there. It was never a
-                           gallery photograph.
+     outside               MOVED to Contact as wayfinding.
 
-   Three tiles is thin, and that is the honest result of applying the rule
-   rather than a number anyone chose. The reshoot is logged as NEEDS-ASSETS #3;
-   the strip reads correctly at three and takes more without a code change. */
+   Three is thin, and it is the honest result of applying the rule rather than
+   a number anyone chose. The reshoot is NEEDS-ASSETS #3; the strip takes more
+   without a code change. */
 const GALLERY_ITEMS: GalleryItem[] = [
-  { id: 1, src: "/images/samgyeopsal-grilling.png", alt: "Pork belly grilling over live coals at KM.BBQ", caption: "Samgyeopsal on the grill", ratio: 1.5 },
-  { id: 2, src: "/images/marbled-wagyu.png", alt: "Marbled wagyu held over the grill with tongs", caption: "Marbled wagyu", ratio: 0.72 },
-  { id: 3, src: "/images/banchan-spread.png", alt: "A spread of banchan side dishes", caption: "Banchan, included", ratio: 1.0 },
+  {
+    id: 1,
+    src: "/images/samgyeopsal-grilling.png",
+    alt: "Pork belly grilling over live coals at KM.BBQ",
+    caption: "Samgyeopsal on the grill",
+    ratio: 1.5,
+  },
+  {
+    id: 2,
+    src: "/images/marbled-wagyu.png",
+    alt: "Marbled wagyu held over the grill with tongs",
+    caption: "Marbled wagyu",
+    ratio: 0.72,
+  },
+  {
+    id: 3,
+    src: "/images/banchan-spread.png",
+    alt: "A spread of banchan side dishes",
+    caption: "Banchan, included",
+    ratio: 1.0,
+  },
 ];
 
-// How much vertical scroll maps to the horizontal travel. <1 compresses the
-// pin so the full row passes in roughly half the wheel effort of a 1:1 map —
-// the 1.15 pace read as premium but took ~4 viewport-heights of scrolling to
-// traverse, which testers found sluggish.
-const PACE = 0.55;
-
-// The first two tiles are what the viewer is looking at when the gallery
-// arrives, so they load eagerly at high priority; everything past them stays
-// lazy. Keeping this as a constant rather than a magic index so the count and
-// the reason travel together.
-const EAGER_TILES = 2;
-
 export function Gallery() {
-  const sectionRef = useRef<HTMLElement>(null);
-  // Debounce handle + the last measured track width, for the load-settle
-  // refresh below.
-  const refreshTimer = useRef<number | null>(null);
-  const lastWidth = useRef(0);
-
-  useLayoutEffect(() => {
-    const mm = gsap.matchMedia();
-    const q = gsap.utils.selector(sectionRef);
-
-    // Desktop with motion allowed: pin the section and translate the photo row
-    // horizontally on scroll. Mobile (< md) and prefers-reduced-motion fall
-    // through to the CSS layout below (a native swipeable carousel) — the
-    // motion-safe:md classes that build the pinned layout are inactive there,
-    // and the GSAP timeline below never runs, so touch scroll stays untouched.
-    mm.add(
-      "(min-width: 768px) and (prefers-reduced-motion: no-preference)",
-      () => {
-        const track = q(".gallery-track")[0] as HTMLElement;
-        const wrapper = track.parentElement as HTMLElement;
-        const tiles = q(".gallery-tile") as HTMLElement[];
-        const caps = tiles.map(
-          (t) => t.querySelector(".gallery-caption") as HTMLElement | null
-        );
-
-        // Total sideways distance: full row width minus the visible window to
-        // its right of the heading. Read live (invalidateOnRefresh) so it stays
-        // correct after images load / the window resizes.
-        const getTravel = () =>
-          Math.max(0, track.scrollWidth - wrapper.clientWidth);
-
-        // --- Caption crossfade WITHOUT per-frame layout reads ----------------
-        // Fade in the caption of whichever tile is nearest screen-center, the
-        // rest out. The obvious version calls getBoundingClientRect() on all 8
-        // tiles every scrub frame, which is a forced synchronous layout and
-        // spikes frame times on slower machines. Instead each tile's
-        // screen-center is measured ONCE (on refresh/resize) along with the
-        // track's x at that moment; per frame the live center is derived from
-        // the track's transform delta, read from GSAP's cache. No layout.
-        let metrics: { center: number; half: number }[] = [];
-        let baseX = 0;
-        let viewCenter = window.innerWidth / 2;
-
-        const updateCaptions = () => {
-          const dx = ((gsap.getProperty(track, "x") as number) || 0) - baseX;
-          for (let i = 0; i < tiles.length; i++) {
-            const m = metrics[i];
-            const cap = caps[i];
-            if (!m || !cap) continue;
-            const dist = Math.abs(m.center + dx - viewCenter);
-            // Full opacity within ~30% of half-width of center, faded by ~120%.
-            const o = gsap.utils.clamp(
-              0,
-              1,
-              1 - (dist - m.half * 0.3) / (m.half * 1.2)
-            );
-            gsap.set(cap, { opacity: o });
-          }
-        };
-
-        const measure = () => {
-          baseX = (gsap.getProperty(track, "x") as number) || 0;
-          viewCenter = window.innerWidth / 2;
-          metrics = tiles.map((t) => {
-            const r = t.getBoundingClientRect();
-            return { center: r.left + r.width / 2, half: r.width / 2 };
-          });
-          updateCaptions();
-        };
-
-        gsap.set(track, { x: 0 });
-
-        gsap.to(track, {
-          x: () => -getTravel(),
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top top",
-            end: () => "+=" + getTravel() * PACE,
-            pin: true,
-            pinSpacing: true,
-            anticipatePin: 1,
-            // Numeric scrub (not `true`) eases the row toward the scroll
-            // position so the travel never snaps notch-to-notch.
-            scrub: MOTION.scrub,
-            invalidateOnRefresh: true,
-            // Re-measure on refresh (layout may have changed); per frame only
-            // the cheap transform-delta read runs.
-            onRefresh: measure,
-            onUpdate: updateCaptions,
-          },
-        });
-
-        // Row width depends on the (async) image layout — measure once it lands.
-        ScrollTrigger.refresh();
-      }
-    );
-
-    return () => {
-      mm.revert();
-    };
-  }, []);
-
-  useScrollRefresh();
-
-  // Refresh once after image loads SETTLE, and only if they actually changed
-  // the row's width.
-  //
-  // The previous version counted to 8 and refreshed on the last load. Because
-  // tiles past the first two are lazy, that last load happens while the pinned
-  // track is being scrolled horizontally — so a full ScrollTrigger.refresh()
-  // (recomputing every trigger and all pin spacing on the page) landed in the
-  // middle of the scroll. That was the ~70ms long task behind the first-view
-  // stutter; on later passes the images are cached, nothing loads mid-scroll,
-  // and the stutter is gone, which is exactly the reported symptom.
-  //
-  // Now: each load pushes a 150ms debounce, the work is deferred to idle, and
-  // it bails entirely when scrollWidth is unchanged (the common case, since
-  // every tile's box is fixed by its aspect-ratio before the image arrives).
-  const onTileLoad = () => {
-    const track = sectionRef.current?.querySelector<HTMLElement>(".gallery-track");
-    if (!track) return;
-    if (refreshTimer.current !== null) window.clearTimeout(refreshTimer.current);
-    refreshTimer.current = window.setTimeout(() => {
-      refreshTimer.current = null;
-      const w = track.scrollWidth;
-      if (w === lastWidth.current) return; // layout never moved: nothing to do
-      lastWidth.current = w;
-      const run = () => ScrollTrigger.refresh();
-      if ("requestIdleCallback" in window) {
-        window.requestIdleCallback(run, { timeout: 500 });
-      } else {
-        run();
-      }
-    }, 150);
-  };
-
-  useEffect(
-    () => () => {
-      if (refreshTimer.current !== null) window.clearTimeout(refreshTimer.current);
-    },
-    []
-  );
-
-  // overflow-hidden keeps the horizontal motion inside the section — the page
-  // itself never scrolls sideways at any width.
-  //
-  // GROUND: cream. This section used to sit on the warmer paper tone and
-  // seam-morph into it, which made it a third ground; the page now has exactly
-  // two (cream and char-2) and this boundary is carried by rhythm instead of
-  // by a change of panel. The gallery-bg-warm ink wash went with it — a texture
-  // that exists in exactly one section is a stray voice, and the site-wide
-  // paper grain is the texture now.
   return (
     <section
-      ref={sectionRef}
       id="gallery"
       aria-labelledby="gallery-heading"
-      className="grain relative overflow-hidden bg-char py-section md:py-section-lg motion-safe:md:py-0"
+      className="grain relative overflow-hidden bg-char py-section md:py-section-lg"
     >
-      {/* The grid runs the section: heading in columns 1-4, photo row from
-          column 5 out to the right edge of the viewport. That right-edge break
-          is the ONE way media is allowed to leave the track, and it is the same
-          break here as anywhere else on the site. */}
-      <div className="grid-page relative z-base gap-y-10 motion-safe:md:h-screen motion-safe:md:items-center motion-safe:md:gap-y-0">
-        {/* Heading — the fixed anchor. Sits on the left while the photos stream
-            past on desktop; flows on top on mobile. Left-aligned at both. */}
-        <div className="col-span-full motion-safe:md:col-span-4 motion-safe:md:pr-8">
-          <p className="eyebrow mb-4">Gallery</p>
-          <h2 id="gallery-heading" className="h2-scale">
+      <div className="grid-page relative z-base gap-y-10">
+        <div className="col-text">
+          <p className="eyebrow text-ember">Gallery</p>
+          <h2 id="gallery-heading" className="h2-scale mt-4">
             A look inside
           </h2>
           <p className="copy measure mt-4">
@@ -247,68 +100,40 @@ export function Gallery() {
           </PillLink>
         </div>
 
-        {/* Photo row. On desktop the GSAP timeline translates this track; on
-            mobile / reduced motion the wrapper is a native snap carousel. */}
-        <div className="bleed-right col-span-full overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory motion-safe:md:col-span-8 motion-safe:md:overflow-hidden [&::-webkit-scrollbar]:hidden">
-          {/* No permanent will-change here: it promotes the whole 8-tile row to
-              its own layer for the life of the page, which costs more memory
-              than it saves. GSAP promotes during the tween itself. */}
-          <div className="gallery-track flex items-center gap-5 pr-6 motion-safe:md:gap-8 motion-safe:md:pr-[12vw]">
+        {/* The strip runs from column 1 out to the right viewport edge — the
+            one sanctioned way media leaves the track. `tabIndex` and a label so
+            a keyboard user can reach and scroll it; the scrollbar is hidden
+            because the snap points and the bleed already say it moves. */}
+        <div
+          className="bleed-right col-full snap-x snap-mandatory overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          tabIndex={0}
+          role="group"
+          aria-label="Photographs, scroll sideways"
+        >
+          <div className="flex items-start gap-5 pr-6 md:gap-7">
             {GALLERY_ITEMS.map((item, i) => (
-              <figure
-                key={item.id}
-                // photo carries the shared photography treatment and the
-                // one photo corner radius, so it also owns the clipping.
-                className="gallery-tile photo group relative h-[52vh] shrink-0 snap-start bg-char-2 shadow-card motion-safe:md:h-[60vh]"
-                // Fixed height + aspect-ratio means every tile's box exists at
-                // its final size before its image arrives, so a load can never
-                // shift the row. This is what keeps CLS at 0 here.
-                style={{ aspectRatio: String(item.ratio) }}
-              >
-                <Image
-                  src={item.src}
-                  alt={item.alt}
-                  fill
-                  sizes="(max-width: 768px) 70vw, 40vw"
-                  className="object-cover"
-                  // The first two are decoded before the viewer reaches them;
-                  // the rest stay lazy so the page does not pull 8 photos up
-                  // front. decoding is explicit rather than relying on the
-                  // default.
-                  priority={i < EAGER_TILES}
-                  decoding="async"
-                  onLoad={onTileLoad}
-                />
-                {/* Caption: dark bottom gradient + small letter-spaced label.
-                    Visible per-tile on mobile; on desktop it starts hidden and
-                    the timeline fades in only the centered tile's caption. */}
-                {/* z-nav: above the photo's lift (z-2) and grain (z-3)
-                    overlays, so the label is never washed by either. */}
-                <figcaption className="gallery-caption pointer-events-none absolute inset-x-0 bottom-0 z-nav flex items-end bg-gradient-to-t from-char/70 via-char/20 to-transparent p-4 pt-12 opacity-100 motion-safe:md:opacity-0">
-                  <span className="eyebrow text-bone">{item.caption}</span>
-                </figcaption>
+              <figure key={item.id} className="shrink-0 snap-start">
+                <div
+                  className="photo h-[48vh] md:h-[56vh]"
+                  style={{ aspectRatio: String(item.ratio) }}
+                >
+                  <Image
+                    src={item.src}
+                    alt={item.alt}
+                    fill
+                    sizes="(max-width: 768px) 70vw, 40vw"
+                    className="object-cover"
+                    // The first tile is on screen when the section arrives;
+                    // the rest stay lazy.
+                    priority={i === 0}
+                    decoding="async"
+                  />
+                </div>
+                {/* Under the photograph, in flow, always readable. */}
+                <figcaption className="eyebrow mt-3">{item.caption}</figcaption>
               </figure>
             ))}
           </div>
-        </div>
-
-        {/* Mobile-only scroll indicator. The desktop gallery is a pinned,
-            scroll-driven track that needs no hint; on phones the photo row is a
-            native horizontal swipe carousel, so cue the sideways gesture. */}
-        <div className="col-span-full flex items-center gap-2 md:hidden">
-          <span className="eyebrow text-bone/60">Swipe to explore</span>
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="gallery-swipe-hint h-4 w-4 text-ember"
-          >
-            <path d="M5 12h14M13 6l6 6-6 6" />
-          </svg>
         </div>
       </div>
     </section>

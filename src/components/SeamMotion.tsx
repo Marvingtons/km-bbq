@@ -307,35 +307,11 @@ export function SeamMotion({ calm = false }: { calm?: boolean }) {
       // A handoff is two surfaces exchanging the page, not confetti thrown over
       // the join.
 
-      // 6 — HANDOFF: About -> Gallery. A couple of mural accents drift down past
-      // the boundary and fade, so the illustrated world trails off into the
-      // photography instead of stopping at a border.
-      const trail = gsap.utils.toArray<HTMLElement>(".mural-trail > *");
-      if (trail.length) {
-        gsap.fromTo(
-          trail,
-          { yPercent: 0, autoAlpha: 0.7 },
-          {
-            yPercent: 120,
-            autoAlpha: 0,
-            ease: "none",
-            stagger: 0.06,
-            // Without this, the from-state (autoAlpha 0.7) renders on load and
-            // the marks sit visible for the whole section, not just at the
-            // boundary — including behind the "See the full menu" pill, which
-            // is an OUTLINE pill and therefore transparent at rest, so they
-            // showed straight through it. The marks now stay hidden (CSS
-            // opacity-0) until this trigger actually starts near the seam.
-            immediateRender: false,
-            scrollTrigger: {
-              trigger: sel("#about"),
-              start: "bottom 75%",
-              end: "bottom 25%",
-              scrub: true,
-            },
-          }
-        );
-      }
+      // 6 — REMOVED. A disc, a squiggle and a second disc used to drift down
+      // across the About -> Gallery boundary, fading as they went. They were
+      // drawn to echo the mural, and the mural is gone, so they were echoing
+      // nothing. `.mural-trail` no longer exists in the markup either, so this
+      // timeline was querying an empty set.
 
       // 7 — HARD CUT: Contact -> Footer. The dark footer settles up under the
       // cream: its content lags slightly as it enters, so the page comes to

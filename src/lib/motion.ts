@@ -49,8 +49,10 @@ export const MOTION = {
   /** Entrance reveal: the distance content rises through, in px. */
   rise: 24,
   stagger: 0.08,
-  /** Scrub catch-up for pinned, scroll-driven timelines. */
-  scrub: 1,
+  /** Scrub catch-up, in seconds. Was 1 — a full second of the page still
+   *  moving after the wheel stopped, compounded on top of Lenis's own
+   *  smoothing, which read as the page lagging behind the reader. */
+  scrub: 0.5,
 } as const;
 
 /** Fixed site-header height, in px. One value; sections and jump offsets read it. */
@@ -68,37 +70,39 @@ export const NAV_H = 68;
 export const HERO_SCRUB = 0.6;
 
 /**
- * Preloader choreography. The mark building is the point, so these beats are
- * deliberately longer than a minimal loader — but the timeline is load-aware
- * (the HOLD is skipped when the page is already ready) so it never feels stuck.
- * All values in seconds.
+ * Preloader choreography. CAPPED AT 1.2 SECONDS, TOTAL.
  *
- * Every MOVE here draws its duration and its curve from MOTION above. The two
- * values that are NOT moves — `build` (how long the whole assembly lasts) and
- * `hold` (the rest beat once it is assembled) — are the length of a scene, not
- * the speed of a transition, so they stay as their own numbers.
+ * It used to run ~3.0s best case — a 2.2s scripted build, a 0.7s "deliberate
+ * rest beat" with nothing happening, and a 0.8s wipe — and it could park
+ * indefinitely waiting on `window.load`, with a 10s CSS failsafe behind it. The
+ * whole time, `html.preloading` held `overflow: hidden`, so someone standing
+ * outside deciding where to eat was looking at a locked, empty rectangle.
+ *
+ * PRELOADER.total is the contract, and Preloader.tsx enforces it with a timed
+ * exit rather than trusting the sum of the beats. The load-await is gone: the
+ * page is server-rendered, so there is nothing worth waiting for that is worth
+ * a second of someone's evening.
+ *
+ * All values in seconds.
  */
 export const PRELOADER = {
-  /** Ember hairline scales in beneath the mark. */
-  line: MOTION.dur.slow,
+  /** Total wall-clock budget, in seconds. Enforced, not aspirational. */
+  total: 1.2,
+  /** Flame hairline scales in beneath the mark. */
+  line: 0.28,
   /** Per-path fade+rise as the 8 lockup paths build in document order. */
-  pathIn: MOTION.dur.slow,
-  pathStagger: 0.11,
+  pathIn: 0.3,
+  pathStagger: 0.035,
   pathRise: 8,
-  /** The whole lockup settles from 1.04 -> 1 across the entire build. */
-  lockupScaleFrom: 1.04,
-  build: 2.2,
-  /** "Korean Barbecue" eyebrow, overlapping the build's tail. */
-  eyebrow: MOTION.dur.slow,
-  /** Rest beat with the mark fully assembled (skipped if the page is ready). */
-  hold: 0.7,
-  /** Line stretches, lockup fades, cream field wipes upward. */
-  exit: MOTION.dur.stage,
+  /** The whole lockup settles from 1.03 -> 1 across the build. */
+  lockupScaleFrom: 1.03,
+  build: 0.62,
+  /** The eyebrow, overlapping the build's tail. */
+  eyebrow: 0.26,
+  /** Line stretches, lockup fades, the field wipes upward. */
+  exit: 0.36,
   exitLineStretch: 3,
   exitLockupScale: 0.985,
-  /* Was "expo.out" / "power4.inOut" — two curves this sequence had invented
-     for itself. The build now settles on the house curve and the wipe reverses
-     on the house in-out, so the loading screen and the page move alike. */
   ease: MOTION.gsapEase,
   exitEase: MOTION.gsapEaseInOut,
 } as const;
