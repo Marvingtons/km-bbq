@@ -223,6 +223,9 @@ export function About() {
             <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7">
               {FEATURED.map(({ item, category, href }, i) => {
                 const isFeature = i === 0;
+                // Spans of the CARD grid directly above, not of the page's
+                // 12-column track. The rule that bans raw col-span-* is about
+                // `.grid-page`; a component's own grid is allowed its own spans.
                 const span = isFeature ? "sm:col-span-2 lg:row-span-2" : "";
                 return (
                   <Link

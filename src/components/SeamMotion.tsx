@@ -277,7 +277,7 @@ export function SeamMotion({ calm = false }: { calm?: boolean }) {
       // gallery rises to meet it.
       //
       // yPercent 2, not 7. At 7 this pushed the card down ~40px on a 571px
-      // card, and since the card sits directly above the "See the full menu"
+      // card, and since the card sits directly above the "See the menu"
       // pill, the lag drove it straight into the button exactly when the
       // button became visible. The pinned stage has no spare height to simply
       // push the pill further down, so the lag itself had to come back to

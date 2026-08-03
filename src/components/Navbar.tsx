@@ -154,7 +154,7 @@ export function Navbar() {
   const barVisible = scrolled || !isHome;
 
   // EMBER-DEEP NEEDS THE CREAM PANEL UNDER IT. While the bar is transparent it
-  // is the hero's video the type sits on, and ember (#9A5A1A) is a warm
+  // is the hero's backdrop the type sits on, and ember was a warm
   // mid-brown against footage that is full of warm mid-brown: measured 1.83:1
   // at its worst frame, against 6.1:1 for ink in the same place. So over the
   // video every link is ink, and the active one is identified by its pink

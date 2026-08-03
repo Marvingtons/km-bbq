@@ -22,8 +22,14 @@ Grep for `NEEDS ASSET` to find every slot.
 - **Why:** The current R2 clip (`kmbbq-hero.mp4`) is a macro of a *clean, empty*
   grill plate — cold, metallic, no food, and it is the same frame the About
   panel used. Phase 3 bans it from both slots.
-- **Currently rendering:** `--char` ground with a low ember glow at the bottom
-  edge, so the hero reads as a dark grill room rather than a failed load.
+- **Currently rendering:** `live-grill.png` as an interim still — the client's
+  own photograph of their own grill with their own food on it, so it is neither
+  stock nor off-menu — under a char scrim and a low ember glow. It is not a
+  substitute for the loop: it was never shot for this frame, and it shows. The
+  hero window clips into About's right-hand columns, and the right third of
+  this photo is tables and chairs rather than food, so `object-position` is
+  currently biased to 62% to drag the grill toward the dock. A loop shot for
+  the frame makes that workaround unnecessary.
 
 ## 2. About section photograph — RESOLVED for now
 

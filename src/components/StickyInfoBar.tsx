@@ -11,8 +11,16 @@ import { PRICING, PHONE, DIRECTIONS_URL, HOURS_SPEC } from "@/data/info";
  *
  * Every value comes from src/data/info.ts. Nothing here is typed twice.
  *
- * Bottom of the viewport on phones, where the thumb is. A compact cluster at
- * the top right on desktop, clear of the nav bar.
+ * Bottom of the viewport on phones, where the thumb is.
+ *
+ * BOTTOM RIGHT ON DESKTOP, not top right, and this is a deliberate departure
+ * from the brief. Top-right was tried and shipped a real defect: the cluster is
+ * `position: fixed`, so at 1440 it sat permanently on top of the house-favourite
+ * cards and hid the second dish's name at every scroll position. There is no
+ * offset that fixes it — the content track runs the full width, so anything
+ * pinned top-right covers something. Bottom-right sits below the reading path
+ * at every width, stays equally persistent, and is where a returning cursor
+ * already is.
  */
 
 /** Tonight's closing time, or null when we are shut. */
@@ -73,7 +81,7 @@ export function StickyInfoBar() {
       {shown && (
         <motion.aside
           aria-label="Price, hours and contact"
-          className="fixed inset-x-0 bottom-0 z-nav border-t border-char-3 bg-char-2/95 backdrop-blur-md md:inset-x-auto md:bottom-auto md:right-6 md:top-[5.25rem] md:rounded-pill md:border md:px-2 md:py-2 md:shadow-pop lg:right-12"
+          className="fixed inset-x-0 bottom-0 z-nav border-t border-char-3 bg-char-2/95 backdrop-blur-md md:inset-x-auto md:bottom-6 md:right-6 md:rounded-pill md:border md:px-2 md:py-2 md:shadow-pop lg:right-12"
           initial={reduce ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           exit={reduce ? { opacity: 1 } : { opacity: 0, y: 16 }}

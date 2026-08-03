@@ -1,6 +1,5 @@
 import { Logo } from "./Logo";
 import { SocialLinks } from "./SocialLinks";
-import { SectionSeam } from "./SectionSeam";
 import { Dot } from "./Dot";
 import { PHONE, ADDRESS, HOURS, DIRECTIONS_URL } from "@/data/info";
 
@@ -51,33 +50,32 @@ export function Footer() {
 
   return (
     <footer
-      // -mt-6 pulls the dark footer up under the cream by a hair so the two
-      // surfaces overlap rather than abut; SeamMotion lags the content inside
-      // as it enters. The ember hairline on the seam is the divider.
-      //
-      // char-2, not the old neutral near-black. This is one of the two places
-      // the pink logo and the ember accent have to share a dark ground, and a
-      // neutral black rejects both — on a warm char-2 they belong to the same
-      // world, and it echoes the purple already in the mural.
-      className="relative -mt-6 overflow-hidden bg-char-2 pb-10 pt-14 text-bone/70"
+      // char-2 rather than char: the footer is a raised surface, so it lifts
+      // off the page ground by one step instead of being divided from it by a
+      // rule. The whole site is dark now, so the four-colour mark sits here the
+      // same way it sits everywhere else.
+      className="relative overflow-hidden border-t border-char-3 bg-char-2 pb-10 pt-14 text-bone/70"
       role="contentinfo"
     >
-      {/* The ground changes here (cream -> char-2), so the seam gets the
-          site's one transition device. */}
-      <SectionSeam />
       {/* Ambient warm glow for depth. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-ember/10 blur-[120px]"
       />
 
-      <div className="grid-page relative gap-y-12">
+      <div className="grid-page relative">
+        <div className="col-full">
+          {/* The four columns are a layout inside the footer, not four spans of
+              the page's 12-column track — so they nest their own grid rather
+              than reaching for raw col-span-* against `.grid-page`. That is
+              what `.col-full` is for. */}
+          <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_0.8fr]">
           {/* Brand. The socials used to be pushed to the column's foot with
               md:mt-auto, which only worked while this was the tallest column;
               once Explore went back to a single column it stretched a 100px
               hole between the tagline and the icons. They sit directly under
               the tagline now and the column simply ends where it ends. */}
-          <div className="col-span-full flex flex-col md:col-span-4">
+          <div className="flex flex-col">
             <div className={topRow}>
               <Logo size={148} className="opacity-90" />
             </div>
@@ -86,17 +84,10 @@ export function Footer() {
               cuts and grill them yourself right at your table.
             </p>
             <SocialLinks tone="dark" className="mt-6" />
-            {/* NO mural spot mark here, deliberately. The mural's white is
-                keyed out of the artwork itself — the tiger's teeth, the eye
-                highlights — so on cream those gaps read as the page showing
-                through and on this char-2 ground they read as holes punched
-                in the animal. The marks live on the cream sections; the footer
-                carries the logo, which is the brand mark that does work on a
-                dark surface. See tools/extract-mural-marks.mjs. */}
           </div>
 
           {/* Visit — NAP block + actions */}
-          <div className="col-span-full md:col-span-3">
+          <div>
             <div className={topRow}>
               <h2 className={label}>Visit</h2>
             </div>
@@ -135,7 +126,7 @@ export function Footer() {
           </div>
 
           {/* Hours */}
-          <div className="col-span-full md:col-span-3">
+          <div>
             <div className={topRow}>
               <h2 className={label}>Hours</h2>
             </div>
@@ -153,7 +144,7 @@ export function Footer() {
           </div>
 
           {/* Explore */}
-          <nav aria-label="Footer navigation" className="col-span-full md:col-span-2">
+          <nav aria-label="Footer navigation">
             <div className={topRow}>
               <h2 className={label}>Explore</h2>
             </div>
@@ -179,9 +170,11 @@ export function Footer() {
             </ul>
           </nav>
 
-        {/* The legal row is a grid child too, so it lines up with the brand
-            column above it rather than with a container of its own. */}
-        <div className="col-span-full mt-10 flex flex-col justify-between gap-3 border-t border-bone/10 pt-6 text-bone/55 sm:flex-row sm:items-center">
+          </div>
+
+        {/* The legal row sits under the four columns and lines up with the
+            brand column's left edge. */}
+        <div className="mt-14 flex flex-col justify-between gap-3 border-t border-char-3 pt-6 text-bone/55 sm:flex-row sm:items-center">
           <p className="font-sans text-xs">
             &copy; {year} KM<Dot />BBQ. All rights reserved.
           </p>
@@ -214,6 +207,7 @@ export function Footer() {
               Site by Norvix
             </a>
           </div>
+        </div>
         </div>
       </div>
     </footer>

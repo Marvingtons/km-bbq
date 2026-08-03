@@ -95,7 +95,14 @@ export function HeroBackdrop({ className = "" }: { className?: string }) {
         // The house grade, one notch darker. 0.62 was double-dimming: the
         // scrim below already carries the type, so the filter only has to keep
         // the picture from competing with it.
-        className="select-none object-cover [filter:saturate(1.08)_contrast(1.06)_brightness(0.8)]"
+        // object-position pulls the grill toward the right of the frame on
+        // purpose. The headline sits bottom-LEFT, and the hero window clips
+        // down into About's columns 9-12 — the right third — so biasing the
+        // subject right keeps it out from behind the type AND puts food rather
+        // than empty chairs in the docked panel. It is a crop working around a
+        // still that was never shot for this transition; the loop in
+        // NEEDS-ASSETS #1 makes it moot.
+        className="select-none object-cover object-[62%_58%] [filter:saturate(1.08)_contrast(1.06)_brightness(0.8)]"
       />
 
       {/* THE ONE THING LAYERED OVER THE PICTURE, and it is a ground, not a
