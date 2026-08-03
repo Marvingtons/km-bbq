@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { PRICING, PHONE, DIRECTIONS_URL, HOURS_SPEC } from "@/data/info";
 
@@ -29,27 +29,48 @@ function todaysClose(now: Date): string | null {
   return block.closeLabel;
 }
 
+/**
+ * Scroll position and wall-clock are both external systems, so they are read
+ * with useSyncExternalStore rather than mirrored into state from an effect.
+ *
+ * The snapshot is a STRING, deliberately: getSnapshot has to return a value
+ * that is stable between renders or React re-renders forever, and a fresh
+ * object would not be. One primitive carries both facts.
+ *
+ * getServerSnapshot returns the hidden state, so SSR emits nothing and
+ * hydration cannot disagree about what time it is where the visitor is.
+ */
+const subscribe = (onChange: () => void) => {
+  window.addEventListener("scroll", onChange, { passive: true });
+  window.addEventListener("resize", onChange);
+  // The close time has to go stale on its own, not only when someone scrolls.
+  const tick = window.setInterval(onChange, 60_000);
+  return () => {
+    window.removeEventListener("scroll", onChange);
+    window.removeEventListener("resize", onChange);
+    window.clearInterval(tick);
+  };
+};
+
+const snapshot = () =>
+  `${window.scrollY > window.innerHeight * 0.85}|${todaysClose(new Date()) ?? ""}`;
+const serverSnapshot = () => "false|";
+
 export function StickyInfoBar() {
   const reduce = useReducedMotion();
-  const [shown, setShown] = useState(false);
-  // Rendered only after mount. Opening hours depend on the visitor's clock,
-  // which the server cannot know — computing this during SSR would either
-  // hydrate-mismatch or bake one visitor's evening into the static HTML.
-  const [close, setClose] = useState<string | null | undefined>(undefined);
+  const [shownFlag, closeLabel] = useSyncExternalStore(
+    subscribe,
+    snapshot,
+    serverSnapshot
+  ).split("|");
 
-  useEffect(() => {
-    setClose(todaysClose(new Date()));
-    const onScroll = () => setShown(window.scrollY > window.innerHeight * 0.85);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  const open = close !== undefined && close !== null;
+  const shown = shownFlag === "true";
+  const close = closeLabel || null;
+  const open = close !== null;
 
   return (
     <AnimatePresence>
-      {shown && close !== undefined && (
+      {shown && (
         <motion.aside
           aria-label="Price, hours and contact"
           className="fixed inset-x-0 bottom-0 z-nav border-t border-char-3 bg-char-2/95 backdrop-blur-md md:inset-x-auto md:bottom-auto md:right-6 md:top-[5.25rem] md:rounded-pill md:border md:px-2 md:py-2 md:shadow-pop lg:right-12"

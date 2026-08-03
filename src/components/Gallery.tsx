@@ -19,15 +19,32 @@ interface GalleryItem {
   ratio: number;
 }
 
+/* THE AUDIT, and what it cost.
+   ---------------------------------------------------------------------------
+   Eight tiles became three. Every image on disk was classified as a styled
+   food shot, a phone snapshot, or wayfinding, and the snapshots are gone
+   rather than graded around:
+
+     live-grill            -> promoted to the HERO. It is the strongest asset
+                              on disk, and it is the frame that clips down into
+                              About, so it appears once and travels.
+     banchan-spread        KEEP. Overhead, lit, on the menu.
+     marbled-wagyu         KEEP. Raw marbling under tongs, portrait.
+     samgyeopsal-grilling  KEEP. Pork belly over live coals.
+     interior              CUT. An empty dining room in daylight.
+     table                 CUT. An empty table and a cold grill.
+     drinks                CUT. Two soju bottles and a Corona on bare white.
+     outside               MOVED to Contact as wayfinding — the sign is legible
+                           and that is genuinely useful there. It was never a
+                           gallery photograph.
+
+   Three tiles is thin, and that is the honest result of applying the rule
+   rather than a number anyone chose. The reshoot is logged as NEEDS-ASSETS #3;
+   the strip reads correctly at three and takes more without a code change. */
 const GALLERY_ITEMS: GalleryItem[] = [
-  { id: 1, src: "/images/live-grill.png", alt: "Built-in grill at a table at KM BBQ", caption: "Table Grill", ratio: 1.5 },
-  { id: 2, src: "/images/banchan-spread.png", alt: "Banchan side dishes", caption: "Banchan", ratio: 1.0 },
-  { id: 3, src: "/images/marbled-wagyu.png", alt: "Marbled wagyu on the grill", caption: "Marbled Wagyu", ratio: 0.72 },
-  { id: 4, src: "/images/interior.png", alt: "KM BBQ interior", caption: "Interior", ratio: 1.5 },
-  { id: 5, src: "/images/samgyeopsal-grilling.png", alt: "Samgyeopsal sizzling on the grill", caption: "Samgyeopsal", ratio: 0.95 },
-  { id: 6, src: "/images/table.png", alt: "Table setting", caption: "Table Setting", ratio: 1.5 },
-  { id: 7, src: "/images/drinks.png", alt: "Drinks", caption: "Drinks", ratio: 0.7 },
-  { id: 8, src: "/images/outside.png", alt: "Outside of KM BBQ", caption: "Outside", ratio: 1.05 },
+  { id: 1, src: "/images/samgyeopsal-grilling.png", alt: "Pork belly grilling over live coals at KM.BBQ", caption: "Samgyeopsal on the grill", ratio: 1.5 },
+  { id: 2, src: "/images/marbled-wagyu.png", alt: "Marbled wagyu held over the grill with tongs", caption: "Marbled wagyu", ratio: 0.72 },
+  { id: 3, src: "/images/banchan-spread.png", alt: "A spread of banchan side dishes", caption: "Banchan, included", ratio: 1.0 },
 ];
 
 // How much vertical scroll maps to the horizontal travel. <1 compresses the

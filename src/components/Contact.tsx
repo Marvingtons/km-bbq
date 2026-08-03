@@ -1,6 +1,7 @@
 import { ScrollReveal } from "./ScrollReveal";
 import { SocialLinks } from "./SocialLinks";
-import { ContactMap, DirectionsLink } from "./ContactMap";
+import Image from "next/image";
+import { DirectionsLink } from "./ContactMap";
 import { HOURS, ADDRESS, PHONE, DIRECTIONS_URL } from "@/data/info";
 
 // The two things a visitor is here for — when you are open, and where you are —
@@ -110,16 +111,30 @@ export function Contact() {
           </ScrollReveal>
         </div>
 
-        {/* Map runs the full track, under both cards. An interactive Google
-            embed, lazy-loaded so it stays out of the LCP path. SQUARE: it is a
-            structural surface, not a photograph. */}
+        {/* WAYFINDING, and the one place the storefront photo belongs.
+
+            It is a daylight phone snapshot of a strip-mall unit, which is why
+            it is not in the gallery. It is also the single most useful image on
+            the site here: the sign is legible, so a walk-in knows exactly what
+            they are looking for from the parking lot. Strip-mall honesty is an
+            asset at the door and a liability in a gallery.
+
+            No neighbour is named. Nothing in the record establishes which
+            businesses share the plaza, and Law 1 does not bend for a caption. */}
         <ScrollReveal delay={0.08} className="col-full">
-          <div className="aspect-[16/10] w-full overflow-hidden rounded-none border border-char-3 shadow-card md:aspect-[21/9]">
-            <ContactMap />
-          </div>
-          {/* Under the map, not floating on it — see DirectionsLink. Aligned to
-              the same column edge as the heading, not centred. */}
-          <div className="mt-4 flex">
+          <figure className="photo aspect-[16/10] w-full md:aspect-[21/9]">
+            <Image
+              src="/images/outside.png"
+              alt="The KM.BBQ storefront, with the sign above the entrance"
+              fill
+              sizes="(max-width: 768px) 100vw, 80vw"
+              className="object-cover"
+            />
+            <figcaption className="absolute inset-x-0 bottom-0 z-nav p-5">
+              <span className="eyebrow text-bone/80">Look for the sign</span>
+            </figcaption>
+          </figure>
+          <div className="mt-5 flex">
             <DirectionsLink />
           </div>
         </ScrollReveal>

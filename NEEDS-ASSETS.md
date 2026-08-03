@@ -25,29 +25,36 @@ Grep for `NEEDS ASSET` to find every slot.
 - **Currently rendering:** `--char` ground with a low ember glow at the bottom
   edge, so the hero reads as a dark grill room rather than a failed load.
 
-## 2. About section photograph
+## 2. About section photograph — RESOLVED for now
 
-- **Slot:** `src/components/About.tsx`, the docked media column (`.col-media`)
-- **Aspect:** 3:4 portrait at md+, 16:9 below
-- **Brief:** One frame of the room working — a table mid-service, hands over a
-  grill, a full spread. People welcome. This is the frame the hero window
-  clips down into, so it must survive being seen large.
-- **Why:** The slot previously held `hero-poster.webp`, the same empty-grill
-  macro as the hero. Showing one photo twice in two consecutive sections was
-  the single most visible repetition on the page.
+`live-grill.png` was promoted to the hero, and the hero window clips down into
+About's media column, so the dock now lands on a photograph of the room with
+food on the grill. No second asset is needed until the loop lands, at which
+point About inherits the loop's docked panel automatically.
 
-## 3. Re-graded gallery set
+## 3. Re-graded gallery set — the gallery is down to three tiles
 
-- **Slot:** `src/components/Gallery.tsx`
-- **Aspect:** mixed, tiles share one height
-- **Brief:** Reshoot `drinks`, `table`, `interior` and `outside` at night with
-  the room lit. The current four are daylight phone snapshots on white tables
-  and read a full tier below the food photography beside them.
-- **Kept and in use meanwhile:** `live-grill`, `banchan-spread`,
-  `marbled-wagyu`, `samgyeopsal-grilling` — all styled food shots that hold up
-  under the warm-dark grade.
-- **Note:** `outside.png` is retained deliberately, but only in the Visit
-  section as wayfinding, not in the gallery. See Phase 3.
+The audit cut five of eight. What is left, and why:
+
+| File | Verdict |
+|---|---|
+| `samgyeopsal-grilling` | **Keep.** Pork belly over live coals. |
+| `marbled-wagyu` | **Keep.** Raw marbling under tongs, portrait. |
+| `banchan-spread` | **Keep.** Overhead, lit, on the menu. |
+| `live-grill` | Promoted to the hero. Appears once, and travels. |
+| `interior` | **Cut.** Empty dining room, daylight, brown tile. |
+| `table` | **Cut.** Empty table, cold grill. |
+| `drinks` | **Cut.** Two soju bottles and a Corona on bare white. |
+| `outside` | **Moved** to Contact as wayfinding. |
+
+The three cut files are still on disk and still in the image manifest — they
+are the client's own photographs and are deliberately unreferenced pending a
+reshoot, not deleted.
+
+- **Wanted:** 3–5 more frames, shot **at night with the room lit** — a full
+  table mid-service, hands over a grill, banchan going down, the pass. People
+  welcome. Same warm-dark grade as the three keepers.
+- **Aspect:** mixed is good; tiles share one height and vary in width.
 
 ## 4. Static map image (optional)
 

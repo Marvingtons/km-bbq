@@ -12,78 +12,12 @@ import { useScrollRefresh } from "@/lib/useScrollRefresh";
 gsap.registerPlugin(ScrollTrigger);
 
 /* ===========================================================================
-   ABOUT — three beats, in order: the story on cream, the mural band, the cuts.
-   ---------------------------------------------------------------------------
-   WHAT THIS REPLACED, AND WHY. The mural used to be this section's GROUND: a
-   full-viewport backdrop that the hero's window revealed, pinned for 260% of
-   scroll while two halves slid apart and the story, then the featured cuts,
-   were revealed in the gap between them.
+   ABOUT — two beats: the story, then the cuts.
 
-   Two things were wrong with that, and they were the same thing.
-
-   1. An unbounded mural stops reading as a painting. Run edge to edge with no
-      top and no bottom, the eye reads it as a surface rather than a picture,
-      and the moment it reads as a surface it starts looking for the repeat —
-      which this art obliges, because the two sheets share a motif vocabulary
-      (see the asset note below). Wallpaper is cheap. A painting is expensive.
-      Same asset; the framing is the whole difference.
-   2. The docked video panel had nothing to sit in. At the settled state the
-      story was still hidden (the pinned timeline did not reveal it until 0.16)
-      so the viewport was a video rectangle floating on pattern — the panel got
-      its reserved slot but the section around it never materialised.
-
-   So the mural gets its edges back. It is a discrete full-bleed BAND below the
-   story: one instance, natural aspect, a defined top and bottom, its own
-   drift-and-settle, its own moment. The story sits on cream where it belongs,
-   composed on the grid beside the panel, and THAT is what the hero's window
-   now opens onto.
-
-   The pin is gone with it. It existed to hold the mural still while it opened;
-   nothing opens any more. Everything below flows.
-   ---------------------------------------------------------------------------
-   THE ASSETS ARE NOT TWO HALVES OF ONE PAINTING, whatever the old comments in
-   here said. `mural-left.webp` is 889x884 and `mural-right.webp` is 890x884 —
-   two roughly SQUARE sheets, each a scatter of motifs on a baked-out white
-   field, drawn from a shared vocabulary. Side by side they make 1779x884
-   (~2.01:1), which is where the band's ratio comes from and is the only sane
-   band geometry available: a single sheet is 1:1, and a full-bleed square band
-   is 1430px tall at a 1440 viewport.
-
-   The old comments claimed a "natural ~2535:1240 combined ratio" and that the
-   halves "meet flush at the center seam". Neither was true of the files on
-   disk. Re-measure before trusting any number in here.
+   The mural band that used to sit between them is gone (see the note further
+   down). What is left is the section actually doing a job: what this place is,
+   beside a photograph of it, and then what to order.
    =========================================================================== */
-
-/**
- * THE BAND'S ARITHMETIC, in one place, because the three numbers are coupled
- * and getting them out of step is silent — it does not throw, it just pulls a
- * strip of bare cream into the bottom of the painting at one scroll position.
- *
- *   w / h    the two sheets side by side, in native pixels. Measured off the
- *            files, not inherited from a comment. mural-left.webp is 889x884,
- *            mural-right.webp is 890x884. Re-measure if the art is ever
- *            redrawn; do not trust this block either.
- *   drift    the parallax amplitude, % of the art's height, each way.
- *   settle   the entry overscale, resolving to 1.
- *
- * THE BAND IS SHORTER THAN THE ART BY `bleed` AT EACH EDGE, and that overhang
- * is the drift's travel room — the same device as the hero media's `-inset-y`.
- * `bleed > drift` is the invariant: the margin below is what guarantees the art
- * still covers the trailing edge at the extreme of the drift.
- *
- * This is also the one place the brief's two asks pull against each other. A
- * vertical parallax inside a bounded band cannot exist without vertical bleed,
- * and bleed means the band shows slightly less than the art's full height (the
- * sheets have ~3% of dead margin at the top but run to the last pixel row at
- * the bottom, so the visible cost lands there). It is a frame, not a
- * crop-to-fill: the band's height derives from the ART, the art is never
- * resized to fit the band, and both edges carry the ember hairline that
- * declares them as frame edges. Set `drift` to 0 and the band becomes the
- * art's exact natural ratio with nothing cropped at all.
- */
-const MURAL = { w: 1779, h: 884, drift: 1.6, settle: 1.03 } as const;
-const BAND_BLEED = MURAL.drift + 0.4; // % of art height, per edge
-const BAND_H = MURAL.h * (1 - (2 * BAND_BLEED) / 100);
 
 interface Dish {
   name: string;
@@ -153,8 +87,6 @@ export function About() {
       const textCol = q(".about-text");
       const grillHead = q(".grill-head");
       const grillDishes = q(".grill-dish");
-      const band = q(".mural-band")[0];
-      const bandArt = q(".mural-parallax");
 
       // THE STORY, and the one entrance on the site that is NOT triggered off
       // its own position.
@@ -201,45 +133,6 @@ export function About() {
           : { trigger: textCol[0], start: "top 88%" },
       });
 
-      // THE BAND'S DRIFT AND SETTLE — the parallax that used to belong to the
-      // mural-as-ground, now living with the band as its own moment.
-      //
-      // DRIFT: the art moves at ~0.97x the page's rate across the band's whole
-      // pass, so the painting sits behind the page rather than travelling with
-      // it. The band is 2% shorter than the art at each edge (see the aspect
-      // arithmetic on `.mural-band` below) and that overhang is exactly the
-      // travel room — the same device as the hero media's `-inset-y` bleed.
-      // Worst case the drift leaves ~0.4% of the art's height still covering
-      // the trailing edge, so no scroll position can pull cream into the band.
-      //
-      // SETTLE: a 3% overscale resolving to 1 across the entry, so the band
-      // reads as depth coming to rest rather than a picture sliding past.
-      // Both tweens share one playhead, so they are one move on one transform.
-      if (band && bandArt.length) {
-        const tl = gsap.timeline({
-          defaults: { ease: "none" },
-          scrollTrigger: {
-            trigger: band,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: MOTION.scrub,
-            invalidateOnRefresh: true,
-          },
-        });
-        tl.fromTo(
-          bandArt,
-          { yPercent: -MURAL.drift },
-          { yPercent: MURAL.drift, duration: 1 },
-          0
-        );
-        tl.fromTo(
-          bandArt,
-          { scale: MURAL.settle },
-          { scale: 1, duration: 0.5, ease: MOTION.gsapEase },
-          0
-        );
-      }
-
       // THE FEATURED CUTS, on the shared entrance, feature card first.
       gsap.from(grillHead, {
         opacity: 0,
@@ -265,8 +158,6 @@ export function About() {
   }, []);
 
   useScrollRefresh();
-
-  const refresh = () => ScrollTrigger.refresh();
 
   return (
     <section
@@ -381,10 +272,10 @@ export function About() {
               would put the LCP candidate in doubt. */}
           <figure className="col-media bleed-right" aria-hidden="true">
             <Image
-              src="/images/hero-poster.webp"
+              src="/images/live-grill.png"
               alt=""
               fill
-              quality={60}
+              quality={72}
               sizes="100vw"
               draggable={false}
               className="select-none object-cover motion-safe:md:hidden"
@@ -393,76 +284,24 @@ export function About() {
         </div>
       </div>
 
-      {/* =====================================================================
-          BEAT 3 — THE MURAL BAND.
+      {/* THE MURAL BAND IS GONE, and it is not coming back as a smaller one.
 
-          A discrete full-bleed band with a defined top and bottom edge, an
-          ember hairline on each, and exactly ONE instance of each sheet. It is
-          never tiled, never repeated, never mirrored to fill; there is no
-          `background-repeat` anywhere near it and no second copy of either
-          asset on the page.
+          Two sheets of hand-drawn motifs — a cartoon tiger, a folk dancer, a
+          janggu, a hanok, bonsai — scattered on a baked-out WHITE field. Three
+          problems, any one of which is disqualifying:
 
-          WHY IT FITS EXACTLY. Each half box is (1779/2):884 = 1.0063:1 and the
-          sheets are 1.0057:1 and 1.0068:1, so `object-contain` fills each half
-          edge to edge with sub-pixel slack — nothing is stretched and nothing
-          is cropped horizontally. The slack is anchored OUTWARD (`object-right`
-          / `object-left`) so the two meet flush at the centre and the rounding
-          error lands at the viewport edges, where the sheets are transparent
-          and it is cream on cream either way.
+            1. It depicts food we do not serve. Sundubu jjigae, bibimbap and a
+               bowl of plain rice are none of them on the menu. Law 1: an asset
+               that shows off-menu food is cut, not captioned around.
+            2. Its ground is white, which the palette bans outright. On cream it
+               merely read light; on --char it would be a glowing rectangle.
+            3. It carried ~0.75 of a viewport and zero information, aria-hidden
+               with no alt text, in the middle of the one section that is
+               supposed to say what this restaurant is.
 
-          The band's own ratio, and the bleed it carries, are derived from the
-          MURAL block at the top of this file. Do not hardcode either here.
-
-          Full width at every viewport: at 1440 this is a 682px band, at 375 a
-          174px one, at 2560 a 1217px one. The art is 1779px native, so
-          everything up to 1779 is a downscale; 2560 is a 1.43x upscale, which
-          this soft hand-painted illustration carries without visible mush (a
-          photograph would not), so the band needs no max-width cap.
-          ===================================================================== */}
-      <div
-        className="mural-band relative z-base w-full overflow-hidden"
-        style={{ aspectRatio: `${MURAL.w} / ${BAND_H}` }}
-      >
-        {/* The art layer sits centred in the band and keeps its OWN natural
-            ratio, so the overhang resolves from the two aspect ratios rather
-            than from a magic offset. `.mural-parallax` is what drifts. */}
-        <div className="pointer-events-none absolute inset-0 flex items-center">
-          <div
-            className="mural-parallax relative flex w-full will-change-transform"
-            style={{ aspectRatio: `${MURAL.w} / ${MURAL.h}` }}
-          >
-            <div className="relative h-full w-1/2">
-              <Image
-                src="/images/mural-left.webp"
-                alt=""
-                aria-hidden="true"
-                fill
-                sizes="50vw"
-                draggable={false}
-                onLoad={refresh}
-                className="select-none object-contain object-right"
-              />
-            </div>
-            <div className="relative h-full w-1/2">
-              <Image
-                src="/images/mural-right.webp"
-                alt=""
-                aria-hidden="true"
-                fill
-                sizes="50vw"
-                draggable={false}
-                onLoad={refresh}
-                className="select-none object-contain object-left"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Both ground changes get the site's one seam device: cream into paint
-            at the top, paint back into cream at the bottom. */}
-        <SectionSeam />
-        <SectionSeam className="bottom-0" />
-      </div>
+          --color-pine and --color-plum were sampled from it and went with it.
+          If an illustrated motif is wanted later it is a new asset request, not
+          a revival of this one. */}
 
       {/* The Grill Awaits — house favorites. Plain flow now. It used to share
           the pinned stage with the story at lg, building into the gap as the
@@ -563,37 +402,6 @@ export function About() {
         </div>
       </div>
 
-      {/* Seam: About -> Gallery. A couple of drawn accents drift down past the
-          boundary and fade, so the illustrated world trails off into the
-          photography instead of stopping at a border. These are drawn marks —
-          a disc, a squiggle — not cut-outs of the mural asset. */}
-      <div
-        // z-base, below the content layer (z-base): these are decorative accents
-        // drifting toward the Gallery seam, and at z-nav they painted across
-        // the "See the full menu" pill.
-        // opacity-0 by default: SeamMotion fades these in only as the About ->
-        // Gallery boundary arrives (its tween is immediateRender:false).
-        className="mural-trail pointer-events-none absolute inset-x-0 bottom-6 z-base flex items-center justify-center gap-16 motion-reduce:hidden [&>*]:opacity-0"
-        aria-hidden="true"
-      >
-        <span
-          className="block h-2.5 w-2.5 rounded-full"
-          style={{ background: "var(--color-ember)", opacity: 0.7 }}
-        />
-        <svg width="34" height="14" viewBox="0 0 34 14" fill="none">
-          <path
-            d="M1 9c5-6 10 4 16-1s10-6 16 2"
-            stroke="var(--color-smoke)"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeOpacity="0.6"
-          />
-        </svg>
-        <span
-          className="block h-2 w-2 rounded-full"
-          style={{ background: "var(--color-ember)", opacity: 0.6 }}
-        />
-      </div>
     </section>
   );
 }

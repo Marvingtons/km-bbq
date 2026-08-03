@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 /* ===========================================================================
    NEEDS ASSET: hero loop.
@@ -18,7 +19,22 @@ import { useEffect, useRef, useState } from "react";
    up on its own — no other file needs to change.
    =========================================================================== */
 const VIDEO_SRC: string | null = null;
-const POSTER: string | null = null;
+
+/**
+ * INTERIM STILL, not a substitute. `live-grill.png` is the client's own
+ * photograph of their own grill with their own food on it — meat and shrimp
+ * over the coals, smoke up, the room behind. It is the single strongest asset
+ * on disk and the closest thing to the shot brief above.
+ *
+ * It is not stock and it depicts nothing that is off the menu, so it satisfies
+ * Laws 1 and 2 while the loop is outstanding. It also does the transition a
+ * favour: this is the frame that clips down into About's media column, so the
+ * dock lands on a photograph of the room rather than on an empty rectangle.
+ *
+ * Deliberately NOT in the gallery. One image, one appearance — the hero-to-
+ * About move is the same object travelling, not the same photo shown twice.
+ */
+const STILL = "/images/live-grill.png";
 
 /**
  * The hero's ground.
@@ -65,8 +81,32 @@ export function HeroBackdrop({ className = "" }: { className?: string }) {
 
   return (
     <div className={`bg-char ${className}`}>
-      {/* The ember glow. Bottom-anchored and wide, so it reads as heat off a
-          grill line rather than as a vignette. Sits under everything. */}
+      {/* The still, carrying the site's one photo grade. `priority` because
+          this is the LCP element. */}
+      <Image
+        src={STILL}
+        alt=""
+        aria-hidden="true"
+        fill
+        priority
+        quality={72}
+        sizes="100vw"
+        draggable={false}
+        className="select-none object-cover [filter:saturate(1.08)_contrast(1.06)_brightness(0.62)]"
+      />
+
+      {/* THE ONE THING LAYERED OVER THE PICTURE, and it is a ground, not a
+          veil: char rising from the bottom so the type below has something to
+          sit on, plus the ember glow reading as heat off the grill line. The
+          top two thirds of the frame are untouched. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(to top, var(--color-char) 4%, rgb(18 17 16 / 0.72) 38%, rgb(18 17 16 / 0.25) 72%, transparent 100%)",
+        }}
+      />
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
@@ -83,7 +123,6 @@ export function HeroBackdrop({ className = "" }: { className?: string }) {
             ready ? "opacity-100" : "opacity-0"
           }`}
           src={VIDEO_SRC}
-          poster={POSTER ?? undefined}
           muted
           loop
           playsInline
