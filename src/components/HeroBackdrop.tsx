@@ -122,7 +122,10 @@ export function HeroBackdrop({ className = "" }: { className?: string }) {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(120% 70% at 50% 118%, rgb(242 123 33 / 0.32) 0%, rgb(230 59 46 / 0.14) 38%, transparent 72%)",
+            /* Heat off the grill line. Both stops were the retired pair —
+               ember 242/123/33 and the old brighter flame 230/59/46. They are
+               now the one accent, #bc2c19, at two densities. */
+            "radial-gradient(120% 70% at 50% 118%, rgb(188 44 25 / 0.34) 0%, rgb(188 44 25 / 0.15) 38%, transparent 72%)",
         }}
       />
 

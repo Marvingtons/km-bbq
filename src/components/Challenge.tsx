@@ -18,7 +18,7 @@ import { CLOCK_PROMO, PRICING } from "@/data/info";
    three-stop gradient, four fake mount screws, an engraved nameplate, a
    recessed window, a ghost-segment layer at 8% alpha, a separate blur-glow
    layer, a 74/86px glossy red dome built from a five-stop radial of hand-typed
-   hex, an elastic overshoot on press, and a twelve-particle ember burst on a
+   hex, an elastic overshoot on press, and a twelve-particle flame burst on a
    win. It was the only section on the site with its own physics.
 
    THE FONT WENT WITH IT. DSEG7Classic-Bold.woff2 was 5,132 bytes of webfont
@@ -29,7 +29,7 @@ import { CLOCK_PROMO, PRICING } from "@/data/info";
    kept the readout from jittering as it counts. 5.1 kB off the wire, 9.5 kB
    out of the tree, and no license to carry.
 
-   It is a scoreboard now: a char-2 panel, a hairline rule, tabular flame digits
+   It is a scoreboard now: a sand-2 panel, a hairline rule, tabular flame digits
    with a neon glow, and a button that looks like a button.
    =========================================================================== */
 
@@ -84,23 +84,23 @@ export function Challenge() {
     <section
       id="challenge"
       aria-labelledby="challenge-heading"
-      className="grain relative bg-char pb-section md:pb-section-lg"
+      className="grain relative bg-sand pb-section md:pb-section-lg"
     >
       <div className="grid-page">
         <div className="col-text">
           <ScrollReveal>
-            <p className="eyebrow text-ember">House game</p>
+            <p className="eyebrow">House game</p>
           </ScrollReveal>
           <ScrollReveal delay={0.05}>
-            {/* THE NEON HEADING, and one of only two permitted on the site.
-                This section is literally a lit sign by the door, so the
-                treatment describes the subject rather than decorating it. The
-                second is deliberately left unspent. */}
-            <h2
-              id="challenge-heading"
-              className="h2-scale mt-4 text-neon-pink"
-              style={{ textShadow: "0 0 22px rgb(255 79 160 / 0.45)" }}
-            >
+            {/* THE NEON HEADING IS GONE, and no heading replaces the colour.
+                It was pink with a 22px pink glow, justified as "this section is
+                literally a lit sign by the door". There is no lit sign in this
+                restaurant, and nothing pink or neon anywhere in the room — the
+                treatment was describing a fiction. --color-neon-pink is deleted
+                (DIRECTION.md constraint 4) and the accent that remains has one
+                job, which a heading is not (constraint 3). So this is the same
+                .h2-scale as every other section heading. */}
+            <h2 id="challenge-heading" className="h2-scale mt-4">
               Beat the clock
             </h2>
           </ScrollReveal>
@@ -114,26 +114,27 @@ export function Challenge() {
         </div>
 
         <ScrollReveal delay={0.1} className="col-wide mt-10">
-          <div className="max-w-md rounded-card border border-char-3 bg-char-2 p-6 sm:p-8">
+          <div className="max-w-md rounded-card border border-sand-3 bg-sand-2 p-6 sm:p-8">
             <p className="eyebrow">Stop the clock</p>
 
             {/* The digits. tabular-nums is the whole reason DSEG7 was carried:
                 one advance width, so the readout cannot jitter as it counts. */}
             <p
               className="mt-4 font-display text-2xl font-black leading-none [font-stretch:87.5%] [font-variant-numeric:tabular-nums] sm:text-display"
-              style={{
-                color: won ? "var(--color-ember)" : "var(--color-flame)",
-                textShadow: won
-                  ? "0 0 34px rgb(242 123 33 / 0.55)"
-                  : "0 0 26px rgb(230 59 46 / 0.35)",
-              }}
+              /* THE GLOW IS GONE. A text-shadow halo is a light source, and a
+                 light source only reads on a dark ground — on sand the two old
+                 shadows (ember at 0.55, flame at 0.35) rendered as a dirty
+                 smudge around the digits rather than as emission. The win state
+                 is now carried by colour alone: the accent when you land it,
+                 ink while you are counting. */
+              style={{ color: won ? "var(--color-flame)" : "var(--color-ink)" }}
               aria-hidden="true"
             >
               {format(phase === "idle" ? TARGET_CS : cs)}
             </p>
 
             <p
-              className="eyebrow mt-4 border-t border-char-3 pt-4"
+              className="eyebrow mt-4 border-t border-sand-3 pt-4"
               aria-live="polite"
             >
               {readout}
@@ -142,7 +143,7 @@ export function Challenge() {
             <button
               type="button"
               onClick={press}
-              className="mt-6 min-h-11 w-full rounded-pill bg-flame px-6 py-3 font-sans text-sm font-semibold text-bone transition-colors duration-[var(--dur-base)] ease-house hover:bg-ember hover:text-char"
+              className="mt-6 min-h-11 w-full rounded-pill bg-flame px-6 py-3 font-sans text-sm font-semibold text-sand transition-colors duration-[var(--dur-base)] ease-house hover:bg-char hover:text-sand"
             >
               {phase === "running"
                 ? "Stop"
@@ -151,7 +152,7 @@ export function Challenge() {
                   : "Again"}
             </button>
 
-            <p className="mt-4 font-sans text-xs text-smoke">
+            <p className="mt-4 font-sans text-xs text-ash">
               Practice as much as you like. Only the clock at the restaurant
               counts — one press per table, per visit.
             </p>

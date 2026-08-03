@@ -7,8 +7,8 @@
    =========================================================================== */
 
 :root {
-  --background: #121110; /* = --color-char */
-  --foreground: #ede6dc; /* = --color-bone */
+  --background: #f2eadd; /* = --color-sand */
+  --foreground: #1f1a16; /* = --color-ink */
 }
 
 @theme {
@@ -20,25 +20,59 @@
   --radius-*: initial;
   --ease-*: initial;
 
-  /* --- GROUND ---------------------------------------------------------- */
-  --color-char: #121110; /* page ground — grill-room dark */
-  --color-char-2: #1b1917; /* raised surfaces, cards */
-  --color-char-3: #26221f; /* borders, dividers, hover surfaces */
+  /* =====================================================================
+     THE ROOM IS TWO-VALUE. See DIRECTION.md before changing anything here.
 
-  /* --- TYPE ------------------------------------------------------------ */
-  --color-bone: #ede6dc; /* primary text on dark */
-  --color-smoke: #8a837c; /* muted text, captions */
+     Warm-light surfaces BELOW (tables, floor, walls) and a black industrial
+     ceiling ABOVE, with chrome ducts bridging them. Both previous directions
+     treated surface as ONE field and were wrong in opposite directions:
+     cream-everywhere missed the ceiling and the chrome, char-everywhere
+     rendered the ceiling and called it the room.
 
-  /* --- HEAT ------------------------------------------------------------ */
-  --color-flame: #e63b2e; /* primary — CTAs, price */
-  --color-ember: #f27b21; /* secondary — hovers, gradients, the logo's K */
+     Values are DERIVED, not sampled — the frames were not available. Every
+     pair the site renders is contrast-checked by tools/verify-palette.mjs.
+     ===================================================================== */
 
-  /* --- SIGNAGE / IDENTITY ---------------------------------------------- */
-  /* The logo pink, recast brighter so it reads as neon rather than as print. */
-  --color-neon-pink: #ff4fa0;
-  /* The mark's actual badge blue (Logo.tsx). UTILITY ONLY: focus rings and
-     footer links. Never a surface. */
-  --color-km-blue: #1a36af;
+  /* --- GROUND — warm light, keyed to the laminate tabletops and tan walls.
+     Deliberately NOT #faf4ec (the old cool cream): warmer (R-B 21 vs 14) and
+     a step down in luminance (0.829 vs 0.911). ------------------------- */
+  --color-sand: #f2eadd; /* page ground */
+  --color-sand-2: #e9dfce; /* raised surfaces, cards */
+  --color-sand-3: #d9ccb8; /* borders, dividers, hover surfaces */
+
+  /* --- TYPE — warm near-black, never pure black. ----------------------- */
+  --color-ink: #1f1a16; /* primary text on the warm ground */
+  --color-ash: #5c534b; /* muted text, captions */
+
+  /* --- STRUCTURE — THE CEILING, and only the ceiling.
+     Black is architectural in this room: it is overhead, not underfoot. On
+     the page it belongs to the nav, the footer, section caps and grill-well
+     punctuation. It must describe something real. It is NEVER the page
+     ground — that is what the last rework got wrong. ------------------- */
+  --color-char: #121110; /* the black structure's ground */
+  --color-char-2: #1b1917; /* raised surfaces inside the structure */
+
+  /* --- CHROME — the ten-plus mirror downdraft ducts, tokenized.
+     Cool where --color-ash is warm, so the two never read as one grey
+     (separation 1.93:1, warmth -15 vs +17). One value serving both grounds:
+     3.26:1 as a rule on sand, 4.85:1 as meta text on char. ------------- */
+  --color-steel: #7b828a;
+
+  /* --- ACCENT — ONE, and its one job is INTERACTION.
+     The mural's brush red, at the deepest value that still clears AA as text
+     on the card ground (4.53:1 on sand-2, 5.01:1 on sand). `ember` is gone,
+     collapsed into this. Note it is deliberately NOT used as text on char
+     (3.15:1) or inside a sky band (3.52:1) — on those grounds the accent
+     appears as FILL only and links take --color-sand. ------------------ */
+  --color-flame: #bc2c19;
+
+  /* --- THE MURAL'S SKY FIELD.
+     Real provenance: the ~12ft wall mural is painted on a pale blue sky
+     ground. It is the only thing in the room that gives the logo's badge
+     blue a reason to exist. Applied in AT MOST ONE place — see DIRECTION.md
+     constraint 7. Inside a sky band, muted copy must be ink-based: ash on
+     sky measures 4.43:1 and does not clear. ---------------------------- */
+  --color-sky: #aecbdb;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -90,9 +124,10 @@
   --radius-pill: 9999px; /* controls */
   --radius-hair: 2px; /* focus ring only */
 
-  /* --- SHADOW — two, and only two. */
-  --shadow-card: 0 2px 14px rgb(0 0 0 / 0.35);
-  --shadow-pop: 0 10px 34px rgb(0 0 0 / 0.5);
+  /* --- SHADOW — two, and only two. Warm and light-ground weight; the old
+     values were tuned to read against near-black and go to mud on sand. */
+  --shadow-card: 0 1px 2px rgb(62 42 24 / 0.06), 0 4px 14px rgb(62 42 24 / 0.08);
+  --shadow-pop: 0 6px 16px rgb(62 42 24 / 0.10), 0 18px 40px rgb(62 42 24 / 0.14);
 
   /* --- Z-INDEX — four values. Tailwind's namespace is --z-index-*, so the
      utilities are z-base / z-nav / z-overlay / z-preloader. */
@@ -116,21 +151,22 @@
 }
 
 html {
-  background: var(--color-char);
+  background: var(--color-sand);
   scrollbar-gutter: stable;
   scrollbar-width: thin;
-  scrollbar-color: var(--color-char-3) var(--color-char);
+  scrollbar-color: var(--color-steel) var(--color-sand-2);
 }
 
 body {
-  background: var(--color-char);
-  color: var(--color-bone);
+  background: var(--color-sand);
+  color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
+/* The accent's one job is interaction, and a focus ring is interaction. */
 :focus-visible {
-  outline: 2px solid var(--color-ember);
+  outline: 2px solid var(--color-flame);
   outline-offset: 3px;
   border-radius: var(--radius-hair);
 }
@@ -141,10 +177,10 @@ body {
 }
 ::-webkit-scrollbar-track,
 ::-webkit-scrollbar-corner {
-  background: var(--color-char);
+  background: var(--color-sand-2);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-char-3);
+  background: var(--color-steel);
   border-radius: var(--radius-pill);
 }
 
@@ -240,7 +276,7 @@ body {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.18em;
-    color: var(--color-smoke);
+    color: var(--color-ash);
   }
 
   /* The one body run. */
@@ -249,7 +285,7 @@ body {
     font-size: var(--text-sm);
     line-height: var(--text-sm--line-height);
     font-weight: 400;
-    color: var(--color-smoke);
+    color: var(--color-ash);
   }
 
   /* The one section heading. */
@@ -261,7 +297,7 @@ body {
     line-height: var(--text-xl--line-height);
     letter-spacing: -0.01em;
     text-transform: uppercase;
-    color: var(--color-bone);
+    color: var(--color-ink);
   }
 
   @media (min-width: 768px) {
@@ -280,7 +316,7 @@ body {
     line-height: var(--text-md--line-height);
     text-transform: uppercase;
     letter-spacing: 0.01em;
-    color: var(--color-bone);
+    color: var(--color-ink);
   }
 
   /* The one display lockup. */
@@ -294,20 +330,34 @@ body {
     text-transform: uppercase;
   }
 
-  /* --- PHOTO — the one photography treatment. -------------------------- */
+  /* --- PHOTO — the one photography treatment, REVERSED for a light ground.
+     The previous grade existed to sink photographs INTO near-black:
+     brightness(0.94) under a char-to-transparent scrim. Both invert on sand
+     — the grade dirties an already-bright room and the dark scrim reads as a
+     bruise along the bottom edge of every tile.
+
+     Two things keep this from repeating the "diagonal wash" failure recorded
+     in the verify skill. The scrim is FLAT-BOTTOM only, never shaped to a
+     copy column, so it cannot composite into a diagonal. And it carries no
+     legibility duty at all: since the gallery was unpinned the captions sit
+     under their photograph in flow, not over it, so the scrim can stay light
+     enough to leave the food alone. ------------------------------------- */
   .photo {
     position: relative;
     isolation: isolate;
     overflow: hidden;
     border-radius: var(--radius-card);
-    background: var(--color-char-2);
+    background: var(--color-sand-2);
+    /* Chrome at the frame edge — the room's own material, at the one place a
+       photograph meets the page. */
+    box-shadow: inset 0 0 0 1px rgb(123 130 138 / 0.28);
   }
 
   .photo img {
-    filter: saturate(1.08) contrast(1.06) brightness(0.94);
+    filter: saturate(1.06) contrast(1.02) brightness(1.02);
   }
 
-  /* Bottom scrim, so a photo sits into the ground instead of on it. */
+  /* Bottom scrim, so a photo sits into the WARM ground instead of on it. */
   .photo::after {
     content: "";
     position: absolute;
@@ -316,14 +366,31 @@ body {
     pointer-events: none;
     background: linear-gradient(
       to top,
-      var(--color-char) 0%,
-      rgb(18 17 16 / 0.35) 32%,
-      transparent 65%
+      rgb(242 234 221 / 0.55) 0%,
+      rgb(242 234 221 / 0.16) 26%,
+      transparent 54%
     );
+  }
+
+  /* --- CHROME RULE — the one divider. ---------------------------------- */
+  .rule-chrome {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      var(--color-steel) 12%,
+      var(--color-steel) 88%,
+      transparent 100%
+    );
+    opacity: 0.55;
   }
 }
 
-/* Material, not noise — keeps a large dark ground from banding. */
+/* Material, not noise. On the old near-black ground this stopped banding; on
+   sand it does the opposite job — it gives the warm ground a paper tooth so a
+   large flat light field does not read as blank screen. Black noise shows far
+   more on light than on dark, so the opacity comes down accordingly. */
 .grain {
   position: relative;
   isolation: isolate;
@@ -337,7 +404,7 @@ body {
   pointer-events: none;
   background-image: var(--grain);
   background-size: 180px 180px;
-  opacity: 0.035;
+  opacity: 0.02;
 }
 
 /* Preloader. Server-rendered so it paints in frame one; the inline script in

@@ -1,27 +1,34 @@
 /**
- * The dot in KM.BBQ, and the separators between phrases, set in the logo pink.
+ * The dot in KM.BBQ, and the separators between phrases.
  *
- * Pink's second job is punctuation. The mark itself carries a pink dot between
- * KM and BBQ; wherever the name is set as TYPE the dot should be the same
- * colour, so the wordmark and the typeset name are recognisably one thing.
+ * THIS COMPONENT NO LONGER SETS A COLOUR. It used to set the logo pink, on the
+ * rule that "pink's second job is punctuation" — the mark carries a pink dot
+ * between KM and BBQ, so wherever the name was set as type the dot matched.
+ *
+ * That rule died with the palette. There is nothing pink, neon or lit-sign
+ * anywhere in the restaurant, so --color-neon-pink is gone (DIRECTION.md
+ * constraint 4), and the accent that replaced it has one job that a
+ * punctuation glyph is not. Colouring the dot with the interaction accent
+ * would say "this is clickable" about a full stop.
+ *
+ * So the glyph inherits. On the warm ground it is ink, in the footer it is
+ * sand, and it is never a colour decision of its own. The mark's own SVG keeps
+ * its real pink — Law 3 forbids restyling it — so the wordmark and the typeset
+ * name no longer match on that one glyph. That is the correct trade: the mark
+ * is the mark, and the page is the page.
  *
  * The glyph stays in the text run rather than being drawn as a shape, so it
- * copies, reads aloud, and wraps exactly as it did before — this is a colour
- * change, not a substitution.
- */
-/**
- * CONTRAST, measured:
- *   the "." in KM.BBQ  — only ever set on the char-2 footer, 4.79:1, passes
- *                        AA at body size, and is never inside a link. It stays
- *                        in the accessibility tree because it is part of the
- *                        restaurant's name, not decoration.
- *   the "·" separators — 3.51:1 on cream. Pink cannot reach 4.5:1 against cream
- *                        at any opacity, so these are marked aria-hidden: they
- *                        carry no information the spacing does not already
- *                        carry, which is what makes them incidental text rather
- *                        than content that fails.
- * The rule that follows: pink is only allowed on a glyph that is either part of
- * the wordmark or explicitly ornamental. It never sets anything a reader needs.
+ * copies, reads aloud, and wraps exactly as it always did.
+ *
+ * ACCESSIBILITY, unchanged by the colour removal:
+ *   the "." in KM.BBQ  — part of the restaurant's name, not decoration, so it
+ *                        stays in the accessibility tree.
+ *   the "·" separators — aria-hidden. They carry no information that the
+ *                        spacing does not already carry.
+ * Both now inherit a colour that already clears AA in its context, so the
+ * measured-contrast note this file used to carry has nothing left to warn
+ * about: there is no longer a glyph on the site set in a colour that cannot
+ * reach 4.5:1 against its own ground.
  */
 export function Dot({
   char = ".",
@@ -32,7 +39,7 @@ export function Dot({
 }) {
   const isWordmarkDot = char === ".";
   return (
-    <span aria-hidden={isWordmarkDot ? undefined : "true"} className={`text-neon-pink ${className}`}>
+    <span aria-hidden={isWordmarkDot ? undefined : "true"} className={className}>
       {char}
     </span>
   );

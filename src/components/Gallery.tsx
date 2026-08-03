@@ -78,11 +78,11 @@ export function Gallery() {
     <section
       id="gallery"
       aria-labelledby="gallery-heading"
-      className="grain relative overflow-hidden bg-char py-section md:py-section-lg"
+      className="grain relative overflow-hidden bg-sand py-section md:py-section-lg"
     >
       <div className="grid-page relative z-base gap-y-10">
         <div className="col-text">
-          <p className="eyebrow text-ember">Gallery</p>
+          <p className="eyebrow">Gallery</p>
           <h2 id="gallery-heading" className="h2-scale mt-4">
             A look inside
           </h2>

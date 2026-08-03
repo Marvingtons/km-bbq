@@ -110,7 +110,7 @@ export function About() {
       // screen is what the hero's window reveals as it clips down and the net
       // document height is unchanged. One number, written here, in Hero's
       // h-[160vh], and as HERO_SCRUB. Change one, change all three.
-      className="grain relative z-base overflow-hidden bg-char motion-safe:md:-mt-[60vh]"
+      className="grain relative z-base overflow-hidden bg-sand motion-safe:md:-mt-[60vh]"
       style={{ ["--nav-h" as string]: `${NAV_H}px` } as React.CSSProperties}
     >
       <SectionSeam />
@@ -127,13 +127,13 @@ export function About() {
       <div className="about-stage relative z-base py-section md:py-section-lg motion-safe:md:h-screen motion-safe:md:py-0">
         <div className="grid-page motion-safe:md:h-full motion-safe:md:items-center">
           <div className="about-text col-text">
-            <p className="eyebrow text-ember">Our story</p>
+            <p className="eyebrow">Our story</p>
             <h2 id="about-heading" className="h2-scale mt-4">
               It started with a grill
             </h2>
             <span
               aria-hidden="true"
-              className="mt-5 block h-0.5 w-16 bg-flame"
+              className="mt-5 block h-0.5 w-16 bg-steel"
             />
             <div className="copy measure mt-8 space-y-5">
               <p>
@@ -191,7 +191,7 @@ export function About() {
                bowl of plain rice are none of them on the menu. Law 1: an asset
                that shows off-menu food is cut, not captioned around.
             2. Its ground is white, which the palette bans outright. On cream it
-               merely read light; on --char it would be a glowing rectangle.
+               merely read light; on --sand it would be a glowing rectangle.
             3. It carried ~0.75 of a viewport and zero information, aria-hidden
                with no alt text, in the middle of the one section that is
                supposed to say what this restaurant is.
@@ -207,7 +207,7 @@ export function About() {
         <div className="grid-page">
           <div className="col-full">
             <div className="grill-head">
-              <p className="eyebrow text-ember">House favorites</p>
+              <p className="eyebrow">House favorites</p>
               <h2 id="menu-heading" className="h2-scale mt-4">
                 What to grill first
               </h2>
@@ -231,7 +231,7 @@ export function About() {
                   <Link
                     key={item.id}
                     href={href}
-                    className={`grill-dish group flex h-full flex-col overflow-hidden rounded-card border border-char-3 bg-char-2 p-5 text-left transition-colors duration-[var(--dur-base)] ease-house hover:border-flame/50 ${span}`}
+                    className={`grill-dish group flex h-full flex-col overflow-hidden rounded-card border border-sand-3 bg-sand-2 p-5 text-left transition-colors duration-[var(--dur-base)] ease-house hover:border-flame/50 ${span}`}
                   >
                     <div
                       className={`photo relative w-full ${
@@ -254,15 +254,15 @@ export function About() {
                     </div>
                     {/* The category, and it is a real anchor on /menu — not a
                         badge naming a section that does not exist. */}
-                    <p className="eyebrow mt-4 text-ember">{category.name}</p>
+                    <p className="eyebrow mt-4">{category.name}</p>
                     <h3 className="card-title mt-1">
                       {item.name}
                       {item.english && (
-                        <span className="text-smoke"> — {item.english}</span>
+                        <span className="text-ash"> — {item.english}</span>
                       )}
                     </h3>
                     {item.hangul && (
-                      <p className="mt-1 font-sans text-xs text-smoke">
+                      <p className="mt-1 font-sans text-xs text-ash">
                         {item.hangul}
                       </p>
                     )}

@@ -81,7 +81,7 @@ export function StickyInfoBar() {
       {shown && (
         <motion.aside
           aria-label="Price, hours and contact"
-          className="fixed inset-x-0 bottom-0 z-nav border-t border-char-3 bg-char-2/95 backdrop-blur-md md:inset-x-auto md:bottom-6 md:right-6 md:rounded-pill md:border md:px-2 md:py-2 md:shadow-pop lg:right-12"
+          className="fixed inset-x-0 bottom-0 z-nav border-t border-steel/25 bg-char-2/95 backdrop-blur-md md:inset-x-auto md:bottom-6 md:right-6 md:rounded-pill md:border md:px-2 md:py-2 md:shadow-pop lg:right-12"
           initial={reduce ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           exit={reduce ? { opacity: 1 } : { opacity: 0, y: 16 }}
@@ -90,27 +90,35 @@ export function StickyInfoBar() {
           <div className="flex items-center gap-3 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:gap-2 md:p-0 md:pb-0">
             {/* Price + status. The two facts, stacked tight. */}
             <div className="min-w-0 flex-1 md:flex-none md:px-4">
-              <p className="font-display text-md font-black leading-none text-flame [font-stretch:87.5%]">
+              {/* The price is SAND here, not the accent, and this is the one
+                  place on the site where that differs. Everywhere else the
+                  price figure takes the accent — it is the offer, and it is the
+                  documented exception to "the accent's one job is interaction"
+                  (DIRECTION.md constraint 3). But this bar rides on the black
+                  structure, where the accent measures 3.15:1 as text and cannot
+                  carry a figure anyone has to read. Contrast wins over
+                  consistency; the price is still the largest thing in the bar. */}
+              <p className="font-display text-md font-black leading-none text-sand [font-stretch:87.5%]">
                 {PRICING.lunch}
-                <span className="eyebrow ml-2 text-bone/60">Lunch</span>
+                <span className="eyebrow ml-2 text-sand/60">Lunch</span>
               </p>
-              <p className="mt-1 flex items-center gap-1.5 truncate font-sans text-xs text-smoke">
+              <p className="mt-1 flex items-center gap-1.5 truncate font-sans text-xs text-steel">
                 <span
                   aria-hidden="true"
                   className={`inline-block size-1.5 shrink-0 rounded-pill ${
-                    open ? "bg-ember" : "bg-char-3"
+                    open ? "bg-flame" : "bg-steel/30"
                   }`}
                 />
                 {open ? `Open until ${close}` : "Closed now"}
               </p>
             </div>
 
-            <div aria-hidden="true" className="hidden h-8 w-px bg-char-3 md:block" />
+            <div aria-hidden="true" className="hidden h-8 w-px bg-steel/30 md:block" />
 
             {/* The two actions. Icon-plus-label so they stay legible at 375. */}
             <a
               href={PHONE.href}
-              className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-pill bg-flame px-4 font-sans text-xs font-semibold uppercase tracking-[0.08em] text-bone transition-colors duration-[var(--dur-base)] ease-house hover:bg-ember hover:text-char"
+              className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-pill bg-flame px-4 font-sans text-xs font-semibold uppercase tracking-[0.08em] text-sand transition-colors duration-[var(--dur-base)] ease-house hover:bg-sand hover:text-char"
             >
               <svg
                 width="15"
@@ -131,7 +139,7 @@ export function StickyInfoBar() {
               href={DIRECTIONS_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-pill border border-char-3 px-4 font-sans text-xs font-semibold uppercase tracking-[0.08em] text-bone transition-colors duration-[var(--dur-base)] ease-house hover:border-flame hover:bg-flame"
+              className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-pill border border-steel/25 px-4 font-sans text-xs font-semibold uppercase tracking-[0.08em] text-sand transition-colors duration-[var(--dur-base)] ease-house hover:border-flame hover:bg-flame"
             >
               <svg
                 width="15"

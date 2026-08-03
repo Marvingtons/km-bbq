@@ -10,20 +10,31 @@ import Link from "next/link";
  *
  * Two tones, and they are the same object at two volumes:
  *
- *   solid    the primary action in its region. Flame fill, bone label.
- *   outline  everything secondary. A char-3 hairline that fills to flame on
+ *   solid    the primary action in its region. Flame fill, sand label.
+ *   outline  everything secondary. A CHROME hairline that fills to flame on
  *            hover, so both states are the same two colours.
  *
  * No third tone and no colour surgery through `className`. If a button needs
  * to look different, the answer is `tone`, not a new recipe.
+ *
+ * ON THE WARM GROUND, and why hover resolves to black. The accent is the one
+ * interaction colour, so a solid pill cannot hover to a second accent — there
+ * isn't one any more. It hovers to `char`, the room's ceiling black, which is
+ * the site's other real surface and measures 15.80:1 against the sand label.
+ * Pressing a button resolves toward the structure rather than toward a colour
+ * the room does not contain.
+ *
+ * The outline hairline is `steel` — the chrome of the downdraft ducts. It is
+ * the one place every secondary action on the site touches the room's own
+ * material.
  */
 const BASE =
   "group relative isolate inline-flex min-h-11 items-center justify-center gap-2 rounded-pill px-7 py-3 font-sans text-sm font-semibold transition-colors duration-[var(--dur-base)] ease-house";
 
 const TONES = {
-  solid: "bg-flame text-bone hover:bg-ember hover:text-char",
+  solid: "bg-flame text-sand hover:bg-char hover:text-sand",
   outline:
-    "border border-char-3 bg-char-2/60 text-bone hover:border-flame hover:bg-flame hover:text-bone",
+    "border border-steel/55 bg-transparent text-ink hover:border-flame hover:bg-flame hover:text-sand",
 } as const;
 
 export function PillLink({

@@ -20,19 +20,19 @@ import { HOURS, ADDRESS, PHONE, PRICING, DIRECTIONS_URL } from "@/data/info";
  * A styled dark static map is logged as NEEDS-ASSETS #4 — a nice-to-have, not
  * a blocker.
  */
-const card = "h-full rounded-card border border-char-3 bg-char-2 p-5 sm:p-7";
+const card = "h-full rounded-card border border-sand-3 bg-sand-2 p-5 sm:p-7";
 
 export function Contact() {
   return (
     <section
       id="contact"
-      className="grain relative bg-char py-section md:py-section-lg"
+      className="grain relative bg-sand py-section md:py-section-lg"
       aria-labelledby="contact-heading"
     >
       <div className="grid-page gap-y-6">
         <div className="col-text mb-6">
           <ScrollReveal>
-            <p className="eyebrow text-ember">Find us</p>
+            <p className="eyebrow">Find us</p>
           </ScrollReveal>
           <ScrollReveal delay={0.05}>
             <h2 id="contact-heading" className="h2-scale mt-4">
@@ -58,18 +58,18 @@ export function Contact() {
                 {HOURS.map(({ days, time }) => (
                   <div
                     key={days}
-                    className="flex items-start justify-between gap-3 border-b border-char-3 pb-3 font-sans text-sm last:border-b-0 last:pb-0"
+                    className="flex items-start justify-between gap-3 border-b border-sand-3 pb-3 font-sans text-sm last:border-b-0 last:pb-0"
                   >
-                    <dt className="text-smoke">{days}</dt>
+                    <dt className="text-ash">{days}</dt>
                     {/* The time is the answer; never let it break across lines
                         even when the day range does. */}
-                    <dd className="whitespace-nowrap font-semibold text-bone">
+                    <dd className="whitespace-nowrap font-semibold text-ink">
                       {time}
                     </dd>
                   </div>
                 ))}
               </dl>
-              <p className="mt-5 font-sans text-xs text-smoke">
+              <p className="mt-5 font-sans text-xs text-ash">
                 Walk-in only. No reservations needed.
               </p>
             </div>
@@ -85,7 +85,7 @@ export function Contact() {
                   href={DIRECTIONS_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block underline-offset-4 transition-colors duration-[var(--dur-base)] ease-house hover:text-bone hover:underline"
+                  className="inline-block underline-offset-4 transition-colors duration-[var(--dur-base)] ease-house hover:text-ink hover:underline"
                 >
                   {ADDRESS.street}
                   <br />
@@ -94,12 +94,12 @@ export function Contact() {
                 <br />
                 <a
                   href={PHONE.href}
-                  className="mt-3 inline-flex min-h-11 items-center font-semibold text-ember underline-offset-4 transition-colors duration-[var(--dur-base)] ease-house hover:text-flame hover:underline"
+                  className="mt-3 inline-flex min-h-11 items-center font-semibold text-flame underline-offset-4 transition-colors duration-[var(--dur-base)] ease-house hover:text-ink hover:underline"
                 >
                   {PHONE.display}
                 </a>
               </address>
-              <SocialLinks tone="dark" className="mt-5" />
+              <SocialLinks tone="light" className="mt-5" />
             </div>
           </ScrollReveal>
         </div>
@@ -123,8 +123,17 @@ export function Contact() {
               sizes="(max-width: 768px) 100vw, 80vw"
               className="object-cover"
             />
+            {/* The caption sits ON the photograph, so it cannot rely on the
+                .photo scrim the way a caption in flow can — the scrim is light
+                now and this frame is a bright daylight shot, so ink-on-scrim
+                was landing on whatever the picture happened to put there. It
+                gets its own sand chip instead: an opaque ground it carries with
+                it, which is legible over any part of any photograph and does
+                not require the scrim to be doing legibility work. */}
             <figcaption className="absolute inset-x-0 bottom-0 z-nav p-5">
-              <span className="eyebrow text-bone/80">Look for the sign</span>
+              <span className="eyebrow rounded-pill bg-sand/95 px-3 py-1.5 text-ink">
+                Look for the sign
+              </span>
             </figcaption>
           </figure>
           <div className="mt-5 flex">

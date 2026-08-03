@@ -18,7 +18,7 @@ const NAV_LINKS = [
 // AA at 12px; ember passes at 7.4:1 but ember's job is interaction, and a
 // column label is not an affordance. So the footer keeps white/60 — 7.1:1,
 // measured — and matches every other eyebrow in size, weight and tracking.
-const label = "eyebrow text-bone/60";
+const label = "eyebrow text-sand/60";
 
 // Every column opens with a fixed-height row so the eyebrow labels and the logo
 // share one top baseline and all following content starts on the same line.
@@ -54,13 +54,13 @@ export function Footer() {
       // off the page ground by one step instead of being divided from it by a
       // rule. The whole site is dark now, so the four-colour mark sits here the
       // same way it sits everywhere else.
-      className="relative overflow-hidden border-t border-char-3 bg-char-2 pb-10 pt-14 text-bone/70"
+      className="relative overflow-hidden border-t border-steel/25 bg-char-2 pb-10 pt-14 text-sand/70"
       role="contentinfo"
     >
       {/* Ambient warm glow for depth. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-ember/10 blur-[120px]"
+        className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-flame/10 blur-[120px]"
       />
 
       <div className="grid-page relative">
@@ -79,7 +79,7 @@ export function Footer() {
             <div className={topRow}>
               <Logo size={148} className="opacity-90" />
             </div>
-            <p className="copy mt-5 max-w-xs text-bone/60">
+            <p className="copy mt-5 max-w-xs text-sand/60">
               All-you-can-eat Korean BBQ in Oceanside, California. You pick the
               cuts and grill them yourself right at your table.
             </p>
@@ -91,7 +91,7 @@ export function Footer() {
             <div className={topRow}>
               <h2 className={label}>Visit</h2>
             </div>
-            <address className="copy mt-5 not-italic text-bone/70">
+            <address className="copy mt-5 not-italic text-sand/70">
               KM<Dot />BBQ
               <br />
               {ADDRESS.street}
@@ -101,9 +101,9 @@ export function Footer() {
             <div className="mt-5 flex flex-col gap-3">
               <a
                 href={PHONE.href}
-                className="group inline-flex min-h-11 items-center gap-2 font-sans text-sm font-semibold text-bone/90 transition-colors duration-[var(--dur-base)] ease-house hover:text-ember"
+                className="group inline-flex min-h-11 items-center gap-2 font-sans text-sm font-semibold text-sand/90 transition-colors duration-[var(--dur-base)] ease-house hover:text-sand"
               >
-                <span className="text-ember transition-transform duration-[var(--dur-base)] ease-house group-hover:scale-110">
+                <span className="text-sand transition-transform duration-[var(--dur-base)] ease-house group-hover:scale-110">
                   <PhoneIcon />
                 </span>
                 {PHONE.display}
@@ -112,7 +112,7 @@ export function Footer() {
                 href={DIRECTIONS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex min-h-11 w-fit items-center gap-1.5 font-sans text-sm font-medium text-ember transition-colors duration-[var(--dur-base)] ease-house hover:text-bone"
+                className="group inline-flex min-h-11 w-fit items-center gap-1.5 font-sans text-sm font-medium text-sand transition-colors duration-[var(--dur-base)] ease-house hover:text-sand"
               >
                 Get directions
                 <span
@@ -133,12 +133,12 @@ export function Footer() {
             <dl className="mt-5 space-y-2 font-sans text-sm">
               {HOURS.map(({ days, time }) => (
                 <div key={days} className="flex flex-col">
-                  <dt className="font-medium text-bone/80">{days}</dt>
-                  <dd className="font-normal text-bone/60">{time}</dd>
+                  <dt className="font-medium text-sand/80">{days}</dt>
+                  <dd className="font-normal text-sand/60">{time}</dd>
                 </div>
               ))}
             </dl>
-            <p className="mt-4 font-sans text-xs font-normal text-bone/50">
+            <p className="mt-4 font-sans text-xs font-normal text-sand/50">
               Walk-in only. No reservations needed.
             </p>
           </div>
@@ -157,11 +157,11 @@ export function Footer() {
                 <li key={navLabel}>
                   <a
                     href={href}
-                    className="group inline-flex min-h-11 items-center font-sans text-sm text-bone/70 transition-colors duration-[var(--dur-base)] ease-house hover:text-bone"
+                    className="group inline-flex min-h-11 items-center font-sans text-sm text-sand/70 transition-colors duration-[var(--dur-base)] ease-house hover:text-sand"
                   >
                     <span
                       aria-hidden="true"
-                      className="mr-0 h-px w-0 bg-ember transition-all duration-[var(--dur-base)] ease-house group-hover:mr-2 group-hover:w-4"
+                      className="mr-0 h-px w-0 bg-flame transition-all duration-[var(--dur-base)] ease-house group-hover:mr-2 group-hover:w-4"
                     />
                     {navLabel}
                   </a>
@@ -174,7 +174,7 @@ export function Footer() {
 
         {/* The legal row sits under the four columns and lines up with the
             brand column's left edge. */}
-        <div className="mt-14 flex flex-col justify-between gap-3 border-t border-char-3 pt-6 text-bone/55 sm:flex-row sm:items-center">
+        <div className="mt-14 flex flex-col justify-between gap-3 border-t border-steel/25 pt-6 text-sand/55 sm:flex-row sm:items-center">
           <p className="font-sans text-xs">
             &copy; {year} KM<Dot />BBQ. All rights reserved.
           </p>
@@ -183,26 +183,26 @@ export function Footer() {
           <div className="flex flex-wrap items-center gap-x-5 font-sans text-xs">
             <a
               href="/privacy"
-              className="inline-flex min-h-11 items-center transition-colors duration-[var(--dur-base)] ease-house hover:text-bone"
+              className="inline-flex min-h-11 items-center transition-colors duration-[var(--dur-base)] ease-house hover:text-sand"
             >
               Privacy Policy
             </a>
             <a
               href="/terms"
-              className="inline-flex min-h-11 items-center transition-colors duration-[var(--dur-base)] ease-house hover:text-bone"
+              className="inline-flex min-h-11 items-center transition-colors duration-[var(--dur-base)] ease-house hover:text-sand"
             >
               Terms of Service
             </a>
             {/* Decorative divider only when the row sits on one line. Pink:
                 separators are punctuation, which is pink's second job. */}
-            <span aria-hidden="true" className="hidden text-neon-pink sm:inline">
+            <span aria-hidden="true" className="hidden sm:inline">
               |
             </span>
             <a
               href="https://norvix.ai/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-11 items-center transition-colors duration-[var(--dur-base)] ease-house hover:text-ember"
+              className="inline-flex min-h-11 items-center transition-colors duration-[var(--dur-base)] ease-house hover:text-sand"
             >
               Site by Norvix
             </a>

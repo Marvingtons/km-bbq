@@ -33,10 +33,19 @@ import { MOTION } from "@/lib/motion";
 function Price({ amount, label }: { amount: string; label: string }) {
   return (
     <span className="inline-flex items-baseline gap-2">
-      <span className="font-display text-2xl font-black text-flame [font-stretch:87.5%]">
+      {/* SAND, not the accent — the same rule as the sticky bar. The price
+          takes the accent everywhere it sits on the warm ground, but the hero
+          type sits on a graded photograph whose lower third is effectively
+          char, where the accent measures 3.15:1. The price stays the
+          second-largest element on the page; size carries it, not hue.
+
+          This is a symptom of the hero being deferred to pass two rather than a
+          settled answer: the hero is still a dark photographic frame inside a
+          warm-light site. See DIRECTION.md, "Open, not decided" #3. */}
+      <span className="font-display text-2xl font-black text-sand [font-stretch:87.5%]">
         {amount}
       </span>
-      <span className="eyebrow text-bone/70">{label}</span>
+      <span className="eyebrow text-sand/70">{label}</span>
     </span>
   );
 }
@@ -97,13 +106,13 @@ export function Hero() {
         <div className="pointer-events-auto relative z-nav flex w-full flex-1 items-end">
           <div className="track w-full pb-16 pt-10 text-left sm:pb-20 lg:pb-24">
             <div className="hero-exit-support">
-              <motion.p className="eyebrow text-ember" {...rise(0)}>
+              <motion.p className="eyebrow text-sand/80" {...rise(0)}>
                 {EYEBROW}
               </motion.p>
             </div>
 
             <div className="hero-exit-display">
-              <motion.h1 className="display mt-4 text-bone" {...rise(1, false)}>
+              <motion.h1 className="display mt-4 text-sand" {...rise(1, false)}>
                 {HEADLINE}
               </motion.h1>
             </div>
@@ -116,13 +125,13 @@ export function Hero() {
                 {...rise(2)}
               >
                 <Price amount={PRICING.lunch} label="Lunch" />
-                <span aria-hidden="true" className="text-flame/60">
+                <span aria-hidden="true" className="text-sand/50">
                   ·
                 </span>
                 <Price amount={PRICING.dinner} label="Dinner" />
               </motion.p>
 
-              <motion.p className="copy measure mt-4 text-bone/80" {...rise(3)}>
+              <motion.p className="copy measure mt-4 text-sand/80" {...rise(3)}>
                 {SUBHEAD}
               </motion.p>
 

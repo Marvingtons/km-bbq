@@ -161,8 +161,13 @@ export function Navbar() {
   // underline — which is the real active signal anyway. The moment the cream
   // panel fades in, ember has a surface to hold on and comes back.
   const linkColor = (isActive: boolean) => {
-    if (!barVisible) return "text-bone";
-    return isActive ? "text-ember" : "text-bone hover:text-ember";
+    if (!barVisible) return "text-sand";
+    // ACTIVE IS NOT AN ACCENT COLOUR ANY MORE. It used to be ember type, but
+    // the nav sits on the black structure and the accent measures 3.15:1 as
+    // text on char — it cannot carry a label there. State is carried by weight
+    // of colour (full sand vs 70%) and by the flame underline below, which is a
+    // FILL and so has no such limit.
+    return isActive ? "text-sand" : "text-sand/70 hover:text-sand";
   };
 
   return (
@@ -206,7 +211,7 @@ export function Navbar() {
                       href={hrefFor(link)}
                       onClick={close}
                       aria-current={isActive ? "page" : undefined}
-                      className="group relative inline-flex min-h-12 items-center py-1.5 font-display text-xl font-normal leading-tight text-bone transition-colors duration-[var(--dur-base)] ease-house"
+                      className="group relative inline-flex min-h-12 items-center py-1.5 font-display text-xl font-normal leading-tight text-sand transition-colors duration-[var(--dur-base)] ease-house"
                     >
                       {link.label}
                       {/* Same job as the desktop underline — position, not
@@ -215,7 +220,7 @@ export function Navbar() {
                       {isActive && (
                         <span
                           aria-hidden="true"
-                          className="ml-3 inline-block h-1.5 w-1.5 rounded-pill bg-neon-pink align-middle"
+                          className="ml-3 inline-block h-1.5 w-1.5 rounded-pill bg-flame align-middle"
                         />
                       )}
                     </Link>
@@ -254,11 +259,11 @@ export function Navbar() {
                   : { delay: 0.2 + NAV_LINKS.length * 0.055, duration: 0.4 }
               }
             >
-              <dl className="font-sans text-sm text-smoke">
+              <dl className="font-sans text-sm text-steel">
                 {HOURS.map(({ short, time }) => (
-                  <div key={short} className="flex justify-between border-t border-char-3 py-2">
+                  <div key={short} className="flex justify-between border-t border-steel/25 py-2">
                     <dt>{short}</dt>
-                    <dd className="font-medium text-bone">{time}</dd>
+                    <dd className="font-medium text-sand">{time}</dd>
                   </div>
                 ))}
               </dl>
@@ -287,7 +292,7 @@ export function Navbar() {
             stays off the paint path. */}
         <div
           aria-hidden="true"
-          className={`absolute inset-0 border-b border-char-3 bg-char/90 shadow-card backdrop-blur-md transition-opacity duration-[var(--dur-slow)] ease-house ${
+          className={`absolute inset-0 border-b border-steel/25 bg-char/90 shadow-card backdrop-blur-md transition-opacity duration-[var(--dur-slow)] ease-house ${
             barVisible && !menuOpen ? "opacity-100" : "opacity-0"
           } motion-reduce:transition-none`}
         />
@@ -346,7 +351,7 @@ export function Navbar() {
                         so pink never becomes a hover state. */}
                     <span
                       className={`pointer-events-none absolute -bottom-0.5 left-0 h-px w-full origin-left transition-transform duration-[var(--dur-quick)] ease-house group-hover:scale-x-100 motion-reduce:transition-none ${
-                        isActive ? "scale-x-100 bg-neon-pink" : "scale-x-0 bg-ember"
+                        isActive ? "scale-x-100 bg-flame" : "scale-x-0 bg-steel"
                       }`}
                     />
                   </Link>
@@ -394,7 +399,7 @@ export function Navbar() {
                   key={i}
                   className={`absolute left-0 h-0.5 w-6 rounded-pill transition-all duration-[var(--dur-base)] ease-house motion-reduce:transition-none ${
                     bar.top
-                  } ${menuOpen ? `bg-bone ${bar.open}` : "bg-bone"}`}
+                  } ${menuOpen ? `bg-sand ${bar.open}` : "bg-sand"}`}
                 />
               ))}
             </span>

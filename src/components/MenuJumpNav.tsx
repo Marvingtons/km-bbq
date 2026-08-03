@@ -49,7 +49,7 @@ export function MenuJumpNav({ targets }: { targets: JumpTarget[] }) {
   return (
     <nav
       aria-label="Menu categories"
-      className="sticky z-nav border-b border-char-3 bg-char/95 backdrop-blur-sm"
+      className="sticky z-nav border-b border-sand-3 bg-sand/95 backdrop-blur-sm"
       style={{ top: NAV_H }}
     >
       <ul
@@ -68,8 +68,8 @@ export function MenuJumpNav({ targets }: { targets: JumpTarget[] }) {
                 aria-current={isActive ? "true" : undefined}
                 className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-pill border px-4 py-1.5 font-sans text-xs font-medium uppercase tracking-[0.12em] transition-colors duration-[var(--dur-base)] ease-house ${
                   isActive
-                    ? "border-ember bg-ember text-bone"
-                    : "border-char-3 bg-char-2/60 text-bone/60 hover:border-ember hover:text-ember"
+                    ? "border-flame bg-flame text-sand"
+                    : "border-sand-3 bg-sand-2/60 text-ink/60 hover:border-flame hover:text-flame"
                 }`}
               >
                 {label}

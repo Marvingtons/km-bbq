@@ -170,7 +170,13 @@ export function Preloader() {
       ref={rootRef}
       // `preloader-overlay` carries the visibility rule (globals.css) plus the
       // failsafe that clears it if JS never gets to run the timeline.
-      className="preloader-overlay fixed inset-0 z-preloader flex flex-col items-center justify-center overflow-hidden bg-char"
+      /* SAND, not char. This is a full-screen field, and DIRECTION.md
+         constraint 2 puts black in the nav, the footer and section caps —
+         never as a field. It also mattered more than the constraint: the page
+         behind it is sand, so a black overlay made the first thing a visitor
+         saw a hard cut from near-black to warm light, which is exactly the
+         "dim premium room" expectation the direction exists to stop setting. */
+      className="preloader-overlay fixed inset-0 z-preloader flex flex-col items-center justify-center overflow-hidden bg-sand"
       role="status"
       aria-label="KM.BBQ is loading"
     >
@@ -181,7 +187,7 @@ export function Preloader() {
       </div>
       <div
         aria-hidden="true"
-        className="pre-line mt-7 h-0.5 w-[120px] rounded-full bg-ember opacity-0"
+        className="pre-line mt-7 h-0.5 w-[120px] rounded-full bg-flame opacity-0"
       />
       {/* The shared eyebrow, so the loading screen and the page speak the same
           language. The negative right margin cancels the trailing letter-space

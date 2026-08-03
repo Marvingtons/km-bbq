@@ -4,8 +4,8 @@ import { SOCIALS, type SocialKey } from "@/data/info";
 // to a profile, not an ornament. Round rather than pill only because the target
 // is square — same token, same rule.
 //
-// One social-links component, used by both the footer (on char-2) and the
-// contact section (on cream). Same chip shape, size, and lift+ember-glow hover
+// One social-links component, used by both the footer (on sand-2) and the
+// contact section (on cream). Same chip shape, size, and lift+flame-glow hover
 // everywhere — only the resting surface colors switch by `tone` so the chip
 // reads on either background. Instagram, TikTok, and Yelp appear in both.
 
@@ -54,12 +54,23 @@ const ICONS: Record<SocialKey, React.ReactNode> = {
   ),
 };
 
+/**
+ * Two tones, one per ground, and they resolve to the SAME hover: the accent as
+ * a fill with a sand glyph on top.
+ *
+ * That is not a stylistic choice. These are 1.5px-stroke glyphs, and the accent
+ * as a *glyph colour* only clears AA on the warm ground (5.01:1 on sand) — on
+ * the footer's char it is 3.15:1 and on a sky band 3.52:1. Rather than carry
+ * one hover for light and a different one for dark, both tones hover to a flame
+ * fill, where the contrast lives between the fill and the sand glyph and is
+ * identical on either ground.
+ */
 const TONE = {
-  dark: "border-bone/10 bg-char-2/[0.03] text-bone/60 hover:border-ember/60 hover:bg-ember/10 hover:text-ember",
-  // ember on the light tone, not ember: these are 1.5px-stroke glyphs, and
-  // ember on white is 2.5:1. ember is the same colour's AA-safe form.
+  // On the black structure — the footer.
+  dark: "border-sand/15 bg-sand/[0.06] text-sand/70 hover:border-flame hover:bg-flame hover:text-sand",
+  // On the warm ground.
   light:
-    "border-char-3 bg-char-2 text-smoke hover:border-ember/60 hover:bg-ember/10 hover:text-ember",
+    "border-sand-3 bg-sand-2 text-ash hover:border-flame hover:bg-flame hover:text-sand",
 } as const;
 
 export function SocialLinks({
@@ -78,7 +89,7 @@ export function SocialLinks({
           aria-label={label}
           target="_blank"
           rel="noopener noreferrer"
-          className={`flex h-11 w-11 items-center justify-center rounded-pill border transition-all duration-[var(--dur-base)] ease-house hover:-translate-y-1 hover:shadow-[0_8px_24px_-8px] hover:shadow-ember/40 ${TONE[tone]}`}
+          className={`flex h-11 w-11 items-center justify-center rounded-pill border transition-all duration-[var(--dur-base)] ease-house hover:-translate-y-1 hover:shadow-card ${TONE[tone]}`}
         >
           {ICONS[key]}
         </a>

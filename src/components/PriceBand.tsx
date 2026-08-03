@@ -22,24 +22,24 @@ const CELLS = [
 export function PriceBand({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`flex max-w-xl items-stretch overflow-hidden rounded-card border border-char-3 bg-char-2 ${className}`}
+      className={`flex max-w-xl items-stretch overflow-hidden rounded-card border border-sand-3 bg-sand-2 ${className}`}
     >
       {CELLS.map((cell, i) => (
         <div
           key={cell.label}
           className={`flex-1 px-4 py-5 sm:px-7 ${
-            i > 0 ? "border-l border-char-3" : ""
+            i > 0 ? "border-l border-sand-3" : ""
           }`}
         >
           <p className="eyebrow">{cell.label}</p>
           <p
             className={`mt-2 font-display text-lg font-black [font-stretch:87.5%] ${
-              cell.loud ? "text-flame" : "text-bone"
+              cell.loud ? "text-flame" : "text-ink"
             }`}
           >
             {cell.value}
           </p>
-          <p className="mt-1 font-sans text-xs text-smoke">{cell.note}</p>
+          <p className="mt-1 font-sans text-xs text-ash">{cell.note}</p>
         </div>
       ))}
     </div>

@@ -56,9 +56,9 @@ function ItemMedia({ item }: { item: MenuItem }) {
   return (
     <div
       aria-hidden="true"
-      className="mb-4 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-card border border-char-3 bg-char"
+      className="mb-4 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-card border border-sand-3 bg-sand"
     >
-      <span className="select-none font-display text-2xl font-black text-char-3 [font-stretch:87.5%]">
+      <span className="select-none font-display text-2xl font-black text-sand-3 [font-stretch:87.5%]">
         {item.name.charAt(0)}
       </span>
     </div>
@@ -67,16 +67,16 @@ function ItemMedia({ item }: { item: MenuItem }) {
 
 function ItemCard({ item }: { item: MenuItem }) {
   return (
-    <div className="group flex h-full flex-col rounded-card border border-char-3 bg-char-2 p-5 transition-colors duration-[var(--dur-base)] ease-house hover:border-flame/40">
+    <div className="group flex h-full flex-col rounded-card border border-sand-3 bg-sand-2 p-5 transition-colors duration-[var(--dur-base)] ease-house hover:border-flame/40">
       <ItemMedia item={item} />
       <h3 className="card-title">
         {item.name}
         {item.english && (
-          <span className="text-smoke"> — {item.english}</span>
+          <span className="text-ash"> — {item.english}</span>
         )}
       </h3>
       {item.hangul && (
-        <p className="mt-1 font-sans text-xs text-smoke">{item.hangul}</p>
+        <p className="mt-1 font-sans text-xs text-ash">{item.hangul}</p>
       )}
       <p className="copy mt-2">{item.desc}</p>
     </div>
@@ -86,12 +86,12 @@ function ItemCard({ item }: { item: MenuItem }) {
 function CategorySection({ category }: { category: MenuCategory }) {
   return (
     <section id={category.id} className="mt-16 scroll-mt-32 first:mt-0">
-      <div className="mb-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-char-3 pb-4">
+      <div className="mb-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-sand-3 pb-4">
         <h2 className="h2-scale">{category.name}</h2>
         {category.hangul && (
-          <span className="font-sans text-sm text-smoke">{category.hangul}</span>
+          <span className="font-sans text-sm text-ash">{category.hangul}</span>
         )}
-        {category.tag && <span className="eyebrow ml-auto text-ember">{category.tag}</span>}
+        {category.tag && <span className="eyebrow ml-auto">{category.tag}</span>}
       </div>
       {category.blurb && <p className="copy measure -mt-3 mb-7">{category.blurb}</p>}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -116,12 +116,12 @@ export default function MenuPage() {
       <main
         id="main-content"
         tabIndex={-1}
-        className="grain isolate bg-char focus:outline-none"
+        className="grain isolate bg-sand focus:outline-none"
       >
         <section className="pt-32 pb-12 sm:pt-36 lg:pt-40">
           <div className="grid-page">
             <div className="col-text">
-              <p className="eyebrow text-ember">
+              <p className="eyebrow">
                 All-You-Can-Eat <Dot char="·" /> Self-Serve <Dot char="·" />{" "}
                 Grill Your Own
               </p>
@@ -138,10 +138,10 @@ export default function MenuPage() {
             </div>
 
             <div className="col-text mt-6 space-y-2">
-              <p className="font-sans text-xs text-smoke">
+              <p className="font-sans text-xs text-ash">
                 Walk-in only <Dot char="·" /> No reservations needed
               </p>
-              <p className="font-sans text-xs text-smoke">
+              <p className="font-sans text-xs text-ash">
                 Stop our clock at exactly{" "}
                 <span className="font-semibold text-flame">
                   {CLOCK_PROMO.target} seconds
@@ -162,7 +162,7 @@ export default function MenuPage() {
                   <li
                     key={label}
                     className={`copy py-1 pr-5 ${
-                      i < INCLUDED.length - 1 ? "mr-5 border-r border-char-3" : ""
+                      i < INCLUDED.length - 1 ? "mr-5 border-r border-sand-3" : ""
                     }`}
                   >
                     {label}
@@ -220,7 +220,7 @@ export default function MenuPage() {
                   <br />
                   <a
                     href={PHONE.href}
-                    className="inline-flex min-h-11 items-center font-semibold text-ember transition-colors duration-[var(--dur-base)] ease-house hover:text-flame"
+                    className="inline-flex min-h-11 items-center font-semibold text-flame transition-colors duration-[var(--dur-base)] ease-house hover:text-flame"
                   >
                     {PHONE.display}
                   </a>

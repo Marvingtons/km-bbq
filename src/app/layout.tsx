@@ -82,7 +82,7 @@ export const metadata: Metadata = {
   },
 };
 
-// theme-color matches the page ground (--color-char). Literal because the
+// theme-color matches the page ground (--color-sand). Literal because the
 // browser chrome cannot read a CSS custom property.
 export const viewport: Viewport = {
   themeColor: "#121110",
@@ -131,12 +131,12 @@ export default function RootLayout({
           <style>{`.preloader-overlay{display:none!important}`}</style>
         </noscript>
       </head>
-      <body className="min-h-full bg-char text-bone">
+      <body className="min-h-full bg-sand text-ink">
         {/* Keyboard skip link — hidden until focused, then a visible flame pill
             at the top-left. Jumps past the nav to the page's main content. */}
         <a
           href="#main-content"
-          className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-preloader focus-visible:rounded-pill focus-visible:bg-flame focus-visible:px-5 focus-visible:py-2 focus-visible:font-sans focus-visible:text-sm focus-visible:font-semibold focus-visible:text-bone focus-visible:shadow-pop"
+          className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-preloader focus-visible:rounded-pill focus-visible:bg-flame focus-visible:px-5 focus-visible:py-2 focus-visible:font-sans focus-visible:text-sm focus-visible:font-semibold focus-visible:text-ink focus-visible:shadow-pop"
         >
           Skip to content
         </a>
