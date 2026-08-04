@@ -400,6 +400,28 @@ body {
     );
   }
 
+  /* --- THE SKY BAND — the mural's field, and the ONE place it may appear.
+     DIRECTION.md constraint 7: at most one. verify-palette.mjs counts it.
+
+     BUILT AND CURRENTLY UNASSIGNED. Placement is the owner's decision and has
+     not been made, so the recipe exists and nothing wears it. To apply it,
+     swap ONE className — the proposed candidate is Contact:
+       `grain relative bg-sand py-section md:py-section-lg`
+       -> `band-sky grain relative py-section md:py-section-lg`
+     Contact is self-contained, it is semantically outdoors ("find us"), and it
+     is the one section that does not touch the hero/About transition.
+
+     Inside the band the muted type MUST become ink-based. --color-ash measures
+     4.16:1 on sky and does not clear; ink measures 9.55:1. The accent is not
+     text here either (3.27:1) — same rule as the black structure. --------- */
+  .band-sky {
+    background: var(--color-sky);
+  }
+  .band-sky .copy,
+  .band-sky .eyebrow {
+    color: var(--color-ink);
+  }
+
   /* --- CHROME RULE — the one divider. ---------------------------------- */
   .rule-chrome {
     border: 0;
