@@ -377,6 +377,39 @@ Two things keep it honest:
   painted with `--color-open` and fails if there is more than one, or if it
   appears outside the sticky bar.
 
+### A3 — The gallery is pinned and scroll-scrubbed again on desktop. Owner-directed, 2026-08-03.
+
+Amends the supersession list above, which records **"the unpinned gallery"** as
+one of the eight structural wins to preserve from the dark rework: *9,372px →
+6,573px document height, GSAP removed, all three captions visible at once.*
+This reverses the first two of those three.
+
+**What it costs, measured rather than estimated.** Held scroll — the part where
+the page does not move — is **1,274px at 1440, or 1.42 viewport heights.**
+Document height goes 6,566px → 7,584px. Law 6 wants held scroll under one
+viewport and the hero already spends 0.6, so the site's total is now ~2.0vh
+against a budget of 1.0. That is the real price and it is not hidden.
+
+**What bounds it.** The pin duration is `min(trackDistance, innerHeight × 1.75)`
+— a cap, not a target. If the strip grows past that the scrub simply moves
+faster; the pin never lengthens to fit its content, which is precisely how the
+previous pinned gallery reached 2.5 screens of dead scroll.
+
+**What is kept from the win.** Captions stay under their photographs, in flow,
+all visible at once. There is no caption fade choreography — the old pinned
+gallery crossfaded them by distance from screen centre, so at any moment you
+could read exactly one label. That was the worst part of it and it does not come
+back.
+
+**Scope.** Pinned mode exists ONLY inside
+`(min-width: 1024px) and (prefers-reduced-motion: no-preference)`, declared once
+in `globals.css` and once in `gsap.matchMedia()`. Below that bracket, and for
+anyone who has asked for less motion, the native scroll-snap strip is unchanged
+and no ScrollTrigger is ever created. `tools/verify-gallery.mjs` asserts the
+held-scroll cap, that exactly one pin-spacer exists at 1440 and zero exists at
+375 or under reduced motion, and that a round trip across the 1024px boundary
+does not stack a second one.
+
 ---
 
 ## WHY THIS FILE EXISTS

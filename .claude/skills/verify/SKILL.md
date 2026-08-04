@@ -63,8 +63,21 @@ const chromium = (pw.default ?? pw).chromium;   // it is CJS, so unwrap .default
   old illustration set (tiger, samulnori drummer, hanok, Hahoe mask, flame
   mascot, stews) was never the restaurant's wall and is not to be restored — see
   DIRECTION.md. The real wall mural has never been photographed for the site.
-- **The gallery is not pinned.** It is a native scroll-snap strip with all three
-  captions visible in flow under their photograph. No GSAP, no ScrollTrigger.
+- **The gallery has TWO modes from one DOM.** A GSAP-pinned horizontal scrub
+  inside `(min-width: 1024px) and (prefers-reduced-motion: no-preference)`, and
+  a native scroll-snap strip everywhere else. The bracket is written twice — in
+  `globals.css` and in `gsap.matchMedia()` — and they must stay identical, or
+  you get a transformed track inside a live overflow scroller.
+  - Captions sit under their photograph in flow in **both** modes. There is no
+    caption fade choreography and it is not coming back.
+  - **The pinned rules live OUTSIDE `@layer components`, deliberately.**
+    Tailwind's utilities are in a later layer, so a layered rule loses to any
+    utility regardless of specificity — inside the layer, `md:flex` kept the
+    chevrons visible and `md:py-section-lg` kept the section taller than the
+    viewport it was pinned to.
+  - Held scroll is capped at `min(trackDistance, innerHeight × 1.75)`. It is a
+    cap: a longer strip scrubs faster, the pin never grows. See DIRECTION.md
+    amendment A3 for the budget this spends.
 - **There are no glyph halos.** `.hero-display-glow` / `.hero-copy-glow` and the
   blurred copy plate are gone. Legibility over photography is currently bought
   by the backdrop's own scrim, and is an open question for the hero pass.
@@ -88,6 +101,12 @@ comments.
   and neither predecessor. Rendered: body ground is sand, no `<section>` paints
   a black ground, the footer IS black, the mural set is absent, the mural blue
   appears at most once.
+- `node tools/verify-gallery.mjs [url]` — **the two-mode gallery**, and the file
+  to run on any gallery change. Heading visibility (it must never be animated),
+  first-card alignment against the page container, held-scroll cap, pin-spacer
+  count at 1440 / 375 / reduced-motion, the scrub actually travelling, and a
+  double round trip across the 1024px boundary to catch stacked pin-spacers.
+  35 checks.
 - `node tools/verify-window.mjs [url]` — the Hero→About window transition: clip
   progression, mid-gesture reversibility, zero layout animation, CLS 0, the
   window opening onto About's sand ground, the chrome hairline, off-screen video

@@ -1,8 +1,12 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PillLink } from "./PillLink";
+
+gsap.registerPlugin(ScrollTrigger);
 
 /* ===========================================================================
    GALLERY — a scroll-snap strip. No pin, no scrub, no GSAP.
@@ -101,24 +105,144 @@ const GALLERY_ITEMS: GalleryItem[] = [
   },
 ];
 
+/**
+ * The pin's scroll cost, in viewport heights.
+ *
+ * The site's dead-scroll budget (Law 6) wants held scroll under one viewport,
+ * and the hero already spends 0.6 of one. This cap is a deliberate, recorded
+ * overrun — see DIRECTION.md amendment A3. It is a CAP, not a target: if the
+ * track is longer than this the scrub simply moves faster. The pin never
+ * grows to fit the content.
+ */
+const MAX_PIN_VH = 1.75;
+
 export function Gallery() {
+  const sectionRef = useRef<HTMLElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
 
   // One tile-and-a-gap at the common case, so a click lands the next frame on
-  // a snap point rather than halfway across one.
+  // a snap point rather than halfway across one. Strip mode only.
   const nudge = (dir: 1 | -1) =>
     stripRef.current?.scrollBy({ left: dir * 480, behavior: "smooth" });
 
+  useEffect(() => {
+    const section = sectionRef.current;
+    const track = trackRef.current;
+    if (!section || !track) return;
+
+    /**
+     * PUBLISH THE SCROLLBAR WIDTH.
+     *
+     * In pinned mode the track is `width: max-content`, so its padding cannot
+     * be a percentage of anything useful and has to be viewport-relative. But
+     * `scrollbar-gutter: stable` reserves 10px page-wide, which makes 100vw
+     * permanently wider than the content box — and a padding computed from a
+     * raw 100vw starts the feature card 5px right of every other section's
+     * column 1. The CSS subtracts --sbw to cancel exactly that.
+     *
+     * Measured against document.body, NOT documentElement. Under an overlay
+     * scrollbar (headless Chromium, macOS, most touch devices)
+     * documentElement.clientWidth equals innerWidth and reports a gutter of
+     * zero — but `scrollbar-gutter: stable` has still shrunk the body, so the
+     * page's real content box is narrower and every other section is centred
+     * in it. The body is the box `.grid-page` is actually centred inside, so
+     * the body is the honest basis.
+     */
+    const contentWidth = () => document.body.clientWidth;
+    const setSbw = () =>
+      document.documentElement.style.setProperty(
+        "--sbw",
+        `${window.innerWidth - contentWidth()}px`
+      );
+    setSbw();
+    window.addEventListener("resize", setSbw);
+
+    /**
+     * A single gsap.context scoped to the section. Everything created inside
+     * — the matchMedia bracket, its tween, its ScrollTrigger and its
+     * pin-spacer — is reverted together on unmount.
+     *
+     * This is what stops hot reload and route changes from stacking duplicate
+     * pin-spacers, which is the classic way a pinned gallery ends up with a
+     * screen of blank scroll and a section that looks broken.
+     */
+    const ctx = gsap.context(() => {
+      const mm = gsap.matchMedia();
+
+      // THE SAME BRACKET AS THE CSS. If these two ever disagree you get a
+      // transformed track inside a live overflow scroller.
+      mm.add(
+        "(min-width: 1024px) and (prefers-reduced-motion: no-preference)",
+        () => {
+          // Recomputed, never captured: `invalidateOnRefresh` re-runs the
+          // function values below on every refresh, so a resize or a late
+          // image gets the real number rather than the one measured at build.
+          // Same basis as --sbw above: the body's content box, which is what
+          // the track is actually laid out inside.
+          const getDist = () => Math.max(0, track.scrollWidth - contentWidth());
+
+          gsap.set(track, { x: 0 });
+
+          gsap.to(track, {
+            x: () => -getDist(),
+            ease: "none",
+            scrollTrigger: {
+              trigger: section,
+              start: "top top",
+              // Capped at MAX_PIN_VH. Past that the scrub moves faster; the
+              // pin does not get longer.
+              end: () =>
+                `+=${Math.min(getDist(), window.innerHeight * MAX_PIN_VH)}`,
+              pin: true,
+              // Default pinType. Lenis smooths the WINDOW scroll position
+              // rather than transforming a wrapper, so ScrollTrigger's normal
+              // fixed-position pinning is correct here — forcing
+              // pinType: "transform" is what makes a pin jitter under Lenis.
+              scrub: 0.5,
+              anticipatePin: 1,
+              invalidateOnRefresh: true,
+            },
+          });
+
+          // Belt and braces on top of the section's own measurement: tiles
+          // past the first are lazy, so the last decode can land after the
+          // trigger was measured. The CSS gives every tile a fixed height and
+          // width so the box is known before the image is, and this catches
+          // anything that still settles late.
+          const refresh = () => ScrollTrigger.refresh();
+          window.addEventListener("load", refresh);
+          void document.fonts?.ready.then(refresh);
+
+          return () => window.removeEventListener("load", refresh);
+        }
+      );
+    }, section);
+
+    return () => {
+      window.removeEventListener("resize", setSbw);
+      ctx.revert();
+    };
+  }, []);
+
   return (
     <section
+      ref={sectionRef}
       id="gallery"
       aria-labelledby="gallery-heading"
-      // NOT `overflow-hidden`. The strip is its own scroll container now, so
-      // clipping here would only hide the fact that it can scroll.
-      className="grain relative bg-sand py-section md:py-section-lg"
+      // NOT `overflow-hidden`. The strip is its own scroll container in strip
+      // mode and the track overflows the viewport by design in pinned mode —
+      // clipping here would break both.
+      className="gallery-pinned grain relative bg-sand py-section md:py-section-lg"
     >
-      <div className="grid-page relative z-base">
+      <header className="grid-page relative z-base">
         <div className="col-text">
+          {/* NOTHING ANIMATES THE HEADING. No reveal, no tween, no initial
+              opacity — not in CSS, not inline, not from JS. It is the same
+              static markup pattern as About and Contact, and it renders with
+              JavaScript disabled entirely. That is deliberate: this block is
+              the section's only unconditional content, so it must never depend
+              on a trigger firing. */}
           <p className="eyebrow">Gallery</p>
           <h2 id="gallery-heading" className="h2-scale mt-4">
             A look inside
@@ -145,7 +269,7 @@ export function Gallery() {
             that do the same thing is noise in a screen reader. */}
         <div
           aria-hidden="true"
-          className="col-full mt-8 hidden justify-end gap-2 md:flex"
+          className="gallery-chevrons col-full mt-8 hidden justify-end gap-2 md:flex"
         >
           {([-1, 1] as const).map((dir) => (
             <button
@@ -170,16 +294,18 @@ export function Gallery() {
             </button>
           ))}
         </div>
-      </div>
+      </header>
 
-      {/* FULL-BLEED, and outside `.grid-page` on purpose. The strip spans the
-          viewport and reproduces the container gutter as its own padding-inline,
-          so the first tile lines up with column 1 while the last one can still
-          scroll clear of the right edge.
+      {/* FULL-BLEED, and outside `.grid-page` on purpose.
 
-          `tabIndex` and a label so a keyboard user can reach and scroll it; the
-          scrollbar is hidden because the snap points and the bleed already say
-          it moves. */}
+          STRIP MODE: this element is the scroller and carries the padding that
+          lines tile 1 up with column 1.
+          PINNED MODE: it stops scrolling, the padding moves to the track, and
+          GSAP translates the track through it.
+
+          `tabIndex` and a label so a keyboard user can reach and scroll it in
+          strip mode; the scrollbar is hidden because the snap points and the
+          bleed already say it moves. */}
       <div
         ref={stripRef}
         className="gallery-strip relative z-base mt-6 md:mt-4"
@@ -187,25 +313,31 @@ export function Gallery() {
         role="group"
         aria-label="Photographs, scroll sideways"
       >
-        {GALLERY_ITEMS.map((item, i) => (
-          <figure key={item.id} className="gallery-item">
-            <div className="photo">
-              <Image
-                src={item.src}
-                alt={item.alt}
-                fill
-                sizes="(max-width: 768px) 78vw, 720px"
-                className="object-cover"
-                // The first tile is on screen when the section arrives; the
-                // rest stay lazy.
-                priority={i === 0}
-                decoding="async"
-              />
-            </div>
-            {/* Under the photograph, in flow, always readable. */}
-            <figcaption className="eyebrow mt-3">{item.caption}</figcaption>
-          </figure>
-        ))}
+        <div ref={trackRef} className="gallery-track">
+          {GALLERY_ITEMS.map((item, i) => (
+            <figure key={item.id} className="gallery-item">
+              <div className="photo">
+                <Image
+                  src={item.src}
+                  alt={item.alt}
+                  fill
+                  sizes="(max-width: 1024px) 78vw, 720px"
+                  className="object-cover"
+                  // The first tile is on screen when the section arrives; the
+                  // rest stay lazy.
+                  priority={i === 0}
+                  decoding="async"
+                />
+              </div>
+              {/* Under the photograph, in flow, always readable — in BOTH
+                  modes. There is no caption fade choreography: the previous
+                  pinned gallery crossfaded captions by distance from screen
+                  centre, which meant that at any moment you could not read the
+                  label of anything except one tile. */}
+              <figcaption className="eyebrow mt-3">{item.caption}</figcaption>
+            </figure>
+          ))}
+        </div>
       </div>
     </section>
   );

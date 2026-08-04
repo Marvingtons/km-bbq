@@ -172,8 +172,10 @@
 
   /* --- SHADOW — two, and only two. Warm and light-ground weight; the old
      values were tuned to read against near-black and go to mud on sand. */
-  --shadow-card: 0 1px 2px rgb(62 42 24 / 0.06), 0 4px 14px rgb(62 42 24 / 0.08);
-  --shadow-pop: 0 6px 16px rgb(62 42 24 / 0.10), 0 18px 40px rgb(62 42 24 / 0.14);
+  --shadow-card:
+    0 1px 2px rgb(62 42 24 / 0.06), 0 4px 14px rgb(62 42 24 / 0.08);
+  --shadow-pop:
+    0 6px 16px rgb(62 42 24 / 0.1), 0 18px 40px rgb(62 42 24 / 0.14);
 
   /* --- Z-INDEX — four values. Tailwind's namespace is --z-index-*, so the
      utilities are z-base / z-nav / z-overlay / z-preloader. */
@@ -450,20 +452,30 @@ body {
     color: var(--color-ink);
   }
 
-  /* --- GALLERY STRIP — full-bleed, native scroll-snap, no library. ------
-     `padding-inline` is what makes it full-bleed while the FIRST item still
-     lines up with the page container: the strip spans the viewport, and its
-     own padding reproduces the container's gutter. The same padding on the
-     right is what lets the LAST item scroll fully clear of the edge, which a
-     margin on the track cannot do.
+  /* =====================================================================
+     GALLERY — ONE DOM, TWO MODES.
 
-     Measured from 100%, not 100vw, on purpose — `scrollbar-gutter: stable`
-     reserves 10px page-wide, so 100vw is 10px wider than the content box and
-     the first tile would sit a hair left of every other section's column 1. */
+     STRIP MODE is the default and the floor: a native overflow-x scroller
+     with scroll-snap. It needs no library, behaves identically under reduced
+     motion, and is what phones, tablets and anyone who has asked for less
+     motion get.
+
+     PINNED MODE replaces it only inside
+       (min-width: 1024px) and (prefers-reduced-motion: no-preference)
+     — the SAME bracket gsap.matchMedia() uses in Gallery.tsx, written once
+     here and once there. If those two ever disagree you get a transformed
+     track inside a live scroller, which is the worst of both.
+
+     The alignment maths is the reason the padding lives on .gallery-track in
+     pinned mode and on .gallery-strip in strip mode. In strip mode the strip
+     is a full-width block, so `100%` is the body width and the sums are
+     honest. In pinned mode the track is `width: max-content`, so `100%` means
+     nothing useful and the padding has to be viewport-relative — hence
+     `100vw` minus the scrollbar, which Gallery.tsx publishes as --sbw because
+     `scrollbar-gutter: stable` makes 100vw permanently 10px wider than the
+     content box.
+     ===================================================================== */
   .gallery-strip {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--grid-gap);
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
@@ -490,6 +502,13 @@ body {
     display: none;
   }
 
+  .gallery-track {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--grid-gap);
+    width: max-content;
+  }
+
   @media (min-width: 1024px) {
     .gallery-strip {
       padding-inline: calc(
@@ -513,7 +532,9 @@ body {
   }
 
   /* One height for every tile, so the caption baselines line up across the
-     strip however wide each frame is. */
+     strip however wide each frame is. Fixed rather than derived, so a tile's
+     box is known BEFORE its image decodes — ScrollTrigger measures the pin
+     distance from this, and a late-loading image must not move it. */
   .gallery-item .photo {
     height: clamp(240px, 46vh, 460px);
   }
@@ -530,6 +551,82 @@ body {
       transparent 100%
     );
     opacity: 0.55;
+  }
+}
+
+/* ===========================================================================
+   GALLERY - PINNED MODE. DELIBERATELY OUTSIDE @layer components.
+
+   Tailwind's utilities live in a LATER cascade layer than `components`, so a
+   layered rule loses to any utility no matter how specific it is. Inside the
+   layer these rules were silently beaten: `md:flex` kept the chevrons visible
+   in pinned mode, and `md:py-section-lg` kept the section's block padding, so
+   the pinned element ended up TALLER than the viewport it was pinned to.
+
+   Unlayered rules outrank every layer, which is what this block needs and why
+   it sits here rather than beside the strip styles above.
+   =========================================================================== */
+/* --- PINNED MODE ------------------------------------------------------ */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  /* The section becomes exactly one screen so pinning it holds a full view
+     rather than a tall box, and the vertical rhythm is carried by centring
+     instead of by section padding. */
+  .gallery-pinned {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: 0;
+    /* The track is `width: max-content` and runs well past the right edge by
+       design. Without this it widens the DOCUMENT and the whole page gains a
+       horizontal scrollbar — which is the exact symptom this gallery was
+       reported for.
+
+       `clip` rather than `hidden`: clip does not create a scroll container,
+       so it cannot become a stray scrollport, and it leaves overflow-y
+       visible so nothing vertical is trapped. It also does not establish a
+       containing block, so ScrollTrigger's position:fixed pin is unaffected. */
+    overflow-x: clip;
+    overflow-y: visible;
+  }
+
+  /* The scroller stops scrolling. GSAP owns x from here, and an overflow
+     container underneath a transform is what makes a pinned track feel like
+     it is fighting the wheel. */
+  .gallery-pinned .gallery-strip {
+    overflow: visible;
+    scroll-snap-type: none;
+    padding-inline: 0;
+    scroll-padding-inline: 0;
+  }
+
+  /* Padding moves onto the track, because getDist() is
+     `track.scrollWidth - clientWidth` and both paddings have to be inside
+     that measurement: the left one to start the feature card on column 1,
+     the right one so the last card lands clear of the edge rather than
+     flush against it. */
+  .gallery-track {
+    padding-inline: calc(
+      max(0px, (100vw - var(--sbw, 0px) - var(--grid-max)) / 2) +
+        var(--grid-gutter-lg)
+    );
+    will-change: transform;
+  }
+
+  .gallery-item {
+    scroll-snap-align: none;
+    width: min(440px, 30vw);
+  }
+
+  .gallery-item:first-child {
+    width: min(720px, 44vw);
+  }
+
+  /* Chevrons are a strip affordance. In pinned mode the scroll IS the
+     control, so they would be two buttons that do nothing the wheel is not
+     already doing. */
+  .gallery-pinned .gallery-chevrons {
+    display: none;
   }
 }
 
