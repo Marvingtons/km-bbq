@@ -11,11 +11,10 @@
  *   2. the scrub is monotonic AND reversible mid-gesture (not fire-and-play)
  *   3. clip-path/transform only — the panel's layout box never changes, and
  *      CLS across the whole transition stays 0
- *   4. the window opens onto About's CREAM ground with the story composed on
- *      it, and the mural is a bounded band below that — one instance of each
- *      sheet, never tiled, never a CSS background, ungraded, full opacity,
- *      hairlined top and bottom
- *   5. the ember hairline is present at the ground change
+ *   4. the window opens onto About's SAND ground with the story composed on it,
+ *      and the retired illustration mural is absent — no <img>, no CSS
+ *      background, no band or parallax markup left behind
+ *   5. the chrome hairline is present at the ground change
  *   6. the video pauses once fully off-screen and resumes on return
  *   7. prefers-reduced-motion: nothing clips, nothing moves, hairline intact
  *   8. under 768px: no clip scrub at all, and no horizontal overflow at 375px
@@ -54,8 +53,8 @@ const readClip = (page) =>
 /**
  * Is About's story ever visible with nothing painted over it?
  *
- * This exists because of a specific bug. The hero runs 200vh with a sticky
- * stage and About is pulled up -100vh to sit behind it — which is free WHILE
+ * This exists because of a specific bug. The hero runs 160vh with a sticky
+ * stage and About is pulled up -60vh to sit behind it — which is free WHILE
  * THE WINDOW CLIPS, because by the time the stage releases it is a small docked
  * panel. Where the clip never runs (reduced motion, under 768px) the stage stays
  * full-bleed and opaque for that whole extra viewport and then slides up over
@@ -152,14 +151,22 @@ const browser = await chromium.launch();
   const cls = await page.evaluate(() => window.__cls);
   check("CLS through the transition is 0", cls < 0.005, `CLS ${cls.toFixed(4)}`);
 
-  // WHAT THE WINDOW OPENS ONTO. This used to assert the mural was behind the
-  // panel. It is not any more, and that is the point of the reveal-retarget
-  // pass: the reveal target is About's CREAM GROUND with the story composed on
-  // it, and the mural is a bounded band further down the section.
+  // WHAT THE WINDOW OPENS ONTO.
+  //
+  // This block has now been wrong twice, in opposite directions, and the second
+  // time nothing caught it. It first asserted the mural was behind the panel.
+  // The reveal-retarget pass moved the target to About's CREAM ground and left
+  // mural assertions below. Then dca56c5..7afd87c deleted the mural entirely and
+  // made the ground char, and this file kept asserting rgb(250,244,236) against
+  // a near-black page — it could not have passed, and it was not run.
+  //
+  // It now asserts the current truth: the window opens onto About's SAND ground
+  // with the story composed on it, and there is no mural anywhere. The mural
+  // checks are inverted rather than deleted, because "the illustration set is
+  // not restored" is a live requirement of DIRECTION.md, not merely a fact.
   const behind = await page.evaluate(() => {
     const about = document.getElementById("about");
     const stage = document.querySelector("#about .about-stage");
-    const band = document.querySelector("#about .mural-band");
     const heading = document.getElementById("about-heading");
     const copy = document.querySelector("#about .about-text p");
     const cta = document.querySelector("#about .about-text a");
@@ -171,68 +178,44 @@ const browser = await chromium.launch();
     };
     return {
       ground: getComputedStyle(about).backgroundColor,
-      stageBeforeBand: stage && band ? stage.getBoundingClientRect().bottom <= band.getBoundingClientRect().top + 1 : null,
       composed: [heading, copy, cta].every(vis),
       muralInStage: stage ? stage.querySelectorAll("img[src*='mural']").length : -1,
     };
   });
-  // #FAF4EC
+  // --color-sand #F2EADD. If this ever reads rgb(18, 17, 16) the page ground
+  // has gone dark again, which DIRECTION.md constraint 1 forbids.
   check(
-    "the window opens onto About's cream ground, not the mural",
-    behind && behind.ground === "rgb(250, 244, 236)" && behind.muralInStage === 0,
-    `ground ${behind?.ground}, ${behind?.muralInStage} mural img in the story stage`
+    "the window opens onto About's SAND ground",
+    behind && behind.ground === "rgb(242, 234, 221)",
+    `ground ${behind?.ground}`
   );
   check(
     "settled state is composed: heading, copy and action are all visible",
     behind && behind.composed,
     `composed ${behind?.composed}`
   );
-  check("the mural band sits BELOW the story", behind && behind.stageBeforeBand === true);
 
-  // The mural itself: one instance of each sheet, nowhere else, untouched.
-  const mural = await page.evaluate(() => {
-    const imgs = [...document.querySelectorAll("img[src*='mural']")];
-    const band = document.querySelector(".mural-band");
-    const art = document.querySelector(".mural-parallax");
-    const srcOf = (i) => decodeURIComponent(i.getAttribute("src")).replace(/^.*url=/, "").replace(/&.*$/, "");
-    const bg = [...document.querySelectorAll("*")].filter((e) => /mural/.test(getComputedStyle(e).backgroundImage)).length;
-    const br = band?.getBoundingClientRect(), ar = art?.getBoundingClientRect();
-    return {
-      count: imgs.length,
-      unique: new Set(imgs.map(srcOf)).size,
-      inHero: document.querySelectorAll("#home img[src*='mural']").length,
-      outsideBand: imgs.filter((i) => !band || !band.contains(i)).length,
-      muralBackgrounds: bg,
-      opacity: imgs.map((i) => getComputedStyle(i).opacity),
-      filter: imgs.map((i) => getComputedStyle(i).filter),
-      objectFit: imgs.map((i) => getComputedStyle(i).objectFit),
-      bandClips: band ? getComputedStyle(band).overflow : null,
-      bandRatio: br ? +(br.width / br.height).toFixed(3) : null,
-      artRatio: ar ? +(ar.width / ar.height).toFixed(3) : null,
-      seamCount: band ? [...band.children].filter((e) => e.getAttribute("aria-hidden") === "true" && getComputedStyle(e).height === "1px").length : 0,
-    };
-  });
-  check("mural is one instance of each sheet, and no more", mural && mural.count === 2 && mural.unique === 2, `${mural?.count} img, ${mural?.unique} unique`);
-  check("no mural in the hero, none outside the band", mural && mural.inHero === 0 && mural.outsideBand === 0, `${mural?.inHero} in hero, ${mural?.outsideBand} outside the band`);
-  check("no mural used as a CSS background anywhere (nothing can tile)", mural && mural.muralBackgrounds === 0, `${mural?.muralBackgrounds} elements`);
-  check(
-    "mural is full-opacity, ungraded, and never cropped to fill",
-    mural && mural.opacity.every((o) => o === "1") && mural.filter.every((f) => f === "none") && mural.objectFit.every((f) => f === "contain"),
-    `opacity ${mural?.opacity}, filter ${mural?.filter}, fit ${mural?.objectFit}`
-  );
-  // 1779:884 art inside a band 1.6%-per-edge shorter — see the MURAL block in About.tsx.
-  check(
-    "band is a bounded strip at the art's natural ratio",
-    mural && mural.bandClips === "hidden" && Math.abs(mural.artRatio - 2.012) < 0.01 && mural.bandRatio > mural.artRatio,
-    `band ${mural?.bandRatio}, art ${mural?.artRatio}, overflow ${mural?.bandClips}`
-  );
-  check("ember hairline on the band's top AND bottom edge", mural && mural.seamCount === 2, `${mural?.seamCount} hairlines`);
+  // THE MURAL SET STAYS GONE. The illustration mural (tiger, samulnori drummer,
+  // hanok, Hahoe mask, flame mascot, stews) was never the restaurant's wall — it
+  // stood in for a real painted wall that had never been photographed for the
+  // site. DIRECTION.md supersedes it and says do not restore it, so this asserts
+  // absence rather than composition.
+  const mural = await page.evaluate(() => ({
+    imgs: document.querySelectorAll("img[src*='mural']").length,
+    backgrounds: [...document.querySelectorAll("*")].filter((e) =>
+      /mural/.test(getComputedStyle(e).backgroundImage)
+    ).length,
+    bandEls: document.querySelectorAll(".mural-band, .mural-parallax").length,
+  }));
+  check("no mural <img> anywhere on the page", mural.imgs === 0, `${mural.imgs} found`);
+  check("no mural used as a CSS background anywhere", mural.backgrounds === 0, `${mural.backgrounds} elements`);
+  check("no mural band or parallax markup left behind", mural.bandEls === 0, `${mural.bandEls} elements`);
 
   const seam = await page.evaluate(() => {
     const el = document.querySelector("#about > div[aria-hidden='true']");
     return el ? { h: getComputedStyle(el).height, bg: getComputedStyle(el).backgroundImage.slice(0, 40) } : null;
   });
-  check("ember hairline present at the ground change", !!seam && seam.h === "1px" && /gradient/.test(seam.bg), seam ? seam.h : "missing");
+  check("chrome hairline present at the ground change", !!seam && seam.h === "1px" && /gradient/.test(seam.bg), seam ? seam.h : "missing");
 
   // Video pauses fully off-screen, resumes on return.
   await scrollTo(page, 3400);

@@ -181,7 +181,7 @@ const browser = await chromium.launch();
     // WHAT THE WINDOW OPENS ONTO. This used to assert the opposite — that
     // About's copy stayed at opacity 0 for the whole sweep, because the old
     // design revealed the mural and the copy did not arrive until About's own
-    // pin ran. The reveal target is the cream story now, so the copy MUST be up
+    // pin ran. The reveal target is the sand story now, so the copy MUST be up
     // by the time the panel docks; what must never happen is the panel's edge
     // sitting on top of it, which `overlaps` above tests glyph by glyph.
     //
