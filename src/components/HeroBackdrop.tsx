@@ -124,8 +124,8 @@ export function HeroBackdrop({ className = "" }: { className?: string }) {
           background:
             /* Heat off the grill line. Both stops were the retired pair —
                ember 242/123/33 and the old brighter flame 230/59/46. They are
-               now the one accent, #bc2c19, at two densities. */
-            "radial-gradient(120% 70% at 50% 118%, rgb(188 44 25 / 0.34) 0%, rgb(188 44 25 / 0.15) 38%, transparent 72%)",
+               now the one accent, #b73434, at two densities. */
+            "radial-gradient(120% 70% at 50% 118%, rgb(183 52 52 / 0.34) 0%, rgb(183 52 52 / 0.15) 38%, transparent 72%)",
         }}
       />
 

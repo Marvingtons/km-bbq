@@ -33,22 +33,40 @@ interface GalleryItem {
   ratio: number;
 }
 
-/* THE AUDIT, and what it cost. Eight tiles became three — every image was
-   classified as a styled food shot, a phone snapshot, or wayfinding:
+/* THE AUDIT, RE-RUN against the two-value warm direction. Three tiles become
+   five, because two of the three cuts were made for failing a palette that was
+   itself wrong.
 
-     live-grill            -> promoted to the HERO, and it is the frame that
-                              clips into About, so it appears once and travels.
-     samgyeopsal-grilling  KEEP. Pork belly over live coals.
-     marbled-wagyu         KEEP. Raw marbling under tongs, portrait.
-     banchan-spread        KEEP. Overhead, lit, and on the menu.
-     interior              CUT. An empty dining room in daylight.
-     table                 CUT. An empty table and a cold grill.
-     drinks                CUT. Two soju bottles and a Corona on bare white.
+   The original audit cut `interior` for being "an empty dining room in
+   daylight" and `table` for being "an empty table and a cold grill". Both
+   readings are about brightness, and both were correct ONLY against a near-
+   black ground. On sand they are two of the best photographs on disk — and
+   `interior` is the frame the entire palette was sampled from. See DIRECTION.md.
+
+     live-grill            -> the HERO, and it is the frame that clips into
+                              About, so it appears once and travels.
+     samgyeopsal-grilling  KEEP.     Pork belly over live coals.
+     marbled-wagyu         KEEP.     Raw marbling under tongs, portrait.
+     banchan-spread        KEEP.     Overhead, lit, and on the menu.
+     interior              RESTORED. The room itself: the terracotta floor, the
+                           black ceiling, the chrome ducts, and the whole 12ft
+                           mural. It is the most informative image the
+                           restaurant has and it was sitting unreferenced.
+     table                 RESTORED. The best photograph of the CHROME on disk —
+                           two polished downdraft hoods filling the frame over a
+                           grill well. Chrome is a tokenized material in this
+                           direction, and this is the only frame that shows what
+                           it actually looks like.
+     drinks                STAYS CUT, for a better reason than "bare white",
+                           which is no longer disqualifying. It is three
+                           bottles of two other companies' packaging — Jinro
+                           and Corona trade dress, front and centre, sharp — in
+                           our own gallery. That is the same mistake as the
+                           Google Maps embed labelling the neighbours.
      outside               MOVED to Contact as wayfinding.
 
-   Three is thin, and it is the honest result of applying the rule rather than
-   a number anyone chose. The reshoot is NEEDS-ASSETS #3; the strip takes more
-   without a code change. */
+   Five is still short of what the room deserves. The reshoot is NEEDS-ASSETS
+   #3 and the strip takes more without a code change. */
 const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: 1,
@@ -69,6 +87,20 @@ const GALLERY_ITEMS: GalleryItem[] = [
     src: "/images/banchan-spread.png",
     alt: "A spread of banchan side dishes",
     caption: "Banchan, included",
+    ratio: 1.0,
+  },
+  {
+    id: 4,
+    src: "/images/interior.png",
+    alt: "The KM.BBQ dining room: tables with built-in grills under chrome extraction ducts, with the painted mural along the back wall",
+    caption: "The room",
+    ratio: 1.0,
+  },
+  {
+    id: 5,
+    src: "/images/table.png",
+    alt: "Chrome extraction hoods over a table with a built-in charcoal grill",
+    caption: "Every table has a grill",
     ratio: 1.0,
   },
 ];

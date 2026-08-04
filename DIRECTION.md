@@ -68,12 +68,15 @@ Roughly 12 feet, on the back wall, deliberately lit by aimed track lights.
 The mural's voice — loud, warm, unembarrassed, exclamatory — is the
 restaurant's own voice. The site's voice should not be cooler than the room's.
 
-> **Provenance note.** The blue field and the pavilion are owner-reported from
-> frames not yet pixel-sampled. The interior frame reviewed on 2026-08-03 was
-> read by eye as a cream/ivory field, which the owner has corrected to blue —
-> plausibly a pale blue read as neutral under warm artificial light. **Sampled
-> values are pending** (see "Open, not decided"). This note exists so the
-> distinction between measured and reported evidence stays visible.
+> **Provenance note — RESOLVED by measurement.** The blue field was first read
+> by eye as cream/ivory, then corrected to blue by the owner. A pixel sample
+> settles it: the mural's ground is **`#bbc1cd`, hue 220°, saturation 15%** — a
+> genuinely cool, heavily desaturated blue-grey. Both earlier readings were
+> wrong in the same direction and for the same reason: at 15% saturation under
+> warm artificial light, a pale blue reads as neutral to the eye, and a guess
+> made from memory of "sky blue" lands around 38% saturation, two and a half
+> times too vivid. The pavilion is confirmed present at the right end (and a
+> second at the left). Source: `public/images/interior.png`.
 
 ### Furniture, light, density
 
@@ -229,9 +232,10 @@ wall that had never been photographed for the site. **It is not to be restored.*
 These are explicitly *not* settled by this document. Do not decide them
 autonomously.
 
-1. **Sampled token values.** Every hex in the new palette must be sampled from
-   the restaurant frames and reported with the frame it came from. Pending the
-   photographs.
+1. ~~**Sampled token values.**~~ **RESOLVED 2026-08-03.** See "The sampled
+   palette" below. The frames were never sent — the source turned out to be
+   `public/images/interior.png`, already in the repo, cut from the gallery by
+   the dark rework and unreferenced ever since.
 2. **Mural-blue placement.** The token is defined; where it lands is the owner's
    call. Candidates to be presented as screenshotted variants alongside a
    warm-only control: a section band, the About ground, or a footer/nav field.
@@ -244,6 +248,67 @@ autonomously.
    highest-value outstanding asset. It is cream-to-blue ground with red
    lettering, so it drops onto a warm-light ground natively and carries the
    brand voice and the accent colour in one frame.
+
+---
+
+## THE SAMPLED PALETTE
+
+Source frame: **`public/images/interior.png`**, the client's own photograph of
+the dining room. Each value is the median of a 19×19 pixel patch, so a specular
+highlight or a grout line cannot swing it.
+
+| Region sampled | Measured | Notes |
+|---|---|---|
+| Tan wall | `#edcea3` | hue 35°, sat 67%, light 78%, warmth (R−B) **74** |
+| Terracotta floor | `#c26e33` / `#b24e10` | hue 23–25°, warmth **143–162** |
+| Mural sky field | `#bbc1cd` | hue 220°, sat **15%**, warmth **−18** — cool |
+| Mural brush red | `#c53737` | hue 0°, sat 56% — a **true** red, G=B=55 |
+| Ceiling | `#060708` | luminance 0.0021, neutral-cool |
+| Chair black | `#0c0703` | luminance 0.0024 |
+
+### What shipped, and how each value relates to its sample
+
+| Token | Value | Relation to the sample |
+|---|---|---|
+| `--color-sand` | `#f4ece1` | Wall **hue held exactly** (35°); saturation and lightness moved to page values, `hsl(35, 45%, 92%)`. A lit wall at 67%/78% is not a page ground. |
+| `--color-sand-2` | `#ede0cf` | Same hue, `hsl(35, 45%, 87%)`. |
+| `--color-sand-3` | `#dccab2` | Same hue, `hsl(35, 38%, 78%)`. |
+| `--color-ink` | `#1f1a16` | Warm near-black in the room's hue family. Not sampled. |
+| `--color-ash` | `#5c534b` | Warm muted grey, warmth +17. Not sampled. |
+| `--color-char` | `#121110` | The ceiling sampled at `#060708`; the token is a deliberately lifted screen-safe black at the same neutral-cool character. |
+| `--color-char-2` | `#1b1917` | Raised surface inside the structure. |
+| `--color-steel` | `#7b828a` | **The one token not sampled.** The ducts are thin and specular, so a patch median off them is unreliable. Solved instead from its two constraints: ≥3:1 as a rule on sand (3.32) and ≥4.5:1 as meta text on char (4.85). Cool (−15) where `ash` is warm (+17). |
+| `--color-flame` | `#b73434` | Mural red's **hue and saturation held**, lightness walked to 46% so it clears AA as text on the card ground. `#c53737` itself measures 4.13:1 there. |
+| `--color-sky` | `#bbc1cd` | **Taken exactly as sampled.** |
+
+### The rule the contrast maths forced
+
+No single red clears 4.5:1 as **text** on both the warm ground and the black
+structure — go light enough for char and it fails on sand, dark enough for sand
+and it fails on char. That is physics, not taste, so it became a rule rather
+than a second token:
+
+> **The accent is text only on the warm ground.** On the black structure and
+> inside a sky band it appears as a **fill**, where the contrast lives between
+> the fill and its sand label. Links on those grounds are sand.
+
+Consequences: the nav's active state is weight-of-colour plus a flame
+underline; the price is sand in the sticky bar and the hero, and the accent
+everywhere it sits on sand.
+
+`tools/verify-palette.mjs` asserts all of this, **including that flame-on-char
+(3.19:1) and flame-on-sky (3.27:1) keep failing.** If either starts passing, the
+accent value has moved and the rule needs revisiting rather than silently
+surviving.
+
+### One documented exception to constraint 3
+
+The accent's job is interaction. **The price figure is the single sanctioned
+non-interaction use**, because the price *is* the offer for an all-you-can-eat
+restaurant and because the room's own red is used for emphasis, not for
+controls — "It's BBQ Time!" is painted in it. Every other decorative use was
+stripped: five eyebrows, a menu tag, a category label, and the rule under
+About's heading, which is chrome now.
 
 ---
 

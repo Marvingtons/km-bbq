@@ -29,16 +29,16 @@ const chromium = (pw.default ?? pw).chromium;
 const URL_ = process.argv[2] || "http://localhost:3111/";
 
 const TOKENS = {
-  sand: "#f2eadd",
-  "sand-2": "#e9dfce",
-  "sand-3": "#d9ccb8",
+  sand: "#f4ece1",
+  "sand-2": "#ede0cf",
+  "sand-3": "#dccab2",
   ink: "#1f1a16",
   ash: "#5c534b",
   char: "#121110",
   "char-2": "#1b1917",
   steel: "#7b828a",
-  flame: "#bc2c19",
-  sky: "#aecbdb",
+  flame: "#b73434",
+  sky: "#bbc1cd",
 };
 
 /** Tokens deleted by the direction. None may reappear, in any form. */

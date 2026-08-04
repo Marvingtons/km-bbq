@@ -38,9 +38,10 @@ About's media column, so the dock now lands on a photograph of the room with
 food on the grill. No second asset is needed until the loop lands, at which
 point About inherits the loop's docked panel automatically.
 
-## 3. Re-graded gallery set — the gallery is down to three tiles
+## 3. Gallery — five tiles after the re-audit, still short
 
-The audit cut five of eight. What is left, and why:
+The dark rework's audit cut five of eight. Two of those cuts were made for
+failing a palette that was itself wrong, and are now restored:
 
 | File | Verdict |
 |---|---|
@@ -48,19 +49,33 @@ The audit cut five of eight. What is left, and why:
 | `marbled-wagyu` | **Keep.** Raw marbling under tongs, portrait. |
 | `banchan-spread` | **Keep.** Overhead, lit, on the menu. |
 | `live-grill` | Promoted to the hero. Appears once, and travels. |
-| `interior` | **Cut.** Empty dining room, daylight, brown tile. |
-| `table` | **Cut.** Empty table, cold grill. |
-| `drinks` | **Cut.** Two soju bottles and a Corona on bare white. |
+| `interior` | **RESTORED.** Cut as "empty dining room, daylight, brown tile" — a brightness objection that only held against a near-black ground. It is the room: terracotta floor, black ceiling, chrome ducts, the whole 12ft mural. **The site's palette is sampled from this file.** |
+| `table` | **RESTORED.** Cut as "empty table, cold grill". It is the best photograph of the CHROME on disk, and chrome is a tokenized material now. |
+| `drinks` | **Still cut**, for a better reason. Not "bare white" — that is no longer disqualifying — but because it is three bottles of two other companies' packaging (Jinro, Corona) sharp and front-and-centre in our own gallery. Same mistake as the Maps embed labelling the neighbours. |
 | `outside` | **Moved** to Contact as wayfinding. |
 
-The three cut files are still on disk and still in the image manifest — they
-are the client's own photographs and are deliberately unreferenced pending a
-reshoot, not deleted.
-
-- **Wanted:** 3–5 more frames, shot **at night with the room lit** — a full
-  table mid-service, hands over a grill, banchan going down, the pass. People
-  welcome. Same warm-dark grade as the three keepers.
+- **Wanted:** 3–5 more frames of the room **in service** — a full table
+  mid-service, hands over a grill, banchan going down, the pass. People
+  welcome. The room is bright and warm; shoot it that way rather than grading
+  it down.
 - **Aspect:** mixed is good; tiles share one height and vary in width.
+
+## 3a. The wall mural — the highest-value outstanding shot
+
+The ~12ft mural on the back wall has **never been photographed for the site**,
+in any direction. `interior.png` catches it obliquely, at an angle, with chrome
+ducts crossing it — good enough to sample colour from, not good enough to ship
+as the brand signature.
+
+- **Wanted:** straight-on, whole mural, lit as the track lights already light
+  it. Shoot from far enough back that the ducts do not cross the art, or from
+  a position where they fall between panels.
+- **Why it matters:** it is painted on a pale blue field with a sandy lower
+  band and a Korean pavilion at each end, with "It's BBQ Time!" in a brush red
+  that is now the site's accent colour. It carries the brand's voice and its
+  accent in one frame, and it drops onto the warm ground natively.
+- The retired illustration mural (`mural-left` / `mural-right`) is **not** this
+  and is not to be restored — see DIRECTION.md.
 
 ## 4. Static map image (optional)
 

@@ -7,7 +7,7 @@
    =========================================================================== */
 
 :root {
-  --background: #f2eadd; /* = --color-sand */
+  --background: #f4ece1; /* = --color-sand */
   --foreground: #1f1a16; /* = --color-ink */
 }
 
@@ -29,16 +29,29 @@
      cream-everywhere missed the ceiling and the chrome, char-everywhere
      rendered the ceiling and called it the room.
 
-     Values are DERIVED, not sampled — the frames were not available. Every
-     pair the site renders is contrast-checked by tools/verify-palette.mjs.
+     VALUES ARE SAMPLED from public/images/interior.png — the client's own
+     photograph of the dining room, which Phase 3 cut from the gallery as
+     "empty dining room, daylight, brown tile" and which turns out to be the
+     single most informative frame on disk. It carries the terracotta floor,
+     the black ceiling, the chrome ducts and the whole mural. Sampling is the
+     median of a 19x19 patch so a specular highlight cannot swing a value.
+
+     Every pair the site renders is contrast-checked by
+     tools/verify-palette.mjs.
      ===================================================================== */
 
-  /* --- GROUND — warm light, keyed to the laminate tabletops and tan walls.
-     Deliberately NOT #faf4ec (the old cool cream): warmer (R-B 21 vs 14) and
-     a step down in luminance (0.829 vs 0.911). ------------------------- */
-  --color-sand: #f2eadd; /* page ground */
-  --color-sand-2: #e9dfce; /* raised surfaces, cards */
-  --color-sand-3: #d9ccb8; /* borders, dividers, hover surfaces */
+  /* --- GROUND — warm light, keyed to the room's tan wall.
+     Sampled wall: #edcea3 — hue 35°, sat 67%, light 78%, warmth (R-B) 74.
+     That is a LIT WALL, not a page ground: at 78% lightness and 67% saturation
+     it is a strong tan. So the ground holds the sampled HUE exactly and moves
+     saturation and lightness to page values — hsl(35, 45%, 92%) — with the
+     ramp built on the same hue. Keyed to the sample, not transcribed from it.
+
+     Deliberately NOT #faf4ec (the old cool cream): warmer (R-B 19 vs 14) and
+     a step down in luminance (0.847 vs 0.911). ------------------------- */
+  --color-sand: #f4ece1; /* page ground */
+  --color-sand-2: #ede0cf; /* raised surfaces, cards */
+  --color-sand-3: #dccab2; /* borders, dividers, hover surfaces */
 
   /* --- TYPE — warm near-black, never pure black. ----------------------- */
   --color-ink: #1f1a16; /* primary text on the warm ground */
@@ -55,24 +68,39 @@
   /* --- CHROME — the ten-plus mirror downdraft ducts, tokenized.
      Cool where --color-ash is warm, so the two never read as one grey
      (separation 1.93:1, warmth -15 vs +17). One value serving both grounds:
-     3.26:1 as a rule on sand, 4.85:1 as meta text on char. ------------- */
+     3.32:1 as a rule on sand, 4.85:1 as meta text on char.
+
+     The sampled ducts are thin and specular, so a patch median off them is
+     unreliable — this value is solved from the two contrast constraints
+     rather than read off a pixel, and is the one token here that is not
+     sampled. ---------------------------------------------------------- */
   --color-steel: #7b828a;
 
   /* --- ACCENT — ONE, and its one job is INTERACTION.
-     The mural's brush red, at the deepest value that still clears AA as text
-     on the card ground (4.53:1 on sand-2, 5.01:1 on sand). `ember` is gone,
-     collapsed into this. Note it is deliberately NOT used as text on char
-     (3.15:1) or inside a sky band (3.52:1) — on those grounds the accent
-     appears as FILL only and links take --color-sand. ------------------ */
-  --color-flame: #bc2c19;
+     Sampled straight off the mural's brush lettering: #c53737, hue 0°, sat
+     56%. Note it is a TRUE red (G and B both 55), not the orange-leaning
+     tomato the dark rework used — that palette's #e63b2e was 20 points of red
+     away from the paint on the wall.
+
+     #c53737 itself measures 4.13:1 on the card ground and does not clear, so
+     the token holds the sampled hue and saturation and walks lightness down to
+     46%: 4.55:1 on sand-2, 5.05:1 on sand. `ember` is gone, collapsed into
+     this. Deliberately NOT used as text on char (3.19:1) or inside a sky band
+     (3.27:1) — on those grounds the accent is a FILL and links take
+     --color-sand. ------------------------------------------------------ */
+  --color-flame: #b73434;
 
   /* --- THE MURAL'S SKY FIELD.
-     Real provenance: the ~12ft wall mural is painted on a pale blue sky
-     ground. It is the only thing in the room that gives the logo's badge
-     blue a reason to exist. Applied in AT MOST ONE place — see DIRECTION.md
-     constraint 7. Inside a sky band, muted copy must be ink-based: ash on
-     sky measures 4.43:1 and does not clear. ---------------------------- */
-  --color-sky: #aecbdb;
+     Sampled from the mural's own ground: #bbc1cd, hue 220°, sat 15%. It is a
+     DESATURATED blue-grey, not the picture-book sky blue you would reach for
+     from memory — an earlier guess at #aecbdb ran 38% saturation and was two
+     and a half times too vivid.
+
+     It is the only thing in the room that gives the logo's badge blue a reason
+     to exist. Applied in AT MOST ONE place — see DIRECTION.md constraint 7.
+     Inside a sky band, muted copy must be ink-based: ink measures 9.55:1 and
+     ash 4.16:1, which does not clear. ---------------------------------- */
+  --color-sky: #bbc1cd;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -366,8 +394,8 @@ body {
     pointer-events: none;
     background: linear-gradient(
       to top,
-      rgb(242 234 221 / 0.55) 0%,
-      rgb(242 234 221 / 0.16) 26%,
+      rgb(244 236 225 / 0.55) 0%,
+      rgb(244 236 225 / 0.16) 26%,
       transparent 54%
     );
   }
