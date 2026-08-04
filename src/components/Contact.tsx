@@ -115,25 +115,41 @@ export function Contact() {
             No neighbour is named — nothing in the record establishes who shares
             the plaza, and Law 1 does not bend for a caption. */}
         <ScrollReveal delay={0.08} className="col-full">
-          <figure className="photo aspect-[16/10] w-full md:aspect-[21/9]">
-            <Image
-              src="/images/outside.png"
-              alt="The KM.BBQ storefront, with the sign above the entrance"
-              fill
-              sizes="(max-width: 768px) 100vw, 80vw"
-              className="object-cover"
-            />
-            {/* The caption sits ON the photograph, so it cannot rely on the
-                .photo scrim the way a caption in flow can — the scrim is light
-                now and this frame is a bright daylight shot, so ink-on-scrim
-                was landing on whatever the picture happened to put there. It
-                gets its own sand chip instead: an opaque ground it carries with
-                it, which is legible over any part of any photograph and does
-                not require the scrim to be doing legibility work. */}
-            <figcaption className="absolute inset-x-0 bottom-0 z-nav p-5">
-              <span className="eyebrow rounded-pill bg-sand/95 px-3 py-1.5 text-ink">
-                Look for the sign
-              </span>
+          {/* CONSTRAINED, and carrying the card treatment.
+              Unbounded it grew to whatever 21:9 of the full track came to and
+              read as a hero rather than as a signpost. It now matches the
+              Hours/Location pair exactly — same radius, same hairline — because
+              it is the third item in the same set of facts, not a feature.
+
+              object-position 50% 12%, and the number is arithmetic rather than
+              taste. The source is square and the card is 21:9, so `cover`
+              scales to width and only (9/21) = 43% of the image height is ever
+              visible. The KM.BBQ sign occupies roughly the top 5-30%, so a
+              centred crop shows soffit and awning and cuts the signage off
+              entirely. At 12% the visible band runs ~7-49%: the whole sign, the
+              yellow fascia and the top of the awning. Checked at 1440, 768 and
+              375 — the mobile card is 16:10, which shows 63% and keeps the
+              windows too. */}
+          {/* The card is the FIGURE, and the media box inside it deliberately
+              does not carry `.photo`: that recipe brings its own radius and its
+              own chrome inset hairline, which would double the card's. The one
+              thing it does carry — the house grade — is applied to the image
+              directly so the treatment still matches every other photograph. */}
+          <figure className="overflow-hidden rounded-card border border-sand-3 bg-sand-2">
+            <div className="relative aspect-[16/10] max-h-[420px] w-full md:aspect-[21/9]">
+              <Image
+                src="/images/outside.png"
+                alt="The KM.BBQ storefront, with the sign above the entrance"
+                fill
+                sizes="(max-width: 768px) 100vw, 80vw"
+                className="object-cover object-[50%_12%] [filter:saturate(1.06)_contrast(1.02)_brightness(1.02)]"
+              />
+            </div>
+            {/* The caption is BELOW the photograph now, not on it. A line of
+                wayfinding is information, and information on a card belongs on
+                the card's ground where it is legible without a chip. */}
+            <figcaption className="eyebrow border-t border-sand-3 px-5 py-4">
+              In the plaza at {ADDRESS.street}
             </figcaption>
           </figure>
           <div className="mt-5 flex">

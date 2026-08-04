@@ -217,6 +217,36 @@ check(
   skyUsers.map((e) => e.id || e.tag).join(", ")
 );
 
+// THE STATUS PAIR IS CONFINED TO THE STATUS DOT. `--color-open` is the one
+// colour on the site outside the single accent (DIRECTION.md, Amendments), and
+// it is allowed because it is semantic rather than decorative. That argument
+// only holds while it stays on the dot, so this counts every element painted
+// with it and requires at most one, inside the sticky bar.
+const openUse = await page.evaluate(() => {
+  const v = getComputedStyle(document.documentElement)
+    .getPropertyValue("--color-open")
+    .trim();
+  const c = document.createElement("canvas").getContext("2d");
+  c.fillStyle = v;
+  c.fillRect(0, 0, 1, 1);
+  const d = c.getImageData(0, 0, 1, 1).data;
+  const target = `rgb(${d[0]}, ${d[1]}, ${d[2]})`;
+  const hits = [...document.querySelectorAll("*")].filter((e) => {
+    const s = getComputedStyle(e);
+    return s.backgroundColor === target || s.color === target;
+  });
+  return {
+    count: hits.length,
+    allInBar: hits.every((e) => !!e.closest("aside")),
+    where: hits.map((e) => e.tagName + "." + String(e.className).slice(0, 24)),
+  };
+});
+check(
+  "the open/closed green is used at most once, and only inside the sticky bar",
+  openUse.count <= 1 && openUse.allInBar,
+  `${openUse.count} element(s): ${openUse.where.join(", ")}`
+);
+
 check("no console errors", consoleErrors.length === 0, consoleErrors.slice(0, 3).join(" | "));
 
 await ctx.close();

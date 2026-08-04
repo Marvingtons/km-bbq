@@ -193,8 +193,9 @@ export function Footer() {
             >
               Terms of Service
             </a>
-            {/* Decorative divider only when the row sits on one line. Pink:
-                separators are punctuation, which is pink's second job. */}
+            {/* Decorative divider, only when the row sits on one line. It sets no
+                colour of its own — the pink that used to live here went with
+                --color-neon-pink. */}
             <span aria-hidden="true" className="hidden sm:inline">
               |
             </span>

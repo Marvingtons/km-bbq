@@ -86,8 +86,13 @@ export function Challenge() {
       aria-labelledby="challenge-heading"
       className="grain relative bg-sand pb-section md:pb-section-lg"
     >
-      <div className="grid-page">
-        <div className="col-text">
+      {/* TWO COLUMNS FROM md, and that is the fix for the empty right half.
+          The copy sat in `.col-text` (columns 1-7) with the panel dropped
+          BELOW it in `.col-wide`, which left the right five columns blank for
+          the whole section and pushed the panel a screen further down. Story
+          left, machine right, stacked on phones. */}
+      <div className="grid-page items-start gap-y-10">
+        <div className="col-story">
           <ScrollReveal>
             <p className="eyebrow">House game</p>
           </ScrollReveal>
@@ -113,37 +118,61 @@ export function Challenge() {
           </ScrollReveal>
         </div>
 
-        <ScrollReveal delay={0.1} className="col-wide mt-10">
-          <div className="max-w-md rounded-card border border-sand-3 bg-sand-2 p-6 sm:p-8">
-            <p className="eyebrow">Stop the clock</p>
+        {/* THE PANEL IS DARK, and it is the site's one dark card.
+            DIRECTION.md constraint 2 puts black in the nav, the footer and
+            section caps — a card is none of those, so this is a recorded
+            amendment rather than a slip. The reason it earns it: the game is a
+            real object in the room, a scoreboard and a red button by the door,
+            and the site's black is the room's own ceiling and hardware. The
+            SECTION stays sand; only the prop is dark. */}
+        <ScrollReveal delay={0.1} className="col-panel">
+          <div className="rounded-card bg-char p-6 shadow-[inset_0_1px_0_rgb(255_255_255_/_0.06)] sm:p-8">
+            <p className="eyebrow text-steel">Stop the clock</p>
 
             {/* The digits. tabular-nums is the whole reason DSEG7 was carried:
-                one advance width, so the readout cannot jitter as it counts. */}
+                one advance width, so the readout cannot jitter as it counts.
+                On the dark panel a colour shift is legible again, so the three
+                states are carried by colour: sand at rest and while running,
+                the accent on a win, smoke on a miss. */}
             <p
-              className="mt-4 font-display text-2xl font-black leading-none [font-stretch:87.5%] [font-variant-numeric:tabular-nums] sm:text-display"
-              /* THE GLOW IS GONE. A text-shadow halo is a light source, and a
-                 light source only reads on a dark ground — on sand the two old
-                 shadows (ember at 0.55, flame at 0.35) rendered as a dirty
-                 smudge around the digits rather than as emission. The win state
-                 is now carried by colour alone: the accent when you land it,
-                 ink while you are counting. */
-              style={{ color: won ? "var(--color-flame)" : "var(--color-ink)" }}
+              className={`mt-4 font-display text-display font-black leading-none [font-stretch:87.5%] [font-variant-numeric:tabular-nums] ${
+                won
+                  ? "animate-[win-pulse_420ms_var(--ease-house)] text-flame"
+                  : phase === "stopped"
+                    ? "text-steel"
+                    : "text-sand"
+              }`}
               aria-hidden="true"
             >
               {format(phase === "idle" ? TARGET_CS : cs)}
             </p>
 
+            {/* The delta, small, under the digits — only after a miss. */}
+            {phase === "stopped" && !won && (
+              <p
+                aria-hidden="true"
+                className="mt-2 font-sans text-sm font-semibold tabular-nums text-steel"
+              >
+                {off > 0 ? "+" : "−"}
+                {format(Math.abs(off))}
+              </p>
+            )}
+
             <p
-              className="eyebrow mt-4 border-t border-sand-3 pt-4"
+              className="eyebrow mt-5 border-t border-sand/10 pt-4 text-steel"
               aria-live="polite"
             >
               {readout}
             </p>
 
+            {/* FLAT RECTANGLE. The pill and its gloss are gone: this is a
+                machine's button, not a link. Hover darkens toward the panel,
+                active drops it 1px. No gradient, no shadow, no radius beyond
+                the panel's own. */}
             <button
               type="button"
               onClick={press}
-              className="mt-6 min-h-11 w-full rounded-pill bg-flame px-6 py-3 font-sans text-sm font-semibold text-sand transition-colors duration-[var(--dur-base)] ease-house hover:bg-char hover:text-sand"
+              className="mt-6 min-h-12 w-full rounded-[4px] bg-flame px-6 py-3 font-sans text-sm font-semibold uppercase tracking-[0.14em] text-sand transition-[background-color,transform] duration-[var(--dur-quick)] ease-house hover:bg-[#96271f] active:translate-y-px"
             >
               {phase === "running"
                 ? "Stop"
@@ -152,7 +181,7 @@ export function Challenge() {
                   : "Again"}
             </button>
 
-            <p className="mt-4 font-sans text-xs text-ash">
+            <p className="mt-4 font-sans text-xs text-steel">
               Practice as much as you like. Only the clock at the restaurant
               counts — one press per table, per visit.
             </p>

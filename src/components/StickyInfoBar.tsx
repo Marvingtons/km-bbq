@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { PRICING, PHONE, DIRECTIONS_URL, HOURS_SPEC } from "@/data/info";
 
@@ -72,9 +72,32 @@ export function StickyInfoBar() {
     serverSnapshot
   ).split("|");
 
-  const shown = shownFlag === "true";
+  /**
+   * GET OUT OF THE FOOTER'S WAY.
+   *
+   * The bar is `position: fixed`, so at the bottom of the page it sits on top
+   * of the footer's own links and the copyright row — the one place where
+   * everything it offers (phone, directions, hours) is already on screen in
+   * full. An IntersectionObserver on the footer is all this needs: no scroll
+   * handler, no ScrollTrigger, no measurement that can go stale on resize.
+   */
+  const [atFooter, setAtFooter] = useState(false);
+  useEffect(() => {
+    const footer = document.querySelector("footer");
+    if (!footer) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setAtFooter(entry.isIntersecting),
+      // Fire a little before the footer's edge so the bar is already gone by
+      // the time the first footer link is reachable.
+      { rootMargin: "0px 0px -64px 0px" }
+    );
+    io.observe(footer);
+    return () => io.disconnect();
+  }, []);
+
   const close = closeLabel || null;
   const open = close !== null;
+  const shown = shownFlag === "true" && !atFooter;
 
   return (
     <AnimatePresence>
@@ -102,11 +125,22 @@ export function StickyInfoBar() {
                 {PRICING.lunch}
                 <span className="eyebrow ml-2 text-sand/60">Lunch</span>
               </p>
+              {/* THE STATUS DOT carries a semantic colour pair, green for open
+                  and red for shut, which is the one place on the site outside
+                  the palette's single accent (DIRECTION.md, Amendments).
+                  Owner-directed, and the reasoning is that red/green on a
+                  status dot is read without a legend, where the palette-pure
+                  alternative — lit sand against dim steel — says "inactive"
+                  rather than "closed".
+
+                  The colour is never the only carrier: the text beside it says
+                  "Open until 9:30 PM" or "Closed now" in full, so nothing here
+                  depends on distinguishing red from green. */}
               <p className="mt-1 flex items-center gap-1.5 truncate font-sans text-xs text-steel">
                 <span
                   aria-hidden="true"
                   className={`inline-block size-1.5 shrink-0 rounded-pill ${
-                    open ? "bg-flame" : "bg-steel/30"
+                    open ? "bg-open" : "bg-shut"
                   }`}
                 />
                 {open ? `Open until ${close}` : "Closed now"}

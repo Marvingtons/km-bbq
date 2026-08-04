@@ -90,6 +90,24 @@
      --color-sand. ------------------------------------------------------ */
   --color-flame: #b73434;
 
+  /* --- STATUS — open/closed, and NOT a second accent.
+     Owner-directed 2026-08-03: the sticky bar's dot reads red when the
+     restaurant is shut and green when it is open. Green has no referent
+     anywhere in the room, so this is a deliberate amendment to constraint 3
+     rather than an oversight — recorded in DIRECTION.md under "Amendments".
+
+     The distinction that keeps the palette honest: this pair is SEMANTIC and
+     information-bearing, not decorative. Red/green on a status dot is a
+     convention a visitor reads without a legend, and the alternative (dim
+     steel vs lit sand) says "inactive", not "closed". It is allowed on the
+     status dot and nowhere else. verify-palette.mjs enforces the "nowhere
+     else" half.
+
+     `--color-shut` is the accent's own value, so the closed state costs the
+     palette nothing new. ------------------------------------------------ */
+  --color-open: #3f8f5c;
+  --color-shut: #b73434;
+
   /* --- THE MURAL'S SKY FIELD.
      Sampled from the mural's own ground: #bbc1cd, hue 220°, sat 15%. It is a
      DESATURATED blue-grey, not the picture-book sky blue you would reach for
@@ -236,7 +254,9 @@ body {
 
   .col-text,
   .col-wide,
-  .col-full {
+  .col-full,
+  .col-story,
+  .col-panel {
     grid-column: 1 / -1;
     min-width: 0;
   }
@@ -271,6 +291,14 @@ body {
     }
     .col-wide {
       grid-column: 1 / span 9;
+    }
+    /* The one two-column split on the site: copy left, a physical object
+       right. Used by the game, where the panel IS the prop. */
+    .col-story {
+      grid-column: 1 / span 6;
+    }
+    .col-panel {
+      grid-column: 8 / -1;
     }
     .col-media {
       grid-column: 9 / -1;
@@ -422,6 +450,74 @@ body {
     color: var(--color-ink);
   }
 
+  /* --- GALLERY STRIP — full-bleed, native scroll-snap, no library. ------
+     `padding-inline` is what makes it full-bleed while the FIRST item still
+     lines up with the page container: the strip spans the viewport, and its
+     own padding reproduces the container's gutter. The same padding on the
+     right is what lets the LAST item scroll fully clear of the edge, which a
+     margin on the track cannot do.
+
+     Measured from 100%, not 100vw, on purpose — `scrollbar-gutter: stable`
+     reserves 10px page-wide, so 100vw is 10px wider than the content box and
+     the first tile would sit a hair left of every other section's column 1. */
+  .gallery-strip {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--grid-gap);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    /* Centring offset PLUS the container's own gutter — `.grid-page` applies
+       both, so matching only the first put the tile a full gutter left of
+       column 1.
+
+       scroll-padding-inline has to repeat it. Snap alignment is measured
+       against the SCROLLPORT edge and ignores padding-inline entirely, so
+       without this the strip silently scrolls itself by exactly its own
+       padding on load and parks tile 1 hard against the viewport edge. */
+    padding-inline: calc(
+      max(0px, (100% - var(--grid-max)) / 2) + var(--grid-gutter)
+    );
+    scroll-padding-inline: calc(
+      max(0px, (100% - var(--grid-max)) / 2) + var(--grid-gutter)
+    );
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .gallery-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .gallery-strip {
+      padding-inline: calc(
+        max(0px, (100% - var(--grid-max)) / 2) + var(--grid-gutter-lg)
+      );
+      scroll-padding-inline: calc(
+        max(0px, (100% - var(--grid-max)) / 2) + var(--grid-gutter-lg)
+      );
+    }
+  }
+
+  .gallery-item {
+    scroll-snap-align: start;
+    flex: 0 0 auto;
+    width: min(440px, 66vw);
+  }
+
+  /* The opening frame is the feature and carries the section. */
+  .gallery-item:first-child {
+    width: min(720px, 78vw);
+  }
+
+  /* One height for every tile, so the caption baselines line up across the
+     strip however wide each frame is. */
+  .gallery-item .photo {
+    height: clamp(240px, 46vh, 460px);
+  }
+
   /* --- CHROME RULE — the one divider. ---------------------------------- */
   .rule-chrome {
     border: 0;
@@ -479,7 +575,27 @@ html.preloading {
   animation: preloader-failsafe 0.3s linear 2.2s forwards;
 }
 
+/* The game's win flash. One short scale pulse, and nothing else on the site
+   uses it — a result is the one moment the page is allowed to celebrate. */
+@keyframes win-pulse {
+  0% {
+    transform: scale(1);
+  }
+  38% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  /* No celebration under reduced motion — the colour change already carries
+     the win, so the pulse is pure decoration and is dropped entirely. */
+  .animate-\[win-pulse_420ms_var\(--ease-house\)\] {
+    animation: none !important;
+  }
+
   /* ScrollReveal's entrance is inline-styled; pin the revealed state so the
      page is readable at first paint regardless of JS. */
   .scroll-reveal {

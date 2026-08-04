@@ -1,3 +1,6 @@
+"use client";
+
+import { useRef } from "react";
 import Image from "next/image";
 import { PillLink } from "./PillLink";
 
@@ -29,8 +32,6 @@ interface GalleryItem {
   src: string;
   alt: string;
   caption: string;
-  /** width / height. Tiles share one height; this sets each tile's width. */
-  ratio: number;
 }
 
 /* THE AUDIT, RE-RUN against the two-value warm direction. Three tiles become
@@ -73,46 +74,50 @@ const GALLERY_ITEMS: GalleryItem[] = [
     src: "/images/samgyeopsal-grilling.png",
     alt: "Pork belly grilling over live coals at KM.BBQ",
     caption: "Samgyeopsal on the grill",
-    ratio: 1.5,
   },
   {
     id: 2,
     src: "/images/marbled-wagyu.png",
     alt: "Marbled wagyu held over the grill with tongs",
     caption: "Marbled wagyu",
-    ratio: 0.72,
   },
   {
     id: 3,
     src: "/images/banchan-spread.png",
     alt: "A spread of banchan side dishes",
     caption: "Banchan, included",
-    ratio: 1.0,
   },
   {
     id: 4,
     src: "/images/interior.png",
     alt: "The KM.BBQ dining room: tables with built-in grills under chrome extraction ducts, with the painted mural along the back wall",
     caption: "The room",
-    ratio: 1.0,
   },
   {
     id: 5,
     src: "/images/table.png",
     alt: "Chrome extraction hoods over a table with a built-in charcoal grill",
     caption: "Every table has a grill",
-    ratio: 1.0,
   },
 ];
 
 export function Gallery() {
+  const stripRef = useRef<HTMLDivElement>(null);
+
+  // One tile-and-a-gap at the common case, so a click lands the next frame on
+  // a snap point rather than halfway across one.
+  const nudge = (dir: 1 | -1) =>
+    stripRef.current?.scrollBy({ left: dir * 480, behavior: "smooth" });
+
   return (
     <section
       id="gallery"
       aria-labelledby="gallery-heading"
-      className="grain relative overflow-hidden bg-sand py-section md:py-section-lg"
+      // NOT `overflow-hidden`. The strip is its own scroll container now, so
+      // clipping here would only hide the fact that it can scroll.
+      className="grain relative bg-sand py-section md:py-section-lg"
     >
-      <div className="grid-page relative z-base gap-y-10">
+      <div className="grid-page relative z-base">
         <div className="col-text">
           <p className="eyebrow">Gallery</p>
           <h2 id="gallery-heading" className="h2-scale mt-4">
@@ -132,41 +137,75 @@ export function Gallery() {
           </PillLink>
         </div>
 
-        {/* The strip runs from column 1 out to the right viewport edge — the
-            one sanctioned way media leaves the track. `tabIndex` and a label so
-            a keyboard user can reach and scroll it; the scrollbar is hidden
-            because the snap points and the bleed already say it moves. */}
+        {/* THE CHEVRONS. Desktop only, right-aligned above the strip, and
+            purely an affordance — the strip already scrolls by wheel, trackpad,
+            touch and keyboard without them. `aria-hidden` plus `tabIndex={-1}`
+            because the strip itself is the focusable, labelled control and a
+            keyboard user scrolls it with the arrow keys; exposing two more stops
+            that do the same thing is noise in a screen reader. */}
         <div
-          className="bleed-right col-full snap-x snap-mandatory overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          tabIndex={0}
-          role="group"
-          aria-label="Photographs, scroll sideways"
+          aria-hidden="true"
+          className="col-full mt-8 hidden justify-end gap-2 md:flex"
         >
-          <div className="flex items-start gap-5 pr-6 md:gap-7">
-            {GALLERY_ITEMS.map((item, i) => (
-              <figure key={item.id} className="shrink-0 snap-start">
-                <div
-                  className="photo h-[48vh] md:h-[56vh]"
-                  style={{ aspectRatio: String(item.ratio) }}
-                >
-                  <Image
-                    src={item.src}
-                    alt={item.alt}
-                    fill
-                    sizes="(max-width: 768px) 70vw, 40vw"
-                    className="object-cover"
-                    // The first tile is on screen when the section arrives;
-                    // the rest stay lazy.
-                    priority={i === 0}
-                    decoding="async"
-                  />
-                </div>
-                {/* Under the photograph, in flow, always readable. */}
-                <figcaption className="eyebrow mt-3">{item.caption}</figcaption>
-              </figure>
-            ))}
-          </div>
+          {([-1, 1] as const).map((dir) => (
+            <button
+              key={dir}
+              type="button"
+              tabIndex={-1}
+              onClick={() => nudge(dir)}
+              className="flex size-10 items-center justify-center rounded-pill border border-steel/55 text-ink transition-colors duration-[var(--dur-base)] ease-house hover:border-flame hover:bg-flame hover:text-sand"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d={dir === 1 ? "m9 18 6-6-6-6" : "m15 18-6-6 6-6"} />
+              </svg>
+            </button>
+          ))}
         </div>
+      </div>
+
+      {/* FULL-BLEED, and outside `.grid-page` on purpose. The strip spans the
+          viewport and reproduces the container gutter as its own padding-inline,
+          so the first tile lines up with column 1 while the last one can still
+          scroll clear of the right edge.
+
+          `tabIndex` and a label so a keyboard user can reach and scroll it; the
+          scrollbar is hidden because the snap points and the bleed already say
+          it moves. */}
+      <div
+        ref={stripRef}
+        className="gallery-strip relative z-base mt-6 md:mt-4"
+        tabIndex={0}
+        role="group"
+        aria-label="Photographs, scroll sideways"
+      >
+        {GALLERY_ITEMS.map((item, i) => (
+          <figure key={item.id} className="gallery-item">
+            <div className="photo">
+              <Image
+                src={item.src}
+                alt={item.alt}
+                fill
+                sizes="(max-width: 768px) 78vw, 720px"
+                className="object-cover"
+                // The first tile is on screen when the section arrives; the
+                // rest stay lazy.
+                priority={i === 0}
+                decoding="async"
+              />
+            </div>
+            {/* Under the photograph, in flow, always readable. */}
+            <figcaption className="eyebrow mt-3">{item.caption}</figcaption>
+          </figure>
+        ))}
       </div>
     </section>
   );

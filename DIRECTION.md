@@ -338,6 +338,47 @@ About's heading, which is chrome now.
 
 ---
 
+## AMENDMENTS
+
+Changes to the decided constraints, with who made them and why. A constraint
+that gets quietly bent instead of listed here is the failure this file exists
+to prevent — so an amendment is a normal, expected entry, and an unlisted
+exception is a bug.
+
+### A1 — The game panel may be black. Owner-directed, 2026-08-03.
+
+Amends **constraint 2** ("black appears only in nav, footer, section caps and
+grill-well punctuation"). The game's panel is a card, which is none of those.
+
+It earns the exception because it is a **prop, not a surface**: the promotion is
+a real clock and a red button by the restaurant's door, and the site's black is
+the room's own ceiling and hardware. Rendering the machine in it describes
+something real, which is what constraint 2 actually asks of black.
+
+Scope, and it is narrow: **the section stays sand; only the panel is dark.**
+`tools/verify-palette.mjs` still asserts that no `<section>` paints a black
+ground, so this cannot spread from a card to a band without failing.
+
+### A2 — A semantic status pair, green and red, on the sticky bar's dot only. Owner-directed, 2026-08-03.
+
+Amends **constraint 3** ("exactly one accent colour"). `--color-open` `#3f8f5c`
+is a second hue, and there is nothing green anywhere in the room.
+
+It earns the exception because it is **information, not decoration**. Red/green
+on a status dot is read without a legend; the palette-pure alternative — lit
+sand against dim steel — says "inactive" rather than "closed". `--color-shut` is
+the accent's own value, so the closed state costs nothing new.
+
+Two things keep it honest:
+- **Colour is never the only carrier.** The text beside the dot reads "Open
+  until 9:30 PM" or "Closed now" in full, so nothing depends on telling red from
+  green.
+- **It is confined to the dot.** `verify-palette.mjs` counts every element
+  painted with `--color-open` and fails if there is more than one, or if it
+  appears outside the sticky bar.
+
+---
+
 ## WHY THIS FILE EXISTS
 
 On 2026-07-28 the owner decided the hero would be cream with ink type, and that

@@ -24,7 +24,16 @@ export default function Home() {
     <>
       <RestaurantSchema />
       <Navbar />
-      <main id="main-content" tabIndex={-1} className="relative isolate focus:outline-none">
+      {/* pb on mobile only: the sticky bar is a full-width fixed strip at the
+          bottom of the viewport under `md`, so the last thing on the page needs
+          room to clear it. Bar height (~76px incl. safe-area) + 24px. From `md`
+          the bar is a floating cluster bottom-right with nothing beneath it, so
+          the reserve is dropped rather than left as dead space. */}
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="relative isolate pb-[100px] focus:outline-none md:pb-0"
+      >
         <Hero />
         <About />
         <Gallery />
