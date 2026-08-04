@@ -37,10 +37,25 @@ const chromium = (pw.default ?? pw).chromium;   // it is CJS, so unwrap .default
 - **The accent is text only on the warm ground.** On char it is 3.15:1 and on a
   sky band 3.52:1, so on those grounds it appears as a FILL and links are sand.
   Deliberate, and `verify-palette.mjs` asserts it stays that way.
-- **Hero:** `HeroBackdrop.tsx` (not `HeroVideo.tsx`, deleted). It renders
-  `live-grill.png` as an interim still under a char scrim plus an accent radial;
-  the R2 clip is wired but `VIDEO_SRC` is unset, so there is usually no
-  `<video>` in the DOM at all. There is no `hero-poster.webp` — it was deleted.
+- **Hero:** `HeroBackdrop.tsx` (not `HeroVideo.tsx`, deleted). It is a **video**
+  hero now: `kmbbq-hero.mp4` served straight from R2, over a
+  `/images/hero-poster.webp` cut from the clip at 2.6s, under a char scrim plus
+  an accent radial.
+  - **Playback starts at 2.6s and loops back to 2.6, not 0.** The first ~1.8s is
+    the bare plate and the oiling hand. There is deliberately **no `loop`
+    attribute** — `onEnded` seeks to `START`, and `ended` does not fire when
+    `loop` is present.
+  - The `<video>` is mounted **after `window.load`**, and not at all under
+    reduced motion or save-data. The poster never unmounts, so every failure
+    path (R2 down, codec, autoplay refused) lands on a real photograph.
+  - **The poster's `sizes` is load-bearing.** `object-cover` draws the 16:9
+    poster ~30% wider than the viewport; told `100vw` the browser picks a 1200px
+    variant, Chrome scores that LCP candidate below the video's, and the video
+    takes the LCP slot at ~3.6s. `sizes="(max-width: 768px) 140vw, 1920px"` is
+    what keeps LCP at ~544ms. Do not "simplify" it back to `100vw`.
+  - **The clip is not faststart** (`moov` after `mdat`), so first video frame is
+    ~3.6s on a 4Mbps profile. That is an asset defect, logged as NEEDS-ASSETS
+    #1a, not a code one.
 - **Hero arithmetic:** the hero is **160vh** with a sticky stage and About is
   pulled up **`-mt-[60vh]`**. One number written twice; change both in one
   commit. Both halves are `motion-safe:md:`.
@@ -83,18 +98,26 @@ comments.
   no horizontal overflow on ANY route, the lockup neither overflowing nor
   colliding (tested in pixels, since `leading-[0.8]` makes the line boxes
   overlap by design), and 44px tap targets.
+- `node tools/verify-hero.mjs [url]` — **the video hero**, and the file to run
+  on any hero change. Element contract (R2 source, muted/autoPlay/playsInline,
+  no `loop`, preload not `auto`, intrinsic ratio, playback past the empty
+  opening), the poster underneath, **a 14-frame contrast sweep**, CLS, the
+  R2-blocked fallback, reduced motion, and 375px autoplay. 27 checks.
+  - The sweep is the point. It hides the type, photographs what is actually
+    behind each text block at 14 timestamps, and reports the worst case — a
+    poster-only check would hide exactly the problem this hero is known for.
+    It composites alpha type over the measured background, because the
+    supporting lines are `text-sand/80` and measuring the token alone flatters
+    them. It reports `mean` and `p95`, and judges AA on `p95`.
 - `node tools/hero-worst-frames.mjs` then
-  `node tools/hero-glyph-contrast.mjs --effective [url]` — per-glyph contrast
-  against the actual pixels behind each letterform. Written for the video hero;
-  **useful again only when the hero pass lands**, since there is currently no
-  clip to sample frames from.
+  `node tools/hero-glyph-contrast.mjs --effective [url]` — the older per-glyph
+  samplers, written when the hero was cream over video. `verify-hero.mjs`
+  supersedes them for the current hero; keep them for glyph-level work.
 
-`tools/verify-hero.mjs` was **deleted**. Every assertion it carried — cream
-base, `hero-poster.webp`, cream glyph halos, the blurred copy plate, the sRGB
-scrim — described elements removed two directions ago. It had been unrunnable
-since `dca56c5` and nobody noticed, which is the exact failure this file is now
-written to avoid. Do not resurrect it; write the hero's checks fresh when the
-hero pass decides what the hero is.
+The **previous** `verify-hero.mjs` was deleted in the direction pass — cream
+base, cream glyph halos, a blurred copy plate — all removed two directions ago,
+and it had been unrunnable since `dca56c5`. The current file shares only its
+name.
 
 ## Gotchas worth knowing
 

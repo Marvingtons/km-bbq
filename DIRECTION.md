@@ -239,10 +239,36 @@ autonomously.
 2. **Mural-blue placement.** The token is defined; where it lands is the owner's
    call. Candidates to be presented as screenshotted variants alongside a
    warm-only control: a section band, the About ground, or a footer/nav field.
-3. **The hero.** Pass two. A photographic backdrop on a light ground reopens the
-   glyph-contrast problem that `ff80bf4` and `30e1200` both failed to solve
-   (supporting lines landed at 1.6–3.7:1). The alternatives are mural-led or
-   type-only. Genuine design decision; not a token sweep.
+3. ~~**The hero.**~~ **DECIDED 2026-08-03 by the owner: photographic, and
+   moving.** The hero is the R2 clip `kmbbq-hero.mp4`, played over a poster cut
+   from it, under the existing char scrim. The mural-led and type-only
+   alternatives are not taken.
+
+   **The glyph-contrast problem is solved, and measured.** The worry was that a
+   photographic hero reopens what `ff80bf4` and `30e1200` failed to fix
+   (supporting lines at 1.6–3.7:1). It does not, because those attempts were
+   holding ink legible over a *bright cream* hero with halos and plates. This
+   hero's type sits on a char scrim that is 86% opaque by 30% of the frame
+   height — a real ground, not a halo. Swept across 14 frames of the clip with
+   the type hidden and the background behind each block photographed:
+
+   | Element | Needs | Worst frame | mean | p95 |
+   |---|---|---|---|---|
+   | Headline `ALL-YOU-CAN-EAT` (large) | 3:1 | 3.17s | 13.17:1 | **8.55:1** |
+   | Price `$21.99 / $30.99` (large) | 3:1 | 2.60s | 13.93:1 | **11.90:1** |
+   | Subhead `90 minutes…` (body) | 4.5:1 | 7.19s | 9.30:1 | **8.45:1** |
+
+   `tools/verify-hero.mjs` re-measures this on every run.
+
+   **The hero remains the site's one dark surface**, and that is a real tension
+   with constraint 2 rather than an exception to it: it is a photograph, not a
+   ground. Black here is the scrim that photography needs to carry type, not a
+   section painted char. If the hero ever stops being photographic, it returns
+   to sand rather than staying dark.
+
+   Still open inside this decision: the price and eyebrow are `sand` rather than
+   the accent in the hero, because the accent cannot carry text on a dark
+   ground. A purpose-shot loop (NEEDS-ASSETS #1b) would not change that.
 4. **The mural photograph.** The real wall mural has never been shot for the
    site — not in the cream direction, not in the dark one. This is the
    highest-value outstanding asset. It is cream-to-blue ground with red

@@ -9,27 +9,50 @@ Grep for `NEEDS ASSET` to find every slot.
 
 ---
 
-## 1. Hero loop — BLOCKING, highest value
+## 1. Hero loop — RESOLVED. The clip is live.
 
-- **Slot:** `src/components/HeroBackdrop.tsx`, full-viewport background
-- **Aspect:** 16:9, delivered at 1920×1080 or better
-- **Format:** MP4 (H.264) + WebM, plus a WebP first-frame poster
+`kmbbq-hero.mp4` is served from R2 and plays in the hero. The interim still and
+its 62% `object-position` workaround are both gone.
+
+**The record was wrong about this asset**, and that is why it sat unused. This
+file described it as "a macro of a *clean, empty* grill plate — cold, metallic,
+no food", and Phase 3 banned it from both slots on that basis. Frame by frame it
+is nothing of the sort: the plate is empty for roughly the first second, then a
+hand oils it, tongs lay down a marbled steak, and the remaining eight seconds
+are that steak searing with the fat rendering and juice beading on the ridges.
+It is close to the brief it was said to fail. Playback starts at **2.6s** so the
+empty opening is skipped, and the poster is cut from that same timestamp.
+
+### 1a. Re-encode and re-upload the clip with `+faststart` — worth doing
+
+**The MP4 is not faststart.** Atom order is `ftyp / free / mdat / moov`, with
+`moov` at offset 2,283,224 — *after* all 2.28MB of media data. A browser cannot
+decode a single frame until it has read `moov`, so it must fetch essentially the
+whole file before first paint. Measured at 4Mbps / 4× CPU that is ~3.6s to first
+video frame.
+
+This does not currently hurt LCP — the poster holds the LCP slot at 544ms and
+the video is a progressive enhancement layered over it — but it does mean the
+loop starts several seconds later than it needs to on a slow connection.
+
+- **Fix:** `ffmpeg -i kmbbq-hero.mp4 -c copy -movflags +faststart out.mp4`, then
+  re-upload to the same R2 key. It is a remux, not a re-encode: no quality
+  change, seconds to run.
+- **While you are there:** the file carries an AAC audio track that is never
+  played (the element is `muted`). `-an` drops it and saves bandwidth.
+- Nothing in the repo needs to change when this lands — same URL, same poster.
+
+### 1b. A purpose-shot loop is still the ceiling, not a blocker
+
+The current clip is one continuous macro of a single steak. A shot-for-the-frame
+loop would earn its place, but the slot is filled and this is now a nice-to-have.
+
+- **Aspect:** 16:9, 1920×1080 or better
+- **Format:** MP4 (H.264, **faststart**, no audio track) + WebM
 - **Length:** 10–15s, seamless loop, silent
-- **Brief:** Meat on a live grill — close and dim. Smoke moving through the
-  frame, tongs turning a cut, fat catching. Shoot from a tripod at table
-  height, lit only by the room and the grill. Slow motion if the phone offers
-  it. No faces required. Do not shoot an empty grill plate.
-- **Why:** The current R2 clip (`kmbbq-hero.mp4`) is a macro of a *clean, empty*
-  grill plate — cold, metallic, no food, and it is the same frame the About
-  panel used. Phase 3 bans it from both slots.
-- **Currently rendering:** `live-grill.png` as an interim still — the client's
-  own photograph of their own grill with their own food on it, so it is neither
-  stock nor off-menu — under a char scrim and a low ember glow. It is not a
-  substitute for the loop: it was never shot for this frame, and it shows. The
-  hero window clips into About's right-hand columns, and the right third of
-  this photo is tables and chairs rather than food, so `object-position` is
-  currently biased to 62% to drag the grill toward the dock. A loop shot for
-  the frame makes that workaround unnecessary.
+- **Brief:** Meat on a live grill — smoke moving through the frame, tongs
+  turning a cut, fat catching. Tripod at table height, lit by the room and the
+  grill. No faces required. Do not open on an empty grill plate.
 
 ## 2. About section photograph — RESOLVED for now
 

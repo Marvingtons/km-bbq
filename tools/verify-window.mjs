@@ -182,12 +182,24 @@ const browser = await chromium.launch();
       muralInStage: stage ? stage.querySelectorAll("img[src*='mural']").length : -1,
     };
   });
-  // --color-sand #F2EADD. If this ever reads rgb(18, 17, 16) the page ground
-  // has gone dark again, which DIRECTION.md constraint 1 forbids.
+  // --color-sand. Read from the token sheet rather than hardcoded: this check
+  // was written against #f2eadd and silently went red the moment the palette
+  // was resampled from interior.png to #f4ece1. If it ever reads rgb(18,17,16)
+  // the page ground has gone dark again, which constraint 1 forbids.
+  const sandRGB = await page.evaluate(() => {
+    const v = getComputedStyle(document.documentElement)
+      .getPropertyValue("--color-sand")
+      .trim();
+    const c = document.createElement("canvas").getContext("2d");
+    c.fillStyle = v;
+    c.fillRect(0, 0, 1, 1);
+    const d = c.getImageData(0, 0, 1, 1).data;
+    return `rgb(${d[0]}, ${d[1]}, ${d[2]})`;
+  });
   check(
     "the window opens onto About's SAND ground",
-    behind && behind.ground === "rgb(242, 234, 221)",
-    `ground ${behind?.ground}`
+    behind && behind.ground === sandRGB,
+    `ground ${behind?.ground}, --color-sand ${sandRGB}`
   );
   check(
     "settled state is composed: heading, copy and action are all visible",
@@ -288,12 +300,13 @@ for (const w of [375, 767]) {
   check(`${w}px: no horizontal overflow`, overflow.doc <= overflow.win + 1, `scrollWidth ${overflow.doc} vs ${overflow.win}`);
   check(`${w}px: the story is actually readable`, ...(await storyReadable(page)));
 
-  // The band, at mobile width: still exactly one instance of each sheet.
-  const m = await page.evaluate(() => {
-    const imgs = [...document.querySelectorAll("img[src*='mural']")];
-    return { count: imgs.length, unique: new Set(imgs.map((i) => i.getAttribute("src"))).size };
-  });
-  check(`${w}px: mural is one instance of each sheet`, m.count === 2 && m.unique === 2, `${m.count} img, ${m.unique} unique`);
+  // The retired illustration mural stays absent at every width, not just at
+  // desktop. (This assertion was inverted in the desktop block and missed here,
+  // so it went on demanding two mural sheets that no longer exist.)
+  const m = await page.evaluate(
+    () => document.querySelectorAll("img[src*='mural']").length
+  );
+  check(`${w}px: no mural <img>`, m === 0, `${m} found`);
   await ctx.close();
 }
 
