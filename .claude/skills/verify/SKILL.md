@@ -107,6 +107,18 @@ comments.
   count at 1440 / 375 / reduced-motion, the scrub actually travelling, and a
   double round trip across the 1024px boundary to catch stacked pin-spacers.
   35 checks.
+- `node tools/verify-illustration.mjs [url]` — **the Pick Your Fire section and
+  the dual-grill artwork.** The load-bearing check is DOCUMENT ORDER: `#grate`
+  must come after `#coals`, because the raw art drew the mesh first and the
+  briquettes floated on top of the bars they should rest under. Also asserts
+  zero gradients, zero `<style>`, zero `cls-N`, exactly two stroke weights, the
+  five distinct coal/ember fills, `role="img"`, the section at 1440/768/375,
+  and reduced-motion (embers static at FULL opacity, not frozen mid-pulse).
+  44 checks.
+  - The artwork is generated: `node tools/build-dual-grill.mjs` rebuilds
+    `DualGrill.tsx` from `assets/dual-grill-raw.svg`. Edit the generator, not
+    the component — every `d` is copied verbatim and hand-editing 190 paths is
+    how geometry drifts.
 - `node tools/verify-window.mjs [url]` — the Hero→About window transition: clip
   progression, mid-gesture reversibility, zero layout animation, CLS 0, the
   window opening onto About's sand ground, the chrome hairline, off-screen video

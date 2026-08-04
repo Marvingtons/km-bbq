@@ -257,6 +257,8 @@ body {
   .col-text,
   .col-wide,
   .col-full,
+  .col-figure,
+  .col-beside,
   .col-story,
   .col-panel {
     grid-column: 1 / -1;
@@ -301,6 +303,15 @@ body {
     }
     .col-panel {
       grid-column: 8 / -1;
+    }
+    /* The mirror of the pair above — an object LEFT, copy right. Named rather
+       than written as raw col-span-* utilities, which Phase 7 removed from the
+       page grid site-wide and which the QA sweep still greps for. */
+    .col-figure {
+      grid-column: 1 / span 5;
+    }
+    .col-beside {
+      grid-column: 7 / -1;
     }
     .col-media {
       grid-column: 9 / -1;
@@ -627,6 +638,190 @@ body {
      already doing. */
   .gallery-pinned .gallery-chevrons {
     display: none;
+  }
+}
+
+/* ===========================================================================
+   THE DUAL-GRILL ILLUSTRATION.
+
+   Scoped here rather than in a <style> inside the SVG, so the component ships
+   readable role names and no machine classes.
+
+   ON THE LOCAL COLOURS. Three groups do NOT map to brand tokens, and each has
+   a reason:
+
+     STEELS (--dg-steel, --dg-steel-lit, --dg-body). Grill hardware is steel.
+     Forcing it into the warm palette would make a stainless plate look like
+     painted terracotta. Sanctioned by the brief.
+
+     COAL MID-TONES (--dg-coal, --dg-coal-lit). The raw art models the coals
+     with a four-step dark ramp: #28292A, #363736, #504F4F, #5B5C5C. The site
+     has exactly two darks and both are near-black (#121110, #1b1917), so
+     collapsing the ramp into them turns the whole charcoal half into an
+     unreadable silhouette. The near-blacks DO map to --color-char as the
+     brief asks; the two mid-darks stay local, and they are the smallest set
+     that keeps the briquettes reading as separate objects.
+
+     THE HOT EMBER (--dg-ember). A glowing coal is orange at its core; the
+     brand accent is a true red. The brief asked for a retired `--ember`
+     token, which the palette guard rejects by name and which constraint 3
+     would not allow back. This is the artwork's own value instead, scoped to
+     the illustration — the same exemption Logo.tsx has under Law 3. The DEEP
+     ember does take --color-flame, so the accent is present where it fits.
+
+   Everything else is a real token: every near-black is --color-char.
+   =========================================================================== */
+.dual-grill {
+  --dg-steel-lit: #c9c6c2; /* was linearGradient SVGID_1_ (rim) */
+  --dg-steel: #aba7a2; /* was linearGradient XMLID_3_ (gas surface) */
+  --dg-body: #999a9a; /* was linearGradient XMLID_2_, its own dominant stop */
+  --dg-coal-lit: #5b5c5c;
+  --dg-coal-body: #26272a;
+  --dg-coal: #3a3b3a;
+  --dg-ember: #ea5818;
+  --dg-sheen: #e8e4dc;
+
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* TWO STROKE WEIGHTS, and only two. The raw art carried nine, from 0.37 to
+   0.78 on a 150-unit viewBox, which is below a pixel at every size this
+   renders at and fuzzes rather than draws. */
+.dual-grill .rim,
+.dual-grill .rim-line,
+.dual-grill .gas-plate,
+.dual-grill .gas-inner,
+.dual-grill .ember {
+  stroke-width: 1.2;
+}
+
+.dual-grill .sheen,
+.dual-grill :where(#grate) > * {
+  stroke-width: 0.8;
+}
+
+/* --- chassis --- */
+.dual-grill .rim {
+  fill: var(--dg-steel-lit);
+  stroke: var(--color-char);
+}
+.dual-grill .body {
+  fill: var(--dg-body);
+}
+.dual-grill .rim-line {
+  fill: none;
+  stroke: var(--color-char);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Reflected light, not white ink. The raw file drew these in #FFFFFF and
+   #DFDFDE, which on a cream page glows like a hole in the artwork.
+
+   `:where(#grate) > *` rather than a class on all 27 strands: the whole group
+   is one material, so the group says it once.
+
+   :where() IS LOAD-BEARING, not decoration. A bare `#coals > *` carries an ID
+   and scores (1,1,0), which beats `.dual-grill .ember` at (0,2,0) — so the
+   group default silently repainted the embers and every coal highlight in the
+   body colour, and the fire went out. :where() zeroes the ID so the group is
+   a DEFAULT that per-shape classes can override, which is the only thing it
+   was ever meant to be. */
+.dual-grill .sheen,
+.dual-grill :where(#grate) > * {
+  fill: none;
+  stroke: var(--dg-sheen);
+  opacity: 0.8;
+}
+
+/* --- gas side --- */
+.dual-grill .gas-base {
+  fill: var(--dg-coal-lit);
+}
+.dual-grill .gas-inner {
+  fill: var(--dg-steel);
+  stroke: var(--dg-steel);
+}
+.dual-grill .gas-plate {
+  fill: var(--dg-steel);
+  stroke: var(--dg-steel-lit);
+}
+.dual-grill .rib-light {
+  fill: var(--dg-steel-lit);
+}
+.dual-grill .rib-dark {
+  fill: var(--dg-coal);
+}
+.dual-grill .dial {
+  fill: var(--color-char);
+}
+
+/* --- charcoal side --- */
+.dual-grill .char-ground {
+  fill: var(--color-char);
+}
+/* The bed the briquettes sit on — two large filled sweeps in the raw art.
+   Without these the charcoal half is a black hole with a mesh over it. */
+.dual-grill .coal-bed {
+  fill: var(--dg-coal);
+}
+.dual-grill .coal-bed-lit {
+  fill: var(--dg-coal-lit);
+}
+/* Lifted off --color-char on purpose. The raw art draws the ground at #1F1E1D
+   and the coal bodies at #28292A; the brief maps both to --char as
+   "near-blacks", and doing that literally makes 73 briquettes vanish into the
+   surface they are lying on. The GROUND takes the token; the coals keep the
+   one step of separation that makes them objects. */
+.dual-grill :where(#coals) > * {
+  fill: var(--dg-coal-body);
+}
+.dual-grill .coal-deep {
+  fill: var(--dg-coal);
+}
+.dual-grill .coal-mid {
+  fill: var(--dg-coal-lit);
+}
+
+.dual-grill .ember {
+  fill: var(--dg-ember);
+  stroke: var(--color-char);
+}
+.dual-grill .ember-deep {
+  fill: var(--color-flame);
+}
+
+/* THE ONE IDLE LOOP ON THE PAGE. Four embers breathing out of phase, and
+   nothing else in the illustration moves — no rotation, no parallax, no pin. */
+@keyframes dg-ember-pulse {
+  0%,
+  100% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.dual-grill :where(#coals) .ember,
+.dual-grill :where(#coals) .ember-deep {
+  animation: dg-ember-pulse 1.8s ease-in-out infinite;
+}
+.dual-grill :where(#coals) .ember-deep {
+  animation-delay: -0.6s;
+}
+.dual-grill :where(#coals) .ember:nth-of-type(2) {
+  animation-delay: -1.2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Static, embers at full opacity — not frozen mid-pulse at 0.65. */
+  .dual-grill :where(#coals) .ember,
+  .dual-grill :where(#coals) .ember-deep {
+    animation: none;
+    opacity: 1;
   }
 }
 

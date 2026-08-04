@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
+import { PickYourFire } from "@/components/PickYourFire";
 import { Gallery } from "@/components/Gallery";
 import { Challenge } from "@/components/Challenge";
 import { Contact } from "@/components/Contact";
@@ -36,6 +37,11 @@ export default function Home() {
       >
         <Hero />
         <About />
+        {/* The one thing a photograph cannot show: the grill is built into the
+            table, and it can be gas or charcoal. It sits here because About
+            already says exactly that in a single clause — this is that clause
+            given a diagram and a reason to care. */}
+        <PickYourFire />
         <Gallery />
         {/* Visit before the game. The address and the hours are the conversion
             for a walk-in-only restaurant, and they used to sit BEHIND a
