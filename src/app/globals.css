@@ -793,37 +793,26 @@ body {
   fill: var(--color-flame);
 }
 
-/* THE ONE IDLE LOOP ON THE PAGE. Four embers breathing out of phase, and
-   nothing else in the illustration moves — no rotation, no parallax, no pin. */
-@keyframes dg-ember-pulse {
-  0%,
-  100% {
-    opacity: 0.65;
-  }
-  50% {
-    opacity: 1;
-  }
+/* The centre seam. It is the one element in the illustration that the raw art
+   did not contain — see the comment on it in DualGrill.tsx. */
+.dual-grill .divider {
+  fill: none;
+  stroke: var(--color-char);
+  stroke-width: 1.2;
 }
 
-.dual-grill :where(#coals) .ember,
-.dual-grill :where(#coals) .ember-deep {
-  animation: dg-ember-pulse 1.8s ease-in-out infinite;
-}
-.dual-grill :where(#coals) .ember-deep {
-  animation-delay: -0.6s;
-}
-.dual-grill :where(#coals) .ember:nth-of-type(2) {
-  animation-delay: -1.2s;
-}
+/* THE EMBER IDLE LOOP IS NOT HERE ANY MORE.
+   It used to be a CSS keyframe animation. The assembly timeline now owns the
+   embers' opacity through its final phase, and a CSS animation on the same
+   property would fight the scrub at the hand-off boundary — whichever wrote
+   last would win, which is a coin toss on every scroll tick. The loop is a
+   paused GSAP tween in PickYourFire.tsx, played only once the scrub is
+   effectively complete and paused again the moment it is not.
 
-@media (prefers-reduced-motion: reduce) {
-  /* Static, embers at full opacity — not frozen mid-pulse at 0.65. */
-  .dual-grill :where(#coals) .ember,
-  .dual-grill :where(#coals) .ember-deep {
-    animation: none;
-    opacity: 1;
-  }
-}
+   Reduced motion needs no rule here either: under it no timeline is built at
+   all, so the art renders fully assembled with the embers at their natural
+   full opacity. That is the correct static state, and it is the same state a
+   failed JS load produces. */
 
 /* Material, not noise. On the old near-black ground this stopped banding; on
    sand it does the opposite job — it gives the warm ground a paper tooth so a

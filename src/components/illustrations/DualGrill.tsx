@@ -45,6 +45,17 @@ export function DualGrill({ className = "" }: { className?: string }) {
         <path className="sheen" d="m75.8 18.8c28.1-0.9 54.5 22 54.7 55.4 0.1 26.4-22.3 56.1-54.7 56.1" />
         <path className="rim-line" d="m75.2 13.8c28.9-0.9 59.7 23.9 58.8 62.3-0.8 21.5-17.5 57.5-58.5 58.2" />
         <path className="rim-line" d="m76.4 22.5c28.3-1.2 48.6 17.3 49.8 44.3 1.4 32.5-16.8 58.3-49.8 59.4" />
+        {/* THE ONE PIECE OF GEOMETRY THAT IS NOT IN THE RAW FILE.
+            The raw art has no divider element — the centre seam is simply
+            where the gas half's fill ends (x=75.2) and the charcoal half's
+            begins. That is fine to look at and impossible to animate, and the
+            assembly choreography draws the divider as its own beat.
+
+            So this is a single <line> traced along the seam the two fills
+            already share: x=75.2, from the inner rim's top (y=15.9) to its
+            bottom (y=133.8), both read off .gas-inner's own path. It adds no
+            visual element that was not already there as an edge. */}
+        <line className="divider" x1="75.2" y1="15.9" x2="75.2" y2="133.8" />
       </g>
 
       <g id="gas-side">

@@ -107,6 +107,23 @@ comments.
   count at 1440 / 375 / reduced-motion, the scrub actually travelling, and a
   double round trip across the 1024px boundary to catch stacked pin-spacers.
   35 checks.
+- `node tools/verify-assembly.mjs [url]` — **the grill assembly scrub.** Drives
+  REAL scroll (gsap is not on `window`, and the wheel is the honest input),
+  computing each progress from the trigger's own `top 85%` / `center center`
+  definition. Asserts the five phases in order, the ember hand-off scrubbed
+  fast across 0.9–1.0, the mobile one-shot, reduced motion, JS-off, and two
+  round trips across 1024px. 32 checks.
+  - **The section is never pinned** — the assembly rides its natural travel, so
+    it adds nothing to the dead-scroll budget. Scope any pin-spacer check to
+    the section: the gallery legitimately has one.
+  - Two traps this cost real time on, both worth remembering: `gsap.fromTo`
+    immediate-renders its from-value **even when `paused: true`**, and a paused
+    staggered yoyo still owns its per-target sub-tweens, so a `gsap.set` after
+    `pause()` races them. The ember loop is therefore killed and rebuilt rather
+    than paused and resumed.
+  - When screenshotting phases, use `page.screenshot({clip})` or full-viewport —
+    `elementHandle.screenshot()` scrolls the element into view and moves the
+    scrub, so every frame comes out more assembled than its label.
 - `node tools/verify-illustration.mjs [url]` — **the Pick Your Fire section and
   the dual-grill artwork.** The load-bearing check is DOCUMENT ORDER: `#grate`
   must come after `#coals`, because the raw art drew the mesh first and the

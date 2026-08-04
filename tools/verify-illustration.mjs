@@ -182,10 +182,16 @@ console.log("\n=== prefers-reduced-motion ===");
       animations: embers.map((e) => getComputedStyle(e).animationName),
       opacities: embers.map((e) => getComputedStyle(e).opacity),
       headOpacity: getComputedStyle(head).opacity,
-      svgOpacity: getComputedStyle(document.querySelector(".dual-grill").closest(".scroll-reveal")).opacity,
+      // The SVG's OWN opacity. It used to be read off a `.scroll-reveal`
+      // wrapper, which the assembly pass removed — the artwork is no longer
+      // faded in as a block, it assembles part by part, so there is no wrapper
+      // left to interrogate.
+      svgOpacity: getComputedStyle(document.querySelector(".dual-grill")).opacity,
+      chassisOpacity: getComputedStyle(document.querySelector(".dual-grill #chassis")).opacity,
     };
   });
   check("embers do not animate", s.animations.every((a) => a === "none"), s.animations.join(","));
+  check("reduced motion: the assembly never ran (chassis at full opacity)", s.chassisOpacity === "1", s.chassisOpacity);
   check("embers sit at FULL opacity, not frozen at 0.65", s.opacities.every((o) => o === "1"), s.opacities.join(","));
   check("heading fully visible", s.headOpacity === "1", s.headOpacity);
   check("illustration fully visible", s.svgOpacity === "1", s.svgOpacity);
