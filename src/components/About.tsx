@@ -1,284 +1,144 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useRef } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { PillLink } from "./PillLink";
-import { SectionSeam } from "./SectionSeam";
-import { FEATURED, displayName } from "@/data/menu";
-import { MOTION, MOTION_OK, NAV_H, HERO_SCRUB } from "@/lib/motion";
-import { useScrollRefresh } from "@/lib/useScrollRefresh";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useReveal } from "@/lib/reveal";
 
 /* ===========================================================================
-   ABOUT — two beats: the story, then the cuts.
+   OUR STORY — and it is quiet on purpose.
 
-   The mural band that used to sit between them is gone (note further down).
-   What is left is the section doing a job: what this place is, beside a
-   photograph of it, and then what to order.
+   It used to open the page, sharing a section with the grill sequence: three
+   paragraphs about the restaurant on the left while a video turned into a
+   diagram on the right. Two things asking for the same attention, and the copy
+   lost — nobody reads a founding story while something is morphing beside it.
 
-   THE CARDS ARE NOT A SECOND COPY OF THE MENU. `FEATURED` in src/data/menu.ts
-   resolves five ids into the real records at module load and throws on a bad
-   one, so a card here cannot show a name, a photo or a description that /menu
-   does not — and every card links to the anchor of the category the dish
-   actually lives in. Galbi says Premium because Galbi IS in Premium.
+   So it sits here instead, after the menu preview, where the reader has already
+   had the mechanism and the food and is willing to be told what the place is.
+   By this point the page's animation budget is spent (hero, the match cut, the
+   pinned gallery below), and the correct amount of motion left for this section
+   is one fade. There is no scrub and no sticky column, and nothing here reacts
+   to scroll after its entrance has played. The media is a framed piece of
+   artwork and it does not move — a second animated illustration on this page
+   would be arguing with the one the section above is built around.
 
-   That replaces the "Signature" badge, which named a section that had never
-   existed on /menu.
+   IT KEEPS `id="about"`, because the nav's ABOUT link means this copy, not the
+   slot it used to occupy. Pick Your Fire took `#pick-your-fire`.
+
+   NO CTA. The block above this one is the menu preview and it ends with "See
+   the menu"; a second menu button here would be pointing the reader back at
+   what they have just scrolled through. The gallery is next and speaks for
+   itself.
    =========================================================================== */
 
 export function About() {
   const sectionRef = useRef<HTMLElement>(null);
-
-  useLayoutEffect(() => {
-    const mm = gsap.matchMedia();
-    const q = gsap.utils.selector(sectionRef);
-
-    mm.add({ motion: MOTION_OK, wide: "(min-width: 768px)" }, (context) => {
-      const { motion, wide } = context.conditions as {
-        motion: boolean;
-        wide: boolean;
-      };
-      if (!motion) return;
-
-      const textCol = q(".about-text");
-      const grillHead = q(".grill-head");
-      const grillDishes = q(".grill-dish");
-
-      // THE STORY, and the one entrance not triggered off its own position.
-      //
-      // Where the window runs, the copy is revealed by the panel shrinking off
-      // it, so "the copy has arrived" and "the panel has passed" are the same
-      // event and must not disagree. Triggered the ordinary way they did: the
-      // copy's position is a function of viewport HEIGHT and the panel's edge
-      // of viewport WIDTH, so the two drift apart with the aspect ratio and the
-      // panel's edge cut through the heading.
-      //
-      // So it fires off the hero's own scroll, scaled to HERO_SCRUB — 58% of
-      // the transition's travel, wherever that travel is set.
-      gsap.from(textCol, {
-        opacity: 0,
-        y: MOTION.rise,
-        duration: MOTION.dur.reveal,
-        ease: MOTION.gsapEase,
-        scrollTrigger: wide
-          ? {
-              trigger: "#home",
-              start: () => window.innerHeight * HERO_SCRUB * 0.58,
-              invalidateOnRefresh: true,
-              // Plays once. It used to reverse, so scrolling back up
-              // took the copy you were reading away again.
-              toggleActions: "play none none none",
-            }
-          : { trigger: textCol[0], start: "top 88%" },
-      });
-
-      gsap.from(grillHead, {
-        opacity: 0,
-        y: MOTION.rise,
-        duration: MOTION.dur.reveal,
-        ease: MOTION.gsapEase,
-        scrollTrigger: { trigger: grillHead[0], start: "top 88%" },
-      });
-
-      gsap.from(grillDishes, {
-        opacity: 0,
-        y: MOTION.rise,
-        duration: MOTION.dur.reveal,
-        stagger: MOTION.stagger,
-        ease: MOTION.gsapEase,
-        scrollTrigger: { trigger: grillDishes[0], start: "top 90%" },
-      });
-    });
-
-    return () => {
-      mm.revert();
-    };
-  }, []);
-
-  useScrollRefresh();
+  // ONE ENTRANCE, ONCE, AND NOTHING ELSE — now expressed in the shared system
+  // rather than a hand-written gsap.from here. The copy block and the artwork
+  // are one group, so they arrive together instead of as a two-beat reveal.
+  useReveal(sectionRef);
 
   return (
     <section
       ref={sectionRef}
       id="about"
       aria-labelledby="about-heading"
-      // -mt-[60vh] cancels the hero's extra 60vh, so this section's first
-      // screen is what the hero's window reveals as it clips down and the net
-      // document height is unchanged. One number, written here, in Hero's
-      // h-[160vh], and as HERO_SCRUB. Change one, change all three.
-      className="grain relative z-base overflow-hidden bg-sand motion-safe:md:-mt-[60vh]"
-      style={{ ["--nav-h" as string]: `${NAV_H}px` } as React.CSSProperties}
+      className="grain relative z-base bg-sand py-section md:py-section-lg"
     >
-      <SectionSeam />
-
-      {/* ------------------------------------------------------------------
-          BEAT 1 — THE STORY, and the panel the hero docks into.
-
-          `h-screen` at md+ with motion rather than `min-h-screen`: SeamMotion
-          measures `.col-media` About-relative and bails if the cell does not
-          fit inside About's first viewport, which would leave the hero unable
-          to clip at all. An exact viewport keeps the cell centred by
-          construction at every width.
-          ------------------------------------------------------------------ */}
-      <div className="about-stage relative z-base py-section md:py-section-lg motion-safe:md:h-screen motion-safe:md:py-0">
-        <div className="grid-page motion-safe:md:h-full motion-safe:md:items-center">
-          <div className="about-text col-text">
-            <p className="eyebrow">Our story</p>
-            <h2 id="about-heading" className="h2-scale mt-4">
-              It started with a grill
-            </h2>
-            <span
-              aria-hidden="true"
-              className="mt-5 block h-0.5 w-16 bg-steel"
-            />
-            <div className="copy measure mt-8 space-y-5">
-              <p>
-                KM.BBQ started with one idea: really good Korean BBQ that you
-                cook yourself. Every table gets its own grill, gas or charcoal.
-              </p>
-              <p>
-                We pick our meat carefully and marinate it in house, using
-                recipes we have leaned on for years. You grill it fresh, right
-                where you sit, cooked exactly how you like it.
-              </p>
-              <p>
-                Pull up a chair and take your time. Order more whenever you
-                want. Good food, a hot grill, and no reason to rush.
-              </p>
-            </div>
-            <PillLink href="/menu" arrow className="mt-10">
-              See the menu
-            </PillLink>
+      <div className="grid-page items-center gap-y-10" data-reveal-group>
+        <div className="story-copy col-story">
+          <p className="eyebrow" data-reveal>
+            Our story
+          </p>
+          <h2 id="about-heading" className="h2-scale mt-4" data-reveal>
+            It started with a grill
+          </h2>
+          <span
+            aria-hidden="true"
+            className="mt-5 block h-0.5 w-16 bg-steel"
+            data-reveal="rule"
+          />
+          <div className="copy measure mt-8 space-y-5" data-reveal>
+            <p>
+              KM.BBQ started with one idea: really good Korean BBQ that you cook
+              yourself. Every table gets its own grill, gas or charcoal.
+            </p>
+            <p>
+              We pick our meat carefully and marinate it in house, using recipes
+              we have leaned on for years. You grill it fresh, right where you
+              sit, cooked exactly how you like it.
+            </p>
+            <p>
+              Pull up a chair and take your time. Order more whenever you want.
+              Good food, a hot grill, and no reason to rush.
+            </p>
           </div>
+        </div>
 
-          {/* THE MEDIA COLUMN — columns 9-12 out to the right viewport edge,
-              the one span `.col-text` never occupies, so the clearance between
-              copy and panel is a fact about the grid rather than about timing.
+        {/* NOT A PHOTOGRAPH, AND IT MUST NOT BE FRAMED LIKE ONE.
 
-              Filled only where no panel will ever arrive: below 768px and under
-              reduced motion, where it holds the hero's own still statically
-              docked — the transition's end state with nothing animated. At md+
-              with motion it is deliberately EMPTY, because it is the rect
-              SeamMotion clips the hero's window down into.
+            `about.png` is a cave-painting-style illustration — figures cooking
+            around a shared fire, ochre and rust and charcoal pigment laid on a
+            warm parchment ground. That ground is warmer than the page's
+            (--color-sand), which is the whole problem: dropped in bare under
+            `.photo` it reads as a PATCH OF the page that has gone slightly
+            wrong, a rectangle of cream that does not match the cream around it.
 
-              Second in DOM order on purpose: below 768px it stacks UNDER the
-              copy, so the section still opens on its heading at 375. */}
-          <figure className="col-media bleed-right" aria-hidden="true">
+            So it is DECLARED ARTWORK. A cream mat in the page's own ground, a
+            hairline frame in an ochre pulled from the pigment, and a caption
+            underneath. The mat is the piece that does the reconciling: it puts
+            an unambiguous band of true page-cream between the parchment and the
+            page, so the eye reads two grounds because there is an object, not
+            because something is off. See `.artwork-card` in globals.css.
+
+            THE CAPTION IS PROVENANCE, NOT DECORATION. It credits the painted
+            mural on the dining room's back wall — the one visible along the
+            back of `interior.png` in the gallery — which this illustration is
+            after. It does not get reworded into something generic; without it
+            the piece is an unattributed illustration on a restaurant's page,
+            which is exactly the failure DIRECTION.md records against the old
+            `mural-left`/`mural-right` artwork.
+
+            `.photo` is deliberately NOT used: it carries a photographic grade
+            (saturate/contrast/brightness) and a warm bottom scrim, both of
+            which are corrections for a photograph sitting into the ground and
+            both of which are wrong on flat pigment that is meant to sit ON it.
+
+            The dining-room photograph this replaced (live-grill) is in the
+            gallery strip, tile 4, captioned "Mid-service". It was not deleted.
+
+            DOM order copy-then-artwork, which is the stacked reading order
+            below 768; above it the grid puts them side by side. */}
+        {/* `data-reveal="image"` on the FIGURE, so the piece and its provenance
+            line arrive as one object while the artwork itself settles from 1.06
+            inside the frame. The frame is overflow-hidden, so the settle reads
+            as the picture coming to rest in its mat rather than as a scaling
+            box. */}
+        <figure
+          className="story-artwork artwork-card col-panel"
+          data-reveal="image"
+        >
+          <div className="artwork-frame">
             <Image
-              src="/images/live-grill.png"
-              alt=""
-              fill
+              src="/images/about.png"
+              alt="Cave painting style illustration of figures cooking over a shared fire, after the mural in the KM BBQ dining room"
+              /* INTRINSIC DIMENSIONS, NOT `fill`. The artwork is 1916x821 and
+                 every pixel of it has to be visible — a `fill` box would need
+                 an aspect ratio restated here, and a restated ratio is a crop
+                 waiting for someone to reframe the source. Given the real
+                 numbers the box IS the aspect ratio and cropping is not
+                 expressible. */
+              width={1916}
+              height={821}
               quality={72}
-              sizes="100vw"
+              sizes="(max-width: 767px) 100vw, 42vw"
               draggable={false}
-              className="select-none object-cover motion-safe:md:hidden"
+              className="select-none"
             />
-          </figure>
-        </div>
-      </div>
-
-      {/* THE MURAL BAND IS GONE, and it is not coming back as a smaller one.
-
-          Two sheets of hand-drawn motifs — a cartoon tiger, a folk dancer, a
-          janggu, a hanok, bonsai — scattered on a baked-out WHITE field. Three
-          problems, any one of which is disqualifying:
-
-            1. It depicts food we do not serve. Sundubu jjigae, bibimbap and a
-               bowl of plain rice are none of them on the menu. Law 1: an asset
-               that shows off-menu food is cut, not captioned around.
-            2. Its ground is white, which the palette bans outright. On cream it
-               merely read light; on --sand it would be a glowing rectangle.
-            3. It carried ~0.75 of a viewport and zero information, aria-hidden
-               with no alt text, in the middle of the one section that is
-               supposed to say what this restaurant is.
-
-          --color-pine and --color-plum were sampled from it and went with it.
-          If an illustrated motif is wanted later it is a new asset request, not
-          a revival of this one. */}
-
-      {/* ------------------------------------------------------------------
-          BEAT 2 — HOUSE FAVOURITES.
-          ------------------------------------------------------------------ */}
-      <div className="grill-layer relative z-base py-section md:py-section-lg">
-        <div className="grid-page">
-          <div className="col-full">
-            <div className="grill-head">
-              <p className="eyebrow">House favorites</p>
-              <h2 id="menu-heading" className="h2-scale mt-4">
-                What to grill first
-              </h2>
-              <p className="copy measure mt-4">
-                Five of the ones people order again and again. Everything on the
-                menu is the same one price.
-              </p>
-            </div>
-
-            {/* Galbi anchors the left half at full height; the other four form
-                an equal 2x2 on the right. Tablets collapse to two columns with
-                Galbi full-width on top; phones stack single-file, Galbi first. */}
-            <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-7">
-              {FEATURED.map(({ item, category, href }, i) => {
-                const isFeature = i === 0;
-                // Spans of the CARD grid directly above, not of the page's
-                // 12-column track. The rule that bans raw col-span-* is about
-                // `.grid-page`; a component's own grid is allowed its own spans.
-                const span = isFeature ? "sm:col-span-2 lg:row-span-2" : "";
-                return (
-                  <Link
-                    key={item.id}
-                    href={href}
-                    className={`grill-dish group flex h-full flex-col overflow-hidden rounded-card border border-sand-3 bg-sand-2 p-5 text-left transition-colors duration-[var(--dur-base)] ease-house hover:border-flame/50 ${span}`}
-                  >
-                    <div
-                      className={`photo relative w-full ${
-                        isFeature
-                          ? "aspect-[16/9] lg:aspect-auto lg:min-h-0 lg:flex-1"
-                          : "aspect-[16/9] lg:aspect-[2/1]"
-                      }`}
-                    >
-                      <Image
-                        src={item.image!}
-                        alt={displayName(item)}
-                        fill
-                        className="object-cover transition-transform duration-[var(--dur-slow)] ease-house group-hover:scale-[1.04]"
-                        sizes={
-                          isFeature
-                            ? "(max-width: 1023px) 100vw, 50vw"
-                            : "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 25vw"
-                        }
-                      />
-                    </div>
-                    {/* The category, and it is a real anchor on /menu — not a
-                        badge naming a section that does not exist. */}
-                    <p className="eyebrow mt-4">{category.name}</p>
-                    <h3 className="card-title mt-1">
-                      {item.name}
-                      {item.english && (
-                        <span className="text-ash"> — {item.english}</span>
-                      )}
-                    </h3>
-                    {item.hangul && (
-                      <p className="mt-1 font-sans text-xs text-ash">
-                        {item.hangul}
-                      </p>
-                    )}
-                    <p className="copy mt-2">{item.desc}</p>
-                  </Link>
-                );
-              })}
-            </div>
-
-            <div className="grill-cta mt-10 flex lg:mt-12">
-              <PillLink href="/menu" tone="outline" arrow>
-                See the menu
-              </PillLink>
-            </div>
           </div>
-        </div>
+          <figcaption className="eyebrow artwork-caption">
+            Around the fire · After the mural in our dining room
+          </figcaption>
+        </figure>
       </div>
     </section>
   );

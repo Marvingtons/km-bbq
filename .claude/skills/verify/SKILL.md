@@ -58,7 +58,148 @@ const chromium = (pw.default ?? pw).chromium;   // it is CJS, so unwrap .default
     #1a, not a code one.
 - **Hero arithmetic:** the hero is **160vh** with a sticky stage and About is
   pulled up **`-mt-[60vh]`**. One number written twice; change both in one
-  commit. Both halves are `motion-safe:md:`.
+  commit. Both halves are `motion-safe:lg:` — the window clips into About's
+  square media frame, which only exists above 1024, so below that bracket the
+  extra viewport and the negative margin are switched off together. They were
+  `md:` until the About/Pick Your Fire merge; the whole composed sequence now
+  lives at the same 1024px the pinned gallery uses.
+- **THERE IS EXACTLY ONE `<video>` ON THE HOME PAGE.** It is the hero's
+  backdrop, the panel the hero clips into, the circle that becomes, and what
+  dissolves into the illustration — one DOM node the whole way, still playing.
+  `verify-assembly.mjs` asserts `querySelectorAll('video').length === 1` at
+  every scroll position, because a second one "just for About" is the obvious
+  implementation and it puts two boxes of the same footage on screen at once.
+  - **`MediaStage.tsx` owns it, and `.hero-window` is `position: fixed`.** Not
+    sticky (it would stop being viewport-aligned when the hero released), not
+    reparented (React owns the node, and the spec pauses a media element when it
+    leaves the document), not pinned (two viewports of held scroll). Fixed +
+    clip-path costs no scroll and needs no second element.
+  - **The clip is written in PIXELS.** The window's reference box is the
+    viewport *including* the scrollbar gutter, so a percentage there is ~10px
+    wrong on the right edge — permanently, not as an edge case.
+  - **The dock runs one full viewport**, from About entering the bottom of the
+    screen to its top reaching the top — because that is the frame About's
+    sticky media column parks on, and the dock and the park must be the same
+    event. It is NOT bounded by `HERO_SCRUB` any more.
+  - **The sides close first (`SIDES_LEAD` = 55%), and the story appears on that
+    frame (`ABOUT_COPY_IN`).** With a viewport-long dock the copy is on screen
+    while the panel is still shrinking; if all four edges moved together the
+    left one would sweep across the heading and draw half a glyph at a time.
+    The two constants are one number written twice.
+  - **`.media-rest` is one box with two readers**: MediaStage builds the panel's
+    rest shape from it, and the hero's window docks into it (it carries
+    `.col-media`). Do not give either its own numbers.
+- **Page order: Hero → Pick Your Fire → What to grill first → Our Story →
+  Gallery → Contact → Beat the Clock.** The grill sequence opens the page; the
+  story is a quiet two-column section AFTER the menu preview. `id="about"` is on
+  Our Story (the nav's ABOUT link means that copy); `id="pick-your-fire"` is the
+  morph section. Three components: `PickYourFire.tsx`, `Favorites.tsx`,
+  `About.tsx`.
+  - **Our Story has one fade and nothing else** — no scrub, no sticky, no
+    animated illustration, no CTA (the menu preview directly above ends with
+    one). Its media is `about.png` as **declared artwork**: a cave painting on a
+    parchment ground, in a cream mat inside a 1px ochre hairline
+    (`.artwork-card` / `.artwork-frame`), with a provenance caption crediting
+    the dining-room mural. The mat is load-bearing — the parchment is warmer
+    than `--color-sand` and a bare image reads as a patch of the page rather
+    than a picture on it. Never `.photo`: that treatment's grade and bottom
+    scrim exist to sink photographs INTO the ground. `live-grill.png`, which
+    this replaced, is gallery tile 4 ("Mid-service").
+- **Pick Your Fire PINS.** One viewport tall, locks at `top top`, held for
+  PIN_VH = 0.7 viewports while scroll drives the whole sequence. Phases: circle
+  0.00-0.14, cut 0.14-0.20 (revealing #chassis ONLY), assembly 0.20-0.68,
+  **at rest 0.68-1.00**. Nothing in the section moves during the hold — that is
+  the point; before the pin the composed view scrolled apart mid-animation.
+  - **THE BUILD LIVES IN THE FRONT TWO THIRDS, AND THAT IS A FIX.** It used to
+    run 0.26-0.96 of a 1.3vh pin, so the fire lit on the reader's last scroll
+    pixel: they sat beside two finished paragraphs about gas and charcoal
+    watching a half-built grill. The rest beat is now a third of the pin and is
+    what the held scroll actually buys. `verify-assembly.mjs` asserts it at
+    0.70 — everything at full opacity, mesh and seam drawn, embers already lit.
+  - **THE GRILL ASSEMBLES**, piece by piece: burner plate, dial sweep
+    (angle-sorted, NOT DOM order), bowl, coal pour (shuffled, pre-assigned
+    rotations), grate landing OVER the coals (the longest window — the featured
+    beat), mesh weave, seam, fire. `src/lib/assembly.ts` owns the choreography
+    and the three orderings, because it plays twice: scrubbed in the pin above
+    1024, and as a 1.2s eased one-shot below it.
+  - **HELD SCROLL IS THE PRICE.** 0.7vh here on top of the hero's 0.6 and the
+    gallery's 1.42 — about 2.7vh against Law 6's budget of 1.0, down from 3.3
+    when the pin was 1.3. Owner-directed, capped, and asserted:
+    verify-assembly.mjs fails if the pin-spacer grows past section + PIN_VH.
+  - **The gallery is no longer the page's only pin.** Any check that counted
+    `.pin-spacer` globally has to name its own; verify-gallery.mjs filters for
+    the one containing `#gallery`.
+  - **CLS: pins register as layout shifts under programmatic scroll.** A pinned
+    element goes to `position: fixed` and its in-flow height drops to zero,
+    which Chrome scores against it even though the spacer holds the space and
+    nothing visible moves. verify-window.mjs partitions those out and asserts
+    the transition's own CLS is 0. Both pinned sections show it; always have.
+  - **The ember gates read the TIMELINE's progress, not the ScrollTrigger's.**
+    A scrub chases the wheel 0.4s behind; the loop hands off from the timeline.
+    Gated on scroll, the loop starts while the ignition tween is still ramping
+    the same property, and on a 360px scrub — where 0.4s is most of the range —
+    one ember of four ends up stuck at the loop's 0.65 floor, permanently.
+  - The standalone `PickYourFire.tsx` that was deleted in the merge is back, but
+    it is the whole section now, not an illustration beside a paragraph.
+  - **THERE IS NO ASSEMBLY.** The illustration is complete from the first
+    frame — the payoff is the cut, and a build after it made the reader wait
+    through a second event for a picture they had already been shown. Phases are
+    hold → circle → cut → ignition → settle. `verify-assembly.mjs` greps both
+    components for the old machinery (`buildAssembly`, `dashPrep`, …).
+  - **The illustration is CO-CLIPPED to the footage.** It lives in About's DOM
+    (so the stacked layout below 1024 has it in flow) and MediaStage writes the
+    same panel rectangle onto `.media-frame`, converted into its coordinates and
+    clamped. Without it the chassis shows above and below the panel — the rim is
+    a full circle in a square frame and the panel at rest is a landscape rect.
+  - **The clip starts RECTANGULAR and ends CIRCULAR, in one `inset()`.** The
+    frame stays square the whole way — a circle needs a square box — and the
+    landscape rest shape comes from `--rest-inset: 12%`. Never tween `inset()`
+    to `circle()`; they do not interpolate.
+  - **Nothing red or orange renders before ignition.** The ignition set is found
+    by COMPUTED FILL, not by class name (`src/lib/embers.ts`), so a hot shape
+    added to the artwork later cannot ship glowing under an unlit grill. Today
+    it is exactly four: `.ember` ×2 (`--dg-ember #ea5818`) and `.ember-deep` ×2
+    (`--color-flame`). There is no pilot flame on the gas side.
+  - **The chassis is fitted to the frame by measurement, not by eye.** The
+    artwork's rim is 138 x 139.7 in a 150-unit viewBox and sits above centre, so
+    `About.tsx` measures it and writes `--dg-fit` / `--dg-x` / `--dg-y`. Without
+    that the circle photo dissolves onto a chassis 7% too small.
+  - Below 1024, under reduced motion, and with JS off it is plain stacked flow —
+    story, photograph, fire copy, illustration — which is the CSS **default**,
+    with the sticky layering added inside one media query on top. `<noscript>`
+    undoes that layering, because nothing would fade the photograph off the
+    illustration it sits on.
+  - `tools/verify-assembly.mjs` owns the match: concentricity and diameter at
+    progress 0.17 — the middle of the cut, which moved forward with the
+    retiming — within 1.5px of centre and 6px of diameter.
+- **/menu IS TYPOGRAPHIC. There are no per-item photographs and there will not
+  be.** The old ones were stock/generated food presented under the restaurant's
+  own item names, which is the provenance rule's central case. Items are rows
+  on the cream — printed number, `ROMANIZED — PRINTED ENGLISH`, hangul,
+  description, data-driven badges — in two CSS columns with `break-inside:
+  avoid` per category. `app/menu/MenuBoard.tsx`. **35 orphaned item images were
+  deleted; the five the homepage preview uses are the only food photos left and
+  `FEATURED` throws at module load if one loses its `image`.**
+  - **`data/menu.ts` is a transcription of the printed lunch and dinner cards.**
+    `num` is the restaurant's own item number and is non-contiguous on purpose
+    (the dinner card publishes 1B, 4B, 5B and nothing else in that range — the
+    gap is not ours to fill). Korean names appear ONLY where a standard dish
+    name exists; "Head Shrimp", "Hot Dog", "Corn Cheese" and the rest stand in
+    English. The previous file invented both dishes and Korean names.
+  - **The lunch/dinner toggle defaults off the visitor's clock via
+    `useSyncExternalStore`, never `useState(() => ...)`.** The server has no
+    visitor clock, so an initialiser is a hydration mismatch and React discards
+    the whole static subtree. `getServerSnapshot` returns lunch; the client
+    corrects within a frame. Signature renders in dinner only; in lunch it is a
+    non-clickable teaser and no B-item is in the DOM.
+  - **Category ink marks use `pathLength={1}`** so one dasharray retracts every
+    glyph whatever its geometry. Retracted state is set in JS, drawn once on
+    intersect, static under reduced motion.
+- **The restaurant TAKES RESERVATIONS** (Yelp), and `acceptsReservations` in the
+  JSON-LD is the URL, not `false`. Every surface says "Walk-ins welcome ·
+  Reservations available" from `WALK_IN_LINE` — both facts are true and a
+  straight swap would have turned away walk-ins. Lunch cutoff is **3:30 PM**,
+  confirmed; it shipped as a 4:00 placeholder for one patch.
 - **There is NO mural on this site,** and that is enforced, not incidental. The
   old illustration set (tiger, samulnori drummer, hanok, Hahoe mask, flame
   mascot, stews) was never the restaurant's wall and is not to be restored — see
@@ -109,13 +250,16 @@ comments.
   35 checks.
 - `node tools/verify-assembly.mjs [url]` — **the grill assembly scrub.** Drives
   REAL scroll (gsap is not on `window`, and the wheel is the honest input),
-  computing each progress from the trigger's own `top 85%` / `center center`
-  definition. Asserts the five phases in order, the ember hand-off scrubbed
-  fast across 0.9–1.0, the mobile one-shot, reduced motion, JS-off, and two
-  round trips across 1024px. 32 checks.
-  - **The section is never pinned** — the assembly rides its natural travel, so
-    it adds nothing to the dead-scroll budget. Scope any pin-spacer check to
-    the section: the gallery legitimately has one.
+  computing each progress from the pin's own definition — the spacer's offset
+  plus `p × PIN_VH × vh`. Asserts the phases in order (cut at 0.17, the beats
+  through 0.57, **fully assembled and lit at 0.70**), the ember hand-off
+  scrubbed fast across 0.58–1.0, the mobile one-shot, reduced motion, JS-off,
+  and two round trips across 1024px. 68 checks.
+  - **The section IS pinned, and the spacer is the handle.** Once the pin
+    engages the section's own rect is a viewport position and reads 0 for the
+    whole hold, so deriving a scroll target from it walks further down the page
+    on every call. Read the spacer's offset instead. Scope any pin-spacer count
+    to the section: the gallery legitimately has one too.
   - Two traps this cost real time on, both worth remembering: `gsap.fromTo`
     immediate-renders its from-value **even when `paused: true`**, and a paused
     staggered yoyo still owns its per-target sub-tweens, so a `gsap.set` after

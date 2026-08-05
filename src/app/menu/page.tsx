@@ -1,113 +1,44 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { StickyInfoBar } from "@/components/StickyInfoBar";
-import { MenuJumpNav } from "@/components/MenuJumpNav";
 import { SeamMotion } from "@/components/SeamMotion";
-import { BreadcrumbSchema } from "@/components/RestaurantSchema";
+import { MenuSchema } from "@/components/RestaurantSchema";
 import { PriceBand } from "@/components/PriceBand";
 import { Dot } from "@/components/Dot";
-import { HOURS, ADDRESS, PHONE, CLOCK_PROMO } from "@/data/info";
+import { MenuBoard } from "./MenuBoard";
 import {
-  MENU,
-  INCLUDED,
-  JUMP_TARGETS,
-  displayName,
-  type MenuItem,
-  type MenuCategory,
-} from "@/data/menu";
+  HOURS,
+  ADDRESS,
+  PHONE,
+  CLOCK_PROMO,
+  RESERVATION_URL,
+  WALK_IN_LINE,
+} from "@/data/info";
+import { INCLUDED } from "@/data/menu";
 import { pageMeta } from "@/lib/seo";
-import { publicFileExists } from "@/lib/imageManifest.generated";
 
 export const metadata: Metadata = pageMeta({
-  title: "Full Menu | KM.BBQ Korean BBQ in Oceanside",
+  title: "Menu | KM.BBQ — AYCE Korean BBQ Oceanside",
   description:
-    "The full KM.BBQ spread: beef, pork, chicken, seafood, banchan, short ribs and steak. All-you-can-eat, self-serve, and grilled at your table in Oceanside, CA.",
+    "The full all-you-can-eat menu: 33 core items, 10 Premium cuts, and 3 dinner-only Signature cuts. $21.99 lunch, $30.99 dinner. No per-item charges.",
   path: "/menu",
   titleAbsolute: true,
 });
 
-const IMAGE_SIZES = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw";
-
-// Every item carries its expected image path, but a photo may not have been
-// shot yet. The answer comes from a manifest generated at build time, because
-// the Cloudflare Workers runtime has no filesystem.
-const imageExists = publicFileExists;
-
-function ItemMedia({ item }: { item: MenuItem }) {
-  if (item.image && imageExists(item.image)) {
-    return (
-      <div className="photo relative mb-4 aspect-[16/9] w-full">
-        <Image
-          src={item.image}
-          alt={displayName(item)}
-          fill
-          className="object-cover"
-          sizes={IMAGE_SIZES}
-        />
-      </div>
-    );
-  }
-
-  /* NEEDS ASSET: this dish has no photograph on disk. See NEEDS-ASSETS.md #5.
-     A lettered plate rather than a broken frame, and deliberately plain — it
-     should read as "not shot yet", not as a design flourish. */
-  return (
-    <div
-      aria-hidden="true"
-      className="mb-4 flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-card border border-sand-3 bg-sand"
-    >
-      <span className="select-none font-display text-2xl font-black text-sand-3 [font-stretch:87.5%]">
-        {item.name.charAt(0)}
-      </span>
-    </div>
-  );
-}
-
-function ItemCard({ item }: { item: MenuItem }) {
-  return (
-    <div className="group flex h-full flex-col rounded-card border border-sand-3 bg-sand-2 p-5 transition-colors duration-[var(--dur-base)] ease-house hover:border-flame/40">
-      <ItemMedia item={item} />
-      <h3 className="card-title">
-        {item.name}
-        {item.english && (
-          <span className="text-ash"> — {item.english}</span>
-        )}
-      </h3>
-      {item.hangul && (
-        <p className="mt-1 font-sans text-xs text-ash">{item.hangul}</p>
-      )}
-      <p className="copy mt-2">{item.desc}</p>
-    </div>
-  );
-}
-
-function CategorySection({ category }: { category: MenuCategory }) {
-  return (
-    <section id={category.id} className="mt-16 scroll-mt-32 first:mt-0">
-      <div className="mb-7 flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-sand-3 pb-4">
-        <h2 className="h2-scale">{category.name}</h2>
-        {category.hangul && (
-          <span className="font-sans text-sm text-ash">{category.hangul}</span>
-        )}
-        {category.tag && <span className="eyebrow ml-auto">{category.tag}</span>}
-      </div>
-      {category.blurb && <p className="copy measure -mt-3 mb-7">{category.blurb}</p>}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {category.items.map((item) => (
-          <ItemCard key={item.id} item={item} />
-        ))}
-      </div>
-    </section>
-  );
-}
+/* THERE IS NO ItemCard IN THIS FILE ANY MORE, and no <Image>.
+   The item display moved to ./MenuBoard.tsx, which is a client component
+   because the lunch/dinner toggle is stateful and its default is the visitor's
+   own clock. The per-item photographs are gone entirely — see the header note
+   in MenuBoard.tsx for why that is a provenance fix rather than a restyle. */
 
 export default function MenuPage() {
   return (
     <>
-      <BreadcrumbSchema
-        items={[
+      {/* The whole menu as structured data, generated from data/menu.ts — the
+          same 46 records the page prints. */}
+      <MenuSchema
+        breadcrumbs={[
           { name: "Home", path: "/" },
           { name: "Menu", path: "/menu" },
         ]}
@@ -139,14 +70,22 @@ export default function MenuPage() {
 
             <div className="col-text mt-6 space-y-2">
               <p className="font-sans text-xs text-ash">
-                Walk-in only <Dot char="·" /> No reservations needed
+                {WALK_IN_LINE}{" "}
+                <a
+                  href={RESERVATION_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-flame underline-offset-4 hover:underline"
+                >
+                  Reserve a table →
+                </a>
               </p>
               <p className="font-sans text-xs text-ash">
                 Stop our clock at exactly{" "}
                 <span className="font-semibold text-flame">
                   {CLOCK_PROMO.target} seconds
                 </span>{" "}
-                and your next barbecue is free.
+                and your all-you-can-eat is free. Yours, not the table&apos;s.
               </p>
             </div>
           </div>
@@ -173,20 +112,7 @@ export default function MenuPage() {
           </div>
         </section>
 
-        <MenuJumpNav targets={JUMP_TARGETS} />
-
-        <div className="grid-page pt-12 pb-20">
-          <div className="col-full">
-            <p className="copy measure mb-10">
-              Everything is included in the all-you-can-eat price. No per-item
-              charges.
-            </p>
-
-            {MENU.map((category) => (
-              <CategorySection key={category.id} category={category} />
-            ))}
-          </div>
-        </div>
+        <MenuBoard />
 
         <section className="relative py-section md:py-section-lg">
           <div className="grid-page">
@@ -214,9 +140,9 @@ export default function MenuPage() {
                 </p>
               </div>
               <div>
-                <h3 className="eyebrow">Walk-In</h3>
+                <h3 className="eyebrow">Walk in or book</h3>
                 <p className="copy mt-4">
-                  No reservations
+                  {WALK_IN_LINE}
                   <br />
                   <a
                     href={PHONE.href}

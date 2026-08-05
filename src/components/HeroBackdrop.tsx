@@ -61,15 +61,47 @@ const START = 2.6;
 const POSTER = "/images/hero-poster.webp";
 
 /**
- * The hero's ground.
+ * THE TWO GRADES. The hero sits under bone type on a dark stage and takes the
+ * dark grade; About's media sits on --sand and takes the light one, which is
+ * the same grade `.photo img` uses in globals.css. DIRECTION.md constraint 8:
+ * photography is graded for a light ground, and the dark-ground grade inverts
+ * on light. A `brightness(0.8)` circle on sand reads as a hole.
+ */
+const GRADE_DARK = "[filter:saturate(1.08)_contrast(1.06)_brightness(0.8)]";
+const GRADE_LIGHT = "[filter:saturate(1.06)_contrast(1.02)_brightness(1.02)]";
+
+/**
+ * The hero's ground — and, with `scrim={false}`, About's media as well.
  *
  * Layering, bottom to top: --char, the poster, the video, then the scrim and
  * the heat glow. The poster never unmounts, so every failure path — R2 down,
  * codec unsupported, autoplay refused, reduced motion — lands on a real
  * photograph rather than a blank or broken box. The video simply never fades
  * in over it.
+ *
+ * ONE COMPONENT, TWO PLACES, because everything that is easy to get wrong here
+ * is a constant: the R2 URL, the 2.6s start, the loop-back-to-START instead of
+ * `loop`, the mount-after-`load` rule that protects the LCP, the
+ * hold-while-preloading, and the "poster is the floor" failure story. About's
+ * media frame continues this clip into a circle and then into the illustration,
+ * so it has to be the SAME footage; duplicating any of the above to achieve
+ * that would guarantee the two copies drift.
+ *
+ *   scrim     the char gradient and the heat glow, plus the dark grade. Hero
+ *             only — they are type legibility, not the picture.
+ *   minWidth  a width the video mounts above. About's copy is desktop-only
+ *             because that is the only bracket where the morph runs; below it
+ *             the poster IS the media, at 58KB against 2.3MB.
  */
-export function HeroBackdrop({ className = "" }: { className?: string }) {
+export function HeroBackdrop({
+  className = "",
+  scrim = true,
+  minWidth,
+}: {
+  className?: string;
+  scrim?: boolean;
+  minWidth?: number;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ready, setReady] = useState(false);
   // Reduced motion and save-data are read on the client, so the server always
@@ -78,11 +110,17 @@ export function HeroBackdrop({ className = "" }: { className?: string }) {
 
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    // Watched, not sampled: a resize across the boundary has to unmount the
+    // video, the same way a reduced-motion change does.
+    const wide = minWidth
+      ? window.matchMedia(`(min-width: ${minWidth}px)`)
+      : null;
     type Conn = { saveData?: boolean };
     const saveData = Boolean(
       (navigator as Navigator & { connection?: Conn }).connection?.saveData
     );
-    const decide = () => setAllowed(!reduce.matches && !saveData);
+    const decide = () =>
+      setAllowed(!reduce.matches && !saveData && (!wide || wide.matches));
 
     // MOUNT THE VIDEO AFTER `load`, NOT ON HYDRATION. 2.3MB of clip requested
     // during the initial paint competes with the poster for bandwidth on a
@@ -96,12 +134,14 @@ export function HeroBackdrop({ className = "" }: { className?: string }) {
     else window.addEventListener("load", arm, { once: true });
 
     reduce.addEventListener("change", decide);
+    wide?.addEventListener("change", decide);
     return () => {
       window.clearTimeout(idle);
       window.removeEventListener("load", arm);
       reduce.removeEventListener("change", decide);
+      wide?.removeEventListener("change", decide);
     };
-  }, []);
+  }, [minWidth]);
 
   useEffect(() => {
     const el = videoRef.current;
@@ -152,15 +192,21 @@ export function HeroBackdrop({ className = "" }: { className?: string }) {
   }, [allowed]);
 
   return (
-    <div className={`bg-char ${className}`}>
+    <div className={`${scrim ? "bg-char" : "bg-sand-2"} ${className}`}>
       {/* The poster. `priority` because this is the LCP element, and it stays
-          mounted underneath the video for the whole life of the page. */}
+          mounted underneath the video for the whole life of the page.
+
+          `sizes` is IDENTICAL in both places on purpose. About's frame is 520px
+          and would happily take a 640px variant — but the hero has already
+          fetched the 1920 one by the time About needs it, so asking for the
+          same URL costs zero bytes and asking for a "better" one costs a whole
+          second download. */}
       <Image
         src={POSTER}
         alt=""
         aria-hidden="true"
         fill
-        priority
+        priority={scrim}
         quality={72}
         /* NOT "100vw", and this is the LCP fix.
            `object-cover` on a 16:9 source in a taller-than-16:9 stage scales
@@ -174,7 +220,7 @@ export function HeroBackdrop({ className = "" }: { className?: string }) {
            an equal-sized later candidate does not displace the incumbent. */
         sizes="(max-width: 768px) 140vw, 1920px"
         draggable={false}
-        className="select-none object-cover object-center [filter:saturate(1.08)_contrast(1.06)_brightness(0.8)]"
+        className={`select-none object-cover object-center ${scrim ? GRADE_DARK : GRADE_LIGHT}`}
       />
 
       {allowed && (
@@ -185,9 +231,9 @@ export function HeroBackdrop({ className = "" }: { className?: string }) {
           // its own, but stating the ratio keeps it from being a source of one.
           width={1920}
           height={1080}
-          className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-[var(--dur-slow)] ease-house [filter:saturate(1.08)_contrast(1.06)_brightness(0.8)] ${
-            ready ? "opacity-100" : "opacity-0"
-          }`}
+          className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-[var(--dur-slow)] ease-house ${
+            scrim ? GRADE_DARK : GRADE_LIGHT
+          } ${ready ? "opacity-100" : "opacity-0"}`}
           src={VIDEO_SRC}
           poster={POSTER}
           muted
@@ -212,24 +258,33 @@ export function HeroBackdrop({ className = "" }: { className?: string }) {
       {/* THE ONE THING LAYERED OVER THE PICTURE, and it is a ground, not a
           veil: char rising from the bottom so the type below has something to
           sit on, plus the heat glow off the grill line. The top two thirds of
-          the frame are untouched. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to top, var(--color-char) 2%, rgb(18 17 16 / 0.86) 30%, rgb(18 17 16 / 0.45) 58%, rgb(18 17 16 / 0.12) 82%, transparent 100%)",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            /* Heat off the grill line, in the one accent at two densities. */
-            "radial-gradient(120% 70% at 50% 118%, rgb(183 52 52 / 0.34) 0%, rgb(183 52 52 / 0.15) 38%, transparent 72%)",
-        }}
-      />
+          the frame are untouched.
+
+          Hero only. Nothing sits on About's copy of this footage — it is a
+          picture becoming an object, not a bed for type — and a char gradient
+          plus an accent glow inside a 520px circle on sand would be most of
+          what you see. */}
+      {scrim && (
+        <>
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to top, var(--color-char) 2%, rgb(18 17 16 / 0.86) 30%, rgb(18 17 16 / 0.45) 58%, rgb(18 17 16 / 0.12) 82%, transparent 100%)",
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                /* Heat off the grill line, in the one accent at two densities. */
+                "radial-gradient(120% 70% at 50% 118%, rgb(183 52 52 / 0.34) 0%, rgb(183 52 52 / 0.15) 38%, transparent 72%)",
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }

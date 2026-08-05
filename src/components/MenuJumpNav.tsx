@@ -10,6 +10,17 @@ export interface JumpTarget {
   id: string;
 }
 
+/* THE PILLS MATCH `PillLink`, because they are the same object at a smaller
+   size: active is the flame FILL with a sand label, inactive is the chrome
+   hairline that fills to flame on hover. They were a bespoke pair — sand-2/60
+   with an ink/60 label — which is a fourth button recipe on a site whose whole
+   button story is "there is one". */
+const PILL =
+  "inline-flex min-h-11 items-center whitespace-nowrap rounded-pill border px-4 py-1.5 font-sans text-xs font-semibold uppercase tracking-[0.12em] transition-colors duration-[var(--dur-base)] ease-house active:translate-y-px active:duration-[var(--dur-press)] motion-reduce:transition-none";
+const PILL_ON = "border-flame bg-flame text-sand";
+const PILL_OFF =
+  "border-steel/55 bg-transparent text-ink hover:border-flame hover:bg-flame hover:text-sand";
+
 // Clearance for content jumped to: fixed site header (NAV_H) plus this bar.
 // Sections also carry scroll-mt as a fallback for native hash navigation.
 const SCROLL_OFFSET = -(NAV_H + 60);
@@ -66,11 +77,7 @@ export function MenuJumpNav({ targets }: { targets: JumpTarget[] }) {
                 data-target={id}
                 onClick={(e) => jump(e, id)}
                 aria-current={isActive ? "true" : undefined}
-                className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-pill border px-4 py-1.5 font-sans text-xs font-medium uppercase tracking-[0.12em] transition-colors duration-[var(--dur-base)] ease-house ${
-                  isActive
-                    ? "border-flame bg-flame text-sand"
-                    : "border-sand-3 bg-sand-2/60 text-ink/60 hover:border-flame hover:text-flame"
-                }`}
+                className={`${PILL} ${isActive ? PILL_ON : PILL_OFF}`}
               >
                 {label}
               </a>

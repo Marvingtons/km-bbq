@@ -39,8 +39,8 @@ interface GalleryItem {
 }
 
 /* THE AUDIT, RE-RUN against the two-value warm direction. Three tiles become
-   five, because two of the three cuts were made for failing a palette that was
-   itself wrong.
+   six: two of the three cuts were made for failing a palette that was itself
+   wrong, and the sixth came back when About stopped needing it.
 
    The original audit cut `interior` for being "an empty dining room in
    daylight" and `table` for being "an empty table and a cold grill". Both
@@ -48,8 +48,16 @@ interface GalleryItem {
    black ground. On sand they are two of the best photographs on disk — and
    `interior` is the frame the entire palette was sampled from. See DIRECTION.md.
 
-     live-grill            -> the HERO, and it is the frame that clips into
-                              About, so it appears once and travels.
+     live-grill            RESTORED, and the reason it was out is gone twice
+                           over. It was "the HERO, and the frame that clips
+                           into About, so it appears once and travels" — but
+                           the hero is the R2 clip over hero-poster.webp now,
+                           and About's media is that same clip continuing into
+                           the match cut. This photograph was doing neither
+                           job; it was a third image interrupting a chain of
+                           one. It is a good frame — a live grill mid-service
+                           with the room behind it — so it goes where good
+                           frames go.
      samgyeopsal-grilling  KEEP.     Pork belly over live coals.
      marbled-wagyu         KEEP.     Raw marbling under tongs, portrait.
      banchan-spread        KEEP.     Overhead, lit, and on the menu.
@@ -70,7 +78,7 @@ interface GalleryItem {
                            Google Maps embed labelling the neighbours.
      outside               MOVED to Contact as wayfinding.
 
-   Five is still short of what the room deserves. The reshoot is NEEDS-ASSETS
+   Six is still short of what the room deserves. The reshoot is NEEDS-ASSETS
    #3 and the strip takes more without a code change. */
 const GALLERY_ITEMS: GalleryItem[] = [
   {
@@ -93,12 +101,18 @@ const GALLERY_ITEMS: GalleryItem[] = [
   },
   {
     id: 4,
+    src: "/images/live-grill.png",
+    alt: "A table grill mid-service at KM.BBQ, with beef, shrimp and mushrooms over the grate",
+    caption: "Mid-service",
+  },
+  {
+    id: 5,
     src: "/images/interior.png",
     alt: "The KM.BBQ dining room: tables with built-in grills under chrome extraction ducts, with the painted mural along the back wall",
     caption: "The room",
   },
   {
-    id: 5,
+    id: 6,
     src: "/images/table.png",
     alt: "Chrome extraction hoods over a table with a built-in charcoal grill",
     caption: "Every table has a grill",

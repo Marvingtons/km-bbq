@@ -191,6 +191,11 @@
 
 /* Durations. Mirrored from MOTION.dur in src/lib/motion.ts. */
 :root {
+  /* The dome going down, and now every pill going down with it. Faster than
+     the release, which is what a real button feels like — MOTION.dur.press has
+     documented that asymmetry since the table was written and nothing outside
+     the game was using it. */
+  --dur-press: 90ms;
   --dur-quick: 180ms;
   --dur-base: 300ms;
   --dur-slow: 500ms;
@@ -257,8 +262,6 @@ body {
   .col-text,
   .col-wide,
   .col-full,
-  .col-figure,
-  .col-beside,
   .col-story,
   .col-panel {
     grid-column: 1 / -1;
@@ -269,25 +272,13 @@ body {
     max-width: var(--measure);
   }
 
-  /* Media running from a column edge to the right edge of the viewport — the
-     one sanctioned way media leaves the track. */
-  .bleed-right {
-    margin-right: calc(
-      (var(--grid-gutter) + max(0px, (100vw - var(--grid-max)) / 2)) * -1
-    );
-  }
-
-  /* The hero window's dock target. A real grid cell, so the scrub measures the
-     grid rather than recomputing it. */
-  .col-media {
-    grid-column: 1 / -1;
-    position: relative;
-    overflow: hidden;
-    min-width: 0;
-    aspect-ratio: 16 / 9;
-    border-radius: var(--radius-card) 0 0 var(--radius-card);
-    pointer-events: none;
-  }
+  /* `.col-figure` / `.col-beside` (object left, copy right) and `.bleed-right`
+     (media running from a column edge to the viewport edge) were both retired
+     with the standalone Pick Your Fire section and About's 3:4 media cell. The
+     one media element left on the home page is About's square frame, which is
+     sized in its own block below rather than by a column span, because the
+     hero's window has to clip into a SQUARE and a grid span is whatever width
+     the grid happens to be. */
 
   @media (min-width: 768px) {
     .col-text {
@@ -304,22 +295,6 @@ body {
     .col-panel {
       grid-column: 8 / -1;
     }
-    /* The mirror of the pair above — an object LEFT, copy right. Named rather
-       than written as raw col-span-* utilities, which Phase 7 removed from the
-       page grid site-wide and which the QA sweep still greps for. */
-    .col-figure {
-      grid-column: 1 / span 5;
-    }
-    .col-beside {
-      grid-column: 7 / -1;
-    }
-    .col-media {
-      grid-column: 9 / -1;
-      grid-row: 1;
-      align-self: center;
-      aspect-ratio: 3 / 4;
-      max-height: calc(100vh - 2 * var(--nav-h, 68px));
-    }
   }
 
   @media (min-width: 1024px) {
@@ -328,10 +303,111 @@ body {
     .track-edge {
       padding-inline: var(--grid-gutter-lg);
     }
-    .bleed-right {
-      margin-right: calc(
-        (var(--grid-gutter-lg) + max(0px, (100vw - var(--grid-max)) / 2)) * -1
-      );
+  }
+
+  /* =====================================================================
+     PICK YOUR FIRE — the stage the media crosses. Copy, illustration.
+
+     THE FLOOR IS STACKED FLOW, AND IT IS THE CSS DEFAULT rather than a
+     fallback branch: two blocks at full width, in reading order, in normal
+     flow. Everything under 1024px, everyone who has asked for less motion,
+     and anyone with JavaScript off gets exactly this, and it is correct
+     without a single line of script having run.
+
+     The sticky column, the square frame and the clip are all additions made
+     further down inside one media query. Written the other way round —
+     sticky by default, un-stuck as a fallback — a bundle that fails to load
+     parks an illustration in a viewport that never releases it. ========== */
+  .fire-stage {
+    display: flex;
+    flex-direction: column;
+    gap: 3.5rem;
+    padding-block: var(--spacing-section);
+  }
+
+  /* The wrappers exist for the grid above 1024 and are pure overhead below it,
+     so they stop generating boxes entirely and the illustration becomes an item
+     of the stage's own column, straight after the copy that explains it.
+
+     `order` is gone with the second copy block: the DOM order IS the stacked
+     reading order now (copy, then illustration), so there is nothing left to
+     reorder. */
+  .media-col,
+  .media-frame {
+    display: contents;
+  }
+
+  /* Stacked reading order below 1024: the still, the copy it belongs to, then
+     the illustration the copy explains. The still is first because it is what
+     the hero was showing a moment ago — the same frame, held. */
+  .fire-still {
+    order: 1;
+    position: relative;
+    aspect-ratio: 16 / 10;
+    width: 100%;
+  }
+  .copy-block {
+    order: 2;
+  }
+  .grill-layer {
+    order: 3;
+  }
+
+  /* Geometry only, and only where the morph runs — see the sticky block below.
+     In the stacked layout it would be a spare item in the flex column. */
+  .media-rest {
+    display: none;
+  }
+
+  /* --- THE MEDIA STAGE — the page's one <video>, and the box that clips it.
+
+     BY DEFAULT IT IS SIMPLY THE HERO'S BACKDROP: absolute inside `#home`,
+     which below 1024 is exactly one viewport tall, so it fills the hero and
+     scrolls away with it. That is the whole behaviour under 1024, under
+     reduced motion, and with JavaScript off — no clip is ever written.
+
+     Above 1024 with motion it becomes `position: fixed` (further down) and
+     stops scrolling at all, because the same element has to still be there,
+     viewport-aligned, when About's illustration takes over two viewports
+     later. See MediaStage.tsx. ------------------------------------------- */
+  .media-stage,
+  .hero-window {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero-window {
+    overflow: hidden;
+  }
+
+  .media-plate {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* The room going out of the footage as it becomes an object. Char, and its
+     own element: the plate's opacity IS the cut and cannot also carry a tint.
+     Zero until the scrub says otherwise, which means zero everywhere the scrub
+     does not run. */
+  .photo-tint {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    background: var(--color-char);
+  }
+
+  .grill-layer {
+    position: relative;
+    width: min(480px, 88vw);
+    max-width: 100%;
+  }
+
+  @media (min-width: 768px) {
+    .fire-stage {
+      padding-block: var(--spacing-section-lg);
+      gap: 4.5rem;
     }
   }
 
@@ -439,6 +515,64 @@ body {
       rgb(244 236 225 / 0.16) 26%,
       transparent 54%
     );
+  }
+
+  /* --- DECLARED ARTWORK — a framed piece, and the opposite of `.photo`.
+     Our Story's `about.png`: a cave painting in ochre, rust and charcoal on a
+     warm parchment ground.
+
+     THE MAT IS THE WHOLE MECHANISM. The parchment is warmer than
+     --color-sand, so a bare <img> on the page reads as a patch OF the page
+     that has drifted, not as a picture on it — the eye finds two creams and
+     no reason for the difference. An inner band of the page's own ground,
+     wide enough to be unmistakably deliberate (12px, in the 10-14 range that
+     still reads as a mat rather than a gap), gives it the reason: there is an
+     object here, and objects have edges.
+
+     The hairline is #C0622B — an ochre lifted out of the pigment itself, at
+     55% so it describes the edge without becoming a second line of colour on
+     a page whose only accent is --color-flame. Written as a literal rather
+     than a token on purpose: it belongs to this artwork, not to the palette,
+     and promoting it would give the site a sixth colour to defend.
+
+     No `.photo`, no grade, no bottom scrim. Those exist to sink a photograph
+     INTO the warm ground; this piece is meant to sit on top of it.
+     ===================================================================== */
+  .artwork-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .artwork-frame {
+    padding: 12px;
+    background: var(--color-sand);
+    border: 1px solid rgb(192 98 43 / 0.55);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    /* The entrance settles the artwork from 1.06, so the frame has to clip —
+       otherwise the first frame of the reveal is 3% of parchment overhanging a
+       cream mat on all four sides. */
+    overflow: hidden;
+  }
+
+  /* FULL BLEED OF THE ARTWORK, NEVER A CROP. The <img> carries its own
+     1916x821, so `height: auto` makes the box the artwork's aspect ratio and
+     `contain` has nothing left to do — it is here as the assertion, so that a
+     later `aspect-[…]` or `object-cover` on this element is a visible
+     contradiction rather than a silent trim off both ends. */
+  .artwork-frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  /* The provenance line, in the one eyebrow, centred under the piece. `.eyebrow`
+     already carries --color-ash, which is this palette's caption colour. */
+  .artwork-caption {
+    text-align: center;
+    text-wrap: balance;
   }
 
   /* --- THE SKY BAND — the mural's field, and the ONE place it may appear.
@@ -550,6 +684,47 @@ body {
     height: clamp(240px, 46vh, 460px);
   }
 
+  /* --- THE MENU BOARD — two columns of rows, flowing down then across.
+     CSS columns rather than a grid, deliberately: a grid would need the item
+     order interleaved across the two tracks (1,3,5 / 2,4,6) to read top to
+     bottom, which is a source order that only makes sense at one breakpoint.
+     Columns keep the DOM in menu order and let the renderer do the flowing, so
+     the single-column phone layout is the same markup with `column-count: 1`.
+
+     `column-fill: balance` plus `break-inside: avoid` on each category is what
+     stops a header being orphaned at the foot of the left column. ------- */
+  .menu-columns {
+    column-count: 1;
+    column-gap: 3rem;
+  }
+
+  @media (min-width: 768px) {
+    .menu-columns {
+      column-count: 2;
+    }
+  }
+
+  /* The one hover on this page, and it moves nothing. A row that shifted or
+     grew would reflow the column it is in, which with `column-fill: balance`
+     can push an item into the other column under the cursor. */
+  @media (hover: hover) {
+    .menu-row:hover .menu-row-name {
+      color: var(--color-flame);
+    }
+    .menu-row:hover .menu-row-name span {
+      color: color-mix(in oklab, var(--color-flame) 65%, transparent);
+    }
+  }
+
+  @keyframes menu-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
   /* --- CHROME RULE — the one divider. ---------------------------------- */
   .rule-chrome {
     border: 0;
@@ -563,6 +738,54 @@ body {
     );
     opacity: 0.55;
   }
+}
+
+/* ===========================================================================
+   THE OUTLINE PILL, ON THE BLACK STRUCTURE. ALSO OUTSIDE @layer components,
+   and for the reason documented below: Tailwind's utilities live in a later
+   cascade layer, so a layered rule loses to `text-ink` no matter how specific
+   it is. Inside the layer this shipped as a black label on the black nav bar —
+   the Reserve button was there, sized, focusable and invisible.
+
+   It changes exactly ONE thing about `PillLink`'s outline tone: the resting
+   label colour. The chrome hairline, the flame fill on hover and the sand label
+   in that state are all still the shared recipe, which is the point — this is
+   the existing button on a different ground, not a fourth button.
+   =========================================================================== */
+.pill-on-dark {
+  color: var(--color-sand);
+}
+
+/* ===========================================================================
+   THE ARCADE BUTTON'S FOCUS RING — the one place the site's ring cannot hold.
+
+   `:focus-visible` above paints a 2px FLAME outline, which is correct
+   everywhere on this site except on a flame-filled control: red on red is not
+   a focus indicator, it is a focus indicator that does not exist. The game's
+   button is the only such control.
+
+   UNLAYERED, like the rule it overrides. `:focus-visible` at the top of this
+   file is outside `@layer`, so it outranks every Tailwind utility no matter
+   how specific — a `focus-visible:outline-sand` class loses to it silently,
+   which is exactly how this shipped invisible the first time.
+
+   SAND, NOT BLUE. The brief asked for `--km-blue`; that token is RETIRED and
+   tools/verify-palette.mjs fails the build on it by name (along with bone,
+   smoke, ember, char-3 and neon-pink). The logo's blue is sanctioned as
+   logo-only and must not leak into UI, and `--color-sky` is the mural field,
+   which DIRECTION.md permits in at most one place that the owner has not yet
+   chosen. Sand is in-palette, is the label's own colour, and measures 11.4:1
+   against the flame fill — see the note in the summary.
+   =========================================================================== */
+.arcade-press:focus-visible {
+  outline: 2px solid var(--color-sand);
+  outline-offset: 3px;
+  /* AND THE RADIUS HAS TO COME BACK. `:focus-visible` above also sets
+     `border-radius: var(--radius-hair)` — 2px, which is right for the text
+     links and inline controls it was written for and squares off a 96px circle
+     the moment it takes focus. An outline follows the element's border-radius,
+     so without this the ring around the arcade button is a box. */
+  border-radius: var(--radius-pill);
 }
 
 /* ===========================================================================
@@ -638,6 +861,166 @@ body {
      already doing. */
   .gallery-pinned .gallery-chevrons {
     display: none;
+  }
+}
+
+/* ===========================================================================
+   PICK YOUR FIRE - THE STICKY MEDIA COLUMN. DELIBERATELY OUTSIDE
+   @layer components, for the same reason the pinned gallery is: Tailwind's
+   utilities live in a later cascade layer, so a layered rule loses to any
+   utility on the same element no matter how specific it is.
+
+   Same bracket as the pinned gallery and the hero's window — 1024px and
+   `no-preference`, declared here and once more in gsap.matchMedia(). Below it
+   the stacked floor above is the whole layout and no ScrollTrigger is created.
+
+   THE SECTION IS ONE VIEWPORT AND IT PINS. It locks at `top top` and holds for
+   PIN_VH (MediaStage.tsx) while scroll drives the sequence. The layout itself
+   never moves during the hold, which is the whole point: the composed view —
+   copy left, media right — used to exist for a moment and then scroll apart
+   while the animation it belonged to was still running.
+
+   So there is no travel to build into this height, and nothing in here is
+   sticky. Both columns are centred, against each other and against the screen,
+   and they stay exactly where the pin puts them.
+
+   It was 140vh with a sticky media column and 40vh of scrubbed travel. That
+   version is why the copy left the top of the screen while the grill was still
+   arriving at the right of it.
+   =========================================================================== */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .fire-stage {
+    /* Square, and capped by the column so it cannot overhang the grid at any
+       width between 1024 and 1280 where the columns are still growing.
+
+       IT STAYS SQUARE THROUGH THE WHOLE MORPH. `round 50%` is a circle only on
+       a square box; on anything else it is a squircle, and a squircle cannot
+       be concentric with a round chassis rim. The landscape rest shape comes
+       from --rest-inset below, which is a property of the CLIP. */
+    --frame: min(520px, 42vw, 100%);
+    /* How much of the square the footage does NOT fill at rest, top and
+       bottom. 12% each end leaves a 1.32:1 landscape panel — near enough the
+       proportion the hero's own frame has, so the hand-over is a continuation
+       rather than a re-crop. It is the ONE place this number is written: the
+       rest box uses it for its box and MediaStage reads that box back to build
+       the clip, so the two cannot drift. */
+    --rest-inset: 12%;
+
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--grid-gap);
+    row-gap: 0;
+    padding-block: 0;
+    /* ONE VIEWPORT, and that is the pin's whole premise: the section locks at
+       `top top`, so anything taller than the screen would be off it for the
+       entire hold. Both columns are centred against each other and against the
+       screen, and neither moves again until the pin releases. */
+    min-height: 100vh;
+    align-content: center;
+    align-items: center;
+  }
+
+  .copy-block {
+    grid-column: 1 / span 6;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  /* The still is the media BELOW 1024. Up here the fixed video layer is, and
+     two panels of the same footage in one section is the double-render this
+     whole architecture exists to avoid. */
+  .fire-still {
+    display: none;
+  }
+
+  .media-col {
+    display: block;
+    grid-column: 7 / -1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  /* NOT STICKY ANY MORE — the whole section is pinned, so the frame holds
+     still because the page does. A sticky element inside a pinned one is two
+     mechanisms doing one job, and the second one only shows up as a frame of
+     drift at the moment the pin engages. */
+  .media-frame {
+    display: block;
+    position: relative;
+    width: var(--frame);
+    /* SQUARE BY RATIO, not by repeating the width expression as a height.
+       `--frame` carries a `100%` guard so the frame cannot overhang its column;
+       as a HEIGHT that percentage resolves against a column with no definite
+       height — the row is centred now rather than stretched — so `min()` took
+       it as zero and the frame collapsed, taking the clip's geometry with it.
+       A ratio cannot be indefinite. */
+    aspect-ratio: 1;
+    /* Right-aligned in its span rather than centred: the frame keeps the
+       grid's own right edge, which is the alignment the departing hero panel
+       and every card below it already share. */
+    margin-left: auto;
+    /* The artwork is scaled up until its rim fills the frame, so its own
+       viewBox overhangs. Nothing outside the rim is drawn, but a clip here
+       means that stays true if the art is ever regenerated. */
+    overflow: hidden;
+  }
+
+  /* THE REST BOX. Where the clip sits before the morph, and where the hero's
+     window docks — one box, two readers, so they cannot disagree. It paints
+     nothing: no background, no border, no content. */
+  .media-rest {
+    display: block;
+    position: absolute;
+    inset: var(--rest-inset) 0;
+    border-radius: var(--radius-card);
+    pointer-events: none;
+  }
+
+  /* The illustration fills the frame. The footage is not in here — it is the
+     fixed layer above (see `.media-stage`), co-clipped to the same shape, so
+     the chassis is only ever painted where the footage is until the cut takes
+     the footage away. */
+  .grill-layer {
+    position: absolute;
+    inset: 0;
+    width: auto;
+  }
+
+  /* THE REST STATE IS DECLARED IN CSS, NOT ONLY IN THE TIMELINE. The server
+     paints this before any script runs; without it the first frame is a whole
+     assembled grill sitting in About's right column, which then vanishes the
+     moment MediaStage writes its first clip. Same shape `.media-rest`
+     describes — the SSR copy, not a second opinion. */
+  .media-frame {
+    clip-path: inset(var(--rest-inset) 0% var(--rest-inset) 0% round var(--radius-card));
+  }
+
+  /* THE MEDIA STAGE STOPS SCROLLING. It has to still be there, viewport-
+     aligned, when About's illustration takes over two viewports below the
+     hero — and a sticky element stops being viewport-aligned the moment it
+     releases. Fixed is the only position that survives the whole span without
+     pinning anything, which is why there is exactly one <video> on this page
+     rather than one per section. */
+  .media-stage,
+  .hero-window {
+    position: fixed;
+  }
+
+  /* THE MATCH. The artwork's outer rim is 138 x 139.7 of a 150-unit viewBox
+     and sits slightly above centre, so dropped into a square box it renders
+     ~7% small and a little high — a visible ring of empty frame, and a
+     chassis that slides sideways under a photograph that did not.
+
+     About.tsx measures the rim (bbox plus its own stroke, which getBBox does
+     not include) and writes the three numbers that put its centre on the
+     frame's centre and its diameter on the frame's width. Percentages of this
+     element's own box, so they are constants of the ARTWORK and survive every
+     resize. The fallbacks are the untransformed art, which is what a
+     measurement failure should degrade to. */
+  .grill-layer {
+    transform-origin: 0 0;
+    transform: translate(var(--dg-x, 0px), var(--dg-y, 0px))
+      scale(var(--dg-fit, 1));
   }
 }
 
@@ -806,7 +1189,7 @@ body {
    embers' opacity through its final phase, and a CSS animation on the same
    property would fight the scrub at the hand-off boundary — whichever wrote
    last would win, which is a coin toss on every scroll tick. The loop is a
-   paused GSAP tween in PickYourFire.tsx, played only once the scrub is
+   paused GSAP tween in About.tsx, played only once the scrub is
    effectively complete and paused again the moment it is not.
 
    Reduced motion needs no rule here either: under it no timeline is built at
@@ -877,12 +1260,15 @@ html.preloading {
     animation: none !important;
   }
 
-  /* ScrollReveal's entrance is inline-styled; pin the revealed state so the
-     page is readable at first paint regardless of JS. */
-  .scroll-reveal {
-    opacity: 1 !important;
-    transform: none !important;
-  }
+  /* `.scroll-reveal` is GONE, with the component it belonged to. It existed to
+     force back the revealed state under reduced motion, because ScrollReveal
+     rendered an inline `opacity: 0` on the server and could not know the media
+     query until it reached the client — so the whole page depended on a CSS
+     `!important` to undo markup that should never have been written.
+
+     lib/reveal.ts has no such rule and needs none: every from-state is set by
+     GSAP inside a `matchMedia(no-preference)` bracket, so under reduced motion
+     nothing is ever hidden and there is nothing to override. */
 }
 
 /* Lenis owns the scroll position. */

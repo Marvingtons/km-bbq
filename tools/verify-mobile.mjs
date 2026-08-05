@@ -75,8 +75,20 @@ for (const route of ROUTES) {
   const type = await p.evaluate(() => {
     const ink = (el) => { const r = document.createRange(); r.selectNodeContents(el); const b = [...r.getClientRects()];
       return b.length ? { l: Math.min(...b.map(x=>x.left)), r: Math.max(...b.map(x=>x.right)), t: Math.min(...b.map(x=>x.top)), b: Math.max(...b.map(x=>x.bottom)) } : null; };
-    const self = ink(document.querySelector("#home h1 span:first-child"));
-    const serve = ink(document.querySelector("#home h1 span:last-child"));
+    /* THE VISIBLE LOCKUP, EXPLICITLY. These read `span:first-child` /
+       `span:last-child`, which is fragile the moment the h1 gains any other
+       span — and it has: the heading now carries `sr-only` fragments naming
+       the restaurant and the city, so the h1's accessible and crawlable text
+       is a full sentence while the display type stays one word.
+
+       An `sr-only` span is clipped to 1px, but a Range over its CONTENTS still
+       reports the untruncated width, so `span:last-child` measured 759px of
+       hidden text on a 375px screen and failed a viewport-overflow check that
+       nothing visible was failing. `[data-headline]` is the display lockup and
+       is what these two checks were always about. */
+    const lockup = document.querySelector("#home h1 [data-headline]");
+    const self = ink(lockup);
+    const serve = ink(lockup);
     const sub = ink(document.querySelector("#home .copy"));
     const cta = document.querySelector("#home a[href='/menu']").getBoundingClientRect();
     return { vw: innerWidth, vh: innerHeight,

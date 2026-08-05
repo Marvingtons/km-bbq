@@ -1,33 +1,63 @@
-// THE menu. Both the homepage's house favourites and /menu render from these
-// records, so the two cannot disagree about what a dish is called or what it
-// is. They used to: the homepage said "Galbi — Signature", /menu said "Beef
-// Short Ribs" and filed it under Premium, and a visitor who followed "See the
-// full menu" looking for Galbi did not find it.
-//
-// ONE NAMING CONVENTION: `Romanized Korean — English`.
-//
-// It cannot apply to everything, and it is not forced where it does not fit.
-// Two cases take English alone:
-//
-//   1. No Korean name exists in the record (Teriyaki Beef, Pork Chop, Hot Dog,
-//      Lamb, Corn Cheese...). Inventing one would be inventing provenance.
-//   2. The Korean IS a transliteration of the English — 샐러드 is "salad",
-//      데리야키 치킨 is "teriyaki chicken", 참깨볼 is "sesame ball". Romanizing
-//      those back out produces "Deriyaki Chikin", which is nobody's name for
-//      anything. The hangul is still shown; it just is not romanized.
-//
-// Romanizations are Revised Romanization of the hangul already in the record —
-// a transliteration of existing data, not a new claim about the food.
+/* ===========================================================================
+   THE MENU, TRANSCRIBED FROM THE RESTAURANT'S OWN PRINTED CARDS.
+
+   Everything here comes off the green (lunch) and red (dinner) menus. The set
+   that was here before was INVENTED — plausible dishes with plausible
+   descriptions and no relationship to what the kitchen serves — so this file
+   is a replacement, not an edit. Nothing may be added to it that is not on
+   those cards.
+
+   ITEM NUMBERS ARE DATA, not decoration. Regulars order by number and the
+   numbers are printed on the table; `1`, `4A`, `1B` are what a server hears.
+   They are also non-contiguous on purpose — the printed dinner card publishes
+   1B, 4B and 5B and nothing else in that range, and the gap is not ours to
+   fill. No placeholders, no renumbering.
+
+   ONE NAMING CONVENTION: `ROMANIZED — PRINTED ENGLISH`, with hangul.
+
+   It applies ONLY where a standard Korean name exists for the printed English,
+   and the bar for "exists" is a dish name people actually use — Bulgogi,
+   Samgyeopsal, Japchae, Galbi. It is deliberately NOT applied to:
+
+     - Dishes with no Korean name at all: Hot Dog, Onion Ring, Corn Cheese,
+       Popcorn Chicken, Pork Chop, Lamb, Teriyaki anything.
+     - Preparation descriptors rather than dishes: "Head Shrimp", "Freshly Cut
+       Steak", "Sliced Beef Short Plate". Attaching a Korean dish name to those
+       asserts a preparation the printed menu does not claim.
+     - Words whose Korean is a transliteration of the English — 샐러드 is
+       "salad", 참깨볼 is "sesame ball". Romanizing those back out produces
+       "Selleodeu", which is nobody's name for anything.
+
+   The previous file got this wrong in the direction that matters: it invented
+   Korean names (매운 닭 for "Spicy Chicken", 대하 for "Head Shrimp") which read
+   as provenance and were not. Where the record is silent, the English stands
+   alone.
+   =========================================================================== */
+
+export type Tier = "core" | "premium" | "signature";
 
 export interface MenuItem {
-  /** Stable key. Also the deep-link fragment within a category. */
+  /** Stable key, and the deep-link fragment within a category. */
   id: string;
-  /** The romanized Korean where there is one, otherwise the English name. */
+  /** The restaurant's printed item number: "1", "12", "4A", "1B". */
+  num: string;
+  /** The PRINTED ENGLISH, verbatim off the card. */
   name: string;
-  /** The English gloss, when `name` is romanized. Omitted when they'd repeat. */
-  english?: string;
+  /** Romanized Korean, only where a standard dish name exists. */
+  korean?: string;
   hangul?: string;
-  desc: string;
+  /** Optional. A plain row is a fine row — see the note on descriptions below. */
+  desc?: string;
+  /** Category id; the derived `MENU` below groups on it. */
+  category: string;
+  /** True for every item whose PRINTED name starts with "Spicy". Nothing else. */
+  spicy?: boolean;
+  tier: Tier;
+  /**
+   * ONLY the five dishes the homepage preview shows. Every other item on
+   * /menu is typographic — see the note in app/menu/MenuBoard.tsx. A photo
+   * here means "this asset exists, is referenced, and must not be deleted".
+   */
   image?: string;
 }
 
@@ -40,387 +70,505 @@ export interface MenuCategory {
   /** Short label for the jump bar; defaults to `name`. */
   navLabel?: string;
   blurb?: string;
+  /** The tier its items carry, which is what the service toggle filters on. */
+  tier: Tier;
   items: MenuItem[];
 }
 
-export const MENU: MenuCategory[] = [
+/* ---------------------------------------------------------------------------
+   DESCRIPTIONS ARE OPTIONAL AND FACTUAL.
+
+   Kept where the old file happened to describe a real dish accurately; written
+   fresh (twelve words or fewer) where the dish is self-evident; omitted where
+   anything true would be a tautology. "Ice Cream" does not need a sentence,
+   and the previous file's "Self-serve and unlimited" was a claim about service
+   nobody checked.
+   --------------------------------------------------------------------------- */
+
+const CORE: MenuItem[] = [
+  // --- BEEF ---------------------------------------------------------------
   {
-    id: "beef",
-    name: "Beef",
-    hangul: "소고기",
-    items: [
-      {
-        id: "bulgogi",
-        name: "Bulgogi",
-        english: "Marinated Ribeye",
-        hangul: "불고기",
-        desc: "Thin ribeye in a soy, sesame and pear marinade. Sweet, savory, and fast on the grill.",
-        image: "/images/bulgogi.png",
-      },
-      {
-        id: "teriyaki-beef",
-        name: "Teriyaki Beef",
-        desc: "Tender beef glazed in a glossy house teriyaki that caramelizes over the coals.",
-        image: "/images/teriyaki-beef.png",
-      },
-      {
-        id: "chadolbaegi",
-        name: "Chadolbaegi",
-        english: "Beef Brisket",
-        hangul: "차돌박이",
-        desc: "Paper-thin brisket that sears in seconds. Dip it in sesame oil and a pinch of salt.",
-        image: "/images/chadolbaegi.png",
-      },
-    ],
+    id: "bulgogi",
+    num: "1",
+    name: "Beef Bulgogi",
+    korean: "Bulgogi",
+    hangul: "불고기",
+    desc: "Thin beef in a soy and sesame marinade. Sweet, savory, fast on the grill.",
+    category: "beef",
+    tier: "core",
+    image: "/images/bulgogi.png",
   },
   {
-    id: "pork",
-    name: "Pork",
-    hangul: "돼지고기",
-    items: [
-      {
-        id: "samgyeopsal",
-        name: "Samgyeopsal",
-        english: "Sliced Pork Belly",
-        hangul: "삼겹살",
-        desc: "Thick-cut pork belly, grilled crisp and juicy. Wrap it up your way.",
-        image: "/images/samgyeopsal.png",
-      },
-      {
-        id: "pork-chop",
-        name: "Pork Chop",
-        desc: "Simply seasoned pork, charred on your own grill for a smoky bite.",
-        image: "/images/pork-chop.png",
-      },
-      {
-        id: "jeyuk-bokkeum",
-        name: "Jeyuk Bokkeum",
-        english: "Spicy Pork Belly",
-        hangul: "제육볶음",
-        desc: "Pork belly in a gochujang chili marinade. Sweet heat with a smoky finish.",
-        image: "/images/spicy-pork-belly.png",
-      },
-    ],
+    id: "teriyaki-beef",
+    num: "2",
+    name: "Teriyaki Beef",
+    desc: "Beef in a glossy teriyaki glaze that caramelizes over the coals.",
+    category: "beef",
+    tier: "core",
   },
   {
-    id: "chicken",
-    name: "Chicken",
-    hangul: "닭고기",
-    items: [
-      {
-        id: "maeun-dak",
-        name: "Maeun Dak",
-        english: "Spicy Chicken",
-        hangul: "매운 닭",
-        desc: "Boneless chicken in a fiery gochujang glaze with a touch of sweetness.",
-        image: "/images/spicy-chicken.png",
-      },
-      {
-        id: "teriyaki-chicken",
-        name: "Teriyaki Chicken",
-        hangul: "데리야키 치킨",
-        desc: "Sweet-savory teriyaki chicken that grills up golden and tender.",
-        image: "/images/teriyaki-chicken.png",
-      },
-    ],
+    id: "chadolbaegi",
+    num: "3",
+    name: "Beef Brisket",
+    korean: "Chadolbaegi",
+    hangul: "차돌박이",
+    desc: "Paper-thin brisket that sears in seconds. Dip it in sesame oil and salt.",
+    category: "beef",
+    tier: "core",
+    image: "/images/chadolbaegi.png",
+  },
+
+  // --- PORK ---------------------------------------------------------------
+  {
+    id: "samgyeopsal",
+    num: "4",
+    name: "Sliced Pork Belly",
+    korean: "Samgyeopsal",
+    hangul: "삼겹살",
+    desc: "Thick-cut pork belly, grilled crisp and juicy. Wrap it up your way.",
+    category: "pork",
+    tier: "core",
+    image: "/images/samgyeopsal.png",
   },
   {
-    id: "seafood",
-    name: "Seafood",
-    hangul: "해산물",
-    items: [
-      {
-        id: "saeu",
-        name: "Saeu",
-        english: "Shrimp, Peeled",
-        hangul: "새우",
-        desc: "Peeled shrimp, quick to grill and ready for the dipping sauce.",
-        image: "/images/shrimp-no-head.png",
-      },
-      {
-        id: "daeha",
-        name: "Daeha",
-        english: "Head-On Shrimp",
-        hangul: "대하",
-        desc: "Whole head-on shrimp grilled in the shell for deeper, sweeter flavor.",
-        image: "/images/head-shrimp.png",
-      },
-      {
-        id: "saengseon",
-        name: "Saengseon",
-        english: "Fish Fillet",
-        hangul: "생선",
-        desc: "Mild white fish fillet, light and flaky straight off the grill.",
-        image: "/images/fresh-fish-fillet.png",
-      },
-      {
-        id: "ojingeo",
-        name: "Ojingeo",
-        english: "Spicy Squid",
-        hangul: "오징어",
-        desc: "Tender squid tossed in a spicy chili marinade with a smoky char.",
-        image: "/images/spicy-squid.png",
-      },
-    ],
+    id: "pork-chop",
+    num: "5",
+    name: "Pork Chop",
+    desc: "Seasoned pork, charred on your own grill for a smoky bite.",
+    category: "pork",
+    tier: "core",
   },
+  {
+    id: "spicy-pork-belly",
+    num: "11",
+    name: "Spicy Pork Belly",
+    korean: "Jeyuk Bokkeum",
+    hangul: "제육볶음",
+    desc: "Pork belly in a gochujang chili marinade. Sweet heat, smoky finish.",
+    category: "pork",
+    spicy: true,
+    tier: "core",
+  },
+
+  // --- CHICKEN ------------------------------------------------------------
+  {
+    id: "spicy-chicken",
+    num: "10",
+    name: "Spicy Chicken",
+    desc: "Boneless chicken in a chili marinade with a touch of sweetness.",
+    category: "chicken",
+    spicy: true,
+    tier: "core",
+  },
+  {
+    id: "teriyaki-chicken",
+    num: "12",
+    name: "Teriyaki Chicken",
+    desc: "Sweet-savory teriyaki chicken that grills up golden and tender.",
+    category: "chicken",
+    tier: "core",
+  },
+
+  // --- SEAFOOD ------------------------------------------------------------
+  {
+    id: "shrimp-no-head",
+    num: "6",
+    name: "Shrimp (no head)",
+    desc: "Peeled shrimp, quick to grill and ready for the dipping sauce.",
+    category: "seafood",
+    tier: "core",
+  },
+  {
+    id: "head-shrimp",
+    num: "7",
+    name: "Head Shrimp",
+    desc: "Whole shrimp grilled in the shell.",
+    category: "seafood",
+    tier: "core",
+  },
+  {
+    id: "fresh-fish-fillet",
+    num: "8",
+    name: "Fresh Fish Fillet",
+    desc: "White fish fillet, light and flaky straight off the grill.",
+    category: "seafood",
+    tier: "core",
+  },
+  {
+    id: "spicy-squid",
+    num: "9",
+    name: "Spicy Squid",
+    desc: "Squid in a chili marinade, grilled for a smoky char.",
+    category: "seafood",
+    spicy: true,
+    tier: "core",
+  },
+
+  // --- RICE & MORE --------------------------------------------------------
+  {
+    id: "hot-dog",
+    num: "13",
+    name: "Hot Dog",
+    category: "rice-and-more",
+    tier: "core",
+  },
+  {
+    id: "kimchi-fried-rice",
+    num: "14",
+    name: "Kimchi Fried Rice",
+    korean: "Kimchi Bokkeumbap",
+    hangul: "김치볶음밥",
+    desc: "Rice fried with house kimchi. Savory with a tangy kick.",
+    category: "rice-and-more",
+    tier: "core",
+  },
+  {
+    id: "japchae",
+    num: "15",
+    name: "Japchae",
+    korean: "Japchae",
+    hangul: "잡채",
+    desc: "Glass noodles stir-fried with vegetables in sweet sesame soy.",
+    category: "rice-and-more",
+    tier: "core",
+  },
+  {
+    id: "fried-pot-stickers",
+    num: "16",
+    name: "Fried Pot Stickers",
+    korean: "Mandu",
+    hangul: "만두",
+    desc: "Pan-fried dumplings with a savory filling.",
+    category: "rice-and-more",
+    tier: "core",
+  },
+  {
+    id: "fishcake",
+    num: "28",
+    name: "Fishcake",
+    korean: "Eomuk",
+    hangul: "어묵",
+    desc: "Stir-fried fish cake in a light sauce.",
+    category: "rice-and-more",
+    tier: "core",
+  },
+  {
+    id: "steamed-egg",
+    num: "29",
+    name: "Steamed Egg",
+    korean: "Gyeranjjim",
+    hangul: "계란찜",
+    desc: "Silky steamed egg custard.",
+    category: "rice-and-more",
+    tier: "core",
+  },
+  {
+    id: "plain-rice",
+    num: "30",
+    name: "Plain Rice",
+    korean: "Bap",
+    hangul: "밥",
+    category: "rice-and-more",
+    tier: "core",
+  },
+
+  // --- VEGETABLES ---------------------------------------------------------
+  {
+    id: "pumpkin",
+    num: "17",
+    name: "Pumpkin",
+    korean: "Hobak",
+    hangul: "호박",
+    desc: "Sweet slices that caramelize over the grill.",
+    category: "vegetables",
+    tier: "core",
+  },
+  {
+    id: "squash",
+    num: "18",
+    name: "Squash",
+    desc: "Tender squash, lightly charred and naturally sweet.",
+    category: "vegetables",
+    tier: "core",
+  },
+  {
+    id: "mushroom",
+    num: "19",
+    name: "Mushroom",
+    korean: "Beoseot",
+    hangul: "버섯",
+    desc: "Soaks up the smoke as it grills.",
+    category: "vegetables",
+    tier: "core",
+  },
+  {
+    id: "onion-ring",
+    num: "20",
+    name: "Onion Ring",
+    category: "vegetables",
+    tier: "core",
+  },
+  {
+    id: "lettuce-salad",
+    num: "21",
+    name: "Lettuce Salad",
+    desc: "Fresh greens in a light, tangy dressing.",
+    category: "vegetables",
+    tier: "core",
+  },
+
+  // --- BANCHAN ------------------------------------------------------------
+  {
+    id: "kimchi",
+    num: "22",
+    name: "Kimchi",
+    korean: "Kimchi",
+    hangul: "김치",
+    desc: "House-fermented napa cabbage. Tangy, a little spicy.",
+    category: "banchan",
+    tier: "core",
+    image: "/images/kimchi.png",
+  },
+  {
+    id: "radish",
+    num: "23",
+    name: "Radish",
+    desc: "Crunchy pickled radish, bright and refreshing.",
+    category: "banchan",
+    tier: "core",
+  },
+  {
+    id: "garlic-broccoli",
+    num: "24",
+    name: "Garlic Broccoli",
+    desc: "Crisp-tender broccoli tossed with garlic.",
+    category: "banchan",
+    tier: "core",
+  },
+  {
+    id: "salt-beansprout",
+    num: "25",
+    name: "Salt Beansprout",
+    korean: "Kongnamul",
+    hangul: "콩나물",
+    desc: "Crisp seasoned bean sprouts. A cool, clean side.",
+    category: "banchan",
+    tier: "core",
+  },
+  {
+    id: "spicy-cucumber",
+    num: "26",
+    name: "Spicy Cucumber",
+    korean: "Oi Muchim",
+    hangul: "오이무침",
+    desc: "Cucumbers in a cool, spicy sesame dressing.",
+    category: "banchan",
+    spicy: true,
+    tier: "core",
+  },
+  {
+    id: "potato-salad",
+    num: "27",
+    name: "Potato Salad",
+    desc: "Creamy Korean-style potato salad.",
+    category: "banchan",
+    tier: "core",
+  },
+
+  // --- DESSERT ------------------------------------------------------------
+  {
+    id: "sesame-ball",
+    num: "31",
+    name: "Sesame Ball",
+    desc: "Chewy fried dough rolled in toasted sesame seeds.",
+    category: "dessert",
+    tier: "core",
+  },
+  {
+    id: "fried-doughnuts",
+    num: "32",
+    name: "Fried Doughnuts",
+    desc: "Warm, golden doughnuts dusted with sugar.",
+    category: "dessert",
+    tier: "core",
+  },
+  {
+    id: "ice-cream",
+    num: "33",
+    name: "Ice Cream",
+    category: "dessert",
+    tier: "core",
+  },
+];
+
+/** Printed on BOTH cards, so it renders in both services. */
+const PREMIUM: MenuItem[] = [
+  {
+    id: "galbi",
+    num: "1A",
+    name: "Beef Short Ribs",
+    korean: "Galbi",
+    hangul: "갈비",
+    desc: "Bone-in short ribs in a soy-pear marinade, grilled until caramelized.",
+    category: "premium",
+    tier: "premium",
+    image: "/images/galbi.png",
+  },
+  {
+    id: "beef-finger-meat",
+    num: "2A",
+    name: "Beef Finger Meat",
+    desc: "Meat from between the ribs. Deeply beefy and tender.",
+    category: "premium",
+    tier: "premium",
+  },
+  {
+    id: "freshly-cut-steak",
+    num: "3A",
+    name: "Freshly Cut Steak",
+    desc: "House-cut steak, fresh and grill-ready.",
+    category: "premium",
+    tier: "premium",
+  },
+  { id: "lamb", num: "4A", name: "Lamb", category: "premium", tier: "premium" },
+  {
+    id: "marinated-chef-beef",
+    num: "5A",
+    name: "Marinated Chef Beef",
+    desc: "The chef's beef in a house marinade.",
+    category: "premium",
+    tier: "premium",
+  },
+  {
+    id: "marinated-pork-belly",
+    num: "6A",
+    name: "Marinated Pork Belly",
+    desc: "Pork belly in a savory house marinade.",
+    category: "premium",
+    tier: "premium",
+  },
+  {
+    id: "beef-skirt-steak",
+    num: "7A",
+    name: "Beef Skirt Steak",
+    desc: "Marbled skirt steak that chars beautifully.",
+    category: "premium",
+    tier: "premium",
+  },
+  {
+    id: "mussels",
+    num: "8A",
+    name: "Mussels",
+    desc: "Grilled in the shell.",
+    category: "premium",
+    tier: "premium",
+  },
+  {
+    id: "popcorn-chicken",
+    num: "9A",
+    name: "Popcorn Chicken",
+    desc: "Crispy, bite-size fried chicken.",
+    category: "premium",
+    tier: "premium",
+  },
+  {
+    id: "corn-cheese",
+    num: "10A",
+    name: "Corn Cheese",
+    desc: "Sweet corn baked with melted cheese.",
+    category: "premium",
+    tier: "premium",
+  },
+];
+
+/**
+ * DINNER CARD ONLY, and exactly these three.
+ *
+ * The printed dinner menu publishes 1B, 4B and 5B. 2B and 3B are not on the
+ * card — whatever they are or were, the restaurant is not currently offering
+ * them under those numbers, and a placeholder row would be the site claiming
+ * to know something it does not. The gap in the numbering stays.
+ */
+const SIGNATURE: MenuItem[] = [
+  {
+    id: "prime-new-york-steak",
+    num: "1B",
+    name: "Prime New York Steak",
+    category: "signature",
+    tier: "signature",
+  },
+  {
+    id: "beef-tongue",
+    num: "4B",
+    name: "Beef Tongue",
+    desc: "Thin-sliced, quick over high heat.",
+    category: "signature",
+    tier: "signature",
+  },
+  {
+    id: "sliced-beef-short-plate",
+    num: "5B",
+    name: "Sliced Beef Short Plate",
+    category: "signature",
+    tier: "signature",
+  },
+];
+
+export const ITEMS: MenuItem[] = [...CORE, ...PREMIUM, ...SIGNATURE];
+
+/**
+ * CATEGORY ORDER IS THE PRINTED ORDER, with the two upgrade tiers last. The
+ * jump bar, the page and the service toggle all read this one array, so a
+ * category cannot exist in one and not the others.
+ */
+const CATEGORY_META: Omit<MenuCategory, "items">[] = [
+  { id: "beef", name: "Beef", hangul: "소고기", tier: "core" },
+  { id: "pork", name: "Pork", hangul: "돼지고기", tier: "core" },
+  { id: "chicken", name: "Chicken", hangul: "닭고기", tier: "core" },
+  { id: "seafood", name: "Seafood", hangul: "해산물", tier: "core" },
   {
     id: "rice-and-more",
-    name: "Rice, Noodles & More",
+    name: "Rice & More",
+    hangul: "밥과 면",
     navLabel: "Rice & More",
-    items: [
-      {
-        id: "hot-dog",
-        name: "Hot Dog",
-        desc: "A grill-friendly favorite the whole table reaches for.",
-        image: "/images/hot-dog.png",
-      },
-      {
-        id: "kimchi-bokkeumbap",
-        name: "Kimchi Bokkeumbap",
-        english: "Kimchi Fried Rice",
-        hangul: "김치볶음밥",
-        desc: "Rice fried with house kimchi for a savory, tangy kick.",
-        image: "/images/kimchi-fried-rice.png",
-      },
-      {
-        id: "japchae",
-        name: "Japchae",
-        english: "Glass Noodles",
-        hangul: "잡채",
-        desc: "Glass noodles stir-fried with vegetables in sweet sesame soy.",
-        image: "/images/japchae.png",
-      },
-      {
-        id: "mandu",
-        name: "Mandu",
-        english: "Fried Pot Stickers",
-        hangul: "만두",
-        desc: "Crisp pan-fried dumplings with a savory, juicy filling.",
-        image: "/images/fried-pot-stickers.png",
-      },
-    ],
+    tier: "core",
   },
-  {
-    id: "vegetables",
-    name: "Vegetables",
-    hangul: "야채",
-    items: [
-      {
-        id: "hobak",
-        name: "Hobak",
-        english: "Korean Squash",
-        hangul: "호박",
-        desc: "Sweet slices that caramelize beautifully over the grill.",
-        image: "/images/pumpkin.png",
-      },
-      {
-        id: "squash",
-        name: "Squash",
-        desc: "Tender squash, lightly charred and naturally sweet.",
-        image: "/images/squash.png",
-      },
-      {
-        id: "beoseot",
-        name: "Beoseot",
-        english: "Mushrooms",
-        hangul: "버섯",
-        desc: "Assorted mushrooms that soak up the smoke as they grill.",
-        image: "/images/mushroom.png",
-      },
-      {
-        id: "yangpa",
-        name: "Yangpa",
-        english: "Onion",
-        hangul: "양파",
-        desc: "Sweet onions that turn golden and jammy on the grill.",
-        image: "/images/onion.png",
-      },
-      {
-        id: "garlic-broccoli",
-        name: "Garlic Broccoli",
-        desc: "Crisp-tender broccoli tossed with savory garlic.",
-        image: "/images/garlic-broccoli.png",
-      },
-      {
-        id: "kongnamul",
-        name: "Kongnamul",
-        english: "Bean Sprouts",
-        hangul: "콩나물",
-        desc: "Crisp seasoned bean sprouts. A cool, clean side.",
-        image: "/images/salt-beansprout.png",
-      },
-    ],
-  },
-  {
-    id: "banchan",
-    name: "Banchan & Sides",
-    hangul: "반찬",
-    tag: "Included",
-    navLabel: "Banchan",
-    items: [
-      {
-        id: "lettuce-salad",
-        name: "Lettuce Salad",
-        hangul: "샐러드",
-        desc: "Fresh greens in a light, tangy dressing.",
-        image: "/images/lettuce-salad.png",
-      },
-      {
-        id: "kimchi",
-        name: "Kimchi",
-        english: "Napa Cabbage",
-        hangul: "김치",
-        desc: "House-fermented napa cabbage. Tangy, a little spicy, and hard to put down.",
-        image: "/images/kimchi.png",
-      },
-      {
-        id: "danmuji",
-        name: "Danmuji",
-        english: "Pickled Radish",
-        hangul: "단무지",
-        desc: "Crunchy pickled radish, bright and refreshing.",
-        image: "/images/radish.png",
-      },
-      {
-        id: "oi-muchim",
-        name: "Oi Muchim",
-        english: "Spicy Cucumber",
-        hangul: "오이무침",
-        desc: "Cucumbers in a cool, spicy sesame dressing.",
-        image: "/images/spicy-cucumber.png",
-      },
-      {
-        id: "potato-salad",
-        name: "Potato Salad",
-        hangul: "감자 샐러드",
-        desc: "Creamy Korean-style potato salad.",
-        image: "/images/potato-salad.png",
-      },
-      {
-        id: "eomuk",
-        name: "Eomuk",
-        english: "Fishcake",
-        hangul: "어묵",
-        desc: "Savory stir-fried fish cake in a light sauce.",
-        image: "/images/fishcake.png",
-      },
-      {
-        id: "gyeranjjim",
-        name: "Gyeranjjim",
-        english: "Steamed Egg",
-        hangul: "계란찜",
-        desc: "Silky, fluffy steamed egg custard.",
-        image: "/images/steamed-egg.png",
-      },
-      {
-        id: "bap",
-        name: "Bap",
-        english: "Steamed Rice",
-        hangul: "밥",
-        desc: "Warm steamed white rice. The perfect base.",
-        image: "/images/plain-rice.png",
-      },
-    ],
-  },
-  {
-    id: "dessert",
-    name: "Dessert",
-    hangul: "디저트",
-    tag: "Free",
-    items: [
-      {
-        id: "sesame-balls",
-        name: "Sesame Balls",
-        hangul: "참깨볼",
-        desc: "Chewy fried dough rolled in toasted sesame seeds.",
-        image: "/images/sesame-balls.png",
-      },
-      {
-        id: "fried-doughnuts",
-        name: "Fried Doughnuts",
-        desc: "Warm, golden doughnuts dusted with sugar.",
-        image: "/images/fried-doughnuts.png",
-      },
-      {
-        id: "ice-cream",
-        name: "Ice Cream",
-        desc: "A cold, sweet finish. Self-serve and unlimited.",
-        image: "/images/ice-cream.png",
-      },
-    ],
-  },
+  { id: "vegetables", name: "Vegetables", hangul: "야채", tier: "core" },
+  { id: "banchan", name: "Banchan", hangul: "반찬", tag: "Included", tier: "core" },
+  { id: "dessert", name: "Dessert", hangul: "디저트", tag: "Included", tier: "core" },
   {
     id: "premium",
     name: "Premium",
     tag: "Included",
     blurb:
       "Included for everyone at the table, at the same one price as the rest of the menu.",
-    items: [
-      {
-        id: "galbi",
-        name: "Galbi",
-        english: "Beef Short Ribs",
-        hangul: "갈비",
-        desc: "Bone-in short ribs marinated in a soy-pear blend, grilled at your table until caramelized.",
-        image: "/images/galbi.png",
-      },
-      {
-        id: "beef-finger-meat",
-        name: "Beef Finger Meat",
-        desc: "Prized meat from between the ribs. Deeply beefy and tender.",
-        image: "/images/beef-finger-meat.png",
-      },
-      {
-        id: "freshly-cut-steak",
-        name: "Freshly Cut Steak",
-        desc: "House-cut steak, fresh and grill-ready.",
-        image: "/images/freshly-cut-steak.png",
-      },
-      {
-        id: "lamb",
-        name: "Lamb",
-        desc: "Tender lamb with a savory, aromatic char.",
-        image: "/images/lamb.png",
-      },
-      {
-        id: "marinated-chef-beef",
-        name: "Marinated Chef Beef",
-        desc: "The chef's beef in a house marinade.",
-        image: "/images/marinated-chef-beef.png",
-      },
-      {
-        id: "marinated-pork-belly",
-        name: "Marinated Pork Belly",
-        desc: "Pork belly soaked in a savory house marinade.",
-        image: "/images/marinated-pork-belly.png",
-      },
-      {
-        id: "beef-skirt-steak",
-        name: "Beef Skirt Steak",
-        desc: "Richly marbled skirt steak that chars beautifully.",
-        image: "/images/beef-skirt-steak.png",
-      },
-      {
-        id: "mussels",
-        name: "Mussels",
-        desc: "Plump mussels grilled in the shell.",
-        image: "/images/mussels.png",
-      },
-      {
-        id: "popcorn-chicken",
-        name: "Popcorn Chicken",
-        desc: "Crispy, bite-size fried chicken.",
-        image: "/images/popcorn-chicken.png",
-      },
-      {
-        id: "corn-cheese",
-        name: "Corn Cheese",
-        desc: "Sweet corn baked with melty, bubbling cheese.",
-        image: "/images/corn-cheese.png",
-      },
-    ],
+    tier: "premium",
+  },
+  {
+    id: "signature",
+    name: "Signature",
+    tag: "Dinner only",
+    blurb: "On the dinner menu, and included in the dinner price.",
+    tier: "signature",
   },
 ];
+
+/** Grouped, and it THROWS on an item whose category has no metadata. */
+export const MENU: MenuCategory[] = CATEGORY_META.map((meta) => ({
+  ...meta,
+  items: ITEMS.filter((i) => i.category === meta.id),
+}));
+
+{
+  const known = new Set(CATEGORY_META.map((c) => c.id));
+  for (const item of ITEMS) {
+    if (!known.has(item.category)) {
+      throw new Error(
+        `Menu item "${item.id}" is in category "${item.category}", which has no metadata.`
+      );
+    }
+  }
+}
 
 /** Everything the one price covers, shown on both routes. */
 export const INCLUDED = [
@@ -433,8 +581,9 @@ export const INCLUDED = [
 
 /**
  * The homepage's house favourites, BY ID. They are not a second copy of the
- * data — they are pointers into it, so a card can never show a name, a photo
- * or a description that /menu does not.
+ * data — they are pointers into it, so a card can never show a name or a
+ * description that /menu does not. These five are also the only items that
+ * carry an `image`, which is what keeps their assets referenced.
  */
 const FEATURED_IDS = [
   "galbi",
@@ -452,28 +601,57 @@ export interface FeaturedDish {
 }
 
 /**
- * Resolved at module load, and it THROWS on a bad id rather than rendering a
- * hole. A featured dish pointing at a record that does not exist is exactly the
- * failure this file was created to make impossible, so it should break the
- * build, not the page.
+ * Resolved at module load, and it THROWS on a bad id or a missing photo rather
+ * than rendering a hole. A featured dish pointing at a record that does not
+ * exist is exactly the failure this file was created to make impossible, so it
+ * should break the build, not the page.
  */
 export const FEATURED: FeaturedDish[] = FEATURED_IDS.map((id) => {
   for (const category of MENU) {
     const item = category.items.find((i) => i.id === id);
-    if (item) return { item, category, href: `/menu#${category.id}` };
+    if (item) {
+      if (!item.image) {
+        throw new Error(
+          `FEATURED item "${id}" has no image. The homepage preview renders photos.`
+        );
+      }
+      return { item, category, href: `/menu#${category.id}` };
+    }
   }
   throw new Error(
     `FEATURED references "${id}", which is not in MENU. Add the dish or fix the id.`
   );
 });
 
-/** `Galbi — Beef Short Ribs`, or just `Teriyaki Beef` when there is no gloss. */
+/**
+ * `Galbi — Beef Short Ribs`, or just `Teriyaki Beef` where there is no Korean
+ * name. THE ONE PLACE THIS STRING IS BUILT, so the homepage card and the /menu
+ * row are character-identical by construction rather than by review.
+ */
 export function displayName(item: MenuItem): string {
-  return item.english ? `${item.name} — ${item.english}` : item.name;
+  return item.korean ? `${item.korean} — ${item.name}` : item.name;
+}
+
+/**
+ * THE BADGES AN ITEM HAS EARNED, and the only place their labels are written.
+ *
+ * The rendering component had `<Badge>Spicy</Badge>` gated on `item.spicy`,
+ * which is correct behaviour and the wrong location: a designation is a claim
+ * about the food, so both the CONDITION and the WORD belong to the data. A
+ * literal in the view is how a "CHEF'S CHOICE" pill ends up on the page with
+ * nothing in the record behind it.
+ */
+export function badgesOf(item: MenuItem): string[] {
+  const out: string[] = [];
+  // `spicy` is set only where the PRINTED name starts with "Spicy".
+  if (item.spicy) out.push("Spicy");
+  if (item.tier !== "core") out.push(item.tier);
+  return out;
 }
 
 /** Jump-bar targets. Derived, so a new category cannot be missed. */
 export const JUMP_TARGETS = MENU.map((c) => ({
   label: c.navLabel ?? c.name,
   id: c.id,
+  tier: c.tier,
 }));

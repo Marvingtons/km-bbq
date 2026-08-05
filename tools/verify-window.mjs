@@ -31,11 +31,24 @@ const check = (name, pass, detail) => {
 const skipPreloader = (page) =>
   page.addInitScript(() => { try { sessionStorage.setItem("km-preloader-shown", "1"); } catch {} });
 
-/** Parse `inset(a% b% c% d% round r)` into numbers; full-bleed reads as zeros. */
-const parseInset = (s) => {
+/**
+ * Parse an `inset()` clip into PERCENTAGES OF THE VIEWPORT, whichever units it
+ * is written in. Full-bleed reads as zeros.
+ *
+ * It is written in pixels now. The clipped element is the fixed media window,
+ * whose reference box is the viewport INCLUDING the scrollbar gutter — so a
+ * percentage there resolves against a box ~10px wider than clientWidth, which
+ * is a permanent error on the right edge rather than an edge case. Pixels are
+ * exact; this converts them back, because every assertion below is phrased as
+ * a fraction of the screen.
+ */
+const parseInset = (s, vw = 1440, vh = 900) => {
   if (!s || s === "none") return null;
-  const n = (s.match(/-?[\d.]+%/g) || []).map(parseFloat);
-  return n.length ? { top: n[0], right: n[1] ?? n[0], bottom: n[2] ?? n[0], left: n[3] ?? n[1] ?? n[0] } : { top: 0, right: 0, bottom: 0, left: 0 };
+  const px = (s.match(/-?[\d.]+px/g) || []).map(parseFloat);
+  const pc = (s.match(/-?[\d.]+%/g) || []).map(parseFloat);
+  const n = px.length ? px.map((v, i) => (v / (i % 2 ? vw : vh)) * 100) : pc;
+  if (!n.length) return { top: 0, right: 0, bottom: 0, left: 0 };
+  return { top: n[0], right: n[1] ?? n[0], bottom: n[2] ?? n[0], left: n[3] ?? n[1] ?? n[0] };
 };
 
 async function scrollTo(page, y) {
@@ -73,7 +86,7 @@ async function storyReadable(page) {
     await scrollTo(page, Math.round(y));
     const s = await page.evaluate(() => {
       const stage = document.querySelector(".hero-stage");
-      const head = document.getElementById("about-heading");
+      const head = document.getElementById("fire-heading");
       if (!stage || !head) return null;
       const sb = stage.getBoundingClientRect(), hb = head.getBoundingClientRect();
       const onScreen = hb.bottom > 0 && hb.top < innerHeight;
@@ -99,10 +112,36 @@ const browser = await chromium.launch();
   await skipPreloader(page);
 
   // CLS observer installed before first paint.
+  // PINNED SECTIONS ARE EXCLUDED, and the reason is what this file measures.
+  //
+  // ScrollTrigger pins with `position: fixed` and a spacer that holds the
+  // space, so nothing the reader is looking at moves — but the pinned element
+  // itself goes from its own height to zero IN FLOW, and Chrome scores that as
+  // a shift of that element. Under a real wheel it is largely excluded by
+  // hadRecentInput; under this harness's programmatic scrollTo it is not.
+  //
+  // The claim here is narrower and still worth asserting: the WINDOW
+  // transition is clip-path and transform only, so the panel's own layout box
+  // never changes and nothing shifts because of it. Counting a pin against
+  // that is measuring a different mechanism. Both pinned sections on this page
+  // (Pick Your Fire, the gallery) show the same signature and always have.
   await page.addInitScript(() => {
     window.__cls = 0;
+    window.__clsPinned = 0;
     new PerformanceObserver((l) => {
-      for (const e of l.getEntries()) if (!e.hadRecentInput) window.__cls += e.value;
+      for (const e of l.getEntries()) {
+        if (e.hadRecentInput) continue;
+        const sources = e.sources || [];
+        const allPinned =
+          sources.length > 0 &&
+          sources.every((s) => {
+            const n = s.node;
+            const el = n && n.nodeType === 1 ? n : n && n.parentElement;
+            return !!(el && el.closest && el.closest(".pin-spacer"));
+          });
+        if (allPinned) window.__clsPinned += e.value;
+        else window.__cls += e.value;
+      }
     }).observe({ type: "layout-shift", buffered: true });
   });
 
@@ -122,10 +161,11 @@ const browser = await chromium.launch();
   check("starts full-bleed", first && first.right === 0 && first.bottom === 0, seen[0].clip.slice(0, 40));
   check(
     "ends as an inset rounded panel",
-    // The dock BLEEDS RIGHT, so its right inset is 0 by design — asserting on
-    // it would be permanently false. The left inset is the meaningful one now:
-    // the panel's left edge is column 9's left edge.
-    last && last.left > 55 && last.top > 5 && /round/.test(seen[seen.length - 1].clip),
+    // All four insets are real now: the panel is a rounded rectangle inside the
+    // grid rather than a cell bleeding off the right edge, so it has a right
+    // edge to assert on. The last sample is one viewport of scroll, which is
+    // exactly where the dock completes and About's media column parks.
+    last && last.left > 50 && last.right > 5 && last.top > 20 && /round/.test(seen[seen.length - 1].clip),
     seen[seen.length - 1].clip.slice(0, 60)
   );
 
@@ -165,11 +205,16 @@ const browser = await chromium.launch();
   // checks are inverted rather than deleted, because "the illustration set is
   // not restored" is a live requirement of DIRECTION.md, not merely a fact.
   const behind = await page.evaluate(() => {
-    const about = document.getElementById("about");
-    const stage = document.querySelector("#about .about-stage");
-    const heading = document.getElementById("about-heading");
-    const copy = document.querySelector("#about .about-text p");
-    const cta = document.querySelector("#about .about-text a");
+    const fire = document.getElementById("pick-your-fire");
+    const stage = document.querySelector("#pick-your-fire .fire-stage");
+    const heading = document.getElementById("fire-heading");
+    const copy = document.querySelector("#pick-your-fire .copy p");
+    // The action is NOT in this block. About and Pick Your Fire are one stage
+    // with one "See the menu", at the foot of the fire copy — two identical
+    // pills a screen apart was one ask made twice. So what the settled state
+    // has to prove is that the story is composed and that the stage has
+    // exactly one action, not that this block carries it.
+    const actions = document.querySelectorAll("#pick-your-fire a[href='/menu']");
     const vis = (e) => {
       if (!e) return false;
       const r = e.getBoundingClientRect();
@@ -177,8 +222,8 @@ const browser = await chromium.launch();
       return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && +cs.opacity > 0.5;
     };
     return {
-      ground: getComputedStyle(about).backgroundColor,
-      composed: [heading, copy, cta].every(vis),
+      ground: getComputedStyle(fire).backgroundColor,
+      composed: [heading, copy].every(vis) && actions.length === 1,
       muralInStage: stage ? stage.querySelectorAll("img[src*='mural']").length : -1,
     };
   });
@@ -224,7 +269,7 @@ const browser = await chromium.launch();
   check("no mural band or parallax markup left behind", mural.bandEls === 0, `${mural.bandEls} elements`);
 
   const seam = await page.evaluate(() => {
-    const el = document.querySelector("#about > div[aria-hidden='true']");
+    const el = document.querySelector("#pick-your-fire > div[aria-hidden='true']");
     return el ? { h: getComputedStyle(el).height, bg: getComputedStyle(el).backgroundImage.slice(0, 40) } : null;
   });
   check("chrome hairline present at the ground change", !!seam && seam.h === "1px" && /gradient/.test(seam.bg), seam ? seam.h : "missing");
@@ -232,7 +277,7 @@ const browser = await chromium.launch();
   // Video pauses fully off-screen, resumes on return.
   await scrollTo(page, 3400);
   const offState = await page.evaluate(() => {
-    const v = document.querySelector("video");
+    const v = document.querySelector("#home video");
     if (!v) return null;
     const r = v.getBoundingClientRect();
     return { paused: v.paused, offScreen: r.bottom <= 0 || r.top >= innerHeight };
@@ -240,7 +285,7 @@ const browser = await chromium.launch();
   check("video pauses once fully off-screen", offState && offState.offScreen && offState.paused, `offScreen ${offState?.offScreen}, paused ${offState?.paused}`);
   await scrollTo(page, 0);
   await page.waitForTimeout(700);
-  const backState = await page.evaluate(() => { const v = document.querySelector("video"); return v ? v.paused : null; });
+  const backState = await page.evaluate(() => { const v = document.querySelector("#home video"); return v ? v.paused : null; });
   check("video resumes when it returns", backState === false, `paused ${backState}`);
 
   await ctx.close();
@@ -271,7 +316,7 @@ const browser = await chromium.launch();
   });
   check("reduced motion: no parallax", moved < 0.5, `media ty ${moved}px`);
   const seam = await page.evaluate(() => {
-    const el = document.querySelector("#about > div[aria-hidden='true']");
+    const el = document.querySelector("#pick-your-fire > div[aria-hidden='true']");
     return el ? getComputedStyle(el).height : null;
   });
   check("reduced motion: hairline intact", seam === "1px", String(seam));

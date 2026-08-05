@@ -28,8 +28,23 @@ import Link from "next/link";
  * the one place every secondary action on the site touches the room's own
  * material.
  */
+/**
+ * PRESS IS A REAL STATE, and it is one pixel.
+ *
+ * Every control on the site hovered and then did nothing on the way down, so a
+ * tap on a phone — which has no hover at all — got no acknowledgement between
+ * touch and navigation. `active:translate-y-px` is the whole affordance: the
+ * button goes down under the finger and comes back. It is the same gesture the
+ * game's dome already had (`--ease-press`), applied to the object every other
+ * action on the site is made of.
+ *
+ * Transitions cover transform as well as colour now, and press is faster than
+ * release (`--dur-press` down, `--dur-base` back) because that is what a real
+ * button feels like — see MOTION.dur in lib/motion.ts, which documents that
+ * asymmetry and had nothing using it.
+ */
 const BASE =
-  "group relative isolate inline-flex min-h-11 items-center justify-center gap-2 rounded-pill px-7 py-3 font-sans text-sm font-semibold transition-colors duration-[var(--dur-base)] ease-house";
+  "group relative isolate inline-flex min-h-11 items-center justify-center gap-2 rounded-pill px-7 py-3 font-sans text-sm font-semibold transition-[color,background-color,border-color,transform] duration-[var(--dur-base)] ease-house active:translate-y-px active:duration-[var(--dur-press)] motion-reduce:active:translate-y-0 motion-reduce:transition-none";
 
 const TONES = {
   solid: "bg-flame text-sand hover:bg-char hover:text-sand",
@@ -59,7 +74,10 @@ export function PillLink({
       {arrow && (
         <span
           aria-hidden="true"
-          className="transition-transform duration-[var(--dur-base)] ease-house group-hover:translate-x-0.5"
+          // 3px, and 0.2s. It was 2px (`translate-x-0.5`) over 0.3s, which is
+          // slow enough and small enough that the arrow reads as drifting
+          // rather than as answering the cursor.
+          className="transition-transform duration-200 ease-house group-hover:translate-x-[3px] motion-reduce:transition-none"
         >
           →
         </span>

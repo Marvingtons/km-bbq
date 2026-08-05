@@ -32,7 +32,14 @@ const check = (name, pass, detail) => {
 const skip = (p) =>
   p.addInitScript(() => { try { sessionStorage.setItem("km-preloader-shown", "1"); } catch {} });
 
-/** Panel rect in viewport coords, derived from the live clip-path. */
+/**
+ * Panel rect in viewport coords, derived from the live clip-path.
+ *
+ * The clip is written in PIXELS now — the window is fixed and viewport-sized,
+ * and a percentage there would resolve against the scrollbar gutter as well —
+ * so both unit systems are handled and converted against the window's own rect,
+ * which is the clip's actual reference box.
+ */
 const PANEL = `(() => {
   const w = document.querySelector(".hero-window");
   if (!w) return null;
@@ -40,7 +47,11 @@ const PANEL = `(() => {
   const cs = getComputedStyle(w).clipPath;
   const m = cs.match(/inset\\(([^)]*)\\)/);
   if (!m) return { top: r.top, right: r.right, bottom: r.bottom, left: r.left, clip: cs };
-  const nums = (m[1].match(/-?[\\d.]+%/g) || []).map(parseFloat);
+  const px = (m[1].match(/-?[\\d.]+px/g) || []).map(parseFloat);
+  const pc = (m[1].match(/-?[\\d.]+%/g) || []).map(parseFloat);
+  const nums = px.length
+    ? px.map((v, i) => (v / (i % 2 ? r.width : r.height)) * 100)
+    : pc;
   const [t, ri, b, l] = [nums[0] ?? 0, nums[1] ?? nums[0] ?? 0, nums[2] ?? nums[0] ?? 0, nums[3] ?? nums[1] ?? nums[0] ?? 0];
   return {
     top: r.top + (t / 100) * r.height,
@@ -62,9 +73,29 @@ const TYPE_RECTS = `(() => {
     let op = 1, n = el;
     while (n && n !== document.body) { op *= parseFloat(getComputedStyle(n).opacity || "1"); n = n.parentElement; }
     if (op < 0.02) continue;               // faded out: not visible, cannot cross
-    const rg = document.createRange();
-    rg.selectNodeContents(el);
-    const rects = [...rg.getClientRects()].filter((r) => r.width > 2 && r.height > 2);
+    /* VISIBLE INK ONLY — sr-only subtrees are excluded.
+
+       A visually-hidden span is clipped to 1px, but it is still LAID OUT, so a
+       Range over its contents reports the full untruncated text width. The hero
+       h1 now carries sr-only fragments naming the restaurant and the city (its
+       display type is one word; its accessible and crawlable text is a
+       sentence), and measuring the h1 wholesale reported ~760px of hidden text
+       straddling the panel's clip edge — a crossing that nothing visible was
+       making.
+
+       So the range is built per text node, skipping anything inside .sr-only.
+       This is what "does visible type cross the edge" always meant. */
+    const rects = [];
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      if (!node.nodeValue.trim()) continue;
+      if (node.parentElement?.closest(".sr-only")) continue;
+      const rg = document.createRange();
+      rg.selectNodeContents(node);
+      for (const r of rg.getClientRects()) {
+        if (r.width > 2 && r.height > 2) rects.push(r);
+      }
+    }
     const box = rects.length ? rects : [el.getBoundingClientRect()];
     for (const r of box) out.push({ sel: s, op: +op.toFixed(3), top: r.top, right: r.right, bottom: r.bottom, left: r.left });
   }
@@ -84,7 +115,7 @@ const TYPE_RECTS = `(() => {
  *  was never visible during the sweep and the difference could not show up. */
 const ABOUT_RECTS = `(() => {
   const out = [];
-  for (const s of ["#about h2", "#about .about-text .copy", "#about .about-text a", "#about .grill-head", "#about .grill-dish"]) {
+  for (const s of ["#pick-your-fire h2", "#pick-your-fire .copy p", "#pick-your-fire a", ".favorites-head"]) {
     for (const el of document.querySelectorAll(s)) {
       // Effective opacity: the entrance fades the COLUMN, so every child still
       // computes to 1 while the whole block is invisible.
@@ -150,10 +181,13 @@ const browser = await chromium.launch();
   // as insets — the radius ramps to 12px in the first tenth while the frame is
   // still full-bleed, so its corners are the VIEWPORT's corners and there is no
   // edge anywhere near the type.
+  // Either unit: the clip is written in pixels now (the window is fixed and
+  // viewport-sized, so a percentage would resolve against the scrollbar gutter
+  // too). Zero is zero in both, so the only change is which pattern to read.
   const fullBleed = (clip) => {
     const insetPart = clip.split(/\bround\b/)[0];
-    const n = (insetPart.match(/-?[\d.]+%/g) || []).map(parseFloat);
-    return n.length >= 1 && n.length <= 4 && n.every((v) => Math.abs(v) < 0.01);
+    const n = (insetPart.match(/-?[\d.]+(?:px|%)/g) || []).map(parseFloat);
+    return n.length >= 1 && n.length <= 4 && n.every((v) => Math.abs(v) < 0.5);
   };
 
   for (let pct = 0; pct <= 100; pct += 5) {
@@ -190,7 +224,7 @@ const browser = await chromium.launch();
     // way it arrived at ~29% of the transition at 1440x900 and ~25% at 768x800,
     // straight under the sweeping edge.
     const story = await page.evaluate(`(() => {
-      const el = document.querySelector("#about .about-text");
+      const el = document.querySelector(".fire-copy");
       if (!el) return 1;
       let op = 1, n = el;
       while (n && n !== document.body) { op *= parseFloat(getComputedStyle(n).opacity || "1"); n = n.parentElement; }
@@ -217,13 +251,13 @@ const browser = await chromium.launch();
     const up = storyOpacity.filter((s) => s.op > 0.98).map((s) => s.pct);
     const settled = up.length ? Math.min(...up) : null;
     check(
-      "About's copy is fully up by the time the panel docks",
-      settled !== null && settled <= 80,
-      settled === null ? "never reaches opacity 1" : `opacity 1 from ${settled}% (dock completes at 80%)`
+      "the fire copy is fully up by the time the panel docks",
+      settled !== null && settled <= 100,
+      settled === null ? "never reaches opacity 1" : `opacity 1 from ${settled}% (dock completes at 100%)`
     );
   }
   check(
-    "panel never overlaps About's content",
+    "panel never overlaps the section's content",
     overlaps.length === 0,
     overlaps.length ? overlaps.slice(0, 6).map((o) => `${o.pct}% ${o.sel} ${o.area}px²`).join("; ") : "21 scroll positions sampled"
   );
@@ -258,22 +292,66 @@ const browser = await chromium.launch();
   // measurement, or a scrollbar-gutter error — none of which the static grid
   // check can see, because they all leave the grid perfectly correct and only
   // the panel wrong.
-  await page.evaluate((y) => window.scrollTo(0, y), vh);
+  //
+  // MEASURED AT THE DOCK FRAME AND IN THE WINDOW'S OWN FRAME OF REFERENCE, and
+  // both halves of that are corrections.
+  //
+  // This used to sample at `scrollTo(0, vh)` and compare two live viewport
+  // rects, which was right when the transition cost a full viewport and has
+  // been wrong since HERO_SCRUB became 0.6: the stage releases at 0.6vh and
+  // then scrolls away with the page, so by 1.0vh the panel is 0.4vh above
+  // wherever the cell is and the check reported a 400px "error" in a
+  // transition that was working. It failed for months without meaning
+  // anything.
+  //
+  // What is actually load-bearing is that the panel and the cell agree on
+  // SIZE, on LEFT, and on the cell's RESTING top — the cell is sticky now, so
+  // its resting offset is a constant (its own `top`) rather than whatever the
+  // scroll position makes of it. That is precisely the contract SeamMotion's
+  // dock() computes, so this is the check that can catch it being wrong.
+  // ONE VIEWPORT. The clip runs from the top of the page until Pick Your
+  // reaches the top of the viewport, because that is the frame the sticky
+  // media column parks on, and the dock and the park have to be the same event.
+  // It was 0.6vh (HERO_SCRUB) when the hero's own held scroll bounded the clip;
+  // it does not any more — the media outlives the hero stage.
+  const dockAt = await page.evaluate(
+    () => document.getElementById("pick-your-fire").getBoundingClientRect().top + window.scrollY
+  );
+  await page.evaluate((y) => window.scrollTo(0, y), dockAt);
   await page.waitForTimeout(1000);
   const docked = await page.evaluate(PANEL);
+  // The cell's RESTING viewport top, derived the same way SeamMotion derives
+  // it: the nearest sticky ancestor's resolved \`top\`, plus how far the cell
+  // sits inside that ancestor. Both terms are scroll-invariant. Reading the
+  // cell's live \`r.top\` instead would measure wherever the reader happens to
+  // be, which is a 360px "error" in a dock that is exact.
   const cell = await page.evaluate(`(() => {
-    const el = document.querySelector("#about .col-media");
-    if (!el) return null;
+    const el = document.querySelector("#pick-your-fire .col-media");
+    const w = document.querySelector(".hero-window");
+    if (!el || !w) return null;
     const r = el.getBoundingClientRect();
-    return { top: r.top, right: r.right, bottom: r.bottom, left: r.left };
+    let s = el;
+    while (s && getComputedStyle(s).position !== "sticky") s = s.parentElement;
+    return {
+      width: r.width, height: r.height, left: r.left, right: r.right,
+      restTop: s
+        ? (parseFloat(getComputedStyle(s).top) || 0) + (r.top - s.getBoundingClientRect().top)
+        : r.top,
+      winTop: w.getBoundingClientRect().top,
+    };
   })()`);
   const edgeDelta = cell && docked
-    ? Math.max(Math.abs(cell.top - docked.top), Math.abs(cell.bottom - docked.bottom), Math.abs(cell.left - docked.left))
+    ? Math.max(
+        Math.abs((docked.right - docked.left) - cell.width),
+        Math.abs((docked.bottom - docked.top) - cell.height),
+        Math.abs(docked.left - cell.left),
+        Math.abs((docked.top - cell.winTop) - cell.restTop)
+      )
     : Infinity;
   check(
-    "docked panel IS About's media cell",
+    "docked panel IS the media cell it hands over to",
     edgeDelta < 1.5,
-    cell ? `max edge delta ${edgeDelta.toFixed(2)}px (top/bottom/left)` : "no .col-media"
+    cell ? `max delta ${edgeDelta.toFixed(2)}px (w/h/left/rest-top)` : "no .col-media"
   );
 
   // Reversibility: land on the same clip after going away and back.
@@ -326,7 +404,7 @@ const browser = await chromium.launch();
   const about = await page.evaluate(ABOUT_RECTS);
   const panel = after;
   const bad = about.filter((a) => overlapArea(a, panel) > 400);
-  check("reduced motion: docked panel clear of About content", bad.length === 0,
+  check("reduced motion: docked panel clear of section content", bad.length === 0,
     bad.length ? bad.map((b) => b.sel).join("; ") : `${about.length} About elements visible, all clear`);
   await ctx.close();
 }

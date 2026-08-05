@@ -59,15 +59,54 @@ export const MOTION = {
 export const NAV_H = 68;
 
 /**
- * The hero->About window transition's scroll cost, as a fraction of one
- * viewport. This is the site's only stretch of held scroll.
+ * The hero's own held scroll, as a fraction of one viewport. This is the site's
+ * only stretch of page that does not move under the reader.
  *
- * Written in THREE places and they must agree: Hero's `md:h-[160vh]` (100vh
- * sticky stage + 60vh of travel), About's `md:-mt-[60vh]`, and this constant,
- * which is what About's story reveal measures its trigger against. Change one,
- * change all three in the same commit.
+ * Written in THREE places and they must agree: Hero's `lg:h-[160vh]` (100vh
+ * sticky stage + 60vh of travel), Pick Your Fire's `lg:-mt-[60vh]`, and this
+ * constant. Change one, change all three in the same commit.
+ *
+ * `lg:` — the transition, the sticky media column and the pinned gallery all
+ * live in the same `(min-width: 1024px) and (prefers-reduced-motion:
+ * no-preference)` bracket. It used to be `md:`, which gave tablets a 60vh
+ * window with nothing square to clip into once the media became a frame.
+ *
+ * NOTE: this is the HERO's held scroll, not the media clip's travel. The clip
+ * runs from the top of the page until Pick Your Fire's top reaches the top of
+ * the viewport — one full viewport — because that is where its sticky media
+ * column parks and the two have to be the same event. See MediaStage.tsx.
  */
 export const HERO_SCRUB = 0.6;
+
+/**
+ * WHERE THE FIRE COPY IS ALLOWED TO APPEAR, as a fraction of one viewport of
+ * scroll from the top of the page.
+ *
+ * The media panel's sides finish closing at 55% of its travel, which is the
+ * frame on which its left edge clears the copy column. Before that the heading
+ * is behind an opaque video, and a heading revealed by a hard clip sweeping
+ * across it is half a glyph at a time.
+ *
+ * So the copy's entrance is triggered off the page's own scroll rather than off
+ * its position: "the copy has arrived" and "the panel has passed" are the same
+ * event and must not be able to disagree. Triggered the ordinary way, they do —
+ * the copy's distance from the top of the page is a function of viewport HEIGHT
+ * and the panel's edge of viewport WIDTH, so a `top 80%` start and the sweep
+ * agree at 1440x900 and drift apart at every other aspect ratio.
+ *
+ * 0.80 rather than the 0.55 the sweep alone would allow. The floor is a
+ * correctness constraint; where inside the remaining travel to put it is a
+ * question of what the copy looks like arriving. At 0.80 (scrollY 720 at
+ * 1440x900) the block's top is in the lower third of the screen, so the
+ * fade-and-rise reads as arriving; earlier and it fades in halfway up the
+ * screen for no reason, later and it is still animating over the match cut.
+ * It settles ~180px before the crossfade, which is the closest the compressed
+ * timeline gets without the two overlapping.
+ *
+ * Paired with SIDES_LEAD in MediaStage.tsx, which is the floor. Change either
+ * and re-check this one is still above it.
+ */
+export const FIRE_COPY_IN = 0.8;
 
 /**
  * Preloader choreography. CAPPED AT 1.2 SECONDS, TOTAL.

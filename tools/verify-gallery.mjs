@@ -72,15 +72,24 @@ console.log("\n=== 1440px — PINNED MODE ===");
   check("heading is visible and unanimated", head.text === "A look inside" && head.h > 20 && !head.hidden && head.inline === "", `"${head.text}" h=${head.h} style="${head.inline}"`);
   check("eyebrow is visible", head.eyebrow === "Gallery");
 
-  const spacers = await p.evaluate(() => document.querySelectorAll(".pin-spacer").length);
-  check("exactly one pin-spacer exists", spacers === 1, `${spacers}`);
+  // ONE SPACER AROUND THE GALLERY, not one on the page. Pick Your Fire pins
+  // too now, so counting every `.pin-spacer` counts a different section's — and
+  // what this check exists for is that the gallery never STACKS a second one on
+  // a hot reload or a resize.
+  const spacers = await p.evaluate(
+    () =>
+      [...document.querySelectorAll(".pin-spacer")].filter((s) =>
+        s.querySelector("#gallery")
+      ).length
+  );
+  check("exactly one pin-spacer around the gallery", spacers === 1, `${spacers}`);
 
   // HELD scroll, not spacer height. The pin-spacer is the section's own height
   // PLUS the pinned duration, so measuring the spacer alone charges the budget
   // for a screen the reader was going to scroll past anyway. The dead-scroll
   // cost is the part where the page does not move: spacer minus section.
   const geom = await p.evaluate(() => {
-    const sp = document.querySelector(".pin-spacer");
+    const sp = document.getElementById("gallery").parentElement;
     const sec = document.getElementById("gallery");
     return {
       spacerH: sp ? Math.round(sp.getBoundingClientRect().height) : 0,
@@ -123,7 +132,7 @@ console.log("\n=== 1440px — PINNED MODE ===");
   // Scroll through the pin and confirm the track actually scrubs.
   const scrub = await p.evaluate(async () => {
     const sec = document.getElementById("gallery");
-    const sp = document.querySelector(".pin-spacer");
+    const sp = document.getElementById("gallery").parentElement;
     const top = sp.getBoundingClientRect().top + window.scrollY;
     const track = document.querySelector(".gallery-track");
     const xs = [];
@@ -195,7 +204,7 @@ console.log("\n=== 375px — STRIP MODE ===");
     const first = document.querySelector(".gallery-item");
     const chev = document.querySelector(".gallery-chevrons");
     return {
-      spacers: document.querySelectorAll(".pin-spacer").length,
+      spacers: [...document.querySelectorAll(".pin-spacer")].filter((x) => x.querySelector("#gallery")).length,
       canScroll: strip.scrollWidth > strip.clientWidth + 2,
       snap: getComputedStyle(strip).scrollSnapType,
       overflow: getComputedStyle(strip).overflowX,
@@ -205,7 +214,7 @@ console.log("\n=== 375px — STRIP MODE ===");
       bodyOverflow: document.body.scrollWidth - window.innerWidth,
     };
   });
-  check("NO pin-spacer in the DOM at all", s.spacers === 0, `${s.spacers}`);
+  check("NO pin-spacer around the gallery at all", s.spacers === 0, `${s.spacers}`);
   check("strip scrolls natively", s.canScroll && s.overflow === "auto");
   check("scroll-snap is on", /mandatory/.test(s.snap), s.snap);
   check("track carries no transform", s.trackX === 0, `x=${s.trackX}`);
@@ -226,7 +235,7 @@ console.log("\n=== 1440px + prefers-reduced-motion ===");
   const head = await headingState(p);
   check("heading is visible", head.text === "A look inside" && head.h > 20 && !head.hidden);
   const s = await p.evaluate(() => ({
-    spacers: document.querySelectorAll(".pin-spacer").length,
+    spacers: [...document.querySelectorAll(".pin-spacer")].filter((x) => x.querySelector("#gallery")).length,
     overflow: getComputedStyle(document.querySelector(".gallery-strip")).overflowX,
     trackX: Math.round(new DOMMatrix(getComputedStyle(document.querySelector(".gallery-track")).transform).m41),
   }));
@@ -247,13 +256,13 @@ console.log("\n=== resize across 1024px, both directions ===");
 
   const read = async () =>
     p.evaluate(() => ({
-      spacers: document.querySelectorAll(".pin-spacer").length,
+      spacers: [...document.querySelectorAll(".pin-spacer")].filter((x) => x.querySelector("#gallery")).length,
       trackX: Math.round(new DOMMatrix(getComputedStyle(document.querySelector(".gallery-track")).transform).m41),
       overflow: getComputedStyle(document.querySelector(".gallery-strip")).overflowX,
     }));
 
   const start = await read();
-  check("start at 1440: one pin-spacer", start.spacers === 1, `${start.spacers}`);
+  check("start at 1440: one pin-spacer around the gallery", start.spacers === 1, `${start.spacers}`);
 
   await p.setViewportSize({ width: 900, height: 900 });
   await p.waitForTimeout(1500);
@@ -265,7 +274,7 @@ console.log("\n=== resize across 1024px, both directions ===");
   await p.setViewportSize({ width: 1440, height: 900 });
   await p.waitForTimeout(1500);
   const up = await read();
-  check("back to 1440: exactly one pin-spacer, not two", up.spacers === 1, `${up.spacers}`);
+  check("back to 1440: exactly one gallery pin-spacer, not two", up.spacers === 1, `${up.spacers}`);
 
   // And once more, to catch anything that only stacks on the second pass.
   await p.setViewportSize({ width: 900, height: 900 });

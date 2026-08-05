@@ -2,7 +2,12 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { PRICING, PHONE, DIRECTIONS_URL, HOURS_SPEC } from "@/data/info";
+import {
+  PHONE,
+  DIRECTIONS_URL,
+  closeLabelAt,
+  nextOpenLabel,
+} from "@/data/info";
 
 /**
  * THE PERSISTENT BAR. The four things a walk-in decides on, kept on screen for
@@ -22,20 +27,6 @@ import { PRICING, PHONE, DIRECTIONS_URL, HOURS_SPEC } from "@/data/info";
  * at every width, stays equally persistent, and is where a returning cursor
  * already is.
  */
-
-/** Tonight's closing time, or null when we are shut. */
-function todaysClose(now: Date): string | null {
-  const day = now.getDay();
-  const block = HOURS_SPEC.find((b) => (b.dayNums as readonly number[]).includes(day));
-  if (!block) return null;
-  const [h, m] = block.closes.split(":").map(Number);
-  const closesAt = h * 60 + m;
-  const [oh, om] = block.opens.split(":").map(Number);
-  const opensAt = oh * 60 + om;
-  const minutes = now.getHours() * 60 + now.getMinutes();
-  if (minutes >= closesAt || minutes < opensAt) return null;
-  return block.closeLabel;
-}
 
 /**
  * Scroll position and wall-clock are both external systems, so they are read
@@ -60,13 +51,33 @@ const subscribe = (onChange: () => void) => {
   };
 };
 
-const snapshot = () =>
-  `${window.scrollY > window.innerHeight * 0.85}|${todaysClose(new Date()) ?? ""}`;
-const serverSnapshot = () => "false|";
+/**
+ * THE STATUS, AND ONLY THE STATUS. Whether we are open, and the one time that
+ * matters either way — tonight's close if we are, the next opening if we are
+ * not.
+ *
+ * THE PRICE IS GONE FROM THIS BAR. It was the loudest thing in it, and it was
+ * the one fact a persistent bar is worst at carrying: the price depends on the
+ * service, the service depends on the clock, and a figure that changes under
+ * the reader at half past three is a bar that looks broken rather than
+ * informative. It is still on the page three times — the hero, the contact
+ * card, the footer — each next to the hours that qualify it. What a bar riding
+ * over the whole site is actually for is the fact that goes stale: are they
+ * open right now.
+ */
+const snapshot = () => {
+  const now = new Date();
+  const shown = window.scrollY > window.innerHeight * 0.85;
+  return `${shown}|${closeLabelAt(now) ?? ""}|${nextOpenLabel(now)}`;
+};
+// SSR emits the hidden state, so nothing renders before the client knows what
+// time it is where the visitor is — a server-rendered guess would flash the
+// wrong status on hydration.
+const serverSnapshot = () => "false||";
 
 export function StickyInfoBar() {
   const reduce = useReducedMotion();
-  const [shownFlag, closeLabel] = useSyncExternalStore(
+  const [shownFlag, closeLabel, nextOpen] = useSyncExternalStore(
     subscribe,
     snapshot,
     serverSnapshot
@@ -103,7 +114,7 @@ export function StickyInfoBar() {
     <AnimatePresence>
       {shown && (
         <motion.aside
-          aria-label="Price, hours and contact"
+          aria-label="Hours and contact"
           className="fixed inset-x-0 bottom-0 z-nav border-t border-steel/25 bg-char-2/95 backdrop-blur-md md:inset-x-auto md:bottom-6 md:right-6 md:rounded-pill md:border md:px-2 md:py-2 md:shadow-pop lg:right-12"
           initial={reduce ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -111,20 +122,11 @@ export function StickyInfoBar() {
           transition={{ duration: reduce ? 0 : 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
           <div className="flex items-center gap-3 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:gap-2 md:p-0 md:pb-0">
-            {/* Price + status. The two facts, stacked tight. */}
+            {/* ONE FACT NOW, on one line. With the price gone the status is no
+                longer a caption under a figure — it is what the bar is for, so
+                it takes the bar's own size and sits on the centre line with the
+                two actions rather than stacking above nothing. */}
             <div className="min-w-0 flex-1 md:flex-none md:px-4">
-              {/* The price is SAND here, not the accent, and this is the one
-                  place on the site where that differs. Everywhere else the
-                  price figure takes the accent — it is the offer, and it is the
-                  documented exception to "the accent's one job is interaction"
-                  (DIRECTION.md constraint 3). But this bar rides on the black
-                  structure, where the accent measures 3.15:1 as text and cannot
-                  carry a figure anyone has to read. Contrast wins over
-                  consistency; the price is still the largest thing in the bar. */}
-              <p className="font-display text-md font-black leading-none text-sand [font-stretch:87.5%]">
-                {PRICING.lunch}
-                <span className="eyebrow ml-2 text-sand/60">Lunch</span>
-              </p>
               {/* THE STATUS DOT carries a semantic colour pair, green for open
                   and red for shut, which is the one place on the site outside
                   the palette's single accent (DIRECTION.md, Amendments).
@@ -134,16 +136,36 @@ export function StickyInfoBar() {
                   rather than "closed".
 
                   The colour is never the only carrier: the text beside it says
-                  "Open until 9:30 PM" or "Closed now" in full, so nothing here
-                  depends on distinguishing red from green. */}
-              <p className="mt-1 flex items-center gap-1.5 truncate font-sans text-xs text-steel">
+                  "Open until 9:30 PM" or "Closed now · opens 12 PM" in full, so
+                  nothing here depends on distinguishing red from green.
+
+                  CLOSED NOW SAYS WHEN TO COME BACK. On its own it is the least
+                  useful true thing a persistent bar can carry — it tells a
+                  visitor at eleven in the morning to go somewhere else, an hour
+                  before the doors open. The next opening comes from the hours
+                  data (nextOpenLabel), so a day with different hours answers
+                  correctly rather than repeating today's. */}
+              <p className="flex items-center gap-2 truncate font-sans text-sm text-sand">
                 <span
                   aria-hidden="true"
-                  className={`inline-block size-1.5 shrink-0 rounded-pill ${
+                  className={`inline-block size-2 shrink-0 rounded-pill ${
                     open ? "bg-open" : "bg-shut"
                   }`}
                 />
-                {open ? `Open until ${close}` : "Closed now"}
+                {open ? (
+                  <>Open until {close}</>
+                ) : (
+                  <>
+                    Closed now
+                    {/* The space is EXPLICIT. JSX strips the whitespace around
+                        a line break before an expression, so "Closed now" and
+                        the span rendered flush against each other in
+                        `textContent` — invisible in most engines, not in all. */}
+                    {nextOpen && (
+                      <span className="text-steel">{" "}· opens {nextOpen}</span>
+                    )}
+                  </>
+                )}
               </p>
             </div>
 

@@ -1,7 +1,15 @@
 /**
- * verify-illustration.mjs — the Pick Your Fire section and its artwork.
+ * verify-illustration.mjs — the Pick Your Fire artwork and the copy beside it.
  *
  *   node tools/verify-illustration.mjs [url]     (default http://localhost:3111/)
+ *
+ * PICK YOUR FIRE IS NOT A SECTION ANY MORE. It is the second copy block of
+ * `#about`, beside a sticky media column the illustration shares with the
+ * photograph it is match-cut from, so everything here that used to be phrased
+ * as "the section" is phrased against `#pick-your-fire` the block and
+ * `.grill-layer` the artwork. The layout assertions changed with it: the
+ * illustration is on the RIGHT above 1024 and BELOW the copy under it, which
+ * is the reverse of the standalone section on both counts.
  *
  * The one thing worth guarding above all others is DOCUMENT ORDER inside the
  * charcoal half. The raw art drew the wire grate first and the briquettes
@@ -122,47 +130,62 @@ console.log("\n=== THE ARTWORK ===");
   await ctx.close();
 }
 
-console.log("\n=== THE SECTION, AT EACH WIDTH ===");
+console.log("\n=== THE COPY AND THE ARTWORK, AT EACH WIDTH ===");
 for (const [w, h] of [[1440, 900], [768, 1024], [375, 812]]) {
   const ctx = await browser.newContext({ viewport: { width: w, height: h } });
   const p = await ctx.newPage();
   await seed(p);
   await p.goto(URL_, { waitUntil: "networkidle" });
   await p.waitForTimeout(2000);
-  await p.evaluate(() => document.querySelector("#pick-your-fire")?.scrollIntoView({ block: "center" }));
-  await p.waitForTimeout(1400);
+  // The illustration, not the copy: above 1024 the copy scrolls past a sticky
+  // media column, so centring the copy and centring the artwork are different
+  // scroll positions and only the second one has the grill assembled.
+  await p.evaluate(() => document.querySelector(".grill-layer")?.scrollIntoView({ block: "center" }));
+  await p.waitForTimeout(1800);
 
   const s = await p.evaluate(() => {
-    const sec = document.getElementById("pick-your-fire");
+    const block = document.querySelector(".fire-copy");
     const svg = document.querySelector(".dual-grill");
     const head = document.getElementById("fire-heading");
-    const eyebrow = sec.querySelector(".eyebrow");
-    const cta = sec.querySelector("a[href='/menu']");
+    const eyebrow = block.querySelector(".eyebrow");
+    const cta = block.querySelector("a[href='/menu']");
     const sr = svg.getBoundingClientRect(), hr = head.getBoundingClientRect();
     return {
-      sectionBg: getComputedStyle(sec).backgroundColor,
+      sectionBg: getComputedStyle(document.getElementById("pick-your-fire")).backgroundColor,
       svgW: Math.round(sr.width),
+      frameW: Math.round(document.querySelector(".media-frame").getBoundingClientRect().width),
       svgSquare: Math.abs(sr.width - sr.height) <= 2,
       headVisible: +getComputedStyle(head).opacity > 0.99 && hr.height > 20,
       eyebrowText: eyebrow?.textContent?.trim(),
       headText: head.textContent.trim(),
       ctaText: cta?.textContent?.trim(),
-      sideBySide: sr.right <= hr.left + 4,
-      illustrationFirst: sr.top <= hr.top + 2,
+      // Above 1024 the artwork is the RIGHT column; below it, it is the last
+      // block in a single stacked flow.
+      artRight: sr.left >= hr.right - 4,
+      artAfterCopy: sr.top >= hr.top,
+      menuButtons: document.querySelectorAll("#pick-your-fire a[href='/menu']").length,
       overflow: document.body.scrollWidth - window.innerWidth,
     };
   });
 
   console.log(`\n  --- ${w}px ---`);
-  check(`${w}: section keeps the warm ground`, s.sectionBg === "rgb(244, 236, 225)", s.sectionBg);
+  check(`${w}: the section keeps the warm ground`, s.sectionBg === "rgb(244, 236, 225)", s.sectionBg);
   check(`${w}: heading visible`, s.headVisible && s.headText === "Gas or charcoal", `"${s.headText}"`);
   check(`${w}: eyebrow present`, s.eyebrowText === "Pick your fire", `"${s.eyebrowText}"`);
   check(`${w}: CTA present`, /See the menu/.test(s.ctaText || ""), s.ctaText);
+  check(`${w}: exactly ONE menu button on the stage`, s.menuButtons === 1, `${s.menuButtons}`);
   check(`${w}: illustration is square`, s.svgSquare, `${s.svgW}px`);
-  check(`${w}: illustration <= min(480, 88vw)`, s.svgW <= Math.min(480, w * 0.88) + 2, `${s.svgW}px vs ${Math.round(Math.min(480, w * 0.88))}`);
   check(`${w}: no horizontal overflow`, s.overflow <= 0, `${s.overflow}`);
-  if (w >= 768) check(`${w}: two columns, illustration left`, s.sideBySide);
-  else check(`${w}: stacked with the illustration first`, s.illustrationFirst);
+  if (w >= 1024) {
+    // The SVG box is deliberately LARGER than the frame: the chassis rim is
+    // scaled up until it fills the frame, so the viewBox overhangs it.
+    check(`${w}: the frame is min(520, 42vw)`, s.frameW === Math.round(Math.min(520, w * 0.42)), `${s.frameW}px vs ${Math.round(Math.min(520, w * 0.42))}`);
+    check(`${w}: the artwork is scaled up to fill the frame`, s.svgW > s.frameW && s.svgW < s.frameW * 1.15, `svg ${s.svgW}px in a ${s.frameW}px frame`);
+    check(`${w}: two columns, illustration RIGHT`, s.artRight);
+  } else {
+    check(`${w}: illustration <= min(480, 88vw)`, s.svgW <= Math.min(480, w * 0.88) + 2, `${s.svgW}px vs ${Math.round(Math.min(480, w * 0.88))}`);
+    check(`${w}: stacked, illustration after the copy`, s.artAfterCopy);
+  }
   await ctx.close();
 }
 

@@ -9,8 +9,18 @@ import { PRICING } from "@/data/info";
  * the cells share the width at 375 instead of overflowing.
  */
 const CELLS = [
-  { label: "Lunch", value: PRICING.lunch, note: "per person", loud: true },
-  { label: "Dinner", value: PRICING.dinner, note: "per person", loud: true },
+  {
+    label: PRICING.lunch.label,
+    value: PRICING.lunch.display,
+    note: "per person",
+    loud: true,
+  },
+  {
+    label: PRICING.dinner.label,
+    value: PRICING.dinner.display,
+    note: "per person",
+    loud: true,
+  },
   {
     label: "Your table",
     value: PRICING.seatingLabel,

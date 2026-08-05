@@ -1,80 +1,75 @@
 import {
-  SITE_URL,
-  BUSINESS,
-  PHONE,
-  ADDRESS_PARTS,
-  GEO,
-  HOURS_SPEC,
-  SOCIALS,
-} from "@/data/info";
+  graph,
+  restaurantNode,
+  websiteNode,
+  menuNode,
+  breadcrumbNode,
+  faqNode,
+  assertClean,
+} from "@/lib/schema";
+import { FAQS } from "@/data/faq";
 
-// JSON-LD is built from the same restaurant data the page renders, so the
-// structured data can never disagree with the visible hours/address/phone —
-// which is exactly the mismatch Google penalizes.
+/* ===========================================================================
+   THE PAGE GRAPHS.
 
-const restaurant = {
-  "@context": "https://schema.org",
-  "@type": "Restaurant",
-  "@id": `${SITE_URL}/#restaurant`,
-  name: BUSINESS.name,
-  url: SITE_URL,
-  image: `${SITE_URL}/og.png`,
-  telephone: PHONE.href.replace("tel:", ""),
-  servesCuisine: BUSINESS.cuisine,
-  priceRange: BUSINESS.priceRange,
-  // The site is walk-in only ("No reservations needed").
-  acceptsReservations: false,
-  menu: `${SITE_URL}/menu`,
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: ADDRESS_PARTS.street,
-    addressLocality: ADDRESS_PARTS.city,
-    addressRegion: ADDRESS_PARTS.state,
-    postalCode: ADDRESS_PARTS.zip,
-    addressCountry: ADDRESS_PARTS.country,
-  },
-  geo: {
-    "@type": "GeoCoordinates",
-    latitude: GEO.lat,
-    longitude: GEO.lng,
-  },
-  openingHoursSpecification: HOURS_SPEC.map((h) => ({
-    "@type": "OpeningHoursSpecification",
-    dayOfWeek: h.days,
-    opens: h.opens,
-    closes: h.closes,
-  })),
-  sameAs: SOCIALS.map((s) => s.href),
-};
+   These are thin: every node is built in src/lib/schema.ts from the same
+   records the page renders, so nothing here decides anything about the
+   restaurant. What lives in this file is WHICH nodes a route emits and the
+   single <script> that carries them.
 
-export function RestaurantSchema() {
+   ONE `@graph` PER PAGE, not one <script> per node. Nodes reference each other
+   by `@id` (the Menu points at the Restaurant, the Restaurant points back at
+   the Menu), and a parser can only resolve those references inside one
+   document. Three separate scripts describe three unlinked things.
+
+   `assertClean` runs at RENDER TIME, which on these static routes is build
+   time — so an empty string, a stray TODO or a relative URL fails the build
+   rather than shipping to a crawler. See lib/schema.ts.
+   =========================================================================== */
+
+function JsonLd({ data }: { data: object }) {
+  assertClean(data);
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(restaurant) }}
+      // JSON.stringify escapes nothing dangerous here — every value is a
+      // build-time constant from our own data files, and `<` cannot appear.
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
   );
 }
 
+/**
+ * The homepage: the restaurant itself, the site it belongs to, and the eight
+ * questions the page visibly answers.
+ */
+export function RestaurantSchema() {
+  return (
+    <JsonLd data={graph(restaurantNode(), websiteNode(), faqNode(FAQS))} />
+  );
+}
+
+/**
+ * /menu: the full menu generated from data/menu.ts, the restaurant it belongs
+ * to (so the two are one entity to a parser), and the trail back to home.
+ */
+export function MenuSchema({
+  breadcrumbs,
+}: {
+  breadcrumbs: { name: string; path: string }[];
+}) {
+  return (
+    <JsonLd
+      data={graph(menuNode(), restaurantNode(), breadcrumbNode(breadcrumbs))}
+    />
+  );
+}
+
+/** A trail on its own, for routes with nothing else to say. */
 export function BreadcrumbSchema({
   items,
 }: {
   items: { name: string; path: string }[];
 }) {
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: items.map((item, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      name: item.name,
-      item: item.path === "/" ? SITE_URL : `${SITE_URL}${item.path}`,
-    })),
-  };
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
+  return <JsonLd data={graph(breadcrumbNode(items))} />;
 }
