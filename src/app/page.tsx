@@ -15,17 +15,24 @@ import { SeamMotion } from "@/components/SeamMotion";
 import { pageMeta } from "@/lib/seo";
 
 /**
- * TITLE AND DESCRIPTION LEAD WITH THE OFFER.
+ * TITLE AND DESCRIPTION LEAD WITH THE OFFER, AND NOW WITH THE FORMAT.
  *
- * The description was a sentence about self-serve grilling — true, and the
- * last thing a searcher scanning a results page is deciding on. Price and
- * category first, then the differentiator, then the action. 143 characters,
- * inside the ~160 Google renders.
+ * "Self-serve" is first because it is both the differentiator and a term people
+ * search — "KBBQ buffet" and "self serve korean bbq" are how someone describes
+ * this format when they do not know the restaurant's name. It replaced "Gas or
+ * charcoal grills at every table", which is a real fact and the wrong one for a
+ * results page: it answers a question nobody has yet.
+ *
+ * The order is category, price, mechanic, action. 141 characters, inside the
+ * ~160 Google renders. The title is unchanged and stays clean.
+ *
+ * The Open Graph and Twitter descriptions are this same string — `pageMeta`
+ * passes one value to all three, so they cannot drift.
  */
 export const metadata: Metadata = pageMeta({
   title: "KM.BBQ — All You Can Eat Korean BBQ in Oceanside, CA",
   description:
-    "All-you-can-eat Korean BBQ in Oceanside. $21.99 lunch, $30.99 dinner. Gas or charcoal grills at every table. Walk in or reserve.",
+    "Self-serve all-you-can-eat Korean BBQ in Oceanside. $21.99 lunch, $30.99 dinner. Load up at the bar, grill at your table. Walk in or reserve.",
   path: "/",
   titleAbsolute: true,
 });

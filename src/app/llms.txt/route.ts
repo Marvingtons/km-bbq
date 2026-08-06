@@ -39,9 +39,13 @@ function body(): string {
 
   return `# ${BUSINESS.name}
 
-> ${BUSINESS.tagline}. Every table has its own grill, gas or charcoal, and you cook at the table.
+> Self-serve ${BUSINESS.tagline}. Load your plate at the bar, grill it at your own table, and go back as many times as you like.
 
-${BUSINESS.name} (also written KM BBQ or KM Korean BBQ) is an all-you-can-eat Korean BBQ restaurant in Oceanside, California.
+${BUSINESS.name} (also written KM BBQ or KM Korean BBQ) is a self-serve all-you-can-eat Korean BBQ restaurant in Oceanside, California.
+
+## How it works
+
+The format is self-serve, which is the thing most likely to be misunderstood from a listing. There are no per-dish orders and no kitchen tickets: you take a plate to the bar, load it from the spread, cook it on the grill built into your own table, and go back for more as many times as you want inside the ${PRICING.seatingMinutes}-minute seating. Every table has its own grill and it can be gas or charcoal, at the same price either way.
 
 ## Location and contact
 

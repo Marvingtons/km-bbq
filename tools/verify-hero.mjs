@@ -77,6 +77,7 @@ const el = await page.evaluate(() => {
     autoplay: v.autoplay,
     playsInline: v.playsInline || v.hasAttribute("playsinline"),
     hasLoopAttr: v.hasAttribute("loop"),
+    controls: v.controls,
     preload: v.getAttribute("preload"),
     w: v.getAttribute("width"),
     h: v.getAttribute("height"),
@@ -89,23 +90,55 @@ const el = await page.evaluate(() => {
 check("a <video> is mounted in the hero", !!el);
 if (!el) { console.log("\nNo video — nothing further to measure."); await browser.close(); process.exit(1); }
 
-check("served from R2, not from /public", /^https:\/\/pub-[a-z0-9]+\.r2\.dev\//.test(el.src), el.src);
+/* THREE OF THESE ARE INVERTED, and all three for the same reason: the file was
+   re-encoded. See the header of HeroBackdrop.tsx.
+
+   SOURCE. Was "served from R2, not from /public". The R2 object is the ORIGINAL
+   — 2.19MB, an unused AAC track, and `moov` at 99.5% of the file, so nothing
+   could decode until the whole thing had landed. The re-encode is 0.93MB and
+   faststart, and the bucket is not writable from the build, so the file that
+   ships is the one in /public. Asserted the other way round now: a bare R2 URL
+   here means the slow original is back.
+
+   PRELOAD. Was "not 'auto' (must not compete with LCP)". Correct while the
+   element mounted after `load` and could not play early anyway. With a
+   faststart file the fetch is the whole point, and the poster keeps the LCP
+   slot on its own (priority, 58KB, candidate area matched to the video's).
+
+   LOOP. Was "no `loop` — looping would replay the empty plate from 0". The
+   empty plate is not in the file any more (`-ss 2.6`), so frame zero IS the
+   steak and looping to it is correct. This is the assertion that would catch
+   the file being swapped back without the trim. */
+check(
+  "served from /public and not the un-faststart R2 original",
+  el.src.startsWith("/") && /\.mp4$/.test(el.src) && !/r2\.dev/.test(el.src),
+  el.src
+);
 check("muted", el.muted === true);
 check("autoPlay", el.autoplay === true);
 check("playsInline (required for iOS inline autoplay)", el.playsInline === true);
-check("preload is not 'auto' (must not compete with LCP)", el.preload !== "auto", `preload="${el.preload}"`);
+check("preload is 'auto' (faststart file, fetch is the point)", el.preload === "auto", `preload="${el.preload}"`);
 check("intrinsic ratio declared (CLS safety)", el.w === "1920" && el.h === "1080", `${el.w}x${el.h}`);
 check(
-  "no `loop` attribute — looping would replay the empty plate from 0",
-  el.hasLoopAttr === false
+  "`loop` is set — the empty plate is trimmed out of the file, so 0 is the steak",
+  el.hasLoopAttr === true
 );
+check("no controls — the poster is the graceful floor", el.controls !== true);
 check("a poster is set on the element", !!el.poster, el.poster || "");
 check("it is actually playing", el.paused === false, `paused=${el.paused}`);
+/* THE EMPTY-PLATE CHECK MOVED FROM THE PLAYHEAD TO THE FILE.
+   It read `currentTime >= 2.5`, which was how the old build skipped the bare
+   plate and the oiling hand: seek past them on every loop. The trim removed
+   them from the source, so the same guarantee is now "the file is the short
+   one" — 7.57s, not the original 10.17s. Asserting currentTime >= 2.5 against
+   a trimmed file would demand a seek that would put the playhead a third of
+   the way in for no reason. */
 check(
-  "playback started past the empty-plate opening",
-  el.currentTime >= 2.5,
-  `currentTime ${el.currentTime?.toFixed(2)}s`
+  "the empty-plate opening is trimmed out of the file",
+  el.duration > 0 && el.duration < 8.5,
+  `duration ${el.duration?.toFixed(2)}s (original was 10.17s)`
 );
+check("playback is at a real frame", el.currentTime >= 0, `currentTime ${el.currentTime?.toFixed(2)}s`);
 
 check("no failed network requests", failedReq.length === 0, failedReq.slice(0, 2).join(", "));
 
@@ -261,13 +294,19 @@ const cls = await page.evaluate(() => window.__cls);
 check("CLS is 0 through hero load", cls < 0.005, `CLS ${cls.toFixed(4)}`);
 await ctx.close();
 
-/* ------------------------------------------------- FALLBACK: R2 blocked */
-console.log("\n=== FALLBACK — R2 unreachable ===");
+/* --------------------------------------- FALLBACK: the clip is unreachable */
+/* THE ROUTE PATTERN HAS TO FOLLOW THE SOURCE. It blocked `**\/*.r2.dev/**`,
+   which after the re-encode matches nothing — so the video loaded normally and
+   the "never fades in over it" assertion failed against a working page instead
+   of a broken one. A fallback test that cannot trigger the fallback is worse
+   than no test, because it reports PASS for the wrong reason right up until it
+   reports FAIL for the wrong reason. */
+console.log("\n=== FALLBACK — the clip is unreachable ===");
 {
   const c = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const p = await c.newPage();
   await p.addInitScript(() => { try { sessionStorage.setItem("km-preloader-shown", "1"); } catch {} });
-  await p.route("**/*.r2.dev/**", (route) => route.abort());
+  await p.route("**/kmbbq-hero.mp4", (route) => route.abort());
   await p.goto(URL_, { waitUntil: "domcontentloaded" });
   await p.waitForTimeout(2500);
   const s = await p.evaluate(() => {
@@ -290,7 +329,7 @@ console.log("\n=== prefers-reduced-motion: reduce ===");
   const c = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
   const p = await c.newPage();
   await p.addInitScript(() => { try { sessionStorage.setItem("km-preloader-shown", "1"); } catch {} });
-  const r2 = [];
+
   p.on("request", (r) => { if (/r2\.dev/.test(r.url())) r2.push(r.url()); });
   await p.goto(URL_, { waitUntil: "networkidle" });
   await p.waitForTimeout(2000);
@@ -298,9 +337,23 @@ console.log("\n=== prefers-reduced-motion: reduce ===");
     video: !!document.querySelector("#home video"),
     posterComplete: (() => { const i = document.querySelector("#home img"); return !!i && i.complete && i.naturalWidth > 0; })(),
   }));
-  check("no <video> is mounted at all", s.video === false);
-  check("the clip is never even requested", r2.length === 0, `${r2.length} request(s)`);
-  check("the poster is what renders", s.posterComplete === true);
+  /* INVERTED. This asserted that reduced motion mounted no <video> and never
+     requested the clip.
+
+     That gate was removed with the mobile-morph pass, and removing it was the
+     point rather than a side effect: the video is now the single element the
+     whole hero-to-grill sequence is built on, so unmounting it under a
+     preference does not disable an animation, it removes the subject of one.
+     What reduced motion actually objects to is the section-scale
+     choreography — the pin, the scrub, the clip — and that is gated properly in
+     MediaStage and PickYourFire, which build no timeline at all under it. Those
+     opt-outs are asserted in verify-window and verify-assembly.
+
+     A muted, looping, decorative background loop is not what the preference is
+     about. What matters here is that nothing SCROLL-DRIVEN runs, which the
+     `clip none` assertion in verify-window covers. */
+  check("the video still mounts (it is the morph's subject, not an effect)", s.video === true);
+  check("the poster is what renders underneath", s.posterComplete === true);
   await c.close();
 }
 

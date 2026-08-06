@@ -67,9 +67,17 @@ export function About() {
               we have leaned on for years. You grill it fresh, right where you
               sit, cooked exactly how you like it.
             </p>
+            {/* SELF-SERVE, NOT ORDERING. This read "Order more whenever you
+                want", which describes a restaurant where you flag someone down
+                — and the mechanic here is the opposite of that and is the
+                whole differentiator. The closing "Good food, a hot grill, and
+                no reason to rush" went with it: "take your time" above already
+                carries it, and three sentences of pace in a row is the tone
+                this site does not use. */}
             <p>
-              Pull up a chair and take your time. Order more whenever you want.
-              Good food, a hot grill, and no reason to rush.
+              Pull up a chair and take your time. Load up at the self-serve bar
+              as many times as you want. No waiting for a server, no waiting for
+              a kitchen. Your food is ready when you are.
             </p>
           </div>
         </div>

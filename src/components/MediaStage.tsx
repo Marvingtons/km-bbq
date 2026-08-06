@@ -4,7 +4,7 @@ import { useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { HeroBackdrop } from "./HeroBackdrop";
-import { MOTION } from "@/lib/motion";
+import { MOTION, MOTION_OK } from "@/lib/motion";
 import { findEmbers, buildEmberLoop } from "@/lib/embers";
 import {
   collectGrill,
@@ -145,9 +145,31 @@ export function MediaStage() {
     const ctx = gsap.context(() => {
       const mm = gsap.matchMedia();
 
-      mm.add(
-        "(min-width: 1024px) and (prefers-reduced-motion: no-preference)",
-        () => {
+      /* EVERY WIDTH, MOTION ONLY — and this bracket is the second of the three
+         gates that kept the morph off phones.
+
+         It read `(min-width: 1024px) and (prefers-reduced-motion:
+         no-preference)`, so below 1024 this builder never ran: no dock, no pin,
+         no clip, and the fixed window stayed the hero's absolutely-positioned
+         backdrop that scrolled away. PickYourFire.tsx then filled the gap with a
+         separate one-shot assembly on the SVG, so a phone got a video and a
+         grill as two unrelated elements.
+
+         NOTHING BELOW IS PARAMETERISED BY WIDTH, and it never needed to be.
+         Every number here is measured off real boxes — `.media-frame`,
+         `.media-rest`, the window's own rect — so the sequence adapts to a
+         square that is `min(88vw, 56vh)` on a phone exactly as it adapts to one
+         that is `min(520px, 42vw)` on a laptop. The only thing that changed to
+         make this work is the CSS that gives those boxes geometry at all
+         widths, and the hold that keeps the body copy out of the pin.
+
+         THE PIN TARGET IS STILL THE SECTION, deliberately. On a wide screen the
+         section IS one viewport (`.fire-stage` is `min-height: 100vh` and the
+         section has no padding), and on a phone it is the hold plus the copy
+         below it — taller than the screen, pinned at `top top`, so the hold is
+         what you see for the whole sequence and the copy is what the release
+         scrolls you onto. One trigger, one element, both breakpoints. */
+      mm.add(MOTION_OK, () => {
           /* ELEMENTS, NEVER SELECTOR STRINGS, for anything outside this
              component. `gsap.context(fn, root)` scopes every selector string
              inside it to `root`, including a ScrollTrigger's `trigger` — so
@@ -644,13 +666,14 @@ export function MediaStage() {
             frame.style.clipPath = "";
             gsap.set(win, { clearProps: "transform,opacity,visibility" });
           };
-        }
-      );
+      });
 
-      /* Below 1024, and for anyone who has asked for less motion, nothing here
-         runs at all: the window is `position: absolute` inside the hero, no
-         clip is ever written, and the illustration is a block in normal
-         flow with its own entrance. */
+      /* REDUCED MOTION, AND ONLY REDUCED MOTION, gets the static page — width
+         alone never does. Nothing above runs: the window stays `position:
+         absolute` inside the hero, no clip is ever written, no pin is created,
+         and the illustration is a complete grill in normal flow under the copy.
+         That is also exactly what a failed JS load produces, which is the
+         property the whole file is built to keep. */
     }, root);
 
     return () => ctx.revert();

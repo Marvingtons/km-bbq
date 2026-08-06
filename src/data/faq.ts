@@ -21,6 +21,18 @@ import { MENU } from "./menu";
      shows a strip-mall unit and that is the whole of what we know. A plausible
      "free parking in the plaza" is exactly the kind of small invention that
      costs trust at the door. Flagged as TODO: CONFIRM WITH CLIENT.
+
+     HOW PREMIUM AND SIGNATURE REACH THE TABLE. The self-serve bar is
+     established for the core spread and the site now says so in five places.
+     Whether the Premium and dinner-only Signature cuts are ALSO on that bar, or
+     are brought out by staff, is not established anywhere in the record — and
+     the two answers imply visibly different visits. So nothing on this site
+     states either one. Every sentence that mentions those tiers talks about
+     what the price INCLUDES and stops there, which is a fact we do hold.
+
+     This is the same discipline as the parking answer, and it is easy to break
+     by accident: a single "…and the Premium cuts are there too" would do it.
+     Flagged as TODO: CONFIRM WITH CLIENT.
    =========================================================================== */
 
 export interface Faq {
@@ -32,13 +44,21 @@ const signature = MENU.find((c) => c.id === "signature");
 const signatureCount = signature?.items.length ?? 0;
 
 export const FAQS: Faq[] = [
+  // FIRST, because it is the question the format actually raises. Someone who
+  // has never been to a self-serve KBBQ house does not know whether they order,
+  // queue, or get up — and every other answer on this list reads differently
+  // once they do.
+  {
+    q: "How does it work?",
+    a: `Serve yourself. Load your plate at the self-serve bar, grill at your table, and go back as many times as you want within your ${PRICING.seatingMinutes} minutes. No ordering, no waiting.`,
+  },
   {
     q: "How much is all-you-can-eat?",
     a: `${PRICING.lunch.display} per person for lunch, until ${LUNCH_UNTIL}, and ${PRICING.dinner.display} per person for dinner after that. One price covers the whole menu — there are no per-item charges.`,
   },
   {
     q: "How long do we get at the table?",
-    a: `${PRICING.seatingMinutes} minutes, with last call at ${PRICING.lastCallMinutes} minutes so there is time for a final round. Order as many times as you like within that.`,
+    a: `${PRICING.seatingMinutes} minutes, with last call at ${PRICING.lastCallMinutes} minutes so there is time for a final round. Go back as many times as you like within that.`,
   },
   {
     q: "Do you take reservations?",
@@ -52,9 +72,15 @@ export const FAQS: Faq[] = [
     q: "Is it gas or charcoal?",
     a: "Both. Every table has its own grill built into it, and you can ask for charcoal when you walk in — the price is the same either way.",
   },
+  // TWO SENTENCES, AND THE SPLIT IS DELIBERATE. The first says what the spread
+  // is and where it lives; the second says Premium is included in the price and
+  // says NOTHING about how it reaches the table. Written as one sentence — "…all
+  // at the self-serve bar, and so is everything on the Premium list" — it would
+  // claim the Premium cuts are self-serve, which is not established. See the
+  // accuracy note at the foot of this file.
   {
     q: "What is included in the price?",
-    a: "Banchan, fresh vegetables and wraps, house dipping sauces, drink refills and ice cream are all included. So is everything on the Premium list.",
+    a: "Banchan, fresh vegetables and wraps, house dipping sauces, drink refills and ice cream are all included, and the spread lives at the self-serve bar. Everything on the Premium list is included in the price too.",
   },
   {
     q: "What is the difference between lunch and dinner?",

@@ -339,22 +339,28 @@ body {
     padding-block: var(--spacing-section);
   }
 
-  /* The wrappers exist for the grid above 1024 and are pure overhead below it,
-     so they stop generating boxes entirely and the illustration becomes an item
-     of the stage's own column, straight after the copy that explains it.
+  /* The wrappers exist for the composed layouts and are pure overhead in the
+     floor, so they stop generating boxes entirely and their contents become
+     items of the stage's own column.
 
-     `order` is gone with the second copy block: the DOM order IS the stacked
-     reading order now (copy, then illustration), so there is nothing left to
-     reorder. */
+     `.fire-hold` is the box that is exactly one viewport once the morph runs —
+     the heading at the top, the media frame centred under it. In the floor it
+     has no reason to exist, so it does not generate a box either and the head
+     simply sits above the body. */
+  .fire-hold,
   .media-col,
   .media-frame {
     display: contents;
   }
 
-  /* Stacked reading order below 1024: the copy, then the illustration it
-     explains. `.fire-still` — a full-bleed frame of the hero clip that used to
-     sit above the copy — is gone; see the note in PickYourFire.tsx. */
-  .copy-block {
+  /* Stacked reading order in the floor: the heading, the copy it introduces,
+     then the illustration. `.fire-still` — a full-bleed frame of the hero clip
+     that used to sit above the copy — is gone; see the note in
+     PickYourFire.tsx. */
+  .fire-head {
+    order: 1;
+  }
+  .fire-body {
     order: 2;
   }
   .grill-layer {
@@ -1070,39 +1076,55 @@ body {
 }
 
 /* ===========================================================================
-   PICK YOUR FIRE - THE STICKY MEDIA COLUMN. DELIBERATELY OUTSIDE
-   @layer components, for the same reason the pinned gallery is: Tailwind's
-   utilities live in a later cascade layer, so a layered rule loses to any
-   utility on the same element no matter how specific it is.
+   PICK YOUR FIRE — THE MORPH'S GEOMETRY. EVERY WIDTH, MOTION ONLY.
 
-   Same bracket as the pinned gallery and the hero's window — 1024px and
-   `no-preference`, declared here and once more in gsap.matchMedia(). Below it
-   the stacked floor above is the whole layout and no ScrollTrigger is created.
+   DELIBERATELY OUTSIDE @layer components, for the same reason the pinned
+   gallery is: Tailwind's utilities live in a later cascade layer, so a layered
+   rule loses to any utility on the same element no matter how specific it is.
 
-   THE SECTION IS ONE VIEWPORT AND IT PINS. It locks at `top top` and holds for
-   PIN_VH (MediaStage.tsx) while scroll drives the sequence. The layout itself
-   never moves during the hold, which is the whole point: the composed view —
-   copy left, media right — used to exist for a moment and then scroll apart
-   while the animation it belonged to was still running.
+   THIS BRACKET USED TO BE `(min-width: 1024px)` AND THAT WAS THE BUG.
+   ---------------------------------------------------------------------------
+   The mobile morph was specified once before and never shipped, and the reason
+   was not one gate but three, all agreeing with each other so none of them
+   looked wrong:
 
-   So there is no travel to build into this height, and nothing in here is
-   sticky. Both columns are centred, against each other and against the screen,
-   and they stay exactly where the pin puts them.
+     1. THIS BLOCK. Every box the morph measures — the fixed window, the square
+        frame, the rest box, the absolutely-positioned illustration — existed
+        only above 1024. Below it `.media-frame` was `display: contents` and
+        `.media-rest` was `display: none`, so there was no geometry to clip
+        even if something had tried.
+     2. MediaStage.tsx registered its whole builder in the same 1024 bracket,
+        so below it no ScrollTrigger, no pin and no clip were ever created.
+     3. PickYourFire.tsx had a SEPARATE `(max-width: 1023px)` builder that
+        played a one-shot assembly on the SVG and never touched the video.
 
-   It was 140vh with a sticky media column and 40vh of scrubbed travel. That
-   version is why the copy left the top of the screen while the grill was still
-   arriving at the right of it.
+   So mobile was not a broken morph. It was a different, working feature: a
+   video up in the hero that scrolled away, and a grill that assembled itself
+   in a block further down. Two elements, exactly as reported.
+
+   The fix is to make the geometry a property of MOTION rather than of width.
+   Everything below is shared; the 1024 block after it adds only the two-column
+   composition, because that is the only thing that is genuinely about having a
+   wide screen.
+
+   THE STAGE IS PINNED AND ITS FIRST VIEWPORT IS THE COMPOSED VIEW. It locks at
+   `top top` and holds for PIN_VH (MediaStage.tsx) while scroll drives the
+   sequence. Nothing inside moves during the hold, which is the whole point: the
+   composed view used to exist for a moment and then scroll apart while the
+   animation it belonged to was still running.
    =========================================================================== */
-@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+@media (prefers-reduced-motion: no-preference) {
   .fire-stage {
-    /* Square, and capped by the column so it cannot overhang the grid at any
-       width between 1024 and 1280 where the columns are still growing.
+    /* THE FRAME IS SQUARE AT EVERY WIDTH, and it has to be: `round 50%` is a
+       circle only on a square box, and on anything else it is a squircle,
+       which cannot be concentric with a round chassis rim. The landscape rest
+       shape comes from --rest-inset, which is a property of the CLIP.
 
-       IT STAYS SQUARE THROUGH THE WHOLE MORPH. `round 50%` is a circle only on
-       a square box; on anything else it is a squircle, and a squircle cannot
-       be concentric with a round chassis rim. The landscape rest shape comes
-       from --rest-inset below, which is a property of the CLIP. */
-    --frame: min(520px, 42vw, 100%);
+       On a phone the square is bounded by BOTH axes. 88vw keeps a gutter at
+       390; 56vh is what stops the frame eating the whole screen on a short
+       landscape phone, where 88vw would be taller than the viewport it has to
+       sit inside with a heading above it. */
+    --frame: min(88vw, 56vh);
     /* How much of the square the footage does NOT fill at rest, top and
        bottom. 12% each end leaves a 1.32:1 landscape panel — near enough the
        proportion the hero's own frame has, so the hand-over is a continuation
@@ -1111,56 +1133,81 @@ body {
        the clip, so the two cannot drift. */
     --rest-inset: 12%;
 
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: var(--grid-gap);
-    row-gap: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
     padding-block: 0;
-    /* ONE VIEWPORT, and that is the pin's whole premise: the section locks at
-       `top top`, so anything taller than the screen would be off it for the
-       entire hold. Both columns are centred against each other and against the
-       screen, and neither moves again until the pin releases. */
-    min-height: 100vh;
-    align-content: center;
-    align-items: center;
   }
 
-  .copy-block {
-    grid-column: 1 / span 6;
-    grid-row: 1;
-    min-width: 0;
+  /* ONE VIEWPORT, AND IT IS WHAT THE PIN HOLDS. The heading sits at the top of
+     it and the frame is centred in what is left, so the composed view is a
+     title and the object it names — the phone's version of copy-left,
+     media-right.
+
+     The BODY COPY IS NOT IN HERE, and that is the point of the box existing.
+     `.fire-stage` is taller than one viewport on a phone (this hold, then the
+     paragraphs and the pill), and the pin locks its TOP — so during the hold
+     you see exactly this, and the copy arrives by scrolling once the pin
+     releases. */
+  .fire-hold {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* THE HEADING IS AT THE TOP, NOT CENTRED WITH THE FRAME. Centring the pair
+       as a group left a third of the screen empty above the eyebrow and read as
+       a mis-set block rather than as a title over an object. `flex-start` puts
+       the head against the top of the hold and `margin-block: auto` on the
+       media column centres the frame in whatever is left under it. */
+    justify-content: flex-start;
+    min-height: 100vh;
+    /* Clear of the fixed nav, which is 68px and sits over this. */
+    padding-block: calc(var(--nav-h, 68px) + 1rem) 1rem;
+    width: 100%;
+  }
+
+  .fire-head {
+    width: 100%;
+    order: 0;
   }
 
   .media-col {
     display: block;
-    grid-column: 7 / -1;
-    grid-row: 1;
+    order: 0;
     min-width: 0;
+    margin-block: auto;
   }
 
-  /* NOT STICKY ANY MORE — the whole section is pinned, so the frame holds
-     still because the page does. A sticky element inside a pinned one is two
-     mechanisms doing one job, and the second one only shows up as a frame of
-     drift at the moment the pin engages. */
+  /* The copy, after the hold — so on a phone it is what the unpin reveals. */
+  .fire-body {
+    order: 0;
+    padding-block: var(--spacing-section);
+  }
+
+  /* NOT STICKY — the stage is pinned, so the frame holds still because the page
+     does. A sticky element inside a pinned one is two mechanisms doing one job,
+     and the second only shows up as a frame of drift when the pin engages. */
   .media-frame {
     display: block;
     position: relative;
     width: var(--frame);
     /* SQUARE BY RATIO, not by repeating the width expression as a height.
-       `--frame` carries a `100%` guard so the frame cannot overhang its column;
-       as a HEIGHT that percentage resolves against a column with no definite
-       height — the row is centred now rather than stretched — so `min()` took
-       it as zero and the frame collapsed, taking the clip's geometry with it.
-       A ratio cannot be indefinite. */
+       `--frame` carries a `100%` guard on desktop so the frame cannot overhang
+       its column; as a HEIGHT that percentage resolves against a column with no
+       definite height — the row is centred rather than stretched — so `min()`
+       took it as zero and the frame collapsed, taking the clip's geometry with
+       it. A ratio cannot be indefinite. */
     aspect-ratio: 1;
-    /* Right-aligned in its span rather than centred: the frame keeps the
-       grid's own right edge, which is the alignment the departing hero panel
-       and every card below it already share. */
-    margin-left: auto;
+    margin-inline: auto;
     /* The artwork is scaled up until its rim fills the frame, so its own
        viewBox overhangs. Nothing outside the rim is drawn, but a clip here
        means that stays true if the art is ever regenerated. */
     overflow: hidden;
+    /* THE REST STATE IS DECLARED IN CSS, NOT ONLY IN THE TIMELINE. The server
+       paints this before any script runs; without it the first frame is a whole
+       assembled grill, which then vanishes the moment MediaStage writes its
+       first clip. Same shape `.media-rest` describes — the SSR copy, not a
+       second opinion. */
+    clip-path: inset(var(--rest-inset) 0% var(--rest-inset) 0% round var(--radius-card));
   }
 
   /* THE REST BOX. Where the clip sits before the morph, and where the hero's
@@ -1177,48 +1224,102 @@ body {
   /* The illustration fills the frame. The footage is not in here — it is the
      fixed layer above (see `.media-stage`), co-clipped to the same shape, so
      the chassis is only ever painted where the footage is until the cut takes
-     the footage away. */
+     the footage away.
+
+     THE MATCH. The artwork's outer rim is 138 x 139.7 of a 150-unit viewBox and
+     sits slightly above centre, so dropped into a square box it renders ~7%
+     small and a little high — a visible ring of empty frame, and a chassis that
+     slides sideways under a photograph that did not. PickYourFire.tsx measures
+     the rim (bbox plus its own stroke, which getBBox does not include) and
+     writes the three numbers that put its centre on the frame's centre and its
+     diameter on the frame's width. Percentages of this element's own box, so
+     they are constants of the ARTWORK and survive every resize. The fallbacks
+     are the untransformed art, which is what a measurement failure should
+     degrade to. */
   .grill-layer {
     position: absolute;
     inset: 0;
     width: auto;
-  }
-
-  /* THE REST STATE IS DECLARED IN CSS, NOT ONLY IN THE TIMELINE. The server
-     paints this before any script runs; without it the first frame is a whole
-     assembled grill sitting in About's right column, which then vanishes the
-     moment MediaStage writes its first clip. Same shape `.media-rest`
-     describes — the SSR copy, not a second opinion. */
-  .media-frame {
-    clip-path: inset(var(--rest-inset) 0% var(--rest-inset) 0% round var(--radius-card));
+    transform-origin: 0 0;
+    transform: translate(var(--dg-x, 0px), var(--dg-y, 0px))
+      scale(var(--dg-fit, 1));
   }
 
   /* THE MEDIA STAGE STOPS SCROLLING. It has to still be there, viewport-
-     aligned, when About's illustration takes over two viewports below the
-     hero — and a sticky element stops being viewport-aligned the moment it
-     releases. Fixed is the only position that survives the whole span without
-     pinning anything, which is why there is exactly one <video> on this page
-     rather than one per section. */
+     aligned, when the illustration takes over a viewport below the hero — and a
+     sticky element stops being viewport-aligned the moment it releases. Fixed
+     is the only position that survives the whole span without pinning anything,
+     which is why there is exactly one <video> on this page rather than one per
+     section. True on a phone as well now, which is what lets the same element
+     be the hero's backdrop AND the thing that becomes the grill. */
   .media-stage,
   .hero-window {
     position: fixed;
   }
+}
 
-  /* THE MATCH. The artwork's outer rim is 138 x 139.7 of a 150-unit viewBox
-     and sits slightly above centre, so dropped into a square box it renders
-     ~7% small and a little high — a visible ring of empty frame, and a
-     chassis that slides sideways under a photograph that did not.
+/* ===========================================================================
+   ...AND ABOVE 1024, THE COMPOSITION. This is the only part that is really
+   about screen width: two columns, copy left and the object right, with the
+   heading and the body as one block in the left column rather than a title
+   above a centred frame.
 
-     About.tsx measures the rim (bbox plus its own stroke, which getBBox does
-     not include) and writes the three numbers that put its centre on the
-     frame's centre and its diameter on the frame's width. Percentages of this
-     element's own box, so they are constants of the ARTWORK and survive every
-     resize. The fallbacks are the untransformed art, which is what a
-     measurement failure should degrade to. */
-  .grill-layer {
-    transform-origin: 0 0;
-    transform: translate(var(--dg-x, 0px), var(--dg-y, 0px))
-      scale(var(--dg-fit, 1));
+   Everything else — the pin, the clip, the fixed window, the square, the
+   match — is in the block above and is identical on a phone.
+   =========================================================================== */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .fire-stage {
+    /* Capped by the column so it cannot overhang the grid at any width between
+       1024 and 1280 where the columns are still growing. */
+    --frame: min(520px, 42vw, 100%);
+
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--grid-gap);
+    row-gap: 0;
+    /* ONE VIEWPORT, and that is the pin's whole premise here: the stage locks
+       at `top top`, so anything taller than the screen would be off it for the
+       entire hold. Both columns are centred against each other and against the
+       screen, and neither moves again until the pin releases. */
+    min-height: 100vh;
+    align-content: center;
+    align-items: center;
+  }
+
+  /* The hold has no job on a wide screen — the grid composes the three blocks
+     directly, so it stops generating a box and its children become grid items
+     of the stage itself. */
+  .fire-hold {
+    display: contents;
+  }
+
+  .fire-head,
+  .fire-body {
+    grid-column: 1 / span 6;
+    min-width: 0;
+    padding-block: 0;
+  }
+
+  .fire-head {
+    grid-row: 1;
+  }
+
+  .fire-body {
+    grid-row: 2;
+  }
+
+  .media-col {
+    /* Spans both copy rows, so the frame is centred against the whole column
+       rather than against the heading alone. */
+    grid-column: 7 / -1;
+    grid-row: 1 / span 2;
+  }
+
+  .media-frame {
+    /* Right-aligned in its span rather than centred: the frame keeps the grid's
+       own right edge, which is the alignment the departing hero panel and every
+       card below it already share. */
+    margin-inline: auto 0;
   }
 }
 

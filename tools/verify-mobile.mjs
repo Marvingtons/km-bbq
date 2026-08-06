@@ -35,7 +35,16 @@ for (const w of [375, 390, 767]) {
     videos: document.querySelectorAll("video").length,
     poster: !!document.querySelector('img[src*="hero-poster"]'),
   }));
-  check(`${w}px: zero <video> in the DOM`, dom.videos === 0 && mp4 === 0, `${dom.videos} elements, ${mp4} mp4 requests`);
+  /* EXACTLY ONE <video>, AND THAT IS THE REVERSE OF WHAT THIS ASSERTED.
+     ------------------------------------------------------------------------
+     It read `dom.videos === 0 && mp4 === 0`: a phone got the poster and never
+     fetched the clip, because below 1024 there was no morph for the footage to
+     be part of. The morph runs at every width now, and the whole trick is that
+     the SAME element is the hero's backdrop and the thing that becomes the
+     grill — so zero videos on a phone would mean the feature is missing, and
+     two would mean the single-element contract is broken. One is the assertion
+     at every width, which is the same thing verify-assembly checks at 1440. */
+  check(`${w}px: exactly one <video> in the DOM`, dom.videos === 1, `${dom.videos} elements, ${mp4} mp4 requests`);
   check(`${w}px: poster present`, dom.poster);
   await ctx.close();
 }

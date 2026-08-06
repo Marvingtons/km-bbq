@@ -62,6 +62,14 @@ export function restaurantNode() {
     // The names people actually type. All three are the same business; this is
     // the field that tells a parser so rather than leaving it to guess.
     alternateName: ["KM BBQ", "KM Korean BBQ"],
+    /* THE ENTITY DESCRIPTION, and the field was simply absent before.
+       It is the same claim the h1's entity statement, the meta description and
+       llms.txt make, in the same order — category, format, price, mechanic —
+       because an assistant reading the graph and a searcher reading a snippet
+       should not get two different accounts of the same restaurant.
+       It says NOTHING about how the Premium or Signature tiers reach the table.
+       See the accuracy note in src/data/faq.ts. */
+    description: `Self-serve all-you-can-eat Korean BBQ in ${ADDRESS_PARTS.city}, ${ADDRESS_PARTS.state}. ${PRICING.lunch.display} lunch, ${PRICING.dinner.display} dinner. Load your plate at the self-serve bar and grill it at your own table, with a grill built into every table.`,
     url: SITE_URL,
     logo: abs("/icon-512.png"),
     image: [abs("/images/outside.png"), abs("/og.png")],

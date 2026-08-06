@@ -220,7 +220,12 @@ console.log("\n=== DESKTOP 1440 — ONE VIDEO, THE MORPH, THE CUT, THE FIRE ==="
       await goto(+pr.toFixed(2), 420);
       seen.push(await p.evaluate(() => ({
         section: Math.round(document.getElementById("pick-your-fire").getBoundingClientRect().top),
-        copy: Math.round(document.querySelector(".fire-copy").getBoundingClientRect().top),
+        // `.fire-head` — the eyebrow and heading. This was `.fire-copy`, one
+        // block holding the heading AND the body; the mobile morph split it so
+        // the pin could hold the heading while the paragraphs stay below the
+        // fold and arrive after the release. The heading is the part that must
+        // not drift, at both breakpoints, and it is the part on screen here.
+        copy: Math.round(document.querySelector(".fire-head").getBoundingClientRect().top),
       })));
     }
     const sectionDrift = Math.max(...seen.map((s) => Math.abs(s.section)));
@@ -385,46 +390,102 @@ console.log("\n=== THE CHOREOGRAPHY IS DEFINED ONCE ===");
   for (const k of ["slotsCW", "coalsShuffled", "meshOrdered", "spinOf"]) {
     check(`lib/assembly.ts owns ${k}`, lib.includes(k));
   }
-  for (const f of ["../src/components/MediaStage.tsx", "../src/components/PickYourFire.tsx"]) {
-    const src = fs.readFileSync(new URL(f, import.meta.url), "utf8");
-    check(`${f.split("/").pop()}: imports the assembly rather than restating it`,
-      src.includes('from "@/lib/assembly"') && !src.includes("gsap.utils.shuffle"));
+  /* ONE CONSUMER NOW, NOT TWO — and that is the mobile-morph pass landing.
+     This required BOTH MediaStage and PickYourFire to import the choreography,
+     because they each built it: MediaStage scrubbed it above 1024 and
+     PickYourFire played it as a one-shot below. Two builders of one sequence is
+     exactly the split that let mobile drift into a different feature, so the
+     one-shot is gone and MediaStage owns the sequence at every width.
+
+     What the check is actually for survives intact: nobody may RESTATE the
+     choreography. So MediaStage must import it, and neither file may reach for
+     the ordering primitives directly. */
+  {
+    const stage = fs.readFileSync(new URL("../src/components/MediaStage.tsx", import.meta.url), "utf8");
+    check("MediaStage.tsx: imports the assembly rather than restating it",
+      stage.includes('from "@/lib/assembly"') && !stage.includes("gsap.utils.shuffle"));
+  }
+  {
+    const fire = fs.readFileSync(new URL("../src/components/PickYourFire.tsx", import.meta.url), "utf8");
+    check("PickYourFire.tsx: no longer builds a second copy of the sequence",
+      !fire.includes("buildAssembly") && !fire.includes("gsap.utils.shuffle"));
   }
 }
 
-console.log("\n=== MOBILE 375 — ONE ENTRANCE, NO SCRUB, NO SECOND VIDEO ===");
+/* =============================================================================
+   MOBILE 375 — THE SAME MORPH, SCRUBBED AND PINNED.
+
+   THIS BLOCK USED TO ASSERT THE OPPOSITE, and it is the reason the mobile morph
+   was reported as "specced but never shipped": it locked in the fallback.
+   Every check here read the other way — "no video in the section", "a one-shot,
+   not a scrub", "nothing on this page is pinned", "the morph is desktop-only
+   and so is its cost" — so the split path was not an oversight, it was a
+   contract with a test behind it.
+
+   The morph is width-independent now. Only `prefers-reduced-motion` opts out
+   (asserted in its own block below), and the same single <video> is the hero's
+   backdrop and the thing that becomes the grill at every width. So a phone that
+   plays a one-shot, or has no pin, or holds a second piece of media, is the
+   regression — which is what these now say.
+   ============================================================================= */
+console.log("\n=== MOBILE 375 — THE SAME MORPH, SCRUBBED AND PINNED ===");
 {
   const ctx = await browser.newContext({ viewport: { width: 375, height: 812 }, hasTouch: true, isMobile: true });
   const p = await ctx.newPage();
   await seed(p);
   await p.goto(URL_, { waitUntil: "networkidle" });
   await p.waitForTimeout(2000);
+
+  // ONE VIDEO ON THE PAGE, AND IT IS THE HERO'S. The section still renders no
+  // <video> of its own — the footage reaches it as a fixed layer clipped into
+  // the frame, which is the whole single-element contract.
   check(
-    "375: no video in About — the morph is desktop-only and so is its cost",
-    (await p.evaluate(() => document.querySelectorAll("#about video").length === 0)) === true
+    "375: exactly one <video> on the page",
+    (await p.evaluate(() => document.querySelectorAll("video").length)) === 1
   );
+  check(
+    "375: none of it is a second element in the section, and no stand-in still",
+    (await p.evaluate(() => document.querySelectorAll("#pick-your-fire video").length === 0 && !document.querySelector(".fire-still"))) === true
+  );
+
   const before375 = await p.evaluate(readState);
   check("375: the art starts unbuilt (JS-set initial states, never CSS)", before375.gasSurface < 0.05 && before375.chassis > 0.98, `gas ${before375.gasSurface}, chassis ${before375.chassis}`);
-  // THE STILL PANEL IS GONE. It was a full-bleed frame of the hero clip — one
-  // cut of beef in tongs — standing in for the video below 1024, and it was a
-  // second, unrelated piece of media stacked on the illustration that actually
-  // answers the heading. What must still hold is the half that always
-  // mattered: this section never renders a <video> of its own.
-  check("375: no second video in the section, and no stand-in still", (await p.evaluate(() => document.querySelectorAll("#pick-your-fire video").length === 0 && !document.querySelector(".fire-still"))) === true);
-  await p.evaluate(() => document.querySelector(".grill-layer").scrollIntoView({ block: "center" }));
-  await p.waitForTimeout(900);
-  const mid375 = await p.evaluate(readState);
-  check("375: it plays on its own — a one-shot, not a scrub", mid375.gasSurface > 0.5, `gas at ~0.9s ${mid375.gasSurface}`);
-  await p.waitForTimeout(2400);
-  const after = await p.evaluate(readState);
-  check("375: it completes fully assembled", [after.chassis, after.gasSurface, after.slots, after.bowl, after.coals, after.grate].every((v) => v > 0.98));
-  check("375: embers end up on the idle loop", after.embers.every((o) => o >= 0.6), after.embers.map((n) => n.toFixed(2)).join(","));
-  check("375: nothing on this page is pinned", (await p.evaluate(() => document.querySelectorAll(".pin-spacer").length === 0)) === true);
+
+  // THE SECTION PINS. Scoped to this section's own spacer: the gallery
+  // legitimately has one too at some widths.
+  const spacerTop = await p.evaluate(() => {
+    const sp = [...document.querySelectorAll(".pin-spacer")].find((s) => s.contains(document.querySelector("#pick-your-fire")));
+    return sp ? Math.round(sp.getBoundingClientRect().top + window.scrollY) : null;
+  });
+  check("375: the section is pinned", spacerTop !== null, spacerTop === null ? "no pin-spacer around #pick-your-fire" : `spacer at ${spacerTop}`);
+
+  if (spacerTop !== null) {
+    // SCRUBBED, NOT PLAYED. Drive scroll to a progress and read the state; a
+    // one-shot would run to completion on its own regardless of where we stop.
+    const at = async (prog) => {
+      await p.evaluate(([t]) => window.scrollTo({ top: t, behavior: "instant" }), [spacerTop + prog * 0.7 * 812]);
+      await p.waitForTimeout(700);
+      return p.evaluate(readState);
+    };
+    const early = await at(0.05);
+    const mid = await at(0.45);
+    const done = await at(0.95);
+
+    check("375: it is a SCRUB — early in the pin the grill is still unbuilt", early.gasSurface < 0.5, `gas ${early.gasSurface.toFixed(2)}`);
+    check("375: it advances with scroll", mid.gasSurface > early.gasSurface, `${early.gasSurface.toFixed(2)} -> ${mid.gasSurface.toFixed(2)}`);
+    check("375: fully assembled by the end of the pin", [done.chassis, done.gasSurface, done.slots, done.bowl, done.coals, done.grate].every((v) => v > 0.98));
+    check("375: lit by the end of the pin", done.embers.every((o) => o >= 0.6), done.embers.map((n) => n.toFixed(2)).join(","));
+
+    // REVERSIBLE. Scrolling back up de-assembles, which a one-shot cannot do.
+    const back = await at(0.05);
+    check("375: reverse scroll de-assembles it", back.gasSurface < 0.5, `gas back to ${back.gasSurface.toFixed(2)}`);
+  }
+
   check(
-    "375: reading order is copy, then the illustration it explains",
+    "375: reading order is heading, illustration, then the copy the unpin reveals",
     (await p.evaluate(() => {
-      const y = (s) => document.querySelector(s).getBoundingClientRect().top + scrollY;
-      return y(".fire-copy") < y(".grill-layer");
+      const y = (s) => document.querySelector(s).getBoundingClientRect().top + window.scrollY;
+      return y(".fire-head") < y(".grill-layer") && y(".grill-layer") < y(".fire-body");
     })) === true
   );
   await ctx.close();
@@ -443,7 +504,16 @@ console.log("\n=== REDUCED MOTION — NOTHING IS BUILT ===");
   check("reduced motion: nothing is pinned", (await p.evaluate(() => !document.getElementById("pick-your-fire").parentElement.classList.contains("pin-spacer"))) === true);
   check("reduced motion: embers static at FULL opacity", s.embers.every((o) => o === 1), s.embers.join(","));
   check("reduced motion: no clip is ever written", !s.winClip && !s.frameClip);
-  check("reduced motion: no video at all", s.videos === 0, `${s.videos}`);
+  /* THE VIDEO STILL MOUNTS UNDER REDUCED MOTION, and the four checks above are
+     what actually carry that preference: nothing pinned, no clip written,
+     nothing dash-prepped, embers static. Those are the scroll-driven effects.
+
+     Unmounting the element was a side effect of gating the FETCH on the
+     preference, and it stopped being defensible once the same element became
+     the subject of the morph rather than a decorative layer beneath it. A
+     muted, looping background is not what `prefers-reduced-motion` is about;
+     a page that scrubs and pins under the reader is, and none of that runs. */
+  check("reduced motion: the video still mounts, exactly one", s.videos === 1, `${s.videos}`);
   check(
     "reduced motion: the media layer does not stick to the viewport",
     (await p.evaluate(() => getComputedStyle(document.querySelector(".hero-window")).position !== "fixed")) === true

@@ -122,7 +122,23 @@ export function Hero() {
        than on a flat ground. See globals.css. */
     <section
       id="home"
-      className="section-dark section-dark-media pointer-events-none relative z-nav h-screen motion-safe:lg:h-[160vh]"
+      /* `100svh`, NOT `100vh`, AND THAT IS THE CTA CLIPPING FIX.
+         ------------------------------------------------------------------
+         `h-screen` is `100vh`, which on a phone is the LARGE viewport — the
+         height the page has once the browser's address bar has scrolled away.
+         At first paint the bar is still there, so the visible area is 60-100px
+         shorter than the box this section reserved, and the last thing in the
+         stack went under it. The pill measures a constant 48px of clearance in
+         a headless run at every phone size, which is exactly why this never
+         showed up in a test: Playwright's viewport does not retract.
+
+         `svh` is the SMALL viewport — the height with the bar showing — so the
+         hero now fits the worst case and nothing is ever underneath it. Where
+         the bar does retract, the extra strip is filled by the media layer,
+         which is `position: fixed; inset: 0` and therefore the true viewport
+         regardless of what this box says. On a desktop `svh` and `vh` are the
+         same number, so nothing above 1024 changes. */
+      className="section-dark section-dark-media pointer-events-none relative z-nav h-[100svh] motion-safe:lg:h-[160vh]"
       aria-label="Hero"
     >
       {/* THE BACKDROP IS NOT IN THE STAGE ANY MORE, and that is the whole of
@@ -135,9 +151,13 @@ export function Hero() {
           inset-0` inside a one-viewport hero, exactly as it used to be. */}
       <MediaStage />
 
-      <div className="hero-stage sticky top-0 flex h-screen flex-col overflow-hidden">
+      <div className="hero-stage sticky top-0 flex h-[100svh] flex-col overflow-hidden">
         <div className="pointer-events-auto relative z-nav flex w-full flex-1 items-end">
-          <div className="track w-full pb-12 pt-10 text-left sm:pb-20 lg:pb-24">
+          {/* 64px under the pill on a phone rather than 48. With `svh` above,
+              48 already cleared the address bar; this is the margin that keeps
+              it clear when the bar is a little taller than the spec height, and
+              it is still well short of the 80px the `sm` step takes. */}
+          <div className="track w-full pb-16 pt-10 text-left sm:pb-20 lg:pb-24">
             <div className="hero-exit-support">
               <motion.p className="eyebrow text-sand/80" {...rise(0)}>
                 {EYEBROW}
@@ -171,9 +191,18 @@ export function Hero() {
                     span explicitly or it reads 759px of hidden text and fails.
                     tools/verify-mobile.mjs uses this. */}
                 <span data-headline>{HEADLINE}</span>
+                {/* THE ENTITY STATEMENT, and it is the first server-rendered
+                    description of what this business IS. Reading the h1 whole:
+                    "KM.BBQ — All-You-Can-Eat self-serve Korean BBQ in
+                    Oceanside, CA". `self-serve` is the one word added, and it
+                    is here rather than in the visible lockup because the
+                    lockup is display type at 7rem and the format is not the
+                    offer. Matches the meta description, the JSON-LD
+                    `description` and llms.txt, all of which now lead with the
+                    same phrase. */}
                 <span className="sr-only">
                   {" "}
-                  Korean BBQ in {ADDRESS.city}
+                  self-serve Korean BBQ in {ADDRESS.city}
                 </span>
               </motion.h1>
             </div>

@@ -409,7 +409,12 @@ const browser = await chromium.launch();
   await ctx.close();
 }
 
-// ---- mobile: static, no scrub ---------------------------------------------
+/* ---- mobile: THE SCRUB RUNS HERE TOO ---------------------------------------
+   Inverted. This block asserted "375px: no scrub" and "375px: no video
+   element", which described the old mobile path: the footage stayed in the hero
+   and a separate one-shot assembled the illustration further down. The morph is
+   width-independent now — only `prefers-reduced-motion` opts out — so a phone
+   that does NOT scrub is the bug, and the one video element is the feature. */
 {
   const ctx = await browser.newContext({ viewport: { width: 375, height: 812 }, isMobile: true, deviceScaleFactor: 2 });
   const page = await ctx.newPage();
@@ -421,9 +426,9 @@ const browser = await chromium.launch();
   await page.evaluate(() => window.scrollTo(0, 600));
   await page.waitForTimeout(800);
   const after = await page.evaluate(PANEL);
-  check("375px: no scrub", before && after && before.clip === after.clip, (after && after.clip ? after.clip : "?").slice(0, 42));
+  check("375px: the clip scrubs", before && after && before.clip !== after.clip, `${(before?.clip ?? "?").slice(0, 26)} -> ${(after?.clip ?? "?").slice(0, 26)}`);
   const videos = await page.evaluate(() => document.querySelectorAll("video").length);
-  check("375px: no video element", videos === 0, `${videos} elements`);
+  check("375px: exactly one video element", videos === 1, `${videos} elements`);
   await ctx.close();
 }
 

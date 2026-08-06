@@ -6,14 +6,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { DualGrill } from "./illustrations/DualGrill";
 import { PillLink } from "./PillLink";
 import { MOTION, MOTION_OK, NAV_H, FIRE_COPY_IN } from "@/lib/motion";
-import { findEmbers, buildEmberLoop } from "@/lib/embers";
-import {
-  collectGrill,
-  setAssemblyInitial,
-  buildAssembly,
-  span,
-  A,
-} from "@/lib/assembly";
 import { useScrollRefresh } from "@/lib/useScrollRefresh";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -107,68 +99,26 @@ export function PickYourFire() {
       const mm = gsap.matchMedia();
 
       /* ================================================================
-         BELOW 1024 — stacked flow, and the same simplification.
+         THE MOBILE ONE-SHOT IS GONE, AND ITS ABSENCE IS THE FEATURE.
 
-         No sticky column, no clip, no match cut: the illustration is a block
-         in normal flow under the copy, complete, with one entrance. The embers
-         light with it and go straight onto the idle pulse.
+         There used to be a `(max-width: 1023px)` builder here that played a
+         paused 1.2s assembly timeline on the SVG when the illustration scrolled
+         into view. It was a perfectly good animation and it was the reason the
+         mobile morph "did not ship": it is a DIFFERENT feature occupying the
+         same slot, so below 1024 the video stayed up in the hero and scrolled
+         away while a separate grill built itself in a block underneath the
+         copy. Two elements, which is exactly what was reported.
 
-         Above 1024 nothing here runs — MediaStage owns the fire, because it
-         owns the cut the fire follows.
+         The morph runs at every width now. MediaStage owns the whole sequence
+         at both breakpoints from one builder — see the note there — so there is
+         nothing left for this file to animate about the artwork.
+
+         REDUCED MOTION STILL BUILDS NOTHING. No timeline, no ScrollTrigger, no
+         initial states, at any width. The art is assembled in the markup and
+         the embers are at full opacity, so the correct static state costs
+         exactly zero lines, and `collectGrill` / `setAssemblyInitial` are never
+         called to hide anything that would then need restoring.
          ================================================================ */
-      mm.add(
-        "(max-width: 1023px) and (prefers-reduced-motion: no-preference)",
-        () => {
-          const parts = collectGrill(svg);
-          const embers = findEmbers(svg);
-          setAssemblyInitial(parts);
-          gsap.set(embers, { autoAlpha: 0 });
-
-          const loop = buildEmberLoop(embers);
-          // Easing IS allowed here: nothing is tracking the wheel, so the
-          // motion has to carry its own weight. `back.out` on the grate is the
-          // one overshoot in the sequence and it is on the featured beat — the
-          // grate landing on the coals is the moment the thing becomes a grill.
-          const tl = gsap.timeline({ paused: true });
-          buildAssembly(tl, parts, [0, 1], "power2.out", "back.out(1.4)");
-          // IGNITION AT THE ASSEMBLY'S OWN EMBER WINDOW, read from the table
-          // rather than written as a literal. It was `0.86 / 0.14` — the same
-          // beat, spelled out — and the retiming moved the window under it,
-          // which would have left a gap between the seam finishing and the fire
-          // catching, and a timeline shorter than 1 unit for timeScale to
-          // divide.
-          tl.fromTo(
-            embers,
-            { autoAlpha: 0 },
-            { autoAlpha: 1, duration: span(A.embers), immediateRender: false },
-            A.embers[0]
-          );
-          tl.pause(0);
-          tl.eventCallback("onComplete", () => loop.play());
-
-          const st = ScrollTrigger.create({
-            trigger: grillLayer!,
-            start: "top 78%",
-            once: true,
-            // A 1-unit timeline played at 1/1.2 is 1.2 seconds. Down from 1.6:
-            // there is no pin down here and nothing to fill, so the build is
-            // simply quicker to be over — the same compression the desktop pin
-            // got, on the only clock this path has.
-            onEnter: () => tl.timeScale(1 / 1.2).play(),
-          });
-
-          return () => {
-            st.kill();
-            tl.kill();
-            loop.kill();
-          };
-        }
-      );
-
-      /* ---------------- REDUCED MOTION: nothing is built ----------------
-         No timeline, no ScrollTrigger, no initial states. The art is already
-         assembled in the markup and the embers are already at full opacity, so
-         the correct static state costs exactly zero lines. */
 
       /* ================================================================
          THE COPY IS NOT IN THE SCRUB. The media is a scrubbed mechanism; the
@@ -179,33 +129,67 @@ export function PickYourFire() {
         const { motion, wide } = c.conditions as { motion: boolean; wide: boolean };
         if (!motion) return;
 
-        // TRIGGERED OFF THE PAGE'S SCROLL, NOT OFF ITS OWN POSITION, and that
-        // is a correctness rule rather than a preference. The media panel's
-        // sides finish closing at 55% of the dock, and until they have, this
-        // column is underneath an opaque video: a heading revealed by a hard
-        // clip sweeping across it is half a glyph at a time. FIRE_COPY_IN is
-        // just past that frame.
+        // THE HEADING IS TRIGGERED OFF THE PAGE'S SCROLL, NOT OFF ITS OWN
+        // POSITION, and that is a correctness rule rather than a preference. It
+        // is underneath an opaque video until the clip has passed it, and a
+        // heading revealed by a hard clip sweeping across it is half a glyph at
+        // a time. FIRE_COPY_IN is just past that frame.
         //
         // Its position would not do. This block's distance from the top of the
         // page is a function of viewport HEIGHT and the panel's edge of
         // viewport WIDTH, so a `top 80%` start and the sweep drift apart with
         // the aspect ratio — at 1440x900 they agree to within a few pixels,
         // and on a short wide laptop they do not.
-        gsap.from(".fire-copy", {
+        //
+        // IT IS THE SAME NUMBER ON A PHONE, and that is not a coincidence: the
+        // dock spans exactly one viewport at both breakpoints (from the stage
+        // entering the bottom of the screen to its top reaching the top), so a
+        // fraction of a viewport of scroll is the same fraction of the dock
+        // either way. What differs is only which edge is doing the covering —
+        // the left one sweeping off a copy column, or the top one sweeping down
+        // off a centred heading.
+        const fromPageScroll = {
+          trigger: "#home",
+          start: () => window.innerHeight * FIRE_COPY_IN,
+          invalidateOnRefresh: true,
+          // Plays once. It used to reverse, so scrolling back up took the copy
+          // you were reading away again.
+          toggleActions: "play none none none" as const,
+        };
+
+        gsap.from(".fire-head", {
+          opacity: 0,
+          y: MOTION.rise,
+          duration: MOTION.dur.reveal,
+          ease: MOTION.gsapEase,
+          scrollTrigger: fromPageScroll,
+        });
+
+        /* THE BODY. On a wide screen it is the same block as the heading and
+           arrives with it. On a phone it is below the hold, so the pin is still
+           holding it off-screen at FIRE_COPY_IN and it has to wait for its own
+           arrival instead.
+
+           `pinnedContainer` is load-bearing on that path. ScrollTrigger resolves
+           a start position from where the trigger sits in the DOCUMENT, and a
+           pinned ancestor displaces every descendant by the pin's distance — so
+           without this the reveal fires ~70% of a viewport early, while the copy
+           is still behind the fixed stage, and by the time the reader reaches it
+           the entrance has already played. */
+        gsap.from(".fire-body", {
           opacity: 0,
           y: MOTION.rise,
           duration: MOTION.dur.reveal,
           ease: MOTION.gsapEase,
           scrollTrigger: wide
-            ? {
-                trigger: "#home",
-                start: () => window.innerHeight * FIRE_COPY_IN,
+            ? fromPageScroll
+            : {
+                trigger: ".fire-body",
+                start: "top 88%",
+                pinnedContainer: ".fire-stage",
                 invalidateOnRefresh: true,
-                // Plays once. It used to reverse, so scrolling back up took
-                // the copy you were reading away again.
                 toggleActions: "play none none none",
-              }
-            : { trigger: ".fire-copy", start: "top 88%" },
+              },
         });
       });
 
@@ -259,13 +243,42 @@ export function PickYourFire() {
           is correct without a line of script. It is a <noscript> rather than a
           JS-toggled class so the scripted path takes its real layout on the
           first paint and never reflows into it. */}
+      {/* WITHOUT JAVASCRIPT NOTHING EVER CLIPS THE MEDIA LAYER, so every box
+          the morph needs has to be handed back to normal flow.
+
+          THE MEDIA QUERY IS GONE FROM THIS BLOCK. It used to be wrapped in
+          `@media (min-width: 1024px)`, because that was the only bracket where
+          the morph's geometry existed. The geometry is now a property of motion
+          rather than of width, so the undo has to be too — left as it was, a
+          phone with JS off got a fixed, full-screen, unclipped video layer
+          pinned over the entire page, which is the worst failure state on the
+          site.
+
+          `.media-stage` / `.hero-window` are the important two and they were
+          never in here at all: `position: fixed` with no clip is a video
+          covering the document forever. They go back to being the hero's own
+          absolutely-positioned backdrop, which is what they are for. */}
       <noscript>
         <style>{`
-          @media (min-width: 1024px) {
-            .fire-stage { display: flex; min-height: 0; }
-            .media-col, .media-frame { display: contents; }
-            .media-rest { display: none; }
-            .grill-layer { position: relative; inset: auto; }
+          .media-stage, .hero-window { position: absolute; }
+          .fire-stage {
+            display: flex;
+            min-height: 0;
+            gap: 3.5rem;
+            padding-block: var(--spacing-section);
+          }
+          .fire-hold { display: contents; }
+          .fire-head { order: 1; width: auto; }
+          .fire-body { order: 2; padding-block: 0; }
+          .media-col, .media-frame { display: contents; }
+          .media-frame { clip-path: none; }
+          .media-rest { display: none; }
+          .grill-layer {
+            order: 3;
+            position: relative;
+            inset: auto;
+            width: min(480px, 88vw);
+            transform: none;
           }
         `}</style>
       </noscript>
@@ -301,53 +314,78 @@ export function PickYourFire() {
             element, the reduced-motion state, and the landing place for every
             playback failure path. Deleting it would take the hero's floor out
             from under it. See the note in HeroBackdrop.tsx. */}
-        <div className="copy-block">
-          <div className="fire-copy">
+        {/* THE HOLD — exactly one viewport once the morph runs, and the thing
+            the pin holds still.
+
+            IT EXISTS TO KEEP THE BODY COPY OUT OF THE PIN. On a phone the
+            composed view is the heading with the object under it, and the two
+            paragraphs cannot be part of that: a pinned box shows only its first
+            viewport, so copy inside it would be held off-screen for the whole
+            sequence and then appear all at once. With the copy outside, the pin
+            releases and the reader simply scrolls onto it.
+
+            Above 1024 the box has no job — the grid composes head, body and
+            media directly — so it is `display: contents` there and generates no
+            box at all. Same DOM, two layouts, no duplicated markup. */}
+        <div className="fire-hold">
+          <div className="fire-head">
             <p className="eyebrow">Pick your fire</p>
             <h2 id="fire-heading" className="h2-scale mt-4">
               Gas or charcoal
             </h2>
-            <div className="copy measure mt-4 space-y-4">
-              <p>
-                Every table has its own grill, built into the top. Gas runs even
-                and hot and needs almost nothing from you — good if you are
-                feeding a table and want to keep talking.
-              </p>
-              <p>
-                Charcoal takes a little more attention and gives it back as
-                smoke and char on the edges of the meat. Same price either way.
-                Ask for charcoal when you walk in.
-              </p>
+          </div>
+
+          <div className="media-col">
+            {/* THE FRAME IS SQUARE, because the end of the morph is a circle
+                inscribed in it and only a square box makes one. What passes
+                through a rectangle is the CLIP, not the box.
+
+                THERE IS NO VIDEO IN HERE. The footage is one fixed layer that
+                spans the hero and this section (MediaStage.tsx); this frame is
+                the GEOMETRY that layer is measured against, plus the
+                illustration the footage dissolves off. It carries `overflow:
+                hidden` because the artwork is scaled up until its rim fills the
+                frame, so its own viewBox overhangs. */}
+            <div className="media-frame">
+              {/* ONE MEASURED BOX FOR TWO JOBS, and that is the point of it
+                  existing at all. It is the shape the panel passes through, and
+                  it is where the hero's window docks — `.col-media` is the name
+                  that scrub measures. Written as two sets of numbers they would
+                  agree until someone tuned one of them; written as one box they
+                  cannot disagree. It paints nothing. */}
+              <div className="media-rest col-media" aria-hidden="true" />
+
+              <div className="grill-layer">
+                <DualGrill />
+              </div>
             </div>
-            <PillLink href="/menu" arrow className="mt-8">
-              See the menu
-            </PillLink>
           </div>
         </div>
 
-        <div className="media-col">
-          {/* THE FRAME IS SQUARE, because the end of the morph is a circle
-              inscribed in it and only a square box makes one. What passes
-              through a rectangle is the CLIP, not the box.
-
-              THERE IS NO VIDEO IN HERE. The footage is one fixed layer that
-              spans the hero and this section (MediaStage.tsx); this frame is
-              the GEOMETRY that layer is measured against, plus the illustration
-              the footage dissolves off. It carries `overflow: hidden` because
-              the artwork is scaled up until its rim fills the frame, so its own
-              viewBox overhangs. */}
-          <div className="media-frame">
-            {/* ONE MEASURED BOX FOR TWO JOBS, and that is the point of it
-                existing at all. It is the shape the panel passes through, and
-                it is where the hero's window docks — `.col-media` is the name
-                that scrub measures. Written as two sets of numbers they would
-                agree until someone tuned one of them; written as one box they
-                cannot disagree. It paints nothing. */}
-            <div className="media-rest col-media" aria-hidden="true" />
-
-            <div className="grill-layer">
-              <DualGrill />
-            </div>
+        {/* THE BODY. Inside `.fire-stage` so the desktop grid can place it under
+            the heading in column one, but outside `.fire-hold` so a phone's pin
+            never holds it. `data-reveal` is only read below 1024 — see the
+            entrance in this file. */}
+        <div className="fire-body" data-reveal-group>
+          <div className="copy measure space-y-4" data-reveal>
+            {/* VERBATIM. The band brief listed this section's copy as
+                explicitly unchanged, so the em dash below stays even though the
+                copy pass bans new ones. */}
+            <p>
+              Every table has its own grill, built into the top. Gas runs even
+              and hot and needs almost nothing from you — good if you are
+              feeding a table and want to keep talking.
+            </p>
+            <p>
+              Charcoal takes a little more attention and gives it back as smoke
+              and char on the edges of the meat. Same price either way. Ask for
+              charcoal when you walk in.
+            </p>
+          </div>
+          <div className="mt-8 flex" data-reveal>
+            <PillLink href="/menu" arrow>
+              See the menu
+            </PillLink>
           </div>
         </div>
       </div>

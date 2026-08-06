@@ -144,7 +144,12 @@ for (const [w, h] of [[1440, 900], [768, 1024], [375, 812]]) {
   await p.waitForTimeout(1800);
 
   const s = await p.evaluate(() => {
-    const block = document.querySelector(".fire-copy");
+    // `.fire-stage`, not `.fire-copy`. The copy block was split into
+    // `.fire-head` (eyebrow + heading, inside the pinned hold) and
+    // `.fire-body` (paragraphs + pill, below it), so no single element holds
+    // both the eyebrow and the CTA any more. The stage contains all of them at
+    // every breakpoint, which is what this block is actually reaching for.
+    const block = document.querySelector(".fire-stage");
     const svg = document.querySelector(".dual-grill");
     const head = document.getElementById("fire-heading");
     const eyebrow = block.querySelector(".eyebrow");
@@ -183,7 +188,21 @@ for (const [w, h] of [[1440, 900], [768, 1024], [375, 812]]) {
     check(`${w}: the artwork is scaled up to fill the frame`, s.svgW > s.frameW && s.svgW < s.frameW * 1.15, `svg ${s.svgW}px in a ${s.frameW}px frame`);
     check(`${w}: two columns, illustration RIGHT`, s.artRight);
   } else {
-    check(`${w}: illustration <= min(480, 88vw)`, s.svgW <= Math.min(480, w * 0.88) + 2, `${s.svgW}px vs ${Math.round(Math.min(480, w * 0.88))}`);
+    /* THE CAP MOVED FROM THE SVG TO THE FRAME, because below 1024 there is a
+       frame now. This read `svgW <= min(480, 88vw)`, which was right while the
+       illustration was a plain block in flow at that width and carried no
+       transform. It is the morph's layer now: absolutely positioned inside
+       `.media-frame` and scaled up so the chassis rim fills it, so its own box
+       deliberately overhangs by ~7% and the clip is what bounds what you see.
+       Measuring the transformed layer against an untransformed cap reported
+       353px against 330 at 375 — a pass turned into a failure by the artwork
+       doing exactly what it is supposed to.
+
+       Same shape as the >=1024 branch above: assert the FRAME against its
+       formula, then assert the artwork overhangs it by a bounded amount. */
+    const cap = Math.round(Math.min(w * 0.88, h * 0.56));
+    check(`${w}: the frame is min(88vw, 56vh)`, Math.abs(s.frameW - cap) <= 2, `${s.frameW}px vs ${cap}`);
+    check(`${w}: the artwork is scaled up to fill the frame`, s.svgW > s.frameW && s.svgW < s.frameW * 1.15, `svg ${s.svgW}px in a ${s.frameW}px frame`);
     check(`${w}: stacked, illustration after the copy`, s.artAfterCopy);
   }
   await ctx.close();

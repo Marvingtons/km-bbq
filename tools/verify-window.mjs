@@ -367,10 +367,16 @@ for (const w of [375, 767]) {
   await page.waitForLoadState("load");
   await page.waitForTimeout(1800);
 
+  /* THE CLIP RUNS BELOW 768 NOW — inverted, deliberately.
+     This asserted `clip === "none"`, i.e. that the window transition was a
+     desktop-only feature. It is width-independent as of the mobile-morph pass;
+     the only opt-out is `prefers-reduced-motion`, which is asserted in its own
+     block above and still shows `clip none`. A phone with no clip means the
+     morph has silently reverted to the old stacked fallback. */
   await scrollTo(page, 600);
   const c = await readClip(page);
   const p = parseInset(c.clip);
-  check(`${w}px: no clip scrub`, c.clip === "none" || (p && p.right === 0 && p.bottom === 0), `clip ${c.clip.slice(0, 30)}`);
+  check(`${w}px: the clip scrubs`, c.clip !== "none" && !!p, `clip ${c.clip.slice(0, 30)}`);
 
   const overflow = await page.evaluate(() => ({
     doc: document.documentElement.scrollWidth,

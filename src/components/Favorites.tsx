@@ -59,9 +59,11 @@ export function Favorites() {
               className="mt-5 block h-0.5 w-16 bg-steel"
               data-reveal="rule"
             />
+            {/* "grab", not "order", and "at the bar", not "on the menu" — the
+                same self-serve correction the hero and Our Story take. */}
             <p className="copy measure mt-6" data-reveal>
-              Five of the ones people order again and again. Everything on the
-              menu is the same one price.
+              Five of the ones people grab again and again. Everything at the
+              bar is the same price.
             </p>
           </div>
 

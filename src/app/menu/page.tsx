@@ -20,8 +20,10 @@ import { pageMeta } from "@/lib/seo";
 
 export const metadata: Metadata = pageMeta({
   title: "Menu | KM.BBQ — AYCE Korean BBQ Oceanside",
+  // "self-serve" appears ONCE, in the category phrase. The counts and the
+  // prices are what this page is for; the format is context.
   description:
-    "The full all-you-can-eat menu: 33 core items, 10 Premium cuts, and 3 dinner-only Signature cuts. $21.99 lunch, $30.99 dinner. No per-item charges.",
+    "The full self-serve all-you-can-eat menu: 33 core items, 10 Premium cuts, and 3 dinner-only Signature cuts. $21.99 lunch, $30.99 dinner.",
   path: "/menu",
   titleAbsolute: true,
 });
