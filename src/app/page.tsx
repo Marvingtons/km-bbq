@@ -30,7 +30,11 @@ import { pageMeta } from "@/lib/seo";
  * passes one value to all three, so they cannot drift.
  */
 export const metadata: Metadata = pageMeta({
-  title: "KM.BBQ — All You Can Eat Korean BBQ in Oceanside, CA",
+  // A PIPE, NOT AN EM DASH. The sweep's final rule is that the only `—` left
+  // anywhere in copy is the menu item name separator, and a <title> is copy a
+  // searcher reads. A pipe is the conventional title delimiter and is what
+  // /menu already leads with, so the two titles now use one separator.
+  title: "KM.BBQ | All You Can Eat Korean BBQ in Oceanside, CA",
   description:
     "Self-serve all-you-can-eat Korean BBQ in Oceanside. $21.99 lunch, $30.99 dinner. Load up at the bar, grill at your table. Walk in or reserve.",
   path: "/",

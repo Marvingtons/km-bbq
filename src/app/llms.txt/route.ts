@@ -69,7 +69,7 @@ ${hours}
 
 Every table has its own grill built into it. Gas runs even and hot and needs
 little attention; charcoal gives more smoke and char. The price is the same
-either way — ask for charcoal on arrival.
+either way. Ask for charcoal on arrival.
 
 ## Menu
 

@@ -318,7 +318,7 @@ export function PickYourFire() {
             the pin holds still.
 
             IT EXISTS TO KEEP THE BODY COPY OUT OF THE PIN. On a phone the
-            composed view is the heading with the object under it, and the two
+            composed view is the heading with the object under it, and the three
             paragraphs cannot be part of that: a pinned box shows only its first
             viewport, so copy inside it would be held off-screen for the whole
             sequence and then appear all at once. With the copy outside, the pin
@@ -367,19 +367,32 @@ export function PickYourFire() {
             never holds it. `data-reveal` is only read below 1024 — see the
             entrance in this file. */}
         <div className="fire-body" data-reveal-group>
+          {/* THREE PARAGRAPHS, AND THE THIRD IS THE POINT OF THE REWRITE.
+              The section used to end on the charcoal paragraph, which left it
+              answering "gas or charcoal" and nothing else. The fire is only
+              half the mechanic: once it is lit you get up and load a plate.
+              The third paragraph is the hand-off from the grill to the bar, and
+              it is what connects this section to the rest of the page.
+
+              It says nothing about how the Premium or Signature tiers reach the
+              table. See the accuracy note in src/data/faq.ts. */}
           <div className="copy measure space-y-4" data-reveal>
-            {/* VERBATIM. The band brief listed this section's copy as
-                explicitly unchanged, so the em dash below stays even though the
-                copy pass bans new ones. */}
+            {/* The em dash in the first paragraph is gone with it: "needs
+                almost nothing from you — good if…" is now two sentences, which
+                is what the dash was standing in for. */}
             <p>
               Every table has its own grill, built into the top. Gas runs even
-              and hot and needs almost nothing from you — good if you are
-              feeding a table and want to keep talking.
+              and hot and needs almost nothing from you. Good if you are feeding
+              a table and want to keep talking.
             </p>
             <p>
               Charcoal takes a little more attention and gives it back as smoke
               and char on the edges of the meat. Same price either way. Ask for
               charcoal when you walk in.
+            </p>
+            <p>
+              Once your fire is going, head to the self-serve bar and load up.
+              No ordering, no waiting. Your food is ready when you are.
             </p>
           </div>
           <div className="mt-8 flex" data-reveal>

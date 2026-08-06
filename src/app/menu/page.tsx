@@ -19,7 +19,9 @@ import { INCLUDED } from "@/data/menu";
 import { pageMeta } from "@/lib/seo";
 
 export const metadata: Metadata = pageMeta({
-  title: "Menu | KM.BBQ — AYCE Korean BBQ Oceanside",
+  // A COMMA, not an em dash and not a second pipe: the pipe already separates
+  // the page from the brand, so what follows the brand is an appositive.
+  title: "Menu | KM.BBQ, AYCE Korean BBQ Oceanside",
   // "self-serve" appears ONCE, in the category phrase. The counts and the
   // prices are what this page is for; the format is context.
   description:

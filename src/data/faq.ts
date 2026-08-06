@@ -54,7 +54,7 @@ export const FAQS: Faq[] = [
   },
   {
     q: "How much is all-you-can-eat?",
-    a: `${PRICING.lunch.display} per person for lunch, until ${LUNCH_UNTIL}, and ${PRICING.dinner.display} per person for dinner after that. One price covers the whole menu — there are no per-item charges.`,
+    a: `${PRICING.lunch.display} per person for lunch, until ${LUNCH_UNTIL}, and ${PRICING.dinner.display} per person for dinner after that. One price covers the whole menu. There are no per-item charges.`,
   },
   {
     q: "How long do we get at the table?",
@@ -66,11 +66,11 @@ export const FAQS: Faq[] = [
   },
   {
     q: "Can we just walk in?",
-    a: "Yes — walk-ins are welcome any time we are open. Booking ahead is optional, not required.",
+    a: "Yes. Walk-ins are welcome any time we are open, and booking ahead is optional rather than required.",
   },
   {
     q: "Is it gas or charcoal?",
-    a: "Both. Every table has its own grill built into it, and you can ask for charcoal when you walk in — the price is the same either way.",
+    a: "Both. Every table has its own grill built into it, and you can ask for charcoal when you walk in. The price is the same either way.",
   },
   // TWO SENTENCES, AND THE SPLIT IS DELIBERATE. The first says what the spread
   // is and where it lives; the second says Premium is included in the price and
@@ -84,7 +84,7 @@ export const FAQS: Faq[] = [
   },
   {
     q: "What is the difference between lunch and dinner?",
-    a: `Dinner adds the Signature cuts — ${signatureCount} items that are on the dinner menu only, after ${LUNCH_UNTIL}. Everything else on the menu is available at both services.`,
+    a: `Dinner adds the Signature cuts: ${signatureCount} items that are on the dinner menu only, after ${LUNCH_UNTIL}. Everything else on the menu is available at both services.`,
   },
   {
     q: "What are your hours?",

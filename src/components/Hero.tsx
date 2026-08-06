@@ -182,7 +182,12 @@ export function Hero() {
                   screen reader now hears a heading that identifies the
                   restaurant instead of an adjective. */}
               <motion.h1 className="display mt-3 text-sand sm:mt-4" {...rise(1, { fade: false })}>
-                <span className="sr-only">{`${BUSINESS.name} — `}</span>
+                {/* A COMMA. This was an em dash, and the h1 is read aloud: a
+                    screen reader announces "KM.BBQ, All-You-Can-Eat self-serve
+                    Korean BBQ in Oceanside, CA", which is the appositive it
+                    always was. The dash was doing a comma's job in the one
+                    string on the page that is only ever heard. */}
+                <span className="sr-only">{`${BUSINESS.name}, `}</span>
                 {/* `data-headline` is the hook for the VISIBLE lockup. The
                     sr-only fragments are absolutely positioned and clipped to
                     1px, but a Range over their contents still reports the

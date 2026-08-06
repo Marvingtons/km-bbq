@@ -68,16 +68,18 @@ export function About() {
               sit, cooked exactly how you like it.
             </p>
             {/* SELF-SERVE, NOT ORDERING. This read "Order more whenever you
-                want", which describes a restaurant where you flag someone down
-                — and the mechanic here is the opposite of that and is the
-                whole differentiator. The closing "Good food, a hot grill, and
-                no reason to rush" went with it: "take your time" above already
-                carries it, and three sentences of pace in a row is the tone
-                this site does not use. */}
+                want", which describes a restaurant where you flag someone down,
+                and the mechanic here is the opposite of that.
+
+                SHORTER THAN THE LAST PASS, DELIBERATELY. That version ran four
+                sentences and dropped the closing line; this one keeps the
+                paragraph's original shape and changes only the middle sentence,
+                which is the one that was wrong. The longer self-serve
+                explanation now lives in Pick Your Fire's third paragraph, where
+                it follows the fire being lit and has somewhere to go. */}
             <p>
-              Pull up a chair and take your time. Load up at the self-serve bar
-              as many times as you want. No waiting for a server, no waiting for
-              a kitchen. Your food is ready when you are.
+              Pull up a chair and take your time. Grab food from the bar
+              whenever you want. Good food, a hot grill, and no reason to rush.
             </p>
           </div>
         </div>
