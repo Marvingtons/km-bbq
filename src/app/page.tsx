@@ -36,7 +36,11 @@ export const metadata: Metadata = pageMeta({
   // /menu already leads with, so the two titles now use one separator.
   title: "KM.BBQ | All You Can Eat Korean BBQ in Oceanside, CA",
   description:
-    "Self-serve all-you-can-eat Korean BBQ in Oceanside. $21.99 lunch, $30.99 dinner. Load up at the bar, grill at your table. Walk in or reserve.",
+    // "weekday lunch", not "lunch". A snippet is read out of context and acted
+    // on: an unqualified $21.99 in a Saturday search result is a promise the
+    // door cannot keep. One word, 149 characters, still inside the ~160 Google
+    // renders. The OG and Twitter descriptions are this same string.
+    "Self-serve all-you-can-eat Korean BBQ in Oceanside. $21.99 weekday lunch, $30.99 dinner. Load up at the bar, grill at your table. Walk in or reserve.",
   path: "/",
   titleAbsolute: true,
 });

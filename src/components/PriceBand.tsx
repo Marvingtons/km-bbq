@@ -1,4 +1,4 @@
-import { PRICING } from "@/data/info";
+import { PRICING, LUNCH_WINDOW_LINE, DINNER_WINDOW_LINE } from "@/data/info";
 
 /**
  * The price board. One component, rendered on both routes, reading the one
@@ -8,17 +8,24 @@ import { PRICING } from "@/data/info";
  * Three cells, hairline-divided, no box. `flex` rather than `inline-flex` so
  * the cells share the width at 375 instead of overflowing.
  */
+/* THE NOTE UNDER EACH PRICE CARRIES THE WINDOW NOW, not just "per person".
+   Both figures said "per person", which is true and was never the question a
+   reader of a price board is about to get wrong. With lunch restricted to
+   weekdays, the cell that says $21.99 has to say when — this is the strip a
+   visitor screenshots. "per person" survives on the lunch cell because the
+   window phrase does not imply it; the dinner cell's window is long enough
+   that repeating it would wrap the cell at 375. */
 const CELLS = [
   {
     label: PRICING.lunch.label,
     value: PRICING.lunch.display,
-    note: "per person",
+    note: `per person · ${LUNCH_WINDOW_LINE}`,
     loud: true,
   },
   {
     label: PRICING.dinner.label,
     value: PRICING.dinner.display,
-    note: "per person",
+    note: DINNER_WINDOW_LINE,
     loud: true,
   },
   {

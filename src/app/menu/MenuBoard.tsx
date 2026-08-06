@@ -5,7 +5,13 @@ import { useReveal } from "@/lib/reveal";
 import { MenuJumpNav } from "@/components/MenuJumpNav";
 import { CategoryMark, type MarkId } from "@/components/illustrations/CategoryMark";
 import { MENU, JUMP_TARGETS, badgesOf, type MenuItem, type MenuCategory } from "@/data/menu";
-import { PRICING, LUNCH_UNTIL, serviceAt, time12, HOURS_SPEC } from "@/data/info";
+import {
+  PRICING,
+  LUNCH_UNTIL,
+  LUNCH_DAYS_LABEL,
+  DINNER_WINDOW_LINE,
+  serviceAt,
+} from "@/data/info";
 
 /* ===========================================================================
    THE BOARD — the menu as TYPE, not as a product grid.
@@ -44,10 +50,21 @@ const MARK: Record<string, MarkId> = {
   signature: "signature",
 };
 
-/** "12" -> "12:00 PM", for the toggle's own label. */
-const OPENS = time12(HOURS_SPEC[0].opens);
-/** "12–3:30", the compact form the segmented control uses. */
-const LUNCH_WINDOW = `${OPENS.replace(":00", "").replace(" PM", "").replace(" AM", "")}–${LUNCH_UNTIL.replace(" PM", "").replace(" AM", "")}`;
+/**
+ * "Mon–Fri til 3:30" — the lunch segment's window, and the DAYS now lead it.
+ *
+ * It was "12–3:30", built from the opening time and the cutoff. That was a
+ * complete description of lunch while lunch was a clock rule; it is actively
+ * misleading now, because the doors still open at 12 on a Saturday and the
+ * $21.99 does not apply. The opening time is not the useful half of this any
+ * more, so it is gone and the day range takes its place.
+ *
+ * The dinner segment shows no window at all. "After 3:30" alone became false
+ * the moment dinner also meant all day at the weekend, and the segment is too
+ * small for the full rule — which is directly below it on the price strip, in
+ * the footer, and in the FAQ.
+ */
+const LUNCH_WINDOW = `${LUNCH_DAYS_LABEL} til ${LUNCH_UNTIL.replace(" PM", "").replace(" AM", "")}`;
 
 function Row({ item }: { item: MenuItem }) {
   return (
@@ -165,7 +182,8 @@ function Segment({
   active: boolean;
   onClick: () => void;
   label: string;
-  window: string;
+  /** Optional: dinner has no window short enough to be true. See LUNCH_WINDOW. */
+  window?: string;
   price: string;
 }) {
   return (
@@ -181,7 +199,7 @@ function Segment({
     >
       <span className="eyebrow block text-inherit">{label}</span>
       <span className="mt-1 block text-xs">
-        {win} · {price}
+        {win ? `${win} · ${price}` : price}
       </span>
     </button>
   );
@@ -274,7 +292,6 @@ export function MenuBoard() {
               active={service === "dinner"}
               onClick={() => setService("dinner")}
               label={PRICING.dinner.label}
-              window={`After ${LUNCH_UNTIL.replace(" PM", "").replace(" AM", "")}`}
               price={PRICING.dinner.display}
             />
           </div>
@@ -315,8 +332,12 @@ export function MenuBoard() {
                 more useful than hiding it, and making it clickable would be
                 offering something the lunch price does not include. */}
             {!showSignature && (
+              /* "After 3:30" ALONE WAS WRONG once dinner meant the weekend too:
+                 Signature runs all day on a Saturday, and this teaser is shown
+                 to exactly the reader who has not switched cards yet. The full
+                 dinner window says both halves. */
               <p className="eyebrow mt-2 break-inside-avoid rounded-card border border-dashed border-sand-3 px-4 py-4 text-ash">
-                Signature · Dinner only · After {LUNCH_UNTIL}
+                Signature · Dinner only · {DINNER_WINDOW_LINE}
               </p>
             )}
           </div>

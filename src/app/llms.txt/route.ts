@@ -6,6 +6,8 @@ import {
   HOURS,
   PRICING,
   LUNCH_UNTIL,
+  LUNCH_DAYS_LABEL,
+  DINNER_WINDOW_LINE,
   RESERVATION_URL,
   WALK_IN_LINE,
 } from "@/data/info";
@@ -60,8 +62,9 @@ ${hours}
 
 ## Pricing
 
-- ${PRICING.lunch.label}: ${PRICING.lunch.display} per person, until ${LUNCH_UNTIL}
-- ${PRICING.dinner.label}: ${PRICING.dinner.display} per person, after ${LUNCH_UNTIL}
+- ${PRICING.lunch.label}: ${PRICING.lunch.display} per person, ${LUNCH_DAYS_LABEL} until ${LUNCH_UNTIL}
+- ${PRICING.dinner.label}: ${PRICING.dinner.display} per person, ${DINNER_WINDOW_LINE}
+- Lunch pricing is weekdays only. Saturday and Sunday are dinner pricing from open to close.
 - One price covers the whole menu. There are no per-item charges.
 - Table limit: ${PRICING.seatingMinutes} minutes, last call at ${PRICING.lastCallMinutes} minutes.
 

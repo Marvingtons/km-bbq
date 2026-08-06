@@ -10,7 +10,8 @@ import {
   ADDRESS,
   HOURS,
   PRICING,
-  LUNCH_UNTIL,
+  LUNCH_WINDOW_LINE,
+  DINNER_WINDOW_LINE,
   DIRECTIONS_URL,
   RESERVATION_URL,
   WALK_IN_LINE,
@@ -200,6 +201,13 @@ export function Footer() {
                 </div>
               ))}
             </dl>
+            {/* THE PRICE WINDOWS, AND LUNCH IS A WEEKDAY PRICE.
+                The second line under each figure used to read "until 3:30 PM" /
+                "after 3:30 PM", which is only true Monday to Friday: a visitor
+                reading this on a Saturday would have taken $21.99 as available
+                and been wrong at the door. Both phrases come from
+                LUNCH_WINDOW_LINE / DINNER_WINDOW_LINE in data/info.ts so the
+                rule is written once for all six surfaces that state it. */}
             <dl className="mt-4 space-y-2 border-t border-steel/25 pt-4 font-sans text-sm">
               {[PRICING.lunch, PRICING.dinner].map((s) => (
                 <div key={s.label} className="flex flex-col">
@@ -207,9 +215,7 @@ export function Footer() {
                     {s.label} · {s.display}
                   </dt>
                   <dd className="font-normal text-sand/60">
-                    {s === PRICING.lunch
-                      ? `until ${LUNCH_UNTIL}`
-                      : `after ${LUNCH_UNTIL}`}
+                    {s === PRICING.lunch ? LUNCH_WINDOW_LINE : DINNER_WINDOW_LINE}
                   </dd>
                 </div>
               ))}

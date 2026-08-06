@@ -54,7 +54,11 @@ export const FAQS: Faq[] = [
   },
   {
     q: "How much is all-you-can-eat?",
-    a: `${PRICING.lunch.display} per person for lunch, until ${LUNCH_UNTIL}, and ${PRICING.dinner.display} per person for dinner after that. One price covers the whole menu. There are no per-item charges.`,
+    // LUNCH IS A WEEKDAY PRICE, and this answer is the one a searcher is most
+    // likely to see out of context — it is the first result the FAQ rich card
+    // shows. So it states both halves of the rule in full rather than leaning
+    // on the reader having seen the price strip.
+    a: `${PRICING.lunch.display} per person for lunch, Monday through Friday until ${LUNCH_UNTIL}. ${PRICING.dinner.display} per person for dinner, which applies after ${LUNCH_UNTIL} on weekdays and all day Saturday and Sunday. One price covers the whole menu. There are no per-item charges.`,
   },
   {
     q: "How long do we get at the table?",
@@ -84,7 +88,11 @@ export const FAQS: Faq[] = [
   },
   {
     q: "What is the difference between lunch and dinner?",
-    a: `Dinner adds the Signature cuts: ${signatureCount} items that are on the dinner menu only, after ${LUNCH_UNTIL}. Everything else on the menu is available at both services.`,
+    // THE WEEKEND CLAUSE. Both halves of the difference move with the day:
+    // dinner PRICING and the Signature cuts run from 3:30 on a weekday and from
+    // opening on a Saturday or Sunday. Someone planning a weekend visit is
+    // exactly who asks this question.
+    a: `Dinner adds the Signature cuts: ${signatureCount} items that are on the dinner menu only. On weekdays dinner starts after ${LUNCH_UNTIL}, and on Saturday and Sunday dinner pricing and the Signature cuts run all day. Everything else on the menu is available at both services.`,
   },
   {
     q: "What are your hours?",

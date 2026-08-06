@@ -25,7 +25,7 @@ export const metadata: Metadata = pageMeta({
   // "self-serve" appears ONCE, in the category phrase. The counts and the
   // prices are what this page is for; the format is context.
   description:
-    "The full self-serve all-you-can-eat menu: 33 core items, 10 Premium cuts, and 3 dinner-only Signature cuts. $21.99 lunch, $30.99 dinner.",
+    "The full self-serve all-you-can-eat menu: 33 core items, 10 Premium cuts, and 3 dinner-only Signature cuts. $21.99 weekday lunch, $30.99 dinner.",
   path: "/menu",
   titleAbsolute: true,
 });

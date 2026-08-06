@@ -63,6 +63,26 @@ export const PRICING = {
      * and the contact card and footer both print it. One value, five surfaces.
      */
     until: "15:30",
+    /**
+     * LUNCH IS A WEEKDAY PRICE. Confirmed 2026-08-06: $21.99 applies Monday to
+     * Friday until the cutoff above, and Saturday and Sunday are dinner
+     * pricing all day.
+     *
+     * THE CLOCK ALONE IS NO LONGER THE ANSWER, and that is the whole of this
+     * change: every "is it lunch right now" question has to ask the DAY first.
+     * `serviceAt()` below is the one place that decides, and nothing else may
+     * compare a wall clock to `until` on its own.
+     *
+     * DAY NUMBERS, NOT NAMES, and deliberately: `HOURS_SPEC` already keys off
+     * `dayNums` with JS `getDay()` semantics (0 = Sunday), and two day
+     * representations in the one file that exists to prevent drift is exactly
+     * the drift. The change brief sketched `['mon','tue',...]`; this is the
+     * same set in the notation the file already speaks.
+     *
+     * NOTE: this does NOT touch opening hours. The doors open at the same
+     * times all week (see HOURS_SPEC). Only the price window moved.
+     */
+    days: [1, 2, 3, 4, 5],
   }),
   dinner: service({ price: 30.99, label: "Dinner" }),
   /** Table time limit, and the "last call" beat the staff actually run. */
@@ -71,8 +91,33 @@ export const PRICING = {
   lastCallMinutes: 75,
 } as const;
 
-/** "4:00 PM" — the boundary, formatted once for every surface that names it. */
+/** "3:30 PM" — the boundary, formatted once for every surface that names it. */
 export const LUNCH_UNTIL = time12(PRICING.lunch.until);
+
+/* ---------------------------------------------------------------------------
+   THE QUALIFIERS, WRITTEN ONCE.
+
+   Six surfaces now have to say "weekdays only" in their own register, and a
+   price rule that is retyped per surface is a price rule that will disagree
+   with itself. These are the only strings any component may print for it.
+
+   EN DASHES ARE CORRECT HERE. `Mon–Fri` and `Sat–Sun` are RANGES, the same
+   class as `Sun–Thu` in HOURS and `12:00 PM – 9:30 PM` in the time strings —
+   not em dashes joining clauses. The copy pass's sweep excludes ranges
+   explicitly, and its final grep only forbids `—`.
+   --------------------------------------------------------------------------- */
+
+/** "Mon–Fri". The long form, for anywhere with room for it. */
+export const LUNCH_DAYS_LABEL = "Mon–Fri";
+/** "M–F". The compact form, for the hero's one-line phone layout. */
+export const LUNCH_DAYS_SHORT = "M–F";
+/** "Sat–Sun". Named rather than inferred, so the weekend is one string too. */
+export const DINNER_DAYS_LABEL = "Sat–Sun";
+
+/** "Mon–Fri until 3:30 PM" — the lunch window as a full phrase. */
+export const LUNCH_WINDOW_LINE = `${LUNCH_DAYS_LABEL} until ${LUNCH_UNTIL}`;
+/** "after 3:30 PM and all day Sat–Sun" — the dinner window as a full phrase. */
+export const DINNER_WINDOW_LINE = `after ${LUNCH_UNTIL} and all day ${DINNER_DAYS_LABEL}`;
 
 // The real in-store promotion, quoted verbatim wherever it appears.
 export const CLOCK_PROMO = {
@@ -119,8 +164,47 @@ export const ADDRESS_PARTS = {
 
 export const GEO = { lat: 33.1767, lng: -117.3503 } as const;
 
-// 24h form for openingHoursSpecification, and the source the sticky bar reads
-// to work out tonight's close. `day` is JS getDay(): 0 = Sunday.
+/* 24h form for openingHoursSpecification, and the source the sticky bar reads
+   to work out tonight's close. `day` is JS getDay(): 0 = Sunday.
+
+   ===========================================================================
+   TODO: CONFIRM WITH CLIENT — THE DOOR SIGN DISAGREES WITH THESE HOURS.
+   ===========================================================================
+   Found 2026-08-06 while propagating the weekday-lunch rule. The restaurant's
+   own "HOURS OF BUSINESS" sign is legible in `public/images/outside.png`, the
+   storefront photograph this site already ships in the Contact section, and it
+   reads:
+
+       MONDAY - FRIDAY
+         LUNCH TIME   11:30AM - 3:30PM
+         DINNER TIME   4:30AM - 9:30PM     <- "4:30AM" is a typo ON THE SIGN
+       SATURDAY & SUNDAY
+                      11:30AM - 9:30PM
+
+   IT CORROBORATES THE PRICING CHANGE, which is why it is worth trusting at
+   all: lunch is a Monday-to-Friday service ending at 3:30, and the weekend has
+   no lunch sitting listed. That is exactly the rule this file now encodes.
+
+   It also disagrees with the three values below, in three ways:
+
+     1. OPENS. The sign says 11:30 AM every day; we publish 12:00 PM.
+     2. A WEEKDAY BREAK. The sign shows lunch ending at 3:30 and dinner
+        starting at 4:30, i.e. an hour when the doors are shut. We publish one
+        continuous block.
+     3. SATURDAY CLOSE. The sign says 9:30 PM at the weekend; we publish
+        10:00 PM on Friday AND Saturday.
+
+   NOT CHANGED, DELIBERATELY, and for two reasons. The change brief that
+   surfaced this was explicit that hours are out of scope ("this is a pricing
+   window change only"), and a photograph is evidence rather than a record: the
+   sign may predate the hours the owner gave us, or the reverse. Publishing an
+   opening time an hour early is the kind of error that sends someone to a
+   locked door, and guessing which source is current is not a decision to make
+   from a JPEG.
+
+   Note that none of this makes the PRICING copy wrong: "dinner applies after
+   3:30 PM" holds whether or not the room is shut between 3:30 and 4:30.
+   =========================================================================== */
 export const HOURS_SPEC = [
   {
     days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"],
@@ -187,37 +271,77 @@ function short12(hhmm: string): string {
 }
 
 /**
- * WHICH SERVICE THE VISITOR IS BEING QUOTED, from their own wall clock.
+ * IS THIS MOMENT INSIDE THE LUNCH WINDOW? Day first, then clock.
  *
- * Open, before the cutoff  -> lunch
- * Open, after the cutoff   -> dinner
- * Closed                   -> whatever comes NEXT, which is the only useful
- *                             answer to "what does it cost" at 11pm. We open at
- *                             noon and the cutoff is in the afternoon, so the
- *                             next service is lunch — but that is DERIVED from
- *                             the opening time rather than assumed, so moving
- *                             either number keeps the answer honest.
+ * THE ONE PREDICATE, and everything about lunch pricing goes through it. The
+ * rule used to be a single comparison against `until`, so every caller could
+ * reasonably ask the question itself; with a day term as well, a caller that
+ * asks it itself is a caller that will forget the weekend. Nothing outside this
+ * file compares a wall clock to `PRICING.lunch.until`.
  *
- * Lives here rather than in the bar because the contact card and the footer
- * quote the same two windows, and a rule about prices belongs with the prices.
+ * Takes a day and minutes rather than a Date, because `serviceAt` has to ask it
+ * about a moment that is not now: the next time the doors open.
+ */
+function isLunchWindow(day: number, minutes: number): boolean {
+  const days: readonly number[] = PRICING.lunch.days;
+  return days.includes(day) && minutes < minutesOf(PRICING.lunch.until);
+}
+
+/** Is the visitor's own moment a lunch-priced one? The public form. */
+export function isLunchAt(now: Date): boolean {
+  return isLunchWindow(now.getDay(), now.getHours() * 60 + now.getMinutes());
+}
+
+/**
+ * WHICH SERVICE THE VISITOR IS BEING QUOTED, from their own wall clock AND
+ * their own calendar.
+ *
+ * Open, inside the lunch window   -> lunch   (weekday, before the cutoff)
+ * Open, outside it                -> dinner  (weekday evening, or any weekend)
+ * Closed                          -> whatever the doors next open INTO, which
+ *                                    is the only useful answer to "what does it
+ *                                    cost" at 11pm.
+ *
+ * THE CLOSED BRANCH NOW HAS TO CARRY THE DAY WITH IT. It used to find the next
+ * block and compare its `opens` time to the cutoff, which was sufficient while
+ * lunch was a pure clock rule. It is not any more: the doors open at noon every
+ * day of the week, so on a Friday night that test says "opens at 12, 12 is
+ * before 3:30, therefore lunch" — and Saturday has no lunch. The search tracks
+ * which DAY it lands on and asks the same predicate the open branch does.
+ *
+ * Bounded by seven days, because a schedule with no open days would otherwise
+ * loop forever. Same guard `nextOpenLabel` uses.
+ *
+ * Lives here rather than in the bar because the footer, the nav overlay and the
+ * menu toggle quote the same two windows, and a rule about prices belongs with
+ * the prices.
  */
 export function serviceAt(now: Date): typeof PRICING.lunch | typeof PRICING.dinner {
-  const cutoff = minutesOf(PRICING.lunch.until);
-  if (isOpenAt(now)) {
-    const minutes = now.getHours() * 60 + now.getMinutes();
-    return minutes < cutoff ? PRICING.lunch : PRICING.dinner;
-  }
-  // Closed: quote the service the doors next open into. Today's block if we
-  // have not opened yet, otherwise tomorrow's — either way it is the `opens`
-  // time that decides, not the hour it happens to be now.
   const day = now.getDay();
   const minutes = now.getHours() * 60 + now.getMinutes();
+
+  if (isOpenAt(now)) {
+    return isLunchWindow(day, minutes) ? PRICING.lunch : PRICING.dinner;
+  }
+
+  // Closed. Find the next moment the doors open, as a (day, minute) pair, and
+  // ask the same question of it.
   const today = blockFor(day);
-  const beforeToday = today && minutes < minutesOf(today.opens);
-  const next = beforeToday
-    ? today
-    : (blockFor((day + 1) % 7) ?? blockFor(day) ?? HOURS_SPEC[0]);
-  return minutesOf(next.opens) < cutoff ? PRICING.lunch : PRICING.dinner;
+  if (today && minutes < minutesOf(today.opens)) {
+    return isLunchWindow(day, minutesOf(today.opens))
+      ? PRICING.lunch
+      : PRICING.dinner;
+  }
+  for (let i = 1; i <= 7; i++) {
+    const nextDay = (day + i) % 7;
+    const block = blockFor(nextDay);
+    if (block) {
+      return isLunchWindow(nextDay, minutesOf(block.opens))
+        ? PRICING.lunch
+        : PRICING.dinner;
+    }
+  }
+  return PRICING.dinner;
 }
 
 /**

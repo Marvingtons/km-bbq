@@ -7,6 +7,9 @@ import {
   HOURS_SPEC,
   SOCIALS,
   PRICING,
+  LUNCH_UNTIL,
+  LUNCH_DAYS_LABEL,
+  DINNER_WINDOW_LINE,
   RESERVATION_URL,
 } from "@/data/info";
 import { MENU } from "@/data/menu";
@@ -69,7 +72,7 @@ export function restaurantNode() {
        should not get two different accounts of the same restaurant.
        It says NOTHING about how the Premium or Signature tiers reach the table.
        See the accuracy note in src/data/faq.ts. */
-    description: `Self-serve all-you-can-eat Korean BBQ in ${ADDRESS_PARTS.city}, ${ADDRESS_PARTS.state}. ${PRICING.lunch.display} lunch, ${PRICING.dinner.display} dinner. Load your plate at the self-serve bar and grill it at your own table, with a grill built into every table.`,
+    description: `Self-serve all-you-can-eat Korean BBQ in ${ADDRESS_PARTS.city}, ${ADDRESS_PARTS.state}. ${PRICING.lunch.display} for lunch ${LUNCH_DAYS_LABEL} until ${LUNCH_UNTIL}, and ${PRICING.dinner.display} for dinner after that and all day at the weekend. Load your plate at the self-serve bar and grill it at your own table, with a grill built into every table.`,
     url: SITE_URL,
     logo: abs("/icon-512.png"),
     image: [abs("/images/outside.png"), abs("/og.png")],
@@ -154,7 +157,13 @@ export function menuNode() {
       "@type": "MenuSection",
       name: category.name,
       ...(category.tier === "signature"
-        ? { description: "On the dinner menu only, after 3:30 PM." }
+        ? {
+            /* HARDCODED "after 3:30 PM" WAS HIDING HERE, in the one layer
+               nobody reads. It duplicated LUNCH_UNTIL, so the cutoff lived in
+               two places, and it went wrong the moment dinner also meant all
+               day at the weekend. Built from the same phrase the page prints. */
+            description: `On the dinner menu only, ${DINNER_WINDOW_LINE}.`,
+          }
         : category.blurb
           ? { description: category.blurb }
           : {}),

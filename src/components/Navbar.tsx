@@ -20,7 +20,8 @@ import {
   PHONE,
   HOURS,
   PRICING,
-  LUNCH_UNTIL,
+  LUNCH_WINDOW_LINE,
+  DINNER_WINDOW_LINE,
   DIRECTIONS_URL,
   RESERVATION_URL,
 } from "@/data/info";
@@ -359,12 +360,16 @@ export function Navbar() {
                     key={s.label}
                     className="flex justify-between border-t border-steel/25 py-2"
                   >
+                    {/* Same weekday rule as the footer, from the same two
+                        strings. This overlay is the whole site's index on a
+                        phone, so a price without its window is a price a
+                        weekend visitor will act on. */}
                     <dt>
                       {s.label}
                       <span className="ml-2 text-steel/70">
                         {s === PRICING.lunch
-                          ? `until ${LUNCH_UNTIL}`
-                          : `after ${LUNCH_UNTIL}`}
+                          ? LUNCH_WINDOW_LINE
+                          : DINNER_WINDOW_LINE}
                       </span>
                     </dt>
                     <dd className="font-medium text-sand">{s.display}</dd>

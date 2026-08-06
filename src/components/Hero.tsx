@@ -4,7 +4,13 @@ import { motion, useReducedMotion } from "framer-motion";
 import { PillLink } from "./PillLink";
 import { MediaStage } from "./MediaStage";
 import { EYEBROW, HEADLINE, SUBHEAD, CTA_LABEL, CTA_HREF } from "./hero/copy";
-import { PRICING, BUSINESS, ADDRESS } from "@/data/info";
+import {
+  PRICING,
+  BUSINESS,
+  ADDRESS,
+  LUNCH_DAYS_LABEL,
+  LUNCH_DAYS_SHORT,
+} from "@/data/info";
 import { MOTION } from "@/lib/motion";
 
 /**
@@ -29,8 +35,34 @@ import { MOTION } from "@/lib/motion";
  * pairs rather than as broken numbers.
  */
 
-/** One price cell: the figure, then what it buys. */
-function Price({ amount, label }: { amount: string; label: string }) {
+/**
+ * One price cell: the figure, what it buys, and — for lunch — when.
+ *
+ * THE QUALIFIER IS THE POINT OF THE `days` PROP. $21.99 is a weekday price, so
+ * a hero that prints it unqualified tells a Saturday visitor a number they
+ * cannot have. It is deliberately NOT loud: same `.eyebrow` recipe as the
+ * label, one step down in opacity, so the hierarchy is still figure, then
+ * label, then condition.
+ *
+ * TWO FORMS, because the two layouts have different room. On a phone the whole
+ * line is one row (`$21.99 LUNCH (M–F) · $30.99 DINNER`) and the qualifier has
+ * to be three characters in brackets; from `sm` the cells have space for the
+ * separator-and-tag form (`$21.99 LUNCH · MON–FRI`). Both come from the same
+ * two constants in data/info.ts, and only ONE is ever in the accessible tree —
+ * the hidden one is `aria-hidden`, so a screen reader hears the qualifier once
+ * rather than twice.
+ */
+function Price({
+  amount,
+  label,
+  days,
+  daysShort,
+}: {
+  amount: string;
+  label: string;
+  days?: string;
+  daysShort?: string;
+}) {
   return (
     <span className="inline-flex items-baseline gap-2">
       {/* SAND, not the accent — the same rule as the sticky bar. The price
@@ -52,6 +84,19 @@ function Price({ amount, label }: { amount: string; label: string }) {
         {amount}
       </span>
       <span className="eyebrow text-sand/70">{label}</span>
+      {days && daysShort && (
+        <>
+          {/* Phone: "(M–F)", tucked straight after the label on the one line. */}
+          <span className="eyebrow text-sand/55 sm:hidden">({daysShort})</span>
+          {/* sm and up: "· MON–FRI", with the site's own middot separator. */}
+          <span
+            aria-hidden="true"
+            className="eyebrow hidden text-sand/55 sm:inline"
+          >
+            · {days}
+          </span>
+        </>
+      )}
     </span>
   );
 }
@@ -226,7 +271,12 @@ export function Hero() {
                 className="mt-3.5 flex flex-nowrap items-baseline gap-x-3 whitespace-nowrap sm:mt-5 sm:gap-x-4"
                 {...rise(4, { slow: true })}
               >
-                <Price amount={PRICING.lunch.display} label={PRICING.lunch.label} />
+                <Price
+                  amount={PRICING.lunch.display}
+                  label={PRICING.lunch.label}
+                  days={LUNCH_DAYS_LABEL}
+                  daysShort={LUNCH_DAYS_SHORT}
+                />
                 <span aria-hidden="true" className="text-sand/50">
                   ·
                 </span>
