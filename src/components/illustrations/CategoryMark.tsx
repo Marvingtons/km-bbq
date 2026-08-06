@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { prefersReducedMotion } from "@/lib/motion";
+import { SLOT_RING_R, SLOT_RING_TICKS } from "./slotRing";
 
 /* ===========================================================================
    THE CATEGORY MARKS — one ink system, ten glyphs.
@@ -118,30 +119,19 @@ const MARKS: Record<MarkId, React.ReactNode> = {
   ),
 };
 
-/** Circle plus eight ticks, generated so all eight are identical by construction. */
+/** Circle plus eight ticks, from slotRing.ts. The geometry lives there rather
+ *  than here because it used to have a second consumer — see that file. */
 function SlotRing() {
-  const ticks = Array.from({ length: 8 }, (_, i) => {
-    const a = (i * Math.PI * 2) / 8 - Math.PI / 2;
-    const r1 = 6.2;
-    const r2 = 8.6;
-    return {
-      key: i,
-      x1: 12 + Math.cos(a) * r1,
-      y1: 12 + Math.sin(a) * r1,
-      x2: 12 + Math.cos(a) * r2,
-      y2: 12 + Math.sin(a) * r2,
-    };
-  });
   return (
     <>
-      <circle cx="12" cy="12" r="9.6" pathLength={1} />
-      {ticks.map((t) => (
+      <circle cx="12" cy="12" r={SLOT_RING_R} pathLength={1} />
+      {SLOT_RING_TICKS.map((t) => (
         <line
           key={t.key}
-          x1={t.x1.toFixed(2)}
-          y1={t.y1.toFixed(2)}
-          x2={t.x2.toFixed(2)}
-          y2={t.y2.toFixed(2)}
+          x1={t.x1}
+          y1={t.y1}
+          x2={t.x2}
+          y2={t.y2}
           pathLength={1}
         />
       ))}

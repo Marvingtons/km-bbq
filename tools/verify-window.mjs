@@ -14,9 +14,12 @@
  *   4. the window opens onto About's SAND ground with the story composed on it,
  *      and the retired illustration mural is absent — no <img>, no CSS
  *      background, no band or parallax markup left behind
- *   5. the chrome hairline is present at the ground change
+ *   5. the ground change is a HARD CUT — no hairline ornament at the join.
+ *      (This was the opposite assertion until DIRECTION.md amendment A4: the
+ *      site's `<SectionSeam />` drew a chrome rule wherever the ground changed,
+ *      which stopped making sense once every section boundary is one.)
  *   6. the video pauses once fully off-screen and resumes on return
- *   7. prefers-reduced-motion: nothing clips, nothing moves, hairline intact
+ *   7. prefers-reduced-motion: nothing clips, nothing moves, the cut is intact
  *   8. under 768px: no clip scrub at all, and no horizontal overflow at 375px
  */
 import { chromium } from "playwright-core";
@@ -268,11 +271,31 @@ const browser = await chromium.launch();
   check("no mural used as a CSS background anywhere", mural.backgrounds === 0, `${mural.backgrounds} elements`);
   check("no mural band or parallax markup left behind", mural.bandEls === 0, `${mural.bandEls} elements`);
 
-  const seam = await page.evaluate(() => {
-    const el = document.querySelector("#pick-your-fire > div[aria-hidden='true']");
-    return el ? { h: getComputedStyle(el).height, bg: getComputedStyle(el).backgroundImage.slice(0, 40) } : null;
+  /* THE BOUNDARY IS A HARD CUT — inverted by DIRECTION.md amendment A4.
+     ---------------------------------------------------------------------
+     This used to assert the opposite: that a 1px `<SectionSeam />` gradient
+     sat at the top of Pick Your Fire, because a chrome hairline was the site's
+     device for the rare place its ground changed. Every boundary on the page
+     is a ground change now, so drawing that rule honestly would put a border
+     on all eight of them. The seam is deleted and the assertion is flipped
+     rather than dropped: no ornament at the join, and the two grounds really
+     do differ, which is what makes the cut legible without one. */
+  const boundary = await page.evaluate(() => {
+    const fire = document.querySelector("#pick-your-fire");
+    const hairlines = [...fire.children].filter((el) => {
+      const cs = getComputedStyle(el);
+      const h = parseFloat(cs.height);
+      return el.getAttribute("aria-hidden") === "true" && h > 0 && h <= 2;
+    });
+    return {
+      hairlines: hairlines.length,
+      fireGround: getComputedStyle(fire).backgroundColor,
+      heroDeclaresDark: !!document.querySelector("#home.section-dark"),
+    };
   });
-  check("chrome hairline present at the ground change", !!seam && seam.h === "1px" && /gradient/.test(seam.bg), seam ? seam.h : "missing");
+  check("no hairline ornament at the hero -> fire boundary (A4: hard cuts)", boundary.hairlines === 0, `${boundary.hairlines} found`);
+  check("the boundary is a real ground change: fire is sand", boundary.fireGround === "rgb(244, 236, 225)", boundary.fireGround);
+  check("the hero declares itself a dark band (.section-dark)", boundary.heroDeclaresDark);
 
   // Video pauses fully off-screen, resumes on return.
   await scrollTo(page, 3400);
@@ -315,11 +338,22 @@ const browser = await chromium.launch();
     return t === "none" ? 0 : Math.abs(new DOMMatrixReadOnly(t).m42);
   });
   check("reduced motion: no parallax", moved < 0.5, `media ty ${moved}px`);
-  const seam = await page.evaluate(() => {
-    const el = document.querySelector("#pick-your-fire > div[aria-hidden='true']");
-    return el ? getComputedStyle(el).height : null;
+  // The bands are pure CSS, so the hard cut is identical under reduced motion —
+  // there is nothing here that a timeline was ever drawing. Same assertion as
+  // the motion path above, which is the point of checking it twice.
+  const rmBoundary = await page.evaluate(() => {
+    const fire = document.querySelector("#pick-your-fire");
+    return {
+      hairlines: [...fire.children].filter((el) => {
+        const cs = getComputedStyle(el);
+        const h = parseFloat(cs.height);
+        return el.getAttribute("aria-hidden") === "true" && h > 0 && h <= 2;
+      }).length,
+      fireGround: getComputedStyle(fire).backgroundColor,
+    };
   });
-  check("reduced motion: hairline intact", seam === "1px", String(seam));
+  check("reduced motion: still a hard cut, no hairline", rmBoundary.hairlines === 0, `${rmBoundary.hairlines} found`);
+  check("reduced motion: the ground change survives", rmBoundary.fireGround === "rgb(244, 236, 225)", rmBoundary.fireGround);
   check("reduced motion: the story is actually readable", ...(await storyReadable(page)));
   await ctx.close();
 }

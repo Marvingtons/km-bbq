@@ -18,6 +18,20 @@
  * DIRECTION.md, "Open, not decided" #1). When the frames arrive and the values
  * move, update TOKENS below in the same commit — this file asserts internal
  * consistency and AA, and both survive a value change.
+ *
+ * AMENDMENT A4 CHANGED THE SHAPE OF ONE CHECK. Constraint 2 used to be checked
+ * as "no <section> paints a black ground". The home page alternates grounds
+ * now, so that assertion is replaced by one on the ARRANGEMENT — every section
+ * is warm or char, no two adjacent sections share a ground, the rhythm opens
+ * and closes dark, and every dark section declares itself with `.section-dark`
+ * rather than hand-painting char. That is a tighter bound on the failure the
+ * original was written against ("black for mood") than a count was: a fifth
+ * band cannot appear without displacing a cream one.
+ *
+ * The band's four remapped tokens are `color-mix()` results, so they are read
+ * off the rendered page rather than listed in TOKENS. A table that has to be
+ * kept in step with a stylesheet by hand is the thing this file exists to
+ * replace.
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -178,6 +192,59 @@ const seen = await page.evaluate(() => {
       w: el.getBoundingClientRect().width,
     }))
     .filter((e) => e.w > 600);
+
+  /* THE GROUND SEQUENCE, IN PAGE ORDER — the thing constraint 2 is checked by
+     since amendment A4.
+
+     Sorted by document position rather than by DOM order: two sections are
+     inside ScrollTrigger pin-spacers, so `main > section` misses them and a
+     naive querySelectorAll order is not the order a reader meets them in.
+
+     The hero counts as DARK even though it paints nothing. Its ground is the
+     photograph — HeroBackdrop paints char under the poster — and the section
+     itself is deliberately transparent, because it is up to 160vh tall on the
+     nav tier with the next section pulled up underneath it; painting there
+     would black out the top of Pick Your Fire. */
+  const order = [...document.querySelectorAll("section")]
+    .map((s) => ({
+      id: s.id || s.className.split(" ")[0],
+      bg: getComputedStyle(s).backgroundColor,
+      declaresDark: s.classList.contains("section-dark"),
+      top: s.getBoundingClientRect().top + window.scrollY,
+    }))
+    .sort((a, b) => a.top - b.top);
+  const f = document.querySelector("footer");
+  if (f) order.push({ id: "footer", bg: getComputedStyle(f).backgroundColor, declaresDark: true, top: Infinity });
+
+  // The band's four remapped tokens, read off a section that actually paints
+  // one — so the assertion is against what the browser resolved, not against a
+  // table in this file that could drift from it.
+  const band = document.querySelector(".section-dark:not(.section-dark-media)");
+  const cv = document.createElement("canvas").getContext("2d");
+  const hex = (v) => {
+    cv.fillStyle = "#000";
+    cv.fillStyle = v;
+    cv.fillRect(0, 0, 1, 1);
+    const d = cv.getImageData(0, 0, 1, 1).data;
+    return "#" + [d[0], d[1], d[2]].map((n) => n.toString(16).padStart(2, "0")).join("");
+  };
+  const bandTokens = band
+    ? (() => {
+        const cs = getComputedStyle(band);
+        const t = (n) => hex(cs.getPropertyValue(n).trim());
+        return {
+          ground: hex(cs.backgroundColor),
+          ink: t("--color-ink"),
+          ash: t("--color-ash"),
+          "sand-2": t("--color-sand-2"),
+          "sand-3": t("--color-sand-3"),
+          steel: t("--color-steel"),
+          flame: t("--color-flame"),
+          sand: t("--color-sand"),
+        };
+      })()
+    : null;
+
   return {
     body: bg("body"),
     html: getComputedStyle(document.documentElement).backgroundColor,
@@ -185,6 +252,8 @@ const seen = await page.evaluate(() => {
     sections: Object.fromEntries(
       [...document.querySelectorAll("section[id]")].map((s) => [s.id, getComputedStyle(s).backgroundColor])
     ),
+    order,
+    bandTokens,
     wide,
     muralImgs: document.querySelectorAll("img[src*='mural']").length,
     overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
@@ -199,15 +268,125 @@ check(
   `${seen.muralImgs} mural img`
 );
 
-// CONSTRAINT 2 — black is structure, never a page section's ground.
+/* CONSTRAINT 2, AS AMENDED BY A4 — the grounds ALTERNATE.
+   ---------------------------------------------------------------------------
+   This used to read "no <section> paints a black ground", which was the right
+   check while black was confined to the nav, the footer and two props. A4
+   replaces the divider system with alternating full-bleed bands, so that
+   assertion would now fail on four sections that are correct.
+
+   What replaces it is STRICTER in the way that matters, not looser. The old
+   check bounded the COUNT of dark sections at zero; this one bounds the
+   ARRANGEMENT, which is what "never black for mood" actually meant. A fifth
+   band cannot be added without displacing a cream one, and a page that drifts
+   toward dark-everywhere — the failure DIRECTION.md exists to prevent — breaks
+   the alternation on its first step. Constraint 1 is still checked separately:
+   the page ground is sand and it is light.
+   ------------------------------------------------------------------------- */
 const blacks = [rgbOf(TOKENS.char), rgbOf(TOKENS["char-2"])];
-const blackSections = Object.entries(seen.sections).filter(([, bg]) => blacks.includes(bg));
+const groundOf = (s) =>
+  s.id === "home"
+    ? "dark" // its ground is the photograph; see the note in the evaluate above
+    : blacks.includes(s.bg)
+      ? "dark"
+      : s.bg === rgbOf(TOKENS.sand)
+        ? "warm"
+        : `OTHER(${s.bg})`;
+
+const grounds = seen.order.map((s) => ({ id: s.id, g: groundOf(s), declaresDark: s.declaresDark }));
+console.log(`  ...ground sequence: ${grounds.map((s) => `${s.id}=${s.g}`).join(" ")}`);
+
 check(
-  "no <section> paints a black ground (black is nav/footer/caps only)",
-  blackSections.length === 0,
-  blackSections.map(([id]) => `#${id}`).join(", ")
+  "every section paints either the warm ground or the black structure",
+  grounds.every((s) => s.g === "dark" || s.g === "warm"),
+  grounds.filter((s) => s.g.startsWith("OTHER")).map((s) => `#${s.id} ${s.g}`).join(", ")
 );
+
+const adjacent = grounds
+  .map((s, i) => (i > 0 && s.g === grounds[i - 1].g ? `${grounds[i - 1].id}/${s.id} both ${s.g}` : null))
+  .filter(Boolean);
+check(
+  `no two adjacent sections share a ground (${grounds.length} sections, perfect alternation)`,
+  adjacent.length === 0,
+  adjacent.join(", ")
+);
+
+// The rhythm has to START and END dark — the hero and the footer are the two
+// pieces of structure the alternation hangs off.
+check("the rhythm opens on the hero's dark ground", grounds[0]?.g === "dark", grounds[0]?.id);
 check("the footer IS black (the structure exists, not merely absent)", blacks.includes(seen.footer), seen.footer);
+
+// ONE MECHANISM. Every dark section must declare itself with `.section-dark`
+// rather than by painting char with a utility of its own — that is what stops a
+// band acquiring a treatment the other bands do not have.
+const undeclared = grounds.filter((s) => s.g === "dark" && s.id !== "footer" && !s.declaresDark);
+check(
+  "every dark section is declared with .section-dark, not hand-painted",
+  undeclared.length === 0,
+  undeclared.map((s) => `#${s.id}`).join(", ")
+);
+
+/* THE BAND'S REMAPPED TOKENS, MEASURED ON THE RENDERED PAGE.
+   These are `color-mix()` results rather than literals, so there is no hex to
+   put in TOKENS above — and that is the point: the check reads what the browser
+   resolved, so it cannot drift from the value the way a copied table does. */
+console.log("\n=== THE DARK BAND'S OWN PAIRS ===");
+if (!seen.bandTokens) {
+  check("a painted dark band exists to measure", false);
+} else {
+  const B = seen.bandTokens;
+  console.log(`  ...band tokens: ${JSON.stringify(B)}`);
+  const needB = (label, fg, bg, min = 4.5) =>
+    check(`${label} (${ratio(B[fg], B[bg]).toFixed(2)}:1 >= ${min})`, ratio(B[fg], B[bg]) >= min);
+
+  needB("band heading/ink on the band ground", "ink", "ground");
+  needB("band muted copy on the band ground", "ash", "ground");
+  needB("band ink on a band card (sand-2 -> char-2)", "ink", "sand-2");
+  needB("band muted copy on a band card", "ash", "sand-2");
+  // Chrome is unchanged by the band and still has to work as a rule on it.
+  needB("the header-cadence rule (steel) on the band ground", "steel", "ground", 3);
+
+  check(
+    `the band's ground IS --color-char (${B.ground})`,
+    B.ground === TOKENS.char
+  );
+  check(
+    "the band remaps ink to sand rather than inventing a light value",
+    B.ink === TOKENS.sand,
+    B.ink
+  );
+  check(
+    "the band does NOT remap steel — chrome is one material on both grounds",
+    B.steel === TOKENS.steel,
+    B.steel
+  );
+  check(
+    "the band does NOT remap flame — the accent's fills are unchanged",
+    B.flame === TOKENS.flame,
+    B.flame
+  );
+  check(
+    "the band does NOT remap sand — it is the label on every flame fill",
+    B.sand === TOKENS.sand,
+    B.sand
+  );
+  // The hairline is a DIVISION, not a control boundary: it must be visible and
+  // must not become a line of colour. Bracketed rather than floored.
+  const hair = ratio(B["sand-3"], B.ground);
+  check(
+    `the band hairline is a division, not a border (${hair.toFixed(2)}:1 in 1.5-3.0)`,
+    hair >= 1.5 && hair <= 3.0
+  );
+
+  // THE ACCENT'S RULE SURVIVES THE NEW GROUND. Same two deliberate non-pairs as
+  // above, restated against the band — if flame ever clears as text here, the
+  // FAQ link and the plus icon need revisiting rather than silently surviving.
+  check(
+    "flame is still NOT usable as text on the band, and the band does not use it that way",
+    ratio(B.flame, B.ground) < 4.5,
+    `${ratio(B.flame, B.ground).toFixed(2)}:1`
+  );
+}
 
 // CONSTRAINT 7 — the mural blue appears at most once.
 const skyUsers = seen.wide.filter((e) => e.bg === rgbOf(TOKENS.sky));

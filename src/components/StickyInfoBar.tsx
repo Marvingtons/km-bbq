@@ -115,7 +115,17 @@ export function StickyInfoBar() {
       {shown && (
         <motion.aside
           aria-label="Hours and contact"
-          className="fixed inset-x-0 bottom-0 z-nav border-t border-steel/25 bg-char-2/95 backdrop-blur-md md:inset-x-auto md:bottom-6 md:right-6 md:rounded-pill md:border md:px-2 md:py-2 md:shadow-pop lg:right-12"
+          /* THE EDGE HAS TO BE LIGHT NOW, and that is a consequence of the
+             bands rather than a taste change. The bar is a char-2 element and
+             it rides over four dark sections; steel/25 measures 1.35:1 against
+             char, so on the gallery, the menu preview and the FAQ the bar was
+             a dark shape with no boundary sitting on a dark ground. Sand at
+             25% is 2.07:1 — the same hairline value the bands use internally —
+             and it reads as a rim light rather than as a border.
+             Over the cream sections it costs nothing: the bar's own char-2
+             body is already 14:1 against sand, so the edge is decoration
+             there and separation here. Verified over sections 3, 5 and 7. */
+          className="fixed inset-x-0 bottom-0 z-nav border-t border-sand/25 bg-char-2/95 backdrop-blur-md md:inset-x-auto md:bottom-6 md:right-6 md:rounded-pill md:border md:px-2 md:py-2 md:shadow-pop lg:right-12"
           initial={reduce ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           exit={reduce ? { opacity: 1 } : { opacity: 0, y: 16 }}

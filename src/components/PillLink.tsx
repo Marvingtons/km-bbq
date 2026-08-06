@@ -46,10 +46,20 @@ import Link from "next/link";
 const BASE =
   "group relative isolate inline-flex min-h-11 items-center justify-center gap-2 rounded-pill px-7 py-3 font-sans text-sm font-semibold transition-[color,background-color,border-color,transform] duration-[var(--dur-base)] ease-house active:translate-y-px active:duration-[var(--dur-press)] motion-reduce:active:translate-y-0 motion-reduce:transition-none";
 
+/**
+ * `.pill-outline` is a HOOK, not a style — it carries no rules of its own on
+ * the warm ground. Inside a `.section-dark` band it lifts the resting stroke
+ * from steel/55, which measures 2.2:1 on char and misses the 3:1 a control's
+ * own boundary has to clear, to sand/40 at 3.43:1. The LABEL needs no hook:
+ * `text-ink` is a token the band already remaps.
+ *
+ * The gallery's two chevrons carry the same class, because they are the same
+ * object drawn round instead of as a stadium.
+ */
 const TONES = {
   solid: "bg-flame text-sand hover:bg-char hover:text-sand",
   outline:
-    "border border-steel/55 bg-transparent text-ink hover:border-flame hover:bg-flame hover:text-sand",
+    "pill-outline border border-steel/55 bg-transparent text-ink hover:border-flame hover:bg-flame hover:text-sand",
 } as const;
 
 export function PillLink({

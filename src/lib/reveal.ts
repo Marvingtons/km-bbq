@@ -26,6 +26,11 @@ gsap.registerPlugin(ScrollTrigger);
      data-reveal="image"      fade + rise, PLUS the inner <img> settling from
                               1.06 to 1. The card must be overflow-hidden or
                               the settle shows its seams.
+     data-reveal="panel"      fade + rise, PLUS the element itself settling
+                              from 0.97 to 1. For a CARD that is an object in
+                              the room rather than a block of copy — the game's
+                              scoreboard is the one. Distinct from "image",
+                              which scales the picture INSIDE a still frame.
      data-reveal-group        a trigger boundary. Everything inside it arrives
                               on ONE ScrollTrigger, staggered in DOM order.
      data-reveal-stagger="n"  override the group's stagger.
@@ -66,6 +71,11 @@ export const REVEAL = {
   imageFrom: 1.06,
   imageDur: 0.9,
 
+  /** The panel settle. Shallower than the photograph's and exactly as long as
+   *  the fade it rides, because a card is a solid object arriving, not a
+   *  picture coming to rest inside a frame that has already landed. */
+  panelFrom: 0.97,
+
   /** Deliberately generous: it fires as the group's top clears the lower
    *  quarter, so a fast scroller meets content that is already arriving
    *  rather than content that starts arriving once they have stopped. */
@@ -82,7 +92,7 @@ export const REVEAL = {
   maxIndex: 8,
 } as const;
 
-type Kind = "" | "rule" | "image";
+type Kind = "" | "rule" | "image" | "panel";
 
 /**
  * Members of `group`, in DOM order, excluding anything that belongs to a
@@ -169,10 +179,15 @@ export function useReveal(ref: RefObject<HTMLElement | null>) {
 
             tl.fromTo(
               el,
-              { autoAlpha: 0, y: REVEAL.y },
+              {
+                autoAlpha: 0,
+                y: REVEAL.y,
+                ...(kind === "panel" ? { scale: REVEAL.panelFrom } : null),
+              },
               {
                 autoAlpha: 1,
                 y: 0,
+                ...(kind === "panel" ? { scale: 1 } : null),
                 duration: REVEAL.dur,
                 ease: REVEAL.ease,
               },

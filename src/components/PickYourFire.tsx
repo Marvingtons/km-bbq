@@ -3,10 +3,8 @@
 import { useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Image from "next/image";
 import { DualGrill } from "./illustrations/DualGrill";
 import { PillLink } from "./PillLink";
-import { SectionSeam } from "./SectionSeam";
 import { MOTION, MOTION_OK, NAV_H, FIRE_COPY_IN } from "@/lib/motion";
 import { findEmbers, buildEmberLoop } from "@/lib/embers";
 import {
@@ -243,7 +241,17 @@ export function PickYourFire() {
       className="grain relative z-base overflow-x-clip bg-sand motion-safe:lg:-mt-[60vh]"
       style={{ ["--nav-h" as string]: `${NAV_H}px` } as React.CSSProperties}
     >
-      <SectionSeam />
+      {/* THE SEAM IS GONE, AND SO IS THE COMPONENT.
+
+          `<SectionSeam />` was a chrome hairline drawn wherever the page's
+          ground changed, and this was its last placement on the site — the
+          hero's photography handing over to sand. Its own rule was that two
+          sections sharing a ground are joined by rhythm rather than by a rule,
+          which held while a ground change was the exception. Every boundary on
+          this page is a ground change now, so the same rule applied honestly
+          would put a hairline on all eight of them: a border on every section,
+          which is the one thing this site has never done. Bands are hard cuts.
+          See DIRECTION.md amendment A4. */}
 
       {/* WITHOUT JAVASCRIPT nothing ever clips the media layer, so the sticky
           column would park an illustration in a viewport that never releases
@@ -274,19 +282,25 @@ export function PickYourFire() {
             and it must not be a second <video>. The poster IS a frame of the
             same clip, at 58KB against 2.3MB, which is the right trade for a
             panel that was never going to move. */}
-        <figure className="fire-still photo">
-          <Image
-            src="/images/hero-poster.webp"
-            alt=""
-            aria-hidden="true"
-            fill
-            quality={72}
-            sizes="100vw"
-            draggable={false}
-            className="select-none object-cover object-center"
-          />
-        </figure>
+        {/* THE MOBILE STILL PANEL IS GONE.
 
+            Below 1024 this section carried a full-bleed photograph of a single
+            cut of beef held in tongs over a grill — a frame of the hero clip,
+            used as a stand-in because the fixed video layer scrolls away with
+            the hero down here and the section had no media of its own.
+
+            It was the wrong image in the wrong place. Whatever the clip is, a
+            close-up of one piece of meat is not what "GAS OR CHARCOAL" is
+            about, and the section already owns the artwork that IS about it:
+            the dual-grill illustration directly below, which builds itself on
+            entry. The panel was a second, unrelated piece of media stacked on
+            top of the one that answers the heading.
+
+            THE FILE STAYS. `/images/hero-poster.webp` is the hero video's
+            poster — HeroBackdrop renders it under the clip and it is the LCP
+            element, the reduced-motion state, and the landing place for every
+            playback failure path. Deleting it would take the hero's floor out
+            from under it. See the note in HeroBackdrop.tsx. */}
         <div className="copy-block">
           <div className="fire-copy">
             <p className="eyebrow">Pick your fire</p>

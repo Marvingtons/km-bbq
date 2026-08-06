@@ -59,16 +59,56 @@ export default function Home() {
             `id="about"`, so the nav's ABOUT link means this copy. */}
         <About />
         <Gallery />
-        {/* Visit before the game. The address and the hours are the conversion
-            for a walk-in-only restaurant, and they used to sit BEHIND a
-            stopwatch that tells you it does not count. The game is dessert. */}
-        <Contact />
-        {/* The questions land between the address and the game: a reader who
-            has just read the hours is one question from deciding, and the game
-            is the beat after the decision. Its answers are also the page's
-            FAQPage schema — see data/faq.ts, which both read. */}
-        <Faq />
+        {/* THE END OF THE PAGE RUNS GAME -> QUESTIONS -> DOOR.
+
+            Contact used to sit before the game, carrying two cards of hours,
+            prices and actions — the reasoning was that the conversion should
+            not sit behind a stopwatch that tells you it does not count. That
+            held while Contact was the only place those facts lived. It is not
+            any more: the footer, the FAQ and the sticky bar each carry them,
+            so the section shed the cards and became the storefront photograph.
+
+            What is left is a better closing order. The game is the last thing
+            with a reason to hold you. The questions are what you ask once you
+            have decided. And the photograph is the last thing you see before
+            the footer, which is what you want in your head walking up to a
+            strip mall looking for the sign. */}
+
+        {/* THERE ARE NO DIVIDERS ON THIS PAGE, AND THE GROUND IS WHY.
+
+            Three `<SectionDivider />`s used to sit in this run — 96px of clear
+            cream, a centred hairline and the grill's slot ring in a break in
+            it. They were solving a real problem: the end of the page was three
+            flat cream blocks in a row with no scroll device between them, and
+            the last of the three has a `sr-only` heading, so a reader leaving
+            the FAQ met a photograph with nothing to say the page had moved on.
+
+            The grounds alternate now, so that problem no longer exists
+            anywhere. Every boundary on the page is a ground change and the
+            change IS the boundary:
+
+              1  Hero            DARK   (photographic; the band it already was)
+              2  Pick Your Fire  cream  (the grill morph is built for cream)
+              3  Favorites       DARK   (food on charcoal)
+              4  About           cream  (the parchment artwork belongs on light)
+              5  Gallery         DARK
+              6  Challenge       cream  (so the dark PANEL is an object again)
+              7  FAQ             DARK
+              8  Contact         cream  (calm before the footer)
+              9  Footer          DARK   (the last band of the rhythm)
+
+            No two adjacent sections share a ground, and that list is the whole
+            home page — there is no tenth section anywhere in this tree. The
+            mechanism is one class, `.section-dark`; see globals.css and
+            DIRECTION.md amendment A4.
+
+            The game is the reason 6 is cream rather than dark. Its panel is
+            char, and on a char band a dark card on a dark ground is a card you
+            cannot see. On cream, sandwiched by bands above and below, the same
+            panel reads as a deliberate inversion — which is what it is. */}
         <Challenge />
+        <Faq />
+        <Contact />
         {/* Scroll-driven transitions across every section boundary. */}
         <SeamMotion />
       </main>

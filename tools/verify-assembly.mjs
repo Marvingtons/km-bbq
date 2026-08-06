@@ -405,7 +405,12 @@ console.log("\n=== MOBILE 375 — ONE ENTRANCE, NO SCRUB, NO SECOND VIDEO ===");
   );
   const before375 = await p.evaluate(readState);
   check("375: the art starts unbuilt (JS-set initial states, never CSS)", before375.gasSurface < 0.05 && before375.chassis > 0.98, `gas ${before375.gasSurface}, chassis ${before375.chassis}`);
-  check("375: a still panel stands in for the video, and it is not a second one", (await p.evaluate(() => document.querySelectorAll("#pick-your-fire video").length === 0 && !!document.querySelector(".fire-still img"))) === true);
+  // THE STILL PANEL IS GONE. It was a full-bleed frame of the hero clip — one
+  // cut of beef in tongs — standing in for the video below 1024, and it was a
+  // second, unrelated piece of media stacked on the illustration that actually
+  // answers the heading. What must still hold is the half that always
+  // mattered: this section never renders a <video> of its own.
+  check("375: no second video in the section, and no stand-in still", (await p.evaluate(() => document.querySelectorAll("#pick-your-fire video").length === 0 && !document.querySelector(".fire-still"))) === true);
   await p.evaluate(() => document.querySelector(".grill-layer").scrollIntoView({ block: "center" }));
   await p.waitForTimeout(900);
   const mid375 = await p.evaluate(readState);
@@ -416,10 +421,10 @@ console.log("\n=== MOBILE 375 — ONE ENTRANCE, NO SCRUB, NO SECOND VIDEO ===");
   check("375: embers end up on the idle loop", after.embers.every((o) => o >= 0.6), after.embers.map((n) => n.toFixed(2)).join(","));
   check("375: nothing on this page is pinned", (await p.evaluate(() => document.querySelectorAll(".pin-spacer").length === 0)) === true);
   check(
-    "375: reading order is still, copy, illustration",
+    "375: reading order is copy, then the illustration it explains",
     (await p.evaluate(() => {
       const y = (s) => document.querySelector(s).getBoundingClientRect().top + scrollY;
-      return y(".fire-still") < y(".fire-copy") && y(".fire-copy") < y(".grill-layer");
+      return y(".fire-copy") < y(".grill-layer");
     })) === true
   );
   await ctx.close();

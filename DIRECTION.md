@@ -159,7 +159,11 @@ A short list, phrased so a violation is checkable.
 
 1. **The page ground is warm light.** Never char. Never cool cream.
 2. **Black appears only in nav, footer, section caps/bands, and grill-well
-   punctuation.** Never as a section ground for mood.
+   punctuation.** Never as a section ground for mood. **Amended by A4:** on the
+   home page the section grounds ALTERNATE char/sand, and the alternation
+   itself is the constraint — no two adjacent sections may share a ground, so
+   a band can never be added "for mood" without displacing one. The page ground
+   is still warm (constraint 1) and `/menu` is still cream throughout.
 3. **Exactly one accent colour, and its job is interaction.** Not decoration,
    not headings, not "one italic word".
 4. **No pink on this site.** No neon. No lit-sign metaphors. Nothing in the room
@@ -356,8 +360,16 @@ the room's own ceiling and hardware. Rendering the machine in it describes
 something real, which is what constraint 2 actually asks of black.
 
 Scope, and it is narrow: **the section stays sand; only the panel is dark.**
-`tools/verify-palette.mjs` still asserts that no `<section>` paints a black
-ground, so this cannot spread from a card to a band without failing.
+
+> **Amended by A4, 2026-08-05.** The guard clause here used to read
+> "`tools/verify-palette.mjs` still asserts that no `<section>` paints a black
+> ground, so this cannot spread from a card to a band without failing." Sections
+> may be black now, so that sentence is retired and the guard is a different
+> one: the grounds must ALTERNATE. **The game's own scope is unchanged and is
+> now over-determined** — its section stays sand both because A1 says so and
+> because the alternation puts a cream section between the gallery's band and
+> the FAQ's. A dark panel on a dark band is the one arrangement in which the
+> prop stops being visible.
 
 ### A2 — A semantic status pair, green and red, on the sticky bar's dot only. Owner-directed, 2026-08-03.
 
@@ -409,6 +421,76 @@ and no ScrollTrigger is ever created. `tools/verify-gallery.mjs` asserts the
 held-scroll cap, that exactly one pin-spacer exists at 1440 and zero exists at
 375 or under reduced motion, and that a round trip across the 1024px boundary
 does not stack a second one.
+
+### A4 — The home page's section grounds ALTERNATE, char and sand. Owner-directed, 2026-08-05.
+
+Amends **constraint 2** ("black appears only in nav, footer, section caps/bands,
+and grill-well punctuation — never as a section ground for mood"), and
+supersedes the scope clause of **A1**, which said a dark panel "cannot spread
+from a card to a band without failing".
+
+This is the largest amendment in this file and it was escalated before any code
+was written, which is what THE RULE at the top asks for. It is recorded here in
+the same commit that implements it.
+
+**What changed.** Four sections now paint a char ground: the hero (which always
+did, as a photograph), the menu preview, the gallery and the FAQ. The full page
+runs dark, cream, dark, cream, dark, cream, dark, cream, dark — hero, Pick Your
+Fire, What to Grill First, Our Story, Gallery, Beat the Clock, FAQ, Storefront,
+footer. No two adjacent sections share a ground.
+
+**What it replaced, and why the replacement is the argument.** Three
+`<SectionDivider />`s — 96px of clear cream, a centred hairline, and the grill's
+own slot ring set in a break in it — plus the last `<SectionSeam />`. Both were
+devices for a page with ONE ground: the divider existed because the end of the
+page was three cream blocks in a row with nothing between them, and the seam was
+a rule drawn at the rare places the ground changed. Alternating grounds solve
+that problem at the source. The boundary is not announced by an ornament; the
+boundary is the ground changing. Both components are deleted.
+
+**Why this does not simply reverse constraint 2.** Constraint 2's actual demand
+is in its own third sentence: *"Black must describe something real."* The
+objection it was written against was a site that went near-black **everywhere**
+— `--color-char` as the page ground, which renders the ceiling and calls it the
+room. That is still forbidden and is still what constraint 1 says. What this
+amendment permits is narrower and is the thing constraint 2's own bullet list
+already contemplated when it wrote *"section caps **and bands**"*: black as a
+band, alternating with the warm ground, so the page is **stacked** — which is
+the single most important fact in "THE ROOM" above. The room is not a light room
+and not a dark room; it is warm surfaces below and a black ceiling over them.
+A page that alternates is closer to that than a page that is warm throughout
+with black confined to two pieces of furniture.
+
+**What keeps it honest, and it is checkable rather than arguable.**
+
+- **The ratio is fixed at alternating.** `verify-palette.mjs` no longer asks
+  "does any section paint black" — it asserts the exact ground SEQUENCE and
+  fails if any two adjacent sections share a ground. A fifth dark section cannot
+  be added without displacing a cream one, so "dark for mood" cannot creep.
+- **The warm ground is still the page ground.** Body is sand, `/menu` is cream
+  throughout, and both remain asserted. This rhythm is the home page's.
+- **One mechanism, and it is a token remap.** `.section-dark` overrides four
+  tokens — `ink`, `ash`, `sand-2`, `sand-3` — and every component resolves
+  against them unchanged. There is no `dark:` variant, no second copy of a card,
+  and no per-section colour surgery, so a band cannot quietly acquire a
+  treatment the other bands do not have.
+- **Chrome survives the change** (constraint 5). `--color-steel` is NOT
+  remapped: the header-cadence rule under every heading is the same chrome on
+  both grounds, at 4.85:1 on char. That is what makes a band and a cream section
+  read as one system rather than as a light theme and a dark theme.
+- **The accent's rule is unchanged and was enforced by the move.** The accent is
+  text only on the warm ground. The one place a band had flame as TEXT — the
+  FAQ's reservation link, 3.19:1 — became sand with a flame underline, which is
+  the "fill on dark grounds" rule applied rather than an exception to it.
+- **Measured, not asserted.** Every painted band's text was walked and measured
+  against its real ground: 0 elements below AA. Muted copy is 7.46:1, headings
+  16.1:1, outline-pill strokes 3.44:1.
+
+**What A1 keeps.** The game's panel is still a dark PROP, and its section is
+still sand — now for a second, stronger reason. Between two dark bands, a char
+panel on cream is the only dark object in a light room. On a dark band it would
+have been a dark card on a dark ground, which is the one arrangement that makes
+the prop disappear.
 
 ---
 

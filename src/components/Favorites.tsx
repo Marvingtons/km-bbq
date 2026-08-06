@@ -35,7 +35,15 @@ export function Favorites() {
     <section
       ref={sectionRef}
       aria-labelledby="menu-heading"
-      className="favorites grain relative z-base bg-sand py-section md:py-section-lg"
+      /* A DARK BAND. `.section-dark` carries the ground, the block padding and
+         the token remap; nothing below this line changed to get here. The five
+         cards say `border-sand-3 bg-sand-2` exactly as they did on cream and
+         resolve to char-2 on a sand-25% hairline, which is what puts food
+         photography on charcoal without a second copy of the card.
+
+         No `py-*` here any more: the band owns its own padding, and a utility
+         would beat it. */
+      className="favorites section-dark grain relative z-base"
     >
       <div className="grid-page">
         <div className="col-full">

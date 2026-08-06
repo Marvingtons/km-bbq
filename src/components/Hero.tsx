@@ -42,7 +42,13 @@ function Price({ amount, label }: { amount: string; label: string }) {
           This is a symptom of the hero being deferred to pass two rather than a
           settled answer: the hero is still a dark photographic frame inside a
           warm-light site. See DIRECTION.md, "Open, not decided" #3. */}
-      <span className="font-display text-2xl font-black text-sand [font-stretch:87.5%]">
+      {/* ONE LINE ON A PHONE, STACKED ON DESKTOP. At 390 the two jumbo cells
+          took two full lines of the lower half of the screen and pushed the
+          sub-line and the CTA toward the fold — two figures at `text-2xl`
+          competing with a display headline directly above them. 1.4rem keeps
+          the figures the second-largest thing in the hero and fits both cells
+          plus the separator on one line at 360. Desktop is unchanged. */}
+      <span className="font-display text-[1.4rem] font-black text-sand [font-stretch:87.5%] sm:text-2xl">
         {amount}
       </span>
       <span className="eyebrow text-sand/70">{label}</span>
@@ -100,9 +106,23 @@ export function Hero() {
        flow with nothing to dock into, and this extra viewport would be a full
        screen of opaque hero sliding up over an unread story. One bracket for
        the whole composed sequence, the same one the pinned gallery uses. */
+    /* THE FIRST BAND, DECLARED AS ONE. The hero has always been the site's one
+       dark surface; `.section-dark` is it saying so in the same words the other
+       three bands use, so the page's rhythm is one mechanism from top to bottom
+       rather than one mechanism plus a hero that happens to look similar.
+
+       `.section-dark-media` is the modifier that suppresses the paint and the
+       padding. This element is up to 160vh tall and sits on the nav tier while
+       Pick Your Fire is pulled back up under it by 60vh on the base tier, so a
+       ground painted here would black out the top 60vh of the next section —
+       and the hero's char ground already exists in the right place at the right
+       size, under the poster inside HeroBackdrop. What is left is the token
+       remap, which for this section is formal: every piece of type in here
+       already names `sand` explicitly, because it sits on a photograph rather
+       than on a flat ground. See globals.css. */
     <section
       id="home"
-      className="pointer-events-none relative z-nav h-screen motion-safe:lg:h-[160vh]"
+      className="section-dark section-dark-media pointer-events-none relative z-nav h-screen motion-safe:lg:h-[160vh]"
       aria-label="Hero"
     >
       {/* THE BACKDROP IS NOT IN THE STAGE ANY MORE, and that is the whole of
@@ -117,7 +137,7 @@ export function Hero() {
 
       <div className="hero-stage sticky top-0 flex h-screen flex-col overflow-hidden">
         <div className="pointer-events-auto relative z-nav flex w-full flex-1 items-end">
-          <div className="track w-full pb-16 pt-10 text-left sm:pb-20 lg:pb-24">
+          <div className="track w-full pb-12 pt-10 text-left sm:pb-20 lg:pb-24">
             <div className="hero-exit-support">
               <motion.p className="eyebrow text-sand/80" {...rise(0)}>
                 {EYEBROW}
@@ -141,7 +161,7 @@ export function Hero() {
                   the element whose job is to say what the page is about. A
                   screen reader now hears a heading that identifies the
                   restaurant instead of an adjective. */}
-              <motion.h1 className="display mt-4 text-sand" {...rise(1, { fade: false })}>
+              <motion.h1 className="display mt-3 text-sand sm:mt-4" {...rise(1, { fade: false })}>
                 <span className="sr-only">{`${BUSINESS.name} — `}</span>
                 {/* `data-headline` is the hook for the VISIBLE lockup. The
                     sr-only fragments are absolutely positioned and clipped to
@@ -169,7 +189,7 @@ export function Hero() {
                   that would have traded a correct reading order for a timing
                   the delay already expresses. */}
               <motion.p
-                className="mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-1"
+                className="mt-3.5 flex flex-nowrap items-baseline gap-x-3 whitespace-nowrap sm:mt-5 sm:gap-x-4"
                 {...rise(4, { slow: true })}
               >
                 <Price amount={PRICING.lunch.display} label={PRICING.lunch.label} />
@@ -179,11 +199,11 @@ export function Hero() {
                 <Price amount={PRICING.dinner.display} label={PRICING.dinner.label} />
               </motion.p>
 
-              <motion.p className="copy measure mt-4 text-sand/80" {...rise(2)}>
+              <motion.p className="copy measure mt-3 text-sand/80 sm:mt-4" {...rise(2)}>
                 {SUBHEAD}
               </motion.p>
 
-              <motion.div className="mt-7" {...rise(3)}>
+              <motion.div className="mt-5 sm:mt-7" {...rise(3)}>
                 <PillLink href={CTA_HREF} arrow>
                   {CTA_LABEL}
                 </PillLink>

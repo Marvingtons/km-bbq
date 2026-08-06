@@ -247,7 +247,17 @@ export function Gallery() {
       // NOT `overflow-hidden`. The strip is its own scroll container in strip
       // mode and the track overflows the viewport by design in pinned mode —
       // clipping here would break both.
-      className="gallery-pinned grain relative bg-sand py-section md:py-section-lg"
+      //
+      // A DARK BAND, and the pin is untouched by it. `.section-dark` sets a
+      // ground, block padding and four inherited tokens; `.gallery-pinned`
+      // still zeroes that padding in pinned mode from its own unlayered block
+      // in globals.css, which outranks the band's layered rule. The photographs
+      // now sit on charcoal and the captions take the band's muted tone,
+      // because `.eyebrow` resolves --color-ash from this section.
+      //
+      // The `pt-section` pair is gone with the `<SectionDivider />` that used
+      // to follow this section and own the rest between it and the game.
+      className="gallery-pinned section-dark grain relative"
     >
       <header className="grid-page relative z-base">
         <div className="col-text">
@@ -291,7 +301,13 @@ export function Gallery() {
               type="button"
               tabIndex={-1}
               onClick={() => nudge(dir)}
-              className="flex size-10 items-center justify-center rounded-pill border border-steel/55 text-ink transition-colors duration-[var(--dur-base)] ease-house hover:border-flame hover:bg-flame hover:text-sand"
+              /* `.pill-outline` is the same hook `PillLink`'s outline tone
+                 carries, and it is here because this IS that object — a chrome
+                 hairline that fills to flame on hover — drawn round instead of
+                 as a stadium. On a dark band the class lifts the stroke to
+                 sand/40 so the control's own boundary clears 3:1; steel/55
+                 measures 2.2:1 on char. See globals.css. */
+              className="pill-outline flex size-10 items-center justify-center rounded-pill border border-steel/55 text-ink transition-colors duration-[var(--dur-base)] ease-house hover:border-flame hover:bg-flame hover:text-sand"
             >
               <svg
                 width="16"
@@ -337,9 +353,33 @@ export function Gallery() {
                   fill
                   sizes="(max-width: 1024px) 78vw, 720px"
                   className="object-cover"
-                  // The first tile is on screen when the section arrives; the
-                  // rest stay lazy.
+                  /* THE FIRST THREE TILES ARE NOT LAZY, and that is the fix for
+                     "captions with no photographs".
+
+                     The strip is one horizontal band: when the section arrives,
+                     tiles 1-3 are already inside the viewport at 1440 and tile
+                     4 is just past the right edge. They were all `loading=
+                     "lazy"` except the first, so the fetch for the two visible
+                     ones only STARTED as the section came into view — and these
+                     are 2.0-2.6MB source PNGs going through /_next/image, so
+                     what landed first was the caption under an empty frame.
+                     The reveal system was never involved: the gallery has no
+                     `data-reveal` on it at all, and nothing here has ever set
+                     an opacity.
+
+                     Three, not six. Tiles 4-6 are off the right edge at every
+                     width and only ever arrive under the scrub or a swipe, so
+                     they are genuinely lazy and eager-loading them would put
+                     three more full-size decodes in front of the hero's LCP for
+                     no one's benefit.
+
+                     `priority` stays on the first tile alone — it is the only
+                     one that can be the largest contentful paint. The other two
+                     are eager but unprioritised, which is the difference
+                     between "fetch this now" and "fetch this ahead of the
+                     hero". */
                   priority={i === 0}
+                  loading={i < 3 ? "eager" : "lazy"}
                   decoding="async"
                 />
               </div>

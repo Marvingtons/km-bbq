@@ -149,7 +149,14 @@
   --text-xl--line-height: 1.1;
   --text-2xl: 2.4414rem;
   --text-2xl--line-height: 1.05;
-  --text-display: clamp(2.75rem, 10vw, 7rem);
+  /* THE FLOOR IS SET BY "ALL-YOU-CAN-EAT" AT 360px, and by nothing else.
+     At 2.75rem the lockup broke as `ALL-YOU-CAN-` / `EAT` — a hyphen-break
+     mid-compound, which is the worst of the available wraps because the reader
+     parses a dangling hyphen as a word ending. 2.2rem fits the whole string on
+     one line down to 360 and grows with the viewport from there, so the break
+     never happens rather than happening more tidily. Above ~430px `10.5vw`
+     takes over and nothing about the desktop lockup changes. */
+  --text-display: clamp(2.2rem, 10.5vw, 7rem);
   --text-display--line-height: 0.88;
 
   /* --- SPACING — 4px base. Tailwind's dynamic scale covers 1..40 (4..160px).
@@ -157,6 +164,13 @@
   --spacing: 0.25rem;
   --spacing-section: 5rem;
   --spacing-section-lg: 7.5rem;
+  /* The dark band's own block padding at the narrow end. A band has to read as
+     a ROOM rather than as a stripe, and on a phone that is a slightly tighter
+     figure than a cream section's — the ground change is already doing the
+     separating, so the padding is buying volume, not distance. Above 768 the
+     band takes --spacing-section-lg, which is the same 120px the cream
+     sections take, so the two grounds share one desktop rhythm. */
+  --spacing-band: 4.5rem;
 
   /* --- LAYOUT ---------------------------------------------------------- */
   --grid-max: 80rem;
@@ -337,15 +351,9 @@ body {
     display: contents;
   }
 
-  /* Stacked reading order below 1024: the still, the copy it belongs to, then
-     the illustration the copy explains. The still is first because it is what
-     the hero was showing a moment ago — the same frame, held. */
-  .fire-still {
-    order: 1;
-    position: relative;
-    aspect-ratio: 16 / 10;
-    width: 100%;
-  }
+  /* Stacked reading order below 1024: the copy, then the illustration it
+     explains. `.fire-still` — a full-bleed frame of the hero clip that used to
+     sit above the copy — is gone; see the note in PickYourFire.tsx. */
   .copy-block {
     order: 2;
   }
@@ -473,6 +481,17 @@ body {
     line-height: var(--text-display--line-height);
     letter-spacing: -0.02em;
     text-transform: uppercase;
+    /* TWO EVEN LINES, NEVER A DANGLING HYPHEN.
+
+       "ALL-YOU-CAN-EAT" is one word with three break opportunities, and the
+       greedy default takes the last one that fits: at 390 that is
+       `ALL-YOU-CAN-` / `EAT`, which reads as a word that has been cut off
+       rather than a lockup on two lines. `balance` picks the split closest to
+       even instead, so it breaks `ALL-YOU-` / `CAN-EAT`.
+
+       It costs nothing where the string already fits on one line, which is
+       every viewport above ~430px — so the desktop lockup is untouched. */
+    text-wrap: balance;
   }
 
   /* --- PHOTO — the one photography treatment, REVERSED for a light ground.
@@ -595,6 +614,146 @@ body {
   .band-sky .copy,
   .band-sky .eyebrow {
     color: var(--color-ink);
+  }
+
+  /* =====================================================================
+     THE DARK BAND — and it is the page's whole separation system.
+
+     WHAT IT REPLACED. Three `<SectionDivider />`s: 96px of clear cream, a
+     centred hairline, and the grill's slot ring sitting in a break in it. They
+     existed because the end of the page was three cream blocks in a row with
+     nothing between them, and they were punctuation ADDED to a join rather
+     than a join. The home page alternates grounds now — char, sand, char,
+     sand — so the ground change IS the boundary and there is nothing left for
+     an ornament to announce. Owner-directed; see DIRECTION.md amendment A4.
+
+     ONE MECHANISM, NOT NINE. Everything a dark section needs is this class:
+     the ground, the block padding, and a REMAP of the four tokens that carry
+     value rather than hue. Components keep the classes they already had —
+     `.h2-scale`, `.copy`, `bg-sand-2`, `border-sand-3` — and resolve them
+     against this section's values instead of the page's. That is why there is
+     no `dark:` variant on a card in this codebase and no second copy of any
+     component: a token override on an ancestor is inherited, and inheritance
+     is not subject to cascade layers, so it cannot be beaten by a utility the
+     way a plain property rule can.
+
+     WHICH FOUR, AND WHY ONLY FOUR.
+
+       --color-ink    -> sand. Headings, card titles, control labels. 15.8:1.
+       --color-ash    -> a warm smoke mixed from the palette's own two ends.
+                        The mirror of what `ash` is on the warm ground: the one
+                        muted voice, for body copy, eyebrows and captions.
+                        Deliberately NOT --color-steel, which is cool and would
+                        make the muted type on a band read greyer than the same
+                        type on a cream section three inches above it.
+       --color-sand-2 -> char-2. Its job is "raised surfaces, cards", and a
+                        raised surface inside the black structure is char-2.
+                        This is what moves the five photo cards and every
+                        `.photo` backing plate onto the band without touching
+                        a component.
+       --color-sand-3 -> sand at 25%. Its job is "borders, dividers", and this
+                        is the exact mirror of the `char/30` hairline the FAQ
+                        drew on cream: 2.07:1, which is a division rather than
+                        a line of colour.
+
+     WHAT IS DELIBERATELY NOT REMAPPED.
+
+       --color-sand   is the LABEL on every flame fill and the top of the value
+                      ramp. Remapping it would invert the one pair the whole
+                      palette is built to keep (sand on flame, 4.9:1).
+       --color-flame  fills are unchanged, per the direction's own rule: the
+                      accent is text only on the warm ground. The one place a
+                      band had flame as TEXT — the FAQ's reservation link, at
+                      3.19:1 — is sand with a flame underline instead, so the
+                      accent stays on the interaction as a fill.
+       --color-steel  is chrome, and chrome is the same material on both
+                      grounds (4.85:1 here). The header-cadence rule under
+                      every heading is `bg-steel` and stays exactly that, which
+                      is what keeps a band and a cream section reading as one
+                      system rather than as two themes.
+
+     BOUNDARIES ARE HARD CUTS. No gradient, no feather, no hairline at the
+     join — including the `<SectionSeam />` that used to be drawn wherever the
+     ground changed. That rule was written when a ground change was rare; when
+     every boundary on the page is one, a rule at the seam is a border on every
+     section, which is the thing the site has never done.
+     ===================================================================== */
+  .section-dark {
+    /* FULL BLEED. The class goes on the <section>, which is already a block at
+       body width — the content inside keeps `.grid-page` / `.track` and its
+       own gutters, so the ground runs edge to edge and the copy does not. */
+    background-color: var(--color-char);
+    padding-block: var(--spacing-band);
+
+    --color-ink: var(--color-sand);
+    /* MIXED, NOT SAMPLED, and mixed in oklab rather than sRGB: an sRGB
+       midpoint between these two passes through a darker, muddier middle and
+       lands a muted tone that reads dirty rather than smoky.
+
+       70% resolves to #a8a29b, 7.46:1 on char and 6.93:1 on a char-2 card.
+       The band brief asked for #a69e95 (7.14:1) as a literal; this is that
+       value to within two points of lightness and it costs the palette no
+       eleventh colour to defend — it is derived from the two ends the palette
+       already has, the same way `ash` is the muted voice on the warm ground.
+       62% was tried first and gives 5.95:1: legal, and visibly flatter than
+       the same copy three inches up on a cream section.
+
+       tools/verify-palette.mjs reads these back off the rendered page rather
+       than off a table here, so the assertion cannot drift from the value. */
+    --color-ash: color-mix(in oklab, var(--color-sand) 70%, var(--color-char));
+    --color-sand-2: var(--color-char-2);
+    /* THE MIRROR OF THE HAIRLINE THIS REPLACES, measured rather than guessed.
+       The FAQ drew its row rules as `char/30` on sand, which resolves to
+       #a8a29b at 2.16:1. Sand at 30% on char resolves to 2.13:1 — the same
+       weight of division, inverted. The brief said 25%; that measures 1.80:1
+       and is a step lighter than the line it is standing in for. */
+    --color-sand-3: color-mix(in oklab, var(--color-sand) 30%, var(--color-char));
+  }
+
+  @media (min-width: 768px) {
+    .section-dark {
+      padding-block: var(--spacing-section-lg);
+    }
+  }
+
+  /* THE ONE BAND WHOSE GROUND IS A PHOTOGRAPH — the hero, and this is what
+     "formalize the hero under the same system" comes to.
+
+     It takes the remap and NOT the paint, for a structural reason rather than
+     a stylistic one. `#home` is up to 160vh tall above 1024 (the clip's travel)
+     and sits on the nav tier, while Pick Your Fire is pulled back up under it
+     by 60vh on the base tier — so a ground painted here would cover the top
+     60vh of the next section in char. The hero's char ground already exists in
+     the right place and at the right size: HeroBackdrop paints it under the
+     poster, inside the one-viewport window. Padding likewise: the hero is a
+     viewport, not a band with air around its content.
+
+     Written as a modifier of the same class rather than as its own recipe, so
+     the hero cannot drift away from the system it is declaring itself part
+     of. */
+  .section-dark-media {
+    background-color: transparent;
+    padding-block: 0;
+  }
+
+  /* The photographic scrim, inverted for the band. `.photo::after` above is a
+     bottom wash of SAND, there so a photograph sits into the warm ground
+     instead of on it; on char it is a pale haze along the bottom edge of every
+     tile, which is the same mistake in the other direction that DIRECTION.md
+     constraint 8 records against the old dark grade. Same shape, same stops,
+     the band's own ground.
+
+     The `.photo img` grade is NOT inverted with it. That grade
+     (saturate/contrast/brightness slightly up) is what makes food read on a
+     dark ground too — it was the char SCRIM that did not survive the move to
+     cream, not the grade. */
+  .section-dark .photo::after {
+    background: linear-gradient(
+      to top,
+      rgb(18 17 16 / 0.55) 0%,
+      rgb(18 17 16 / 0.16) 26%,
+      transparent 54%
+    );
   }
 
   /* =====================================================================
@@ -754,6 +913,52 @@ body {
    =========================================================================== */
 .pill-on-dark {
   color: var(--color-sand);
+}
+
+/* ===========================================================================
+   THE DARK BAND'S TWO PROPERTY RULES, and they are here rather than beside
+   `.section-dark` for the reason the block above documents: both override a
+   Tailwind utility on the same element, and a layered rule loses to a utility
+   no matter how specific it is. The token remap in `.section-dark` needs none
+   of this — it works by INHERITANCE, which layers do not touch — so these two
+   are the whole of what could not be expressed as a token.
+
+   THE OUTLINE PILL'S STROKE. `tone="outline"` is `border-steel/55`, which is
+   right on cream and measures 2.2:1 on char — below the 3:1 a control's own
+   boundary has to clear. Sand at 40% measures 3.43:1 and is the same hairline
+   the band uses everywhere else, one step up because this one is a control
+   rather than a division. The label needs no rule: `text-ink` is already
+   remapped to sand by the section.
+
+   Applied to the gallery's chevrons as well as to `PillLink`, because they ARE
+   the outline pill — a chrome hairline that fills to flame on hover — drawn at
+   40px round instead of as a stadium. Two elements wearing one recipe is the
+   point of the class; two elements with two nearly-identical border colours is
+   how a system rots.
+
+   THE ACCORDION'S PLUS, AND IT IS A PAIR. `text-flame` at 3.19:1 clears the
+   3:1 a graphical object needs, so taking the RESTING state to sand is a
+   legibility preference rather than a fix — owner-directed in the band brief.
+   The hover is the other half and it is not optional: the row used to hover
+   the whole question to flame, which on char turns a 15.8:1 heading into a
+   3.19:1 one. So the response moved onto the plus, where the accent is a small
+   graphical object and is allowed to be. Rest sand, hover flame — the accent
+   still owns the interaction, it just no longer owns the type.
+
+   Both are unlayered because both fight `text-flame` on the same element. The
+   hover rule needs `.group` (Tailwind's own marker, on the row's button) and
+   has to outrank the resting rule, which it does on specificity.
+   =========================================================================== */
+.section-dark .pill-outline {
+  border-color: rgb(244 236 225 / 0.4);
+}
+
+.section-dark .faq-plus {
+  color: var(--color-sand);
+}
+
+.section-dark .group:hover .faq-plus {
+  color: var(--color-flame);
 }
 
 /* ===========================================================================
@@ -924,13 +1129,6 @@ body {
     grid-column: 1 / span 6;
     grid-row: 1;
     min-width: 0;
-  }
-
-  /* The still is the media BELOW 1024. Up here the fixed video layer is, and
-     two panels of the same footage in one section is the double-render this
-     whole architecture exists to avoid. */
-  .fire-still {
-    display: none;
   }
 
   .media-col {
