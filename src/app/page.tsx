@@ -15,32 +15,31 @@ import { SeamMotion } from "@/components/SeamMotion";
 import { pageMeta } from "@/lib/seo";
 
 /**
- * TITLE AND DESCRIPTION LEAD WITH THE OFFER, AND NOW WITH THE FORMAT.
+ * TITLE AND DESCRIPTION LEAD WITH THE LOCATION KEYWORD, THEN THE OFFER.
  *
- * "Self-serve" is first because it is both the differentiator and a term people
- * search — "KBBQ buffet" and "self serve korean bbq" are how someone describes
- * this format when they do not know the restaurant's name. It replaced "Gas or
- * charcoal grills at every table", which is a real fact and the wrong one for a
- * results page: it answers a question nobody has yet.
+ * "Korean BBQ in Oceanside, CA" is first in both. It is the phrase a local
+ * searcher types, and the earliest words in a title carry the most weight on a
+ * results page. The format and the price follow immediately: "self-serve" and
+ * "all-you-can-eat" are how someone describes this when they do not know the
+ * restaurant's name ("KBBQ buffet", "self serve korean bbq"), and the two
+ * prices are the offer.
  *
- * The order is category, price, mechanic, action. 141 characters, inside the
- * ~160 Google renders. The title is unchanged and stays clean.
- *
- * The Open Graph and Twitter descriptions are this same string — `pageMeta`
- * passes one value to all three, so they cannot drift.
+ * The description is 137 characters, inside the ~160 Google renders. The Open
+ * Graph and Twitter titles and descriptions are these same strings — `pageMeta`
+ * passes one value to each, so they cannot drift.
  */
 export const metadata: Metadata = pageMeta({
-  // A PIPE, NOT AN EM DASH. The sweep's final rule is that the only `—` left
-  // anywhere in copy is the menu item name separator, and a <title> is copy a
-  // searcher reads. A pipe is the conventional title delimiter and is what
-  // /menu already leads with, so the two titles now use one separator.
-  title: "KM.BBQ | All You Can Eat Korean BBQ in Oceanside, CA",
+  // KEYWORD-FIRST, then brand, then offer. A PIPE, NOT AN EM DASH: the sweep's
+  // final rule leaves `—` only as the menu item name separator, and a <title>
+  // is copy a searcher reads. A pipe is the conventional title delimiter and is
+  // what /menu already leads with, so the two titles use one separator.
+  title: "Korean BBQ in Oceanside, CA | KM.BBQ All-You-Can-Eat",
   description:
     // "weekday lunch", not "lunch". A snippet is read out of context and acted
     // on: an unqualified $21.99 in a Saturday search result is a promise the
-    // door cannot keep. One word, 149 characters, still inside the ~160 Google
-    // renders. The OG and Twitter descriptions are this same string.
-    "Self-serve all-you-can-eat Korean BBQ in Oceanside. $21.99 weekday lunch, $30.99 dinner. Load up at the bar, grill at your table. Walk in or reserve.",
+    // door cannot keep. 137 characters, inside the ~160 Google renders. The OG
+    // and Twitter descriptions are this same string.
+    "Korean BBQ in Oceanside, CA. Self-serve all-you-can-eat: $21.99 weekday lunch, $30.99 dinner. Grill it at your table. Walk in or reserve.",
   path: "/",
   titleAbsolute: true,
 });

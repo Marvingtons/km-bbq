@@ -3,7 +3,7 @@ import { Archivo, Inter } from "next/font/google";
 import "./globals.css";
 import { SmoothScroll } from "@/components/SmoothScroll";
 import { Preloader } from "@/components/Preloader";
-import { SITE_URL, BUSINESS } from "@/data/info";
+import { SITE_URL, BUSINESS, ADDRESS_PARTS } from "@/data/info";
 
 // The display face. Variable Archivo with the width axis loaded, so the type
 // recipes in globals.css can sit at wght 900 / wdth 87.5% — a heavy condensed
@@ -56,6 +56,14 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
   alternates: { canonical: SITE_URL },
+  // Legacy geo meta. Google does not use these, but Bing and some
+  // local-directory scrapers still read them, and they are cheap and true.
+  // Built from ADDRESS_PARTS so they cannot drift from the PostalAddress in the
+  // JSON-LD (src/lib/schema.ts). "US-CA" is the ISO-3166-2 region code.
+  other: {
+    "geo.placename": ADDRESS_PARTS.city,
+    "geo.region": `${ADDRESS_PARTS.country}-${ADDRESS_PARTS.state}`,
+  },
   openGraph: {
     type: "website",
     locale: "en_US",

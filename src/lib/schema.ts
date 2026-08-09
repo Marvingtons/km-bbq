@@ -78,6 +78,10 @@ export function restaurantNode() {
     image: [abs("/images/outside.png"), abs("/og.png")],
     telephone: PHONE.href.replace("tel:", ""),
     servesCuisine: BUSINESS.cuisine,
+    // The city this restaurant serves. One entry — this is a single Oceanside
+    // location, not a chain with a delivery radius — built from the same
+    // ADDRESS_PARTS the PostalAddress below reads, so the two cannot drift.
+    areaServed: [{ "@type": "City", name: ADDRESS_PARTS.city }],
     priceRange,
     currenciesAccepted: "USD",
     acceptsReservations: RESERVATION_URL,
