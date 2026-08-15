@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import {
+  LazyMotion,
+  domAnimation,
+  m,
+  AnimatePresence,
+  useReducedMotion,
+} from "framer-motion";
 import {
   PHONE,
   DIRECTIONS_URL,
@@ -111,9 +117,10 @@ export function StickyInfoBar() {
   const shown = shownFlag === "true" && !atFooter;
 
   return (
-    <AnimatePresence>
-      {shown && (
-        <motion.aside
+    <LazyMotion features={domAnimation}>
+      <AnimatePresence>
+        {shown && (
+          <m.aside
           aria-label="Hours and contact"
           /* THE EDGE HAS TO BE LIGHT NOW, and that is a consequence of the
              bands rather than a taste change. The bar is a char-2 element and
@@ -225,8 +232,9 @@ export function StickyInfoBar() {
               <span className="sm:hidden">Map</span>
             </a>
           </div>
-        </motion.aside>
-      )}
-    </AnimatePresence>
+          </m.aside>
+        )}
+      </AnimatePresence>
+    </LazyMotion>
   );
 }

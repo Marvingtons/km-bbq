@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
 import { Logo } from "./Logo";
 import { SocialLinks } from "./SocialLinks";
 import { Dot } from "./Dot";
@@ -89,7 +90,6 @@ export function Footer() {
       // page's last section; the bottom is tight because a copyright line
       // floating in 40px of black reads as an unfinished page.
       className="relative overflow-hidden border-t border-steel/25 bg-char-2 pb-7 pt-[72px] text-sand/70"
-      role="contentinfo"
     >
       {/* Ambient warm glow for depth. */}
       <div
@@ -284,18 +284,18 @@ export function Footer() {
           {/* flex-wrap so the legal links wrap as whole phrases at 375 instead
               of breaking mid-label. */}
           <div className="flex flex-wrap items-center gap-x-5 font-sans text-xs">
-            <a
+            <Link
               href="/privacy"
               className="inline-flex min-h-11 items-center transition-colors duration-[var(--dur-base)] ease-house hover:text-sand"
             >
               Privacy Policy
-            </a>
-            <a
+            </Link>
+            <Link
               href="/terms"
               className="inline-flex min-h-11 items-center transition-colors duration-[var(--dur-base)] ease-house hover:text-sand"
             >
               Terms of Service
-            </a>
+            </Link>
             {/* Decorative divider, only when the row sits on one line. It sets no
                 colour of its own — the pink that used to live here went with
                 --color-neon-pink. */}

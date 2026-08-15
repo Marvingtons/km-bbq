@@ -22,15 +22,12 @@ import { SITE_URL } from "@/data/info";
  * non-content or non-indexable.
  */
 
-// Build time. Honest for the two content routes, which change whenever the
-// site is redeployed.
-const BUILT = new Date();
-
 // The legal pages carry their own effective date in visible copy ("Last
 // updated July 1, 2026"), so they claim THAT date rather than the build's.
 // Stamping all four routes with one identical build timestamp is what makes
 // Google discount lastmod as a signal: it only carries weight when it
-// demonstrably tracks real content changes.
+// demonstrably tracks real content changes. A fixed date string is
+// deterministic, so it stays at module scope.
 const LEGAL_UPDATED = new Date("2026-07-01T00:00:00.000Z");
 
 type Entry = {
@@ -40,17 +37,23 @@ type Entry = {
   lastModified: Date;
 };
 
-const ROUTES: Entry[] = [
-  // The home page carries the hero, about, gallery, the game and contact.
-  { path: "/", priority: 1, changeFrequency: "weekly", lastModified: BUILT },
-  // The menu is what people actually search for, and what changes most.
-  { path: "/menu", priority: 0.9, changeFrequency: "weekly", lastModified: BUILT },
-  // Required, rarely read, and should never outrank the real content.
-  { path: "/privacy", priority: 0.3, changeFrequency: "yearly", lastModified: LEGAL_UPDATED },
-  { path: "/terms", priority: 0.3, changeFrequency: "yearly", lastModified: LEGAL_UPDATED },
-];
-
 export default function sitemap(): MetadataRoute.Sitemap {
+  // Build time. Honest for the two content routes, which change whenever the
+  // site is redeployed. Kept inside the function rather than at module scope:
+  // `new Date()` is nondeterministic, and on these static routes the function
+  // still runs at build time, so the stamp is identical either way.
+  const BUILT = new Date();
+
+  const ROUTES: Entry[] = [
+    // The home page carries the hero, about, gallery, the game and contact.
+    { path: "/", priority: 1, changeFrequency: "weekly", lastModified: BUILT },
+    // The menu is what people actually search for, and what changes most.
+    { path: "/menu", priority: 0.9, changeFrequency: "weekly", lastModified: BUILT },
+    // Required, rarely read, and should never outrank the real content.
+    { path: "/privacy", priority: 0.3, changeFrequency: "yearly", lastModified: LEGAL_UPDATED },
+    { path: "/terms", priority: 0.3, changeFrequency: "yearly", lastModified: LEGAL_UPDATED },
+  ];
+
   return ROUTES.map((r) => ({
     // ABSOLUTE urls, built from SITE_URL. A sitemap carrying relative paths or
     // a localhost origin is silently useless to a crawler, so this never

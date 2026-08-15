@@ -81,8 +81,9 @@ export function collectGrill(svg: SVGSVGElement) {
   const divider = svg.querySelector<SVGLineElement>(".divider");
   const slots = q<SVGGraphicsElement>("#gas-surface .dial");
   const embers = q<SVGGraphicsElement>("#coals .ember, #coals .ember-deep");
+  const emberSet = new Set(embers);
   const coals = q<SVGGraphicsElement>("#coals > *").filter(
-    (el) => !embers.includes(el)
+    (el) => !emberSet.has(el)
   );
   const mesh = q<SVGGeometryElement>("#grate > *");
 

@@ -9,7 +9,13 @@ import {
 } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import {
+  LazyMotion,
+  domAnimation,
+  m,
+  AnimatePresence,
+  useReducedMotion,
+} from "framer-motion";
 import { Logo } from "./Logo";
 import { PillLink } from "./PillLink";
 import { SocialLinks } from "./SocialLinks";
@@ -65,7 +71,7 @@ export function Navbar() {
   // links (MENU is a route, so no homepage section may activate it). Shared
   // observer logic with the menu jump nav via useActiveSection.
   const [active] = useActiveSection(
-    NAV_LINKS.filter((link) => link.hash).map((link) => link.id),
+    NAV_LINKS.flatMap((link) => (link.hash ? [link.id] : [])),
     {
       enabled: isHome,
       initial: isHome ? "home" : "menu",
@@ -245,7 +251,7 @@ export function Navbar() {
   };
 
   return (
-    <>
+    <LazyMotion features={domAnimation}>
       {/* Full-screen mobile takeover. Rendered as a sibling of <header>, NOT a
           child: the header carries backdrop-blur when solid, and an ancestor's
           backdrop-filter makes `position: fixed` descendants resolve against
@@ -253,7 +259,7 @@ export function Navbar() {
           to the header's height. */}
       <AnimatePresence>
         {menuOpen && (
-          <motion.div
+          <m.div
             id="mobile-menu"
             ref={overlayRef}
             className="fixed inset-0 z-overlay flex flex-col overflow-y-auto bg-char pb-8 pt-24 lg:hidden"
@@ -271,7 +277,7 @@ export function Navbar() {
               {NAV_LINKS.map((link, i) => {
                 const isActive = active === link.id;
                 return (
-                  <motion.li
+                  <m.li
                     key={link.label}
                     initial={reduce ? false : { opacity: 0, y: 14 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -298,13 +304,13 @@ export function Navbar() {
                         />
                       )}
                     </Link>
-                  </motion.li>
+                  </m.li>
                 );
               })}
             </ul>
 
             {/* 2 — the two things a phone visitor actually needs. */}
-            <motion.div
+            <m.div
               className="track mt-8 flex flex-col gap-3"
               initial={reduce ? false : { opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
@@ -329,10 +335,10 @@ export function Navbar() {
               <PillLink href={DIRECTIONS_URL} external tone="outline" className="pill-on-dark w-full">
                 Get directions
               </PillLink>
-            </motion.div>
+            </m.div>
 
             {/* 3 — small footer strip: hours summary + the shared socials. */}
-            <motion.div
+            <m.div
               className="track mt-auto pt-10"
               initial={reduce ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -377,8 +383,8 @@ export function Navbar() {
                 ))}
               </dl>
               <SocialLinks tone="light" className="mt-5" />
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -585,6 +591,6 @@ export function Navbar() {
           </button>
         </nav>
       </header>
-    </>
+    </LazyMotion>
   );
 }

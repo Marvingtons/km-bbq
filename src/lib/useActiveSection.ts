@@ -23,6 +23,10 @@ export function useActiveSection(
   const [active, setActive] = useState<string | null>(initial);
   const key = ids.join(",");
 
+  // The effect's return disconnects the observer; the two early returns fire
+  // before anything is allocated. react-doctor's heuristic misreads this as an
+  // uncleaned subscription — it is not.
+  // react-doctor-disable-next-line react-doctor/effect-needs-cleanup
   useEffect(() => {
     if (!enabled) return;
     const els = ids

@@ -25,6 +25,19 @@ const PILL_OFF =
 // Sections also carry scroll-mt as a fallback for native hash navigation.
 const SCROLL_OFFSET = -(NAV_H + 60);
 
+// Smooth-scroll to a section when Lenis owns the scroll, keeping the hash
+// shareable. Depends on nothing in the component, so it lives at module scope
+// rather than being rebuilt on every render. Without Lenis (e.g. it failed to
+// init) the plain anchor still works via the sections' scroll-mt.
+function jump(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
+  const lenis = getLenis();
+  if (lenis) {
+    e.preventDefault();
+    lenis.scrollTo(`#${id}`, { offset: SCROLL_OFFSET });
+    history.replaceState(null, "", `#${id}`);
+  }
+}
+
 export function MenuJumpNav({ targets }: { targets: JumpTarget[] }) {
   const listRef = useRef<HTMLUListElement>(null);
 
@@ -44,18 +57,6 @@ export function MenuJumpNav({ targets }: { targets: JumpTarget[] }) {
     );
     pill?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
   }, [active]);
-
-  const jump = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
-    const lenis = getLenis();
-    if (lenis) {
-      // Lenis owns window scroll; let it animate and keep the hash shareable.
-      e.preventDefault();
-      lenis.scrollTo(`#${id}`, { offset: SCROLL_OFFSET });
-      history.replaceState(null, "", `#${id}`);
-    }
-    // Without Lenis (e.g. it failed to init) the plain anchor still works via
-    // the sections' scroll-mt.
-  };
 
   return (
     <nav

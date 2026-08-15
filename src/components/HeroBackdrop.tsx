@@ -147,6 +147,11 @@ export function HeroBackdrop({
     el.play().catch(() => {});
   }, []);
 
+  // The cleanup at the bottom of this effect disconnects `io`, disconnects the
+  // MutationObserver through the `cleanup` closure, and removes both window
+  // listeners — every subscription this effect makes. react-doctor cannot trace
+  // the indirected disconnect and flags a leak that does not exist.
+  // react-doctor-disable-next-line react-doctor/effect-needs-cleanup
   useEffect(() => {
     const el = videoRef.current;
     if (!el) return;

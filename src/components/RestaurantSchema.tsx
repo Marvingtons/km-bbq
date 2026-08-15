@@ -32,9 +32,12 @@ function JsonLd({ data }: { data: object }) {
   return (
     <script
       type="application/ld+json"
-      // JSON.stringify escapes nothing dangerous here — every value is a
-      // build-time constant from our own data files, and `<` cannot appear.
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      // Every value is a build-time constant from our own data files, so `<`
+      // should never appear — but JSON.stringify does not escape it, and a
+      // literal `</script>` slipping into any future data string would break
+      // out of this element. Escaping `<` to its JSON unicode form is
+      // semantically identical to a parser and closes that off for good.
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }}
     />
   );
 }

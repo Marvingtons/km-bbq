@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { LazyMotion, domAnimation, m, useReducedMotion } from "framer-motion";
 import { PillLink } from "./PillLink";
 import { MediaStage } from "./MediaStage";
 import { EYEBROW, HEADLINE, SUBHEAD, CTA_LABEL, CTA_HREF } from "./hero/copy";
@@ -165,6 +165,7 @@ export function Hero() {
        remap, which for this section is formal: every piece of type in here
        already names `sand` explicitly, because it sits on a photograph rather
        than on a flat ground. See globals.css. */
+    <LazyMotion features={domAnimation}>
     <section
       id="home"
       /* `100svh`, NOT `100vh`, AND THAT IS THE CTA CLIPPING FIX.
@@ -204,9 +205,9 @@ export function Hero() {
               it is still well short of the 80px the `sm` step takes. */}
           <div className="track w-full pb-16 pt-10 text-left sm:pb-20 lg:pb-24">
             <div className="hero-exit-support">
-              <motion.p className="eyebrow text-sand/80" {...rise(0)}>
+              <m.p className="eyebrow text-sand/80" {...rise(0)}>
                 {EYEBROW}
-              </motion.p>
+              </m.p>
             </div>
 
             <div className="hero-exit-display">
@@ -226,7 +227,7 @@ export function Hero() {
                   the element whose job is to say what the page is about. A
                   screen reader now hears a heading that identifies the
                   restaurant instead of an adjective. */}
-              <motion.h1 className="display mt-3 text-sand sm:mt-4" {...rise(1, { fade: false })}>
+              <m.h1 className="display mt-3 text-sand sm:mt-4" {...rise(1, { fade: false })}>
                 {/* A COMMA. This was an em dash, and the h1 is read aloud: a
                     screen reader announces "KM.BBQ, All-You-Can-Eat self-serve
                     Korean BBQ in Oceanside, CA", which is the appositive it
@@ -254,7 +255,7 @@ export function Hero() {
                   {" "}
                   self-serve Korean BBQ in {ADDRESS.city}
                 </span>
-              </motion.h1>
+              </m.h1>
             </div>
 
             <div className="hero-exit-support">
@@ -267,7 +268,7 @@ export function Hero() {
                   takes the longer rise to do it. Reordering the markup to get
                   that would have traded a correct reading order for a timing
                   the delay already expresses. */}
-              <motion.p
+              <m.p
                 className="mt-3.5 flex flex-nowrap items-baseline gap-x-3 whitespace-nowrap sm:mt-5 sm:gap-x-4"
                 {...rise(4, { slow: true })}
               >
@@ -281,21 +282,22 @@ export function Hero() {
                   ·
                 </span>
                 <Price amount={PRICING.dinner.display} label={PRICING.dinner.label} />
-              </motion.p>
+              </m.p>
 
-              <motion.p className="copy measure mt-3 text-sand/80 sm:mt-4" {...rise(2)}>
+              <m.p className="copy measure mt-3 text-sand/80 sm:mt-4" {...rise(2)}>
                 {SUBHEAD}
-              </motion.p>
+              </m.p>
 
-              <motion.div className="mt-5 sm:mt-7" {...rise(3)}>
+              <m.div className="mt-5 sm:mt-7" {...rise(3)}>
                 <PillLink href={CTA_HREF} arrow>
                   {CTA_LABEL}
                 </PillLink>
-              </motion.div>
+              </m.div>
             </div>
           </div>
         </div>
       </div>
     </section>
+    </LazyMotion>
   );
 }
