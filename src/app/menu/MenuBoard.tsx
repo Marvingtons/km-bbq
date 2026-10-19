@@ -80,10 +80,17 @@ function Row({ item }: { item: MenuItem }) {
           {item.num} ·
         </span>
         <h3 className="menu-row-name font-display text-[1.1rem] font-bold leading-tight text-char transition-colors duration-150 ease-house [font-stretch:87.5%]">
-          {item.korean ? (
+          {/* KOREAN ON TOP, ENGLISH BENEATH IT. Two lines rather than an em
+              dash between them; one line when the two are the same word
+              ("Kimchi"). The `{" "}` keeps a space in the heading's text so it
+              reads "Galbi Beef Short Ribs", not "GalbiBeef Short Ribs". */}
+          {item.korean &&
+          item.korean.toLowerCase() !== item.name.toLowerCase() ? (
             <>
-              {item.korean.toUpperCase()}
-              <span className="text-ash"> — {item.name.toUpperCase()}</span>
+              {item.korean.toUpperCase()}{" "}
+              <span className="mt-0.5 block text-[0.82em] text-ash">
+                {item.name.toUpperCase()}
+              </span>
             </>
           ) : (
             item.name.toUpperCase()

@@ -102,7 +102,7 @@ export function Favorites() {
                   >
                     <Image
                       src={item.image!}
-                      alt={displayName(item)}
+                      alt={displayName(item).replace(/^(.+) — \1$/, "$1").replace(" — ", ", ")}
                       fill
                       className="object-cover transition-transform duration-[var(--dur-slow)] ease-house group-hover:scale-[1.04]"
                       sizes={
@@ -125,15 +125,20 @@ export function Favorites() {
                       reader carries to the table: they see it here, they say it
                       to the server. */}
                   <h3 className="card-title mt-1">
-                    {item.korean ? (
+                    {item.korean &&
+                    item.korean.toLowerCase() !== item.name.toLowerCase() ? (
                       <>
-                        {item.korean}
-                        <span className="text-ash"> — {item.name}</span>
+                        {item.korean}{" "}
+                        <span className="mt-0.5 block text-[0.82em] text-ash">
+                          {item.name} · {item.num}
+                        </span>
                       </>
                     ) : (
-                      item.name
+                      <>
+                        {item.name}
+                        <span className="text-ash"> · {item.num}</span>
+                      </>
                     )}
-                    <span className="text-ash"> · {item.num}</span>
                   </h3>
                   {item.hangul && (
                     <p className="mt-1 font-sans text-xs text-ash">
