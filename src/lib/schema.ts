@@ -8,11 +8,10 @@ import {
   SOCIALS,
   PRICING,
   LUNCH_UNTIL,
-  LUNCH_DAYS_LABEL,
-  DINNER_WINDOW_LINE,
   RESERVATION_URL,
+  DIRECTIONS_URL,
 } from "@/data/info";
-import { MENU } from "@/data/menu";
+import { MENU, type MenuItem } from "@/data/menu";
 
 /* ===========================================================================
    STRUCTURED DATA, BUILT FROM THE SAME RECORDS THE PAGE RENDERS.
@@ -56,6 +55,72 @@ export const abs = (path: string) =>
  */
 const priceRange = `${PRICING.lunch.display} - ${PRICING.dinner.display}`;
 
+/* ---------------------------------------------------------------------------
+   NO DASHES IN STRUCTURED DATA.
+
+   The page's own labels ("Mon–Fri", "Sat–Sun", "Galbi — Beef Short Ribs") use
+   en and em dashes, which is right for display type and wrong for markup that
+   a search surface or an assistant quotes out of context. These builders say
+   the same facts in plain words, derived from the same records, so the graph
+   still cannot drift from the page.
+
+   The one exception is the FAQPage answers: they must match the visible FAQ
+   character for character, so they carry whatever the page prints.
+   --------------------------------------------------------------------------- */
+
+const DAY_NAMES = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+] as const;
+
+/** Monday-first week order, so the weekend reads "Saturday and Sunday". */
+const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0] as const;
+
+/** [1,2,3,4,5] -> "Monday to Friday"; [6,0] -> "Saturday and Sunday". */
+function dayRange(days: readonly number[]): string {
+  const ordered = WEEK_ORDER.filter((d) => days.includes(d));
+  const first = DAY_NAMES[ordered[0]];
+  const last = DAY_NAMES[ordered[ordered.length - 1]];
+  if (ordered.length === 1) return first;
+  return ordered.length === 2 ? `${first} and ${last}` : `${first} to ${last}`;
+}
+
+/** "Monday to Friday", from the lunch price's own day list. */
+const LUNCH_DAYS_PLAIN = dayRange(PRICING.lunch.days);
+/** "Saturday and Sunday": every day the lunch price does not apply. */
+const DINNER_ALL_DAY_PLAIN = dayRange(
+  WEEK_ORDER.filter((d) => !(PRICING.lunch.days as readonly number[]).includes(d))
+);
+
+/**
+ * "Galbi, Beef Short Ribs". The same two parts `displayName` joins with an em
+ * dash for the page, joined with a comma. Where the romanised Korean and the
+ * English are the same word ("Kimchi", "Japchae") it is said once.
+ */
+function plainName(item: MenuItem): string {
+  if (!item.korean || item.korean.toLowerCase() === item.name.toLowerCase()) {
+    return item.name;
+  }
+  return `${item.korean}, ${item.name}`;
+}
+
+/**
+ * A map of the place, built from the same address string DIRECTIONS_URL sends
+ * to Google Maps, so the two cannot disagree.
+ *
+ * TODO(owner): swap this for the Google Business Profile Maps URL (the
+ * `?cid=` link) once the owner provides it. That URL points at the listing
+ * itself, with its reviews and photos, rather than at an address search.
+ */
+const MAP_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  new URL(DIRECTIONS_URL).searchParams.get("destination") ?? ""
+)}`;
+
 /** The restaurant itself. The homepage's primary entity. */
 export function restaurantNode() {
   return {
@@ -72,7 +137,7 @@ export function restaurantNode() {
        should not get two different accounts of the same restaurant.
        It says NOTHING about how the Premium or Signature tiers reach the table.
        See the accuracy note in src/data/faq.ts. */
-    description: `Self-serve all-you-can-eat Korean BBQ in ${ADDRESS_PARTS.city}, ${ADDRESS_PARTS.state}. ${PRICING.lunch.display} for lunch ${LUNCH_DAYS_LABEL} until ${LUNCH_UNTIL}, and ${PRICING.dinner.display} for dinner after that and all day at the weekend. Load your plate at the self-serve bar and grill it at your own table, with a grill built into every table.`,
+    description: `Self-serve all-you-can-eat Korean BBQ in ${ADDRESS_PARTS.city}, ${ADDRESS_PARTS.state}. ${PRICING.lunch.display} for lunch ${LUNCH_DAYS_PLAIN} until ${LUNCH_UNTIL}, and ${PRICING.dinner.display} for dinner after that and all day ${DINNER_ALL_DAY_PLAIN}. Load your plate at the self-serve bar and grill it at your own table, with a grill built into every table.`,
     url: SITE_URL,
     logo: abs("/icon-512.png"),
     image: [abs("/images/outside.png"), abs("/og.png")],
@@ -87,6 +152,7 @@ export function restaurantNode() {
     acceptsReservations: RESERVATION_URL,
     menu: `${SITE_URL}/menu`,
     hasMenu: { "@id": ID.menu },
+    hasMap: MAP_URL,
     address: {
       "@type": "PostalAddress",
       streetAddress: ADDRESS_PARTS.street,
@@ -165,18 +231,20 @@ export function menuNode() {
             /* HARDCODED "after 3:30 PM" WAS HIDING HERE, in the one layer
                nobody reads. It duplicated LUNCH_UNTIL, so the cutoff lived in
                two places, and it went wrong the moment dinner also meant all
-               day at the weekend. Built from the same phrase the page prints. */
-            description: `On the dinner menu only, ${DINNER_WINDOW_LINE}.`,
+               day at the weekend. Built from the same records the page's
+               phrase is, in plain words: see "NO DASHES" above. */
+            description: `On the dinner menu only, after ${LUNCH_UNTIL} and all day ${DINNER_ALL_DAY_PLAIN}.`,
           }
         : category.blurb
           ? { description: category.blurb }
           : {}),
       hasMenuItem: category.items.map((item) => ({
         "@type": "MenuItem",
-        // The same string the page prints, from the same builder — see
-        // `displayName` in data/menu.ts. Item numbers are not part of the name:
-        // they are the restaurant's ordering shorthand, not the dish.
-        name: item.korean ? `${item.korean} — ${item.name}` : item.name,
+        // The same two parts the page prints via `displayName` in
+        // data/menu.ts, joined with a comma instead of an em dash (see
+        // `plainName`). Item numbers are not part of the name: they are the
+        // restaurant's ordering shorthand, not the dish.
+        name: plainName(item),
         ...(item.desc ? { description: item.desc } : {}),
         // NO `offers`. See the header note: item prices do not exist here.
       })),
