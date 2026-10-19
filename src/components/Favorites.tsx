@@ -107,8 +107,8 @@ export function Favorites() {
                       className="object-cover transition-transform duration-[var(--dur-slow)] ease-house group-hover:scale-[1.04]"
                       sizes={
                         isFeature
-                          ? "(max-width: 1023px) 100vw, 50vw"
-                          : "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 25vw"
+                          ? "(max-width: 639px) calc(100vw - 80px), (max-width: 1023px) calc(100vw - 48px), 560px"
+                          : "(max-width: 639px) calc(100vw - 80px), (max-width: 1023px) 45vw, 248px"
                       }
                     />
                   </div>

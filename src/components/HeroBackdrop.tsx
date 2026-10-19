@@ -231,7 +231,7 @@ export function HeroBackdrop({
         aria-hidden="true"
         fill
         priority={scrim}
-        quality={72}
+        quality={60}
         /* NOT "100vw", and this is the LCP fix.
            `object-cover` on a 16:9 source in a taller-than-16:9 stage scales
            the poster by HEIGHT, so it is drawn ~30% wider than the viewport —
