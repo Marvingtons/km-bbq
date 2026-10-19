@@ -1,0 +1,9 @@
+# Cloudflare Workers static-asset headers. Parsed by Workers, never served.
+# Applies only to files served straight from .open-next/assets, NOT to
+# responses the Worker generates (HTML, /_next/image). Not hashed, so one day
+# fresh plus a week of stale-while-revalidate, not a year of immutable.
+/kmbbq-hero.mp4
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/images/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800

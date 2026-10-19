@@ -6,6 +6,7 @@
 // render time — which the Cloudflare Workers runtime cannot do.
 
 const PUBLIC_FILES = new Set<string>([
+  "/_headers",
   "/icon-192.png",
   "/icon-512.png",
   "/icon-maskable-512.png",
