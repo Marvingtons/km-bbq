@@ -303,12 +303,12 @@ export function Footer() {
               |
             </span>
             <a
-              href="https://norvix.ai/"
+              href="https://modalor.com"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex min-h-11 items-center transition-colors duration-[var(--dur-base)] ease-house hover:text-sand"
             >
-              Site by Norvix
+              Made by Modalor
             </a>
           </div>
         </div>
