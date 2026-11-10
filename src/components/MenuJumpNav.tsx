@@ -21,19 +21,34 @@ const PILL_ON = "border-flame bg-flame text-sand";
 const PILL_OFF =
   "border-steel/55 bg-transparent text-ink hover:border-flame hover:bg-flame hover:text-sand";
 
-// Clearance for content jumped to: fixed site header (NAV_H) plus this bar.
-// Sections also carry scroll-mt as a fallback for native hash navigation.
-const SCROLL_OFFSET = -(NAV_H + 60);
-
 // Smooth-scroll to a section when Lenis owns the scroll, keeping the hash
 // shareable. Depends on nothing in the component, so it lives at module scope
 // rather than being rebuilt on every render. Without Lenis (e.g. it failed to
 // init) the plain anchor still works via the sections' scroll-mt.
+//
+// THE TARGET IS A NUMBER, NOT "#id". Handed a selector, Lenis resolves it as
+// rect.top + its OWN animatedScroll − scroll-margin. Two things went wrong:
+//  - animatedScroll is stale whenever the window moved natively and Lenis has
+//    not seen the scroll event yet (touch scrolling, which Lenis does not own,
+//    or a tap during momentum). On a phone the jump nav starts below the fold,
+//    so the heading landed short by however far the page had just moved.
+//  - Lenis already subtracts scroll-margin, so a separate `offset` counted the
+//    bars twice and left a ~135px empty band under them on every width.
+// So: absolute position from the live window.scrollY, and the section's
+// scroll-mt as the one clearance, shared with native hash navigation.
 function jump(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
   const lenis = getLenis();
-  if (lenis) {
+  const section = document.getElementById(id);
+  if (lenis && section) {
     e.preventDefault();
-    lenis.scrollTo(`#${id}`, { offset: SCROLL_OFFSET });
+    const margin = parseFloat(getComputedStyle(section).scrollMarginTop) || 0;
+    const top = section.getBoundingClientRect().top + window.scrollY - margin;
+    // Bring Lenis level with the real scroll first, or it animates from where
+    // it last thought the page was and the first frame jumps.
+    if (Math.abs(lenis.animatedScroll - window.scrollY) > 1) {
+      lenis.scrollTo(window.scrollY, { immediate: true });
+    }
+    lenis.scrollTo(top);
     history.replaceState(null, "", `#${id}`);
   }
 }

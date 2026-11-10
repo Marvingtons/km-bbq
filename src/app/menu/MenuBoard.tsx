@@ -141,9 +141,12 @@ function Category({
        lines of a list and not objects — and lib/reveal.ts caps the index at 8,
        so a long category's tail arrives with its eighth row instead of two
        seconds later. */
+    /* scroll-mt-40 (160px) is the jump nav's ONLY clearance: fixed header
+       slot (68) + the sticky pill bar (69) + ~23px of air. MenuJumpNav reads it
+       back, so Lenis and native hash jumps land in the same place. */
     <section
       id={category.id}
-      className={`mb-9 break-inside-avoid scroll-mt-36 ${hidden ? "hidden" : ""}`}
+      className={`mb-9 break-inside-avoid scroll-mt-40 ${hidden ? "hidden" : ""}`}
       // aria-hidden with `hidden`, so a screen reader in the lunch view is not
       // told about a section a sighted reader cannot see. The markup is still
       // in the document, which is the point — this is a display state, not a
