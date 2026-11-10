@@ -48,23 +48,84 @@ remove one without the other.
 
 ---
 
-## First deploy (dashboard)
+## How production deploys
 
-1. **Workers & Pages → Create → Workers → Connect to Git**, pick this repo.
-2. Set the build configuration:
-   - **Build command:** `npx opennextjs-cloudflare build`
-   - **Deploy command:** `npx wrangler deploy`
-   - **Root directory:** `/`
-   - There is **no "output directory" field** on Workers Builds. That is a Pages
-     concept; here the paths come from `wrangler.jsonc`.
-3. Confirm the Worker name matches `name` in `wrangler.jsonc`
-   (`km-bbq-website`), or change it in both places.
-4. Deploy, then attach the custom domain under **Settings → Domains & Routes**.
+**Pushing to `origin/main` is the normal deploy.** The production Worker,
+**`km-bbq`** (account `e28450c2b49e251f9b47c4072e292569`), is connected to this
+repo through **Workers Builds**. A push to `main` triggers a build, and the new
+version is live about two minutes later. Nothing else needs to run, and nobody
+should run `npm run deploy` as part of a normal release.
+
+To see what is live:
+
+```bash
+CLOUDFLARE_ACCOUNT_ID=e28450c2b49e251f9b47c4072e292569 npx wrangler deployments list --name km-bbq
+```
 
 Non-production branches default to `npx wrangler versions upload`, which builds
 a preview version without promoting it. That is usually what you want.
 
-CLI alternative for a one-off: `npm run deploy`.
+### Worker name
+
+`name` in `wrangler.jsonc` is **`km-bbq`**, the Worker the custom domain is
+routed to. Keep it that way. It used to say `km-bbq-website`, a Worker that has
+never existed; Workers Builds deployed to `km-bbq` anyway because it injects
+`WRANGLER_CI_OVERRIDE_NAME` to force the connected Worker's name. The CLI gets
+no such override, so a local deploy with the wrong name would have created a
+new, unrouted Worker and left production untouched. If the Worker is ever
+renamed in the dashboard, change `name` here in the same breath.
+
+`account_id` is pinned in `wrangler.jsonc` too. Workers Builds only rejects an
+`account_id` that names a different account (error 7003), so the correct one
+is safe there.
+
+### CLI one-off (rare)
+
+Only when Workers Builds is unavailable and the fix cannot wait for a push:
+
+```bash
+npm run deploy
+```
+
+This builds and **promotes to production immediately**, from your working tree,
+not from `origin/main`. Make sure what you deploy is committed and pushed, or
+the next push will silently replace it. Use `npm run upload` instead to upload
+a version without promoting it.
+
+wrangler on this machine is logged into several Cloudflare accounts. With
+`account_id` in `wrangler.jsonc` it no longer prompts for one; if you run
+wrangler against a config without it (or point it at another Worker), set the
+account explicitly so it neither prompts nor guesses:
+
+```bash
+export CLOUDFLARE_ACCOUNT_ID=e28450c2b49e251f9b47c4072e292569
+```
+
+Check the target before a real deploy. `deployments status` reads `name` and
+`account_id` from `wrangler.jsonc` and should show the version currently live
+on kmbbq.com, with no account prompt. If it says the Worker does not exist,
+the config is pointing somewhere else: stop.
+
+```bash
+npx wrangler deployments status
+```
+
+`npx wrangler deploy --dry-run` (after `npm run cf:build`) checks the bundle
+and bindings, but it does not print the Worker name.
+
+### Recreating the dashboard connection
+
+If the Git connection ever has to be rebuilt, connect the **existing** `km-bbq`
+Worker rather than creating a new one (**Workers & Pages → km-bbq → Settings →
+Builds → Connect**), with:
+
+- **Build command:** `npx opennextjs-cloudflare build`
+- **Deploy command:** `npx wrangler deploy`
+- **Root directory:** `/`
+- There is **no "output directory" field** on Workers Builds. That is a Pages
+  concept; here the paths come from `wrangler.jsonc`.
+
+The custom domain lives under **Settings → Domains & Routes** on that Worker.
 
 ### "could not determine executable to run"
 

@@ -1,6 +1,14 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "km-bbq-website",
+  // Must match the production Worker serving kmbbq.com. Workers Builds would
+  // override a mismatch via WRANGLER_CI_OVERRIDE_NAME, but a CLI deploy would
+  // not: it would create a new, unrouted Worker under the wrong name.
+  "name": "km-bbq",
+
+  // Pins CLI commands to the account that owns km-bbq, so wrangler does not
+  // prompt when logged into several accounts. Safe for Workers Builds: it only
+  // fails on an account_id for a *different* account (error 7003).
+  "account_id": "e28450c2b49e251f9b47c4072e292569",
   "main": ".open-next/worker.js",
 
   // 2024-09-23 or later is required for nodejs_compat to imply nodejs_compat_v2,
